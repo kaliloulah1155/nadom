@@ -5,9 +5,9 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <h1 class="display-5 fw-bold mb-3">Blog & Actualites</h1>
-            <p class="lead opacity-75 mb-0">
-              Conseils, guides et actualites sur l'import-export avec la Chine
+            <h1 class="display-5 fw-bold mb-3 text-white text-center">{{ t('blog.title') }}</h1>
+            <p class="lead opacity-75 mb-0 text-white text-center">
+              {{ t('blog.subtitle') }}
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <small class="text-muted">{{ formatDate(post.publishedAt) }}</small>
                   <NuxtLink :to="`/resources/blog/${post.slug}`" class="btn btn-sm btn-outline-primary">
-                    Lire plus <i class="bi bi-arrow-right ms-1"></i>
+                    {{ t('blog.readMore') }} <i class="bi bi-arrow-right ms-1"></i>
                   </NuxtLink>
                 </div>
               </div>
@@ -48,7 +48,7 @@
 
         <div v-if="blogPosts.length === 0" class="text-center py-5">
           <i class="bi bi-journal-text display-1 text-muted"></i>
-          <p class="text-muted mt-3">Aucun article pour le moment</p>
+          <p class="text-muted mt-3">{{ t('blog.noArticles') }}</p>
         </div>
       </div>
     </section>
@@ -63,6 +63,7 @@ definePageMeta({
   layout: 'default'
 })
 
+const { t } = useI18n()
 const { formatDate } = useFormatters()
 
 const blogPosts = FAKE_BLOG_POSTS

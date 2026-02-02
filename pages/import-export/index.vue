@@ -11,11 +11,11 @@
             </p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-            <NuxtLink to="/import-export/calculator" class="btn btn-light btn-lg me-2 mb-2">
-              <i class="bi bi-calculator me-2"></i>Calculateur
+            <NuxtLink to="/import-export/calculator" class="btn btn-light btn-md me-2">
+              <i class="bi bi-calculator "></i>Calculateur
             </NuxtLink>
-            <NuxtLink to="/import-export/tracking" class="btn btn-outline-light btn-lg">
-              <i class="bi bi-search me-2"></i>Tracking
+            <NuxtLink to="/import-export/tracking" class="btn btn-outline-light btn-md">
+              <i class="bi bi-search"></i>Tracking
             </NuxtLink>
           </div>
         </div>

@@ -2,12 +2,11 @@
   <div class="ps-page">
     <!-- Hero Section -->
     <section class="ps-hero">
-      <div class="hero-pattern"></div>
-      <div class="container position-relative py-5">
+      <div class="container position-relative">
         <div class="row align-items-center">
           <div class="col-lg-8 text-white">
             <div class="mb-3">
-              <span class="badge bg-warning text-white px-3 py-2">
+              <span class="badge bg-warning text-white px-3">
                 <i class="bi bi-bag-heart me-1"></i>{{ t('personalShopping.badge') }}
               </span>
             </div>
@@ -15,7 +14,7 @@
             <p class="lead opacity-75 mb-0 text-white">{{ t('personalShopping.subtitle') }}</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-            <NuxtLink to="/personal-shopping/new" class="btn btn-light btn-lg">
+            <NuxtLink to="/personal-shopping/new" class="btn btn-light btn-md">
               <i class="bi bi-plus-circle me-2"></i>{{ t('personalShopping.newRequest') }}
             </NuxtLink>
           </div>
@@ -23,7 +22,7 @@
       </div>
     </section>
 
-    <div class="container" style="margin-top: -60px;">
+    <div class="container mt-1">
       <!-- How It Works -->
       <section class="how-it-works-section mb-5">
         <div class="text-center mb-5">

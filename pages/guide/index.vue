@@ -3,7 +3,7 @@
     <!-- Hero Section -->
     <section class="guide-hero">
       <div class="hero-pattern"></div>
-      <div class="container position-relative py-5">
+      <div class="container position-relative">
         <div class="row align-items-center">
           <div class="col-lg-8 text-white">
             <div class="mb-3">
@@ -11,8 +11,8 @@
                 <i class="bi bi-book me-1"></i>{{ t('guide.badge') }}
               </span>
             </div>
-            <h1 class="display-5 fw-bold mb-3">{{ t('guide.title') }}</h1>
-            <p class="lead opacity-75 mb-0">{{ t('guide.subtitle') }}</p>
+            <h1 class="display-5 fw-bold mb-3 text-white">{{ t('guide.title') }}</h1>
+            <p class="lead opacity-75 mb-0 text-white">{{ t('guide.subtitle') }}</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
             <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-light btn-lg">

@@ -7,7 +7,7 @@
         <div class="row align-items-center min-vh-75">
           <div class="col-lg-6">
             <span class="badge bg-warning text-dark mb-3 px-3 py-2">
-              <i class="bi bi-star-fill me-1"></i>{{ locale === 'fr' ? '#1 Import-Export Chine-Afrique' : '#1 China-Africa Import-Export' }} 
+              <i class="bi bi-star-fill me-1"></i>{{ t('home.heroBadge') }}
             </span>
             <h1 class="display-4 fw-bold text-white mb-4">
               {{ t('home.heroTitle') }}
@@ -25,17 +25,17 @@
             </div>
             <!-- Trust badges -->
             <div class="d-flex gap-4 mt-4 pt-3 border-top border-light border-opacity-25">
-              <div class="text-white">
-                <div class="fw-bold">500+</div>
-                <small class="opacity-75">{{ t('home.statsClients') }}</small>
+              <div>
+                <div class="fw-bold text-white">500+</div>
+                <small class="text-white opacity-75">{{ t('home.statsClients') }}</small>
               </div>
-              <div class="text-white">
-                <div class="fw-bold">15+</div>
-                <small class="opacity-75">{{ t('home.statsCountries') }}</small>
+              <div>
+                <div class="fw-bold text-white">15+</div>
+                <small class="text-white opacity-75">{{ t('home.statsCountries') }}</small>
               </div>
-              <div class="text-white">
-                <div class="fw-bold">4.8/5</div>
-                <small class="opacity-75"><i class="bi bi-star-fill text-warning"></i></small>
+              <div>
+                <div class="fw-bold text-white">4.8/5</div>
+                <small class="text-white opacity-75"><i class="bi bi-star-fill text-warning"></i></small>
               </div>
             </div>
           </div>
@@ -52,7 +52,7 @@
     <section class="py-5 bg-light">
       <div class="container">
         <div class="text-center mb-5">
-          <span class="badge bg-primary-subtle text-primary mb-2">{{ locale === 'fr' ? 'Ce que nous offrons' : 'What we offer' }}</span>
+          <span class="badge bg-primary-subtle text-primary mb-2">{{ t('home.servicesBadge') }}</span>
           <h2 class="fw-bold">{{ t('home.servicesTitle') }}</h2>
           <p class="text-muted">{{ t('home.servicesSubtitle') }}</p>
         </div>
@@ -84,9 +84,9 @@
       <div class="section-pattern"></div>
       <div class="container position-relative">
         <div class="text-center mb-5">
-          <span class="badge bg-success-subtle text-success mb-2">{{ locale === 'fr' ? 'Simple et rapide' : 'Simple and fast' }}</span>
-          <h2 class="fw-bold">{{ locale === 'fr' ? 'Comment ca marche ?' : 'How it works?' }}</h2>
-          <p class="text-muted">{{ locale === 'fr' ? 'Un processus simple et efficace en 5 etapes' : 'A simple and efficient 5-step process' }}</p>
+          <span class="badge bg-success-subtle text-success mb-2">{{ t('home.howItWorksBadge') }}</span>
+          <h2 class="fw-bold">{{ t('home.howItWorks') }}</h2>
+          <p class="text-muted">{{ t('home.howItWorksSubtitle') }}</p>
         </div>
 
         <div class="row">
@@ -103,8 +103,8 @@
     <section class="py-5 bg-light">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="fw-bold">Categories de produits</h2>
-          <p class="text-muted">Trouvez tout ce dont vous avez besoin</p>
+          <h2 class="fw-bold">{{ t('home.categoriesTitle') }}</h2>
+          <p class="text-muted">{{ t('home.categoriesSubtitle') }}</p>
         </div>
 
         <div class="row g-3">
@@ -123,25 +123,25 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-5 bg-primary text-white position-relative overflow-hidden">
+    <section class="py-5 bg-primary position-relative overflow-hidden">
       <div class="stats-pattern"></div>
       <div class="container position-relative">
         <div class="row text-center">
           <div class="col-6 col-md-3 mb-4 mb-md-0">
-            <div class="display-4 fw-bold">500+</div>
-            <p class="mb-0 opacity-75">{{ t('home.statsClients') }}</p>
+            <div class="display-4 fw-bold text-white">500+</div>
+            <p class="mb-0 text-white opacity-75">{{ t('home.statsClients') }}</p>
           </div>
           <div class="col-6 col-md-3 mb-4 mb-md-0">
-            <div class="display-4 fw-bold">1200+</div>
-            <p class="mb-0 opacity-75">{{ t('home.statsPackages') }}</p>
+            <div class="display-4 fw-bold text-white">1200+</div>
+            <p class="mb-0 text-white opacity-75">{{ t('home.statsPackages') }}</p>
           </div>
           <div class="col-6 col-md-3">
-            <div class="display-4 fw-bold">15+</div>
-            <p class="mb-0 opacity-75">{{ t('home.statsCountries') }}</p>
+            <div class="display-4 fw-bold text-white">15+</div>
+            <p class="mb-0 text-white opacity-75">{{ t('home.statsCountries') }}</p>
           </div>
           <div class="col-6 col-md-3">
-            <div class="display-4 fw-bold">5+</div>
-            <p class="mb-0 opacity-75">{{ t('home.statsYears') }}</p>
+            <div class="display-4 fw-bold text-white">5+</div>
+            <p class="mb-0 text-white opacity-75">{{ t('home.statsYears') }}</p>
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <span class="badge bg-info-subtle text-info mb-2">{{ t('nav.blog') }}</span>
-            <h2 class="fw-bold mb-0">{{ locale === 'fr' ? 'Derniers articles' : 'Latest articles' }}</h2>
+            <h2 class="fw-bold mb-0">{{ t('home.latestArticles') }}</h2>
             <p class="text-muted mb-0">{{ t('blog.subtitle') }}</p>
           </div>
           <NuxtLink to="/resources/blog" class="btn btn-outline-primary">
@@ -182,12 +182,12 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-5 bg-dark text-white position-relative overflow-hidden">
+    <section class="py-5 bg-dark position-relative overflow-hidden">
       <div class="cta-pattern"></div>
       <div class="container text-center position-relative">
-        <h2 class="fw-bold mb-3 text-white">{{ locale === 'fr' ? 'Pret a commencer ?' : 'Ready to get started?' }}</h2>
-        <p class="lead opacity-75 mb-4 text-white">
-          {{ locale === 'fr' ? 'Soumettez votre premiere demande ou contactez-nous pour en savoir plus' : 'Submit your first request or contact us to learn more' }}
+        <h2 class="fw-bold mb-3 text-white">{{ t('home.ctaTitle') }}</h2>
+        <p class="lead mb-4 text-white opacity-75">
+          {{ t('home.ctaSubtitle') }}
         </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
           <NuxtLink to="/personal-shopping/new" class="btn btn-primary btn-lg">
@@ -211,7 +211,7 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const blogStore = useBlogStore()
 const { truncate } = useFormatters()
 
@@ -219,18 +219,12 @@ const { truncate } = useFormatters()
 const services = FAKE_SERVICES
 const categories = FAKE_CATEGORIES
 
-const steps = computed(() => locale.value === 'fr' ? [
-  { title: 'Envoyez les images', description: 'Photos du produit souhaite' },
-  { title: 'Discutons', description: 'Echange via WhatsApp' },
-  { title: 'Devis', description: 'Recevez votre devis' },
-  { title: 'Paiement', description: 'Confirmez et payez' },
-  { title: 'Livraison', description: 'Recevez votre colis' }
-] : [
-  { title: 'Send images', description: 'Photos of desired product' },
-  { title: 'Let\'s talk', description: 'Chat via WhatsApp' },
-  { title: 'Quote', description: 'Receive your quote' },
-  { title: 'Payment', description: 'Confirm and pay' },
-  { title: 'Delivery', description: 'Receive your package' }
+const steps = computed(() => [
+  { title: t('home.steps.step1'), description: t('home.steps.step1Desc') },
+  { title: t('home.steps.step2'), description: t('home.steps.step2Desc') },
+  { title: t('home.steps.step3'), description: t('home.steps.step3Desc') },
+  { title: t('home.steps.step4'), description: t('home.steps.step4Desc') },
+  { title: t('home.steps.step5'), description: t('home.steps.step5Desc') }
 ])
 
 // Load blog posts

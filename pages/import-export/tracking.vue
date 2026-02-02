@@ -3,14 +3,11 @@
     <!-- Hero Section -->
     <section class="tracking-hero">
       <div class="hero-pattern"></div>
-      <div class="container position-relative py-5">
+      <div class="container position-relative">
         <div class="row justify-content-center">
           <div class="col-lg-8 text-center text-white">
-            <div class="mb-4">
-              <i class="bi bi-box-seam display-3"></i>
-            </div>
-            <h1 class="fw-bold mb-3">{{ t('tracking.title') }}</h1>
-            <p class="lead opacity-75">{{ t('tracking.subtitle') }}</p>
+            <h1 class="fw-bold mb-3 text-white">{{ t('tracking.title') }}</h1>
+            <p class="lead opacity-75 text-white">{{ t('tracking.subtitle') }}</p>
           </div>
         </div>
       </div>

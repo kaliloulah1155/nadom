@@ -21,7 +21,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      whatsapp:"+2250714158172"
+      whatsapp: "+2250714158172",
+      logo: "/logo_nadom.png",
+      siteName: "NADOM"
     }
   },
   css: [

@@ -6,8 +6,7 @@
         <nav class="navbar-listinghub">
           <!-- Logo -->
           <NuxtLink class="navbar-brand" to="/">
-            <i class="bi bi-geo-alt-fill brand-icon"></i>
-            <span class="brand-text">NADOM</span>
+            <img :src="config.public.logo" :alt="config.public.siteName" class="brand-logo" />
           </NuxtLink>
 
           <!-- Mobile Toggle -->
@@ -191,18 +190,18 @@
           <!-- Logo & Description -->
           <div class="col-lg-4 col-md-6">
             <div class="footer-widget pe-xl-4 mb-5">
-              <div class="footerLogo mb-3">
-                <img src="~/assets/img/logo-light.svg" class="img-fluid" width="160" alt="NADOM" />
-              </div>
-              <p class="text-light opacity-75 mb-4">
+              <NuxtLink to="/" class="footerLogo mb-3 d-inline-block">
+                <img :src="config.public.logo" class="img-fluid" :alt="config.public.siteName" />
+              </NuxtLink>
+              <p class="text-white opacity-75 mb-4">
                 {{ t('footer.aboutText') }}
               </p>
               <div class="footerSocialwrap">
                 <ul class="footersocial d-flex gap-2">
-                  <li><a href="#" class="social-link"><i class="bi bi-facebook"></i></a></li>
-                  <li><a href="#" class="social-link"><i class="bi bi-instagram"></i></a></li>
-                  <li><a href="#" class="social-link"><i class="bi bi-whatsapp"></i></a></li>
-                  <li><a href="#" class="social-link"><i class="bi bi-youtube"></i></a></li>
+                  <li><a href="#" class="social-link text-white"><i class="bi bi-facebook"></i></a></li>
+                  <li><a href="#" class="social-link text-white"><i class="bi bi-instagram"></i></a></li>
+                  <li><a href="#" class="social-link text-white"><i class="bi bi-whatsapp"></i></a></li>
+                  <li><a href="#" class="social-link text-white"><i class="bi bi-youtube"></i></a></li>
                 </ul>
               </div>
             </div>
@@ -211,12 +210,12 @@
           <!-- Services -->
           <div class="col-lg-2 col-md-6">
             <div class="footer-widget mb-5">
-              <h4 class="widget-title">{{ t('footer.services') }}</h4>
+              <h4 class="widget-title text-white">{{ t('footer.services') }}</h4>
               <ul class="footer-menu">
-                <li><NuxtLink to="/personal-shopping">{{ t('nav.personalShopping') }}</NuxtLink></li>
-                <li><NuxtLink to="/import-export">{{ t('nav.importExport') }}</NuxtLink></li>
-                <li><NuxtLink to="/visa">{{ t('nav.visa') }}</NuxtLink></li>
-                <li><NuxtLink to="/guide">{{ t('nav.guide') }}</NuxtLink></li>
+                <li><NuxtLink to="/personal-shopping" class="text-white opacity-75">{{ t('nav.personalShopping') }}</NuxtLink></li>
+                <li><NuxtLink to="/import-export" class="text-white opacity-75">{{ t('nav.importExport') }}</NuxtLink></li>
+                <li><NuxtLink to="/visa" class="text-white opacity-75">{{ t('nav.visa') }}</NuxtLink></li>
+                <li><NuxtLink to="/guide" class="text-white opacity-75">{{ t('nav.guide') }}</NuxtLink></li>
               </ul>
             </div>
           </div>
@@ -224,12 +223,12 @@
           <!-- Liens Utiles -->
           <div class="col-lg-2 col-md-6">
             <div class="footer-widget mb-5">
-              <h4 class="widget-title">{{ t('footer.quickLinks') }}</h4>
+              <h4 class="widget-title text-white">{{ t('footer.quickLinks') }}</h4>
               <ul class="footer-menu">
-                <li><NuxtLink to="/faq">{{ t('nav.faq') }}</NuxtLink></li>
-                <li><NuxtLink to="/resources/blog">{{ t('nav.blog') }}</NuxtLink></li>
-                <li><NuxtLink to="/resources/pricing">{{ t('nav.pricing') }}</NuxtLink></li>
-                <li><NuxtLink to="/about-us">{{ t('footer.about') }}</NuxtLink></li>
+                <li><NuxtLink to="/faq" class="text-white opacity-75">{{ t('nav.faq') }}</NuxtLink></li>
+                <li><NuxtLink to="/resources/blog" class="text-white opacity-75">{{ t('nav.blog') }}</NuxtLink></li>
+                <li><NuxtLink to="/resources/pricing" class="text-white opacity-75">{{ t('nav.pricing') }}</NuxtLink></li>
+                <li><NuxtLink to="/about-us" class="text-white opacity-75">{{ t('footer.about') }}</NuxtLink></li>
               </ul>
             </div>
           </div>
@@ -237,12 +236,12 @@
           <!-- Contact -->
           <div class="col-lg-4 col-md-6">
             <div class="footer-widget">
-              <h4 class="widget-title">{{ t('footer.contact') }}</h4>
+              <h4 class="widget-title text-white">{{ t('footer.contact') }}</h4>
               <div class="contactInfowrap">
                 <div class="singleinfo d-flex align-items-start mb-3">
                   <div class="icons me-3"><i class="bi bi-geo-alt-fill text-primary"></i></div>
                   <div class="caps">
-                    <p class="text-light opacity-75 mb-0">
+                    <p class="text-white opacity-75 mb-0">
                       Guangzhou, Chine<br />Abidjan, Cote d'Ivoire
                     </p>
                   </div>
@@ -250,7 +249,7 @@
                 <div class="singleinfo d-flex align-items-start mb-3">
                   <div class="icons me-3"><i class="bi bi-telephone-fill text-primary"></i></div>
                   <div class="caps">
-                    <p class="text-light opacity-75 mb-0">
+                    <p class="text-white opacity-75 mb-0">
                       +86 138 0000 1234<br />+225 01 23 45 67
                     </p>
                   </div>
@@ -258,7 +257,7 @@
                 <div class="singleinfo d-flex align-items-start">
                   <div class="icons me-3"><i class="bi bi-envelope-fill text-primary"></i></div>
                   <div class="caps">
-                    <p class="text-light opacity-75 mb-0">contact@nadom.com</p>
+                    <p class="text-white opacity-75 mb-0">contact@nadom.com</p>
                   </div>
                 </div>
               </div>
@@ -269,15 +268,15 @@
         <!-- Copyright -->
         <div class="row border-top border-secondary pt-4 mt-4">
           <div class="col-md-6 text-center text-md-start">
-            <p class="text-light opacity-50 mb-0">
+            <p class="text-white opacity-50 mb-0">
               &copy; {{ currentYear }} NADOM. {{ t('footer.rights') }}.
             </p>
           </div>
           <div class="col-md-6 text-center text-md-end">
-            <NuxtLink to="/privacy-policy" class="text-light opacity-50 me-3">
+            <NuxtLink to="/privacy-policy" class="text-white opacity-50 me-3">
               {{ locale === 'fr' ? 'Confidentialite' : 'Privacy' }}
             </NuxtLink>
-            <NuxtLink to="/faq" class="text-light opacity-50">
+            <NuxtLink to="/faq" class="text-white opacity-50">
               {{ locale === 'fr' ? 'CGV' : 'Terms' }}
             </NuxtLink>
           </div>
@@ -333,7 +332,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 
 const route = useRoute()
-const router = useRouter()
+const config = useRuntimeConfig()
 const authStore = useAuthStore()
 const { notifications, removeNotification } = useNotification()
 const { locale, setLocale, t } = useI18n()
@@ -361,9 +360,7 @@ const toggleDropdown = (name: string) => {
 
 // Computed
 const isAuthenticated = computed(() => authStore.isAuthenticated)
-const isAdmin = computed(() => authStore.isAdmin)
-const currentUser = computed(() => authStore.currentUser)
-const userFullName = computed(() => authStore.userFullName)
+
 
 // Methods
 const isActive = (path: string) => {
@@ -386,10 +383,7 @@ const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+
 
 // Close menu and dropdowns on route change
 watch(
@@ -478,19 +472,18 @@ main {
   display: flex;
   align-items: center;
   text-decoration: none;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #333;
 }
 
-.brand-icon {
-  font-size: 1.8rem;
-  color: #dc3545;
-  margin-right: 0.5rem;
+.brand-logo {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
 }
 
-.brand-text {
-  color: #333;
+@media (max-width: 991px) {
+  .brand-logo {
+    height: 38px;
+  }
 }
 
 /* Mobile Toggle */
@@ -762,6 +755,13 @@ main {
   background: #c82333;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+/* Footer Logo */
+.footer-logo {
+  max-width: 160px;
+  height: auto;
+  filter: brightness(0) invert(1);
 }
 
 /* ===== Other Elements ===== */

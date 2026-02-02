@@ -3,16 +3,16 @@
     <!-- Hero Section -->
     <section class="visa-hero">
       <div class="hero-pattern"></div>
-      <div class="container position-relative py-5">
+      <div class="container position-relative">
         <div class="row align-items-center">
           <div class="col-lg-8 text-white">
             <div class="mb-3">
-              <span class="badge bg-warning text-dark px-3 py-2">
+              <span class="badge bg-warning text-dark px-3">
                 <i class="bi bi-passport me-1"></i>{{ t('visa.badge') }}
               </span>
             </div>
-            <h1 class="display-5 fw-bold mb-3">{{ t('visa.title') }}</h1>
-            <p class="lead opacity-75 mb-0">{{ t('visa.subtitle') }}</p>
+            <h1 class="display-5 fw-bold mb-3 text-white">{{ t('visa.title') }}</h1>
+            <p class="lead opacity-75 mb-0 text-white">{{ t('visa.subtitle') }}</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
             <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-light btn-lg">
@@ -23,7 +23,7 @@
       </div>
     </section>
 
-    <div class="container" style="margin-top: -60px;">
+    <div class="container mt-2">
       <!-- Visa Types -->
       <div class="row g-4 mb-5">
         <div v-for="visa in visaTypes" :key="visa.id" class="col-md-6 col-lg-4">
