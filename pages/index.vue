@@ -185,8 +185,8 @@
     <section class="py-5 bg-dark text-white position-relative overflow-hidden">
       <div class="cta-pattern"></div>
       <div class="container text-center position-relative">
-        <h2 class="fw-bold mb-3">{{ locale === 'fr' ? 'Pret a commencer ?' : 'Ready to get started?' }}</h2>
-        <p class="lead opacity-75 mb-4">
+        <h2 class="fw-bold mb-3 text-white">{{ locale === 'fr' ? 'Pret a commencer ?' : 'Ready to get started?' }}</h2>
+        <p class="lead opacity-75 mb-4 text-white">
           {{ locale === 'fr' ? 'Soumettez votre premiere demande ou contactez-nous pour en savoir plus' : 'Submit your first request or contact us to learn more' }}
         </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
