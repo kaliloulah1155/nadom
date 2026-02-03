@@ -217,41 +217,41 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-6">
-            <h3 class="fw-bold mb-4">Questions frequentes</h3>
+            <h3 class="fw-bold mb-4">{{ t('pricing.faq') }}</h3>
             <div class="accordion" id="pricingFaq">
               <div class="accordion-item border-0 mb-3 shadow-sm">
                 <h2 class="accordion-header">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                    Comment est calculee la commission ?
+                    {{ t('pricing.faqCommission') }}
                   </button>
                 </h2>
                 <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#pricingFaq">
                   <div class="accordion-body">
-                    La commission de 5% est calculee sur le prix d'achat du produit. Elle couvre la recherche, la negociation, le controle qualite et la coordination avec les fournisseurs.
+                    {{ t('pricing.faqCommissionAnswer') }}
                   </div>
                 </div>
               </div>
               <div class="accordion-item border-0 mb-3 shadow-sm">
                 <h2 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                    Y a-t-il des frais caches ?
+                    {{ t('pricing.faqHiddenFees') }}
                   </button>
                 </h2>
                 <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFaq">
                   <div class="accordion-body">
-                    Non, tous nos tarifs sont transparents. Les seuls frais supplementaires peuvent etre les frais de douane qui dependent de la nature des marchandises et sont reglementes par votre pays.
+                    {{ t('pricing.faqHiddenFeesAnswer') }}
                   </div>
                 </div>
               </div>
               <div class="accordion-item border-0 mb-3 shadow-sm">
                 <h2 class="accordion-header">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                    Quels modes de paiement acceptez-vous ?
+                    {{ t('pricing.faqPayment') }}
                   </button>
                 </h2>
                 <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFaq">
                   <div class="accordion-body">
-                    Nous acceptons les virements bancaires, Orange Money, Wave, et Western Union. Le paiement se fait generalement en deux temps : un acompte a la commande et le solde avant expedition.
+                    {{ t('pricing.faqPaymentAnswer') }}
                   </div>
                 </div>
               </div>
@@ -260,16 +260,16 @@
           <div class="col-lg-6">
             <div class="card border-0 shadow-sm bg-primary text-white h-100">
               <div class="card-body p-5 d-flex flex-column justify-content-center">
-                <h3 class="fw-bold mb-3">Besoin d'un devis personnalise ?</h3>
+                <h3 class="fw-bold mb-3">{{ t('pricing.needQuote') }}</h3>
                 <p class="opacity-75 mb-4">
-                  Pour les commandes en gros ou les besoins specifiques, contactez-nous pour obtenir un devis adapte a votre projet.
+                  {{ t('pricing.needQuoteDesc') }}
                 </p>
                 <div class="d-flex gap-3 flex-wrap">
                   <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-light">
                     <i class="bi bi-whatsapp me-2"></i>WhatsApp
                   </a>
                   <NuxtLink to="/contact-us" class="btn btn-outline-light">
-                    Formulaire de contact
+                    {{ t('pricing.contactForm') }}
                   </NuxtLink>
                 </div>
               </div>

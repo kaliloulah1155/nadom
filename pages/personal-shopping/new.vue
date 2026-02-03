@@ -43,11 +43,11 @@
                       }}
                     </option>
                     <option
-                      v-for="cat in categories"
+                      v-for="cat in (categories as any)"
                       :key="cat.id"
-                      :value="cat.name"
+                      :value="cat[`name_${locale}`] || cat.name_fr"
                     >
-                      {{ cat.name }}
+                      {{ cat[`name_${locale}`] || cat.name_fr }}
                     </option>
                   </select>
                   <div v-if="errors.category" class="invalid-feedback">

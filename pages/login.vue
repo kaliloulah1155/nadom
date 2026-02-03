@@ -10,7 +10,7 @@
               <div class="col-lg-6 d-none d-lg-block auth-image">
                 <div class="auth-image-content">
                   <div class="mb-4">
-                    <img src="~/assets/img/logo-light.svg" alt="NADOM" height="50" />
+                    <img :src="config.public.logo" :alt="config.public.siteName" height="50" />
                   </div>
                   <h3 class="text-white mb-3">{{ locale === 'fr' ? 'Bienvenue sur NADOM' : 'Welcome to NADOM' }}</h3>
                   <p class="text-white opacity-75">
@@ -39,13 +39,13 @@
                   <!-- Mobile Logo -->
                   <div class="text-center mb-4 d-lg-none">
                     <NuxtLink to="/">
-                      <img src="~/assets/img/logo.svg" alt="NADOM" height="40" />
+                      <img :src="config.public.logo" :alt="config.public.siteName" height="40" />
                     </NuxtLink>
                   </div>
 
                   <!-- Tabs -->
                   <ul class="nav nav-pills nav-fill mb-4" role="tablist">
-                    <li class="nav-item">
+                    <li class="nav-item me-2">
                       <button
                         class="nav-link"
                         :class="{ active: activeTab === 'client' }"
@@ -203,7 +203,7 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const { success, error: notifyError } = useNotification()
-
+const config = useRuntimeConfig()
 // State
 const activeTab = ref<'client' | 'admin'>('client')
 const clientCode = ref('')
@@ -322,11 +322,12 @@ const handleAdminLogin = async () => {
 .auth-image {
   background: linear-gradient(135deg, var(--bs-primary) 0%, #0056b3 100%);
   position: relative;
+  text-align: center;
 }
 
 .auth-image-content {
   position: absolute;
-  top: 50%;
+  top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 40px;

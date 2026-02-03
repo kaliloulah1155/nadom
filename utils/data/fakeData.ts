@@ -71,18 +71,18 @@ export const FAKE_USERS = [
 
 // ==================== CATEGORIES ====================
 export const FAKE_CATEGORIES = [
-  { id: 'cat_1', name: 'Électronique & High-Tech', icon: 'bi-phone', color: '#3498db' },
-  { id: 'cat_2', name: 'Fashion & Vêtements', icon: 'bi-bag', color: '#e74c3c' },
-  { id: 'cat_3', name: 'Maison & Décoration', icon: 'bi-house', color: '#2ecc71' },
-  { id: 'cat_4', name: 'Beauté & Cosmétique', icon: 'bi-heart', color: '#9b59b6' },
-  { id: 'cat_5', name: 'Sport & Loisirs', icon: 'bi-bicycle', color: '#f39c12' },
-  { id: 'cat_6', name: 'Jouets & Enfants', icon: 'bi-gift', color: '#1abc9c' },
-  { id: 'cat_7', name: 'Auto & Moto', icon: 'bi-car-front', color: '#34495e' },
-  { id: 'cat_8', name: 'Machines & Équipements', icon: 'bi-gear', color: '#7f8c8d' },
-  { id: 'cat_9', name: 'Alimentation & Boissons', icon: 'bi-cup-hot', color: '#d35400' },
-  { id: 'cat_10', name: 'Mobilier & Bureau', icon: 'bi-lamp', color: '#8e44ad' },
-  { id: 'cat_11', name: 'Santé & Médical', icon: 'bi-hospital', color: '#16a085' },
-  { id: 'cat_12', name: 'Textile & Tissus', icon: 'bi-scissors', color: '#c0392b' }
+  { id: 'cat_1', name_fr: 'Électronique & High-Tech', name_en: 'Electronics & High-tech', icon: 'bi-phone', color: '#3498db' },
+  { id: 'cat_2', name_fr: 'Fashion & Vêtements', name_en: 'Fashion & Clothing', icon: 'bi-bag', color: '#e74c3c' },
+  { id: 'cat_3', name_fr: 'Maison & Décoration', name_en: 'Home & Decoration', icon: 'bi-house', color: '#2ecc71' },
+  { id: 'cat_4', name_fr: 'Beauté & Cosmétique', name_en: 'Beauty & Cosmetics', icon: 'bi-heart', color: '#9b59b6' },
+  { id: 'cat_5', name_fr: 'Sport & Loisirs', name_en: 'Sport & Leisure', icon: 'bi-bicycle', color: '#f39c12' },
+  { id: 'cat_6', name_fr: 'Jouets & Enfants', name_en: 'Toys & Children', icon: 'bi-gift', color: '#1abc9c' },
+  { id: 'cat_7', name_fr: 'Auto & Moto', name_en: 'Auto & Moto', icon: 'bi-car-front', color: '#34495e' },
+  { id: 'cat_8', name_fr: 'Machines & Équipements', name_en: 'Machines & Equipment', icon: 'bi-gear', color: '#7f8c8d' },
+  { id: 'cat_9', name_fr: 'Alimentation & Boissons', name_en: 'Food & Beverage', icon: 'bi-cup-hot', color: '#d35400' },
+  { id: 'cat_10', name_fr: 'Mobilier & Bureau', name_en: 'Furniture & Office', icon: 'bi-lamp', color: '#8e44ad' },
+  { id: 'cat_11', name_fr: 'Santé & Médical', name_en: 'Health & Medical', icon: 'bi-hospital', color: '#16a085' },
+  { id: 'cat_12', name_fr: 'Textile & Tissus', name_en: 'Textile & Fabrics', icon: 'bi-scissors', color: '#c0392b' }
 ]
 
 // ==================== PERSONAL SHOPPING REQUESTS ====================
@@ -411,63 +411,20 @@ export const FAKE_SHIPMENTS = [
 export const FAKE_GUIDES = [
   {
     id: 'guide_1',
-    name: 'Wang Wei',
+    name_fr: 'Wang Wei',
+    name_en: 'Wang Wei',
     languages: ['Français', 'Mandarin', 'Anglais'],
-    specializations: ['Commerce', 'Marchés de gros', 'Négociation'],
-    cities: ['Guangzhou', 'Shenzhen', 'Yiwu'],
+    specializations: ['Commerce', 'Marchés de gros'],
+    cities: ['Guangzhou', 'Shenzhen'],
     experience: 8,
     rating: 4.8,
     reviews: 45,
     avatar: 'https://randomuser.me/api/portraits/men/10.jpg',
     pricePerDay: 150000,
     pricePerHour: 25000,
-    description: 'Expert en sourcing et négociation dans les marchés de Guangzhou et Yiwu. Spécialisé dans l\'électronique et le textile.',
+    description_fr: 'Expert en sourcing et négociation dans les marchés de Guangzhou.',
+    description_en: 'Expert in sourcing and negotiation in Guangzhou markets.',
     available: true
-  },
-  {
-    id: 'guide_2',
-    name: 'Li Ming',
-    languages: ['Français', 'Mandarin'],
-    specializations: ['Textile', 'Mode', 'Usines'],
-    cities: ['Guangzhou', 'Dongguan'],
-    experience: 5,
-    rating: 4.6,
-    reviews: 32,
-    avatar: 'https://randomuser.me/api/portraits/men/11.jpg',
-    pricePerDay: 120000,
-    pricePerHour: 20000,
-    description: 'Spécialiste du textile et de la mode. Connaissance approfondie des usines de confection.',
-    available: true
-  },
-  {
-    id: 'guide_3',
-    name: 'Zhang Hui',
-    languages: ['Français', 'Mandarin', 'Anglais', 'Espagnol'],
-    specializations: ['Électronique', 'High-Tech', 'Gadgets'],
-    cities: ['Shenzhen', 'Hong Kong'],
-    experience: 10,
-    rating: 4.9,
-    reviews: 78,
-    avatar: 'https://randomuser.me/api/portraits/women/12.jpg',
-    pricePerDay: 180000,
-    pricePerHour: 30000,
-    description: 'Experte en électronique et technologies. Accès privilégié aux usines de Shenzhen.',
-    available: true
-  },
-  {
-    id: 'guide_4',
-    name: 'Chen Jie',
-    languages: ['Français', 'Mandarin'],
-    specializations: ['Décoration', 'Mobilier', 'Artisanat'],
-    cities: ['Foshan', 'Guangzhou'],
-    experience: 6,
-    rating: 4.7,
-    reviews: 28,
-    avatar: 'https://randomuser.me/api/portraits/women/13.jpg',
-    pricePerDay: 130000,
-    pricePerHour: 22000,
-    description: 'Spécialiste en mobilier et décoration. Expert des marchés de Foshan.',
-    available: false
   }
 ]
 
@@ -476,72 +433,48 @@ export const FAKE_VISAS = [
   {
     id: 'visa_1',
     type: 'Affaires (M)',
-    duration: '30-90 jours',
-    validity: '1 an (entrées multiples)',
-    processingTime: '7-10 jours ouvrables',
+    name_fr: 'Visa Affaires (M)',
+    name_en: 'Business Visa (M)',
+    duration_fr: '30-90 jours',
+    duration_en: '30-90 days',
+    validity_fr: '1 an (entrées multiples)',
+    validity_en: '1 year (multiple entries)',
+    processingTime_fr: '7-10 jours ouvrables',
+    processingTime_en: '7-10 business days',
     cost: 150000,
-    requirements: [
+    requirements_fr: [
       'Passeport valide 6 mois minimum',
-      'Photo d\'identité récente (4.8x3.3 cm)',
-      'Formulaire de demande rempli',
-      'Lettre d\'invitation d\'une entreprise chinoise',
-      'Justificatif de l\'entreprise (RCCM, etc.)',
-      'Preuve de moyens financiers'
+      'Lettre d\'invitation d\'une entreprise chinoise'
     ],
-    description: 'Pour les voyages d\'affaires, réunions, négociations commerciales et visites de foires.'
+    requirements_en: [
+      'Passport valid for at least 6 months',
+      'Invitation letter from a Chinese company'
+    ],
+    description_fr: 'Pour les voyages d\'affaires, réunions, et foires.',
+    description_en: 'For business trips, meetings, and trade fairs.'
   },
   {
     id: 'visa_2',
     type: 'Tourisme (L)',
-    duration: '30 jours',
-    validity: '3 mois (entrée simple)',
-    processingTime: '5-7 jours ouvrables',
+    name_fr: 'Visa Tourisme (L)',
+    name_en: 'Tourism Visa (L)',
+    duration_fr: '30 jours',
+    duration_en: '30 days',
+    validity_fr: '3 mois (entrée simple)',
+    validity_en: '3 months (single entry)',
+    processingTime_fr: '5-7 jours ouvrables',
+    processingTime_en: '5-7 business days',
     cost: 100000,
-    requirements: [
+    requirements_fr: [
       'Passeport valide 6 mois minimum',
-      'Photo d\'identité récente',
-      'Formulaire de demande rempli',
-      'Réservation d\'hôtel',
-      'Billet d\'avion aller-retour',
-      'Relevé bancaire des 3 derniers mois'
+      'Réservation d\'hôtel'
     ],
-    description: 'Pour les voyages touristiques et visites personnelles.'
-  },
-  {
-    id: 'visa_3',
-    type: 'Études (X1/X2)',
-    duration: 'Selon durée des études',
-    validity: 'Jusqu\'à 5 ans',
-    processingTime: '15-20 jours ouvrables',
-    cost: 200000,
-    requirements: [
-      'Passeport valide 6 mois minimum',
-      'Photo d\'identité récente',
-      'Formulaire JW201 ou JW202',
-      'Lettre d\'admission de l\'université',
-      'Certificat médical',
-      'Preuve de moyens financiers',
-      'Diplômes traduits et légalisés'
+    requirements_en: [
+      'Passport valid for at least 6 months',
+      'Hotel reservation'
     ],
-    description: 'Pour les études universitaires ou formations en Chine.'
-  },
-  {
-    id: 'visa_4',
-    type: 'Travail (Z)',
-    duration: '30 jours (initial)',
-    validity: 'Convertible en permis de résidence',
-    processingTime: '20-30 jours ouvrables',
-    cost: 250000,
-    requirements: [
-      'Passeport valide 6 mois minimum',
-      'Photo d\'identité récente',
-      'Permis de travail chinois',
-      'Lettre d\'invitation de l\'employeur',
-      'Contrat de travail',
-      'Certificat médical',
-      'Diplômes authentifiés'
-    ],
-    description: 'Pour travailler légalement en Chine avec un employeur chinois.'
+    description_fr: 'Pour les voyages touristiques.',
+    description_en: 'For tourist trips.'
   }
 ]
 
@@ -549,10 +482,13 @@ export const FAKE_VISAS = [
 export const FAKE_BLOG_POSTS = [
   {
     id: 'blog_1',
-    title: 'Guide complet de l\'import-export avec la Chine',
+    title_fr: 'Guide complet de l\'import-export avec la Chine',
+    title_en: 'Complete guide to import-export with China',
     slug: 'guide-complet-import-export-chine',
-    excerpt: 'Découvrez tout ce que vous devez savoir pour réussir vos importations depuis la Chine: procédures, pièges à éviter, et conseils pratiques.',
-    content: `L'import-export avec la Chine représente une opportunité majeure pour les entrepreneurs africains. Ce guide vous accompagne étape par étape...`,
+    excerpt_fr: 'Découvrez tout ce que vous devez savoir pour réussir vos importations depuis la Chine: procédures, pièges à éviter, et conseils pratiques.',
+    excerpt_en: 'Discover everything you need to know to succeed in your imports from China: procedures, pitfalls to avoid, and practical advice.',
+    content_fr: `L'import-export avec la Chine représente une opportunité majeure pour les entrepreneurs africains. Ce guide vous accompagne étape par étape...`,
+    content_en: `Import-export with China represents a major opportunity for African entrepreneurs. This guide accompanies you step by step...`,
     category: 'Import-Export',
     author: 'Marie Martin',
     authorAvatar: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -563,10 +499,13 @@ export const FAKE_BLOG_POSTS = [
   },
   {
     id: 'blog_2',
-    title: 'Les meilleurs marchés de Guangzhou pour le sourcing',
+    title_fr: 'Les meilleurs marchés de Guangzhou pour le sourcing',
+    title_en: 'The best markets in Guangzhou for sourcing',
     slug: 'meilleurs-marches-guangzhou-sourcing',
-    excerpt: 'Tour d\'horizon des marchés incontournables de Guangzhou pour trouver les meilleurs produits aux meilleurs prix.',
-    content: `Guangzhou, capitale mondiale du commerce, regorge de marchés spécialisés. Voici notre sélection...`,
+    excerpt_fr: 'Tour d\'horizon des marchés incontournables de Guangzhou pour trouver les meilleurs produits aux meilleurs prix.',
+    excerpt_en: 'A tour of the essential markets in Guangzhou to find the best products at the best prices.',
+    content_fr: `Guangzhou, capitale mondiale du commerce, regorge de marchés spécialisés. Voici notre sélection...`,
+    content_en: `Guangzhou, world capital of commerce, is full of specialized markets. Here is our selection...`,
     category: 'Sourcing',
     author: 'Wang Wei',
     authorAvatar: 'https://randomuser.me/api/portraits/men/10.jpg',
@@ -574,34 +513,6 @@ export const FAKE_BLOG_POSTS = [
     publishedAt: '2024-01-15',
     views: 890,
     readTime: 6
-  },
-  {
-    id: 'blog_3',
-    title: 'Comment négocier efficacement avec les fournisseurs chinois',
-    slug: 'negocier-efficacement-fournisseurs-chinois',
-    excerpt: 'Techniques et astuces pour obtenir les meilleurs prix et conditions avec vos fournisseurs en Chine.',
-    content: `La négociation est un art en Chine. Voici nos conseils pour réussir vos négociations...`,
-    category: 'Conseils',
-    author: 'Zhang Hui',
-    authorAvatar: 'https://randomuser.me/api/portraits/women/12.jpg',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
-    publishedAt: '2024-01-10',
-    views: 2100,
-    readTime: 10
-  },
-  {
-    id: 'blog_4',
-    title: 'Foire de Canton 2024: Guide du visiteur',
-    slug: 'foire-canton-2024-guide-visiteur',
-    excerpt: 'Tout savoir sur la Foire de Canton: dates, inscriptions, conseils pour optimiser votre visite.',
-    content: `La Foire de Canton est le plus grand salon commercial au monde. Voici comment en tirer le meilleur parti...`,
-    category: 'Événements',
-    author: 'Marie Martin',
-    authorAvatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
-    publishedAt: '2024-01-05',
-    views: 3500,
-    readTime: 12
   }
 ]
 
@@ -609,51 +520,11 @@ export const FAKE_BLOG_POSTS = [
 export const FAKE_FAQ = [
   {
     id: 'faq_1',
-    question: 'Combien de temps pour trouver un produit en Personal Shopping ?',
-    answer: 'Généralement entre 2 et 7 jours selon la disponibilité du produit et sa complexité. Les produits courants sont trouvés plus rapidement que les produits spécifiques ou personnalisés.',
+    question_fr: 'Combien de temps pour trouver un produit en Personal Shopping ?',
+    question_en: 'How long does it take to find a product in Personal Shopping?',
+    answer_fr: 'Généralement entre 2 et 7 jours selon la disponibilité du produit et sa complexité.',
+    answer_en: 'Generally between 2 and 7 days depending on product availability and complexity.',
     category: 'Personal Shopping'
-  },
-  {
-    id: 'faq_2',
-    question: 'Quels sont les modes de paiement acceptés ?',
-    answer: 'Nous acceptons les virements bancaires, Mobile Money (Orange Money, Wave, MTN), et Western Union. Les paiements sont sécurisés et vous recevez une confirmation pour chaque transaction.',
-    category: 'Paiement'
-  },
-  {
-    id: 'faq_3',
-    question: 'Comment fonctionne le suivi de colis ?',
-    answer: 'Chaque colis reçoit un numéro de tracking unique. Vous pouvez suivre votre colis en temps réel sur notre plateforme, de l\'enlèvement en Chine jusqu\'à la livraison chez vous.',
-    category: 'Livraison'
-  },
-  {
-    id: 'faq_4',
-    question: 'Quels sont les délais de livraison ?',
-    answer: 'Les délais varient selon le mode d\'expédition: Express aérien (3-5 jours), Fret aérien standard (15-18 jours), Fret maritime (30-45 jours). Les délais peuvent varier selon la destination.',
-    category: 'Livraison'
-  },
-  {
-    id: 'faq_5',
-    question: 'Comment sont calculés les frais de douane ?',
-    answer: 'Les frais de douane dépendent de la nature des marchandises, de leur valeur déclarée et du pays de destination. Nous vous accompagnons dans les démarches de dédouanement.',
-    category: 'Douane'
-  },
-  {
-    id: 'faq_6',
-    question: 'Puis-je visiter les usines en Chine ?',
-    answer: 'Oui ! Nous organisons des visites guidées d\'usines et de marchés avec nos guides francophones. Contactez-nous pour planifier votre voyage d\'affaires.',
-    category: 'Services'
-  },
-  {
-    id: 'faq_7',
-    question: 'Quelle est la quantité minimum de commande ?',
-    answer: 'Il n\'y a pas de minimum pour le Personal Shopping. Pour les commandes en gros, le MOQ (Minimum Order Quantity) dépend du fournisseur et du produit.',
-    category: 'Commandes'
-  },
-  {
-    id: 'faq_8',
-    question: 'Comment vérifiez-vous la qualité des produits ?',
-    answer: 'Tous les produits passent par notre centre d\'inspection à Guangzhou. Nous vérifions la conformité, prenons des photos et vidéos avant expédition. Vous validez avant l\'envoi.',
-    category: 'Qualité'
   }
 ]
 
@@ -661,45 +532,23 @@ export const FAKE_FAQ = [
 export const FAKE_SERVICES = [
   {
     id: 'service_1',
-    name: 'Personal Shopping',
+    name_fr: 'Personal Shopping',
+    name_en: 'Personal Shopping',
     icon: 'bi-bag-check',
-    description: 'Trouvez n\'importe quel produit en Chine sans vous déplacer',
-    features: ['Recherche personnalisée', 'Négociation prix', 'Vérification qualité', 'Photos/vidéos avant achat']
+    description_fr: 'Trouvez n\'importe quel produit en Chine sans vous déplacer',
+    description_en: 'Find any product in China without traveling',
+    features_fr: ['Recherche personnalisée', 'Négociation prix'],
+    features_en: ['Personalized search', 'Price negotiation']
   },
   {
     id: 'service_2',
-    name: 'Import-Export',
+    name_fr: 'Import-Export',
+    name_en: 'Import-Export',
     icon: 'bi-box-seam',
-    description: 'Expédition de vos marchandises vers l\'Afrique',
-    features: ['Fret aérien & maritime', 'Consolidation colis', 'Dédouanement', 'Livraison porte à porte']
-  },
-  {
-    id: 'service_3',
-    name: 'Guides & Interprètes',
-    icon: 'bi-person-badge',
-    description: 'Accompagnement professionnel lors de vos voyages en Chine',
-    features: ['Guides francophones', 'Visite usines & marchés', 'Négociation sur place', 'Organisation séjour']
-  },
-  {
-    id: 'service_4',
-    name: 'Visa Chine',
-    icon: 'bi-passport',
-    description: 'Assistance complète pour l\'obtention de votre visa',
-    features: ['Visa affaires', 'Visa tourisme', 'Visa études', 'Suivi dossier']
-  },
-  {
-    id: 'service_5',
-    name: 'Paiement Fournisseurs',
-    icon: 'bi-credit-card',
-    description: 'Sécurisez vos paiements avec vos fournisseurs chinois',
-    features: ['Paiement sécurisé', 'Taux compétitifs', 'Confirmation rapide', 'Protection acheteur']
-  },
-  {
-    id: 'service_6',
-    name: 'Inspection Qualité',
-    icon: 'bi-search',
-    description: 'Contrôle qualité avant expédition de vos marchandises',
-    features: ['Inspection usine', 'Contrôle pré-expédition', 'Rapport détaillé', 'Photos & vidéos']
+    description_fr: 'Expédition de vos marchandises vers l\'Afrique',
+    description_en: 'Shipping of your goods to Africa',
+    features_fr: ['Fret aérien & maritime', 'Dédouanement'],
+    features_en: ['Air & sea freight', 'Customs clearance']
   }
 ]
 

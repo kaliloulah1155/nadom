@@ -64,10 +64,10 @@
                 <div class="service-icon mb-3">
                   <i :class="service.icon" class="fs-1 text-primary"></i>
                 </div>
-                <h5 class="card-title">{{ service.name }}</h5>
-                <p class="card-text text-muted">{{ service.description }}</p>
+                <h5 class="card-title">{{ service[`name_${locale}`] || service.name_fr }}</h5>
+                <p class="card-text text-muted">{{ service[`description_${locale}`] || service.description_fr }}</p>
                 <ul class="list-unstyled mb-0">
-                  <li v-for="(feature, idx) in service.features.slice(0, 3)" :key="idx" class="mb-1">
+                  <li v-for="(feature, idx) in (service[`features_${locale}`] || service.features_fr || []).slice(0, 3)" :key="idx" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
                     <small>{{ feature }}</small>
                   </li>
@@ -113,7 +113,7 @@
               <div class="card h-100 border-0 shadow-sm text-center hover-card">
                 <div class="card-body py-4">
                   <i :class="category.icon" class="fs-2 mb-2" :style="{ color: category.color }"></i>
-                  <h6 class="mb-0">{{ category.name }}</h6>
+                  <h6 class="mb-0">{{ category[`name_${locale}`] || category.name_fr }}</h6>
                 </div>
               </div>
             </NuxtLink>
@@ -164,11 +164,11 @@
         <div class="row g-4">
           <div v-for="post in recentPosts" :key="post.id" class="col-md-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm">
-              <img :src="post.image" class="card-img-top" :alt="post.title" style="height: 160px; object-fit: cover;" />
+              <img :src="post.image" class="card-img-top" :alt="post.title_fr" style="height: 160px; object-fit: cover;" />
               <div class="card-body">
                 <span class="badge bg-primary-subtle text-primary mb-2">{{ post.category }}</span>
-                <h6 class="card-title">{{ post.title }}</h6>
-                <p class="card-text small text-muted">{{ truncate(post.excerpt, 80) }}</p>
+                <h6 class="card-title">{{ post[`title_${locale}`] || post.title_fr }}</h6>
+                <p class="card-text small text-muted">{{ truncate(post[`excerpt_${locale}`] || post.excerpt_fr, 80) }}</p>
               </div>
               <div class="card-footer bg-transparent border-0">
                 <NuxtLink :to="`/resources/blog/${post.slug}`" class="btn btn-sm btn-link p-0">
@@ -211,7 +211,7 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const blogStore = useBlogStore()
 const { truncate } = useFormatters()
 

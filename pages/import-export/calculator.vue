@@ -4,9 +4,9 @@
     <section class="hero-mini py-5 bg-primary text-white">
       <div class="container">
         <div class="row">
-            <h1 class="display-5 fw-bold mb-3 text-white text-center">Calculateur de tarifs</h1>
+            <h1 class="display-5 fw-bold mb-3 text-white text-center">{{ t('calculator.title') }}</h1>
             <p class="lead opacity-75 mb-0 text-white text-center">
-              Estimez le cout d'expedition de vos marchandises
+              {{ t('calculator.subtitle') }}
             </p>
         </div>
       </div>
@@ -14,21 +14,21 @@
     <div class="container mt-3 mb-2">
       <div class="row justify-content-center">
         <div class="col-lg-8">
-        
+
           <!-- Calculator Card -->
           <div class="card border-0 shadow">
             <div class="card-body p-4 p-lg-5">
               <form @submit.prevent="calculateCost">
                 <!-- Destination -->
                 <div class="mb-4">
-                  <label class="form-label fw-medium">Pays de destination *</label>
+                  <label class="form-label fw-medium">{{ t('calculator.destinationCountry') }}</label>
                   <select
                     v-model="form.destination"
                     class="form-select form-select-lg"
                     required
                     @change="onDestinationChange"
                   >
-                    <option value="">Selectionnez un pays</option>
+                    <option value="">{{ t('calculator.selectCountry') }}</option>
                     <option v-for="dest in destinations" :key="dest.id" :value="dest.country">
                       {{ dest.flag }} {{ dest.country }} - {{ dest.city }}
                     </option>
@@ -37,7 +37,7 @@
 
                 <!-- Shipping Mode -->
                 <div class="mb-4">
-                  <label class="form-label fw-medium">Mode d'expedition *</label>
+                  <label class="form-label fw-medium">{{ t('calculator.shippingMode') }}</label>
                   <div class="row g-3">
                     <div v-for="mode in availableModes" :key="mode.mode" class="col-md-4">
                       <div
@@ -63,7 +63,7 @@
 
                 <!-- Weight -->
                 <div class="mb-4">
-                  <label class="form-label fw-medium">Poids total (kg) *</label>
+                  <label class="form-label fw-medium">{{ t('calculator.totalWeight') }}</label>
                   <input
                     v-model.number="form.weight"
                     type="number"
@@ -73,7 +73,7 @@
                     step="0.1"
                     required
                   />
-                  <small class="text-muted">Poids reel ou volumetrique (le plus eleve)</small>
+                  <small class="text-muted">{{ t('calculator.weightHint') }}</small>
                 </div>
 
                 <!-- Calculate Button -->
@@ -82,27 +82,27 @@
                   class="btn btn-primary btn-lg w-100"
                   :disabled="!canCalculate"
                 >
-                  <i class="bi bi-calculator me-2"></i>Calculer
+                  <i class="bi bi-calculator me-2"></i>{{ t('calculator.calculate') }}
                 </button>
               </form>
 
               <!-- Result -->
               <div v-if="result" class="mt-5 pt-4 border-top">
-                <h5 class="fw-bold mb-4">Estimation des couts</h5>
+                <h5 class="fw-bold mb-4">{{ t('calculator.costEstimate') }}</h5>
 
                 <div class="card bg-light border-0 mb-4">
                   <div class="card-body">
                     <div class="row text-center">
                       <div class="col-4">
-                        <small class="text-muted d-block">Destination</small>
+                        <small class="text-muted d-block">{{ t('calculator.destination') }}</small>
                         <strong>{{ form.destination }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">Mode</small>
+                        <small class="text-muted d-block">{{ t('calculator.mode') }}</small>
                         <strong>{{ getModeLabel(form.shippingMode!) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">Poids</small>
+                        <small class="text-muted d-block">{{ t('calculator.weight') }}</small>
                         <strong>{{ form.weight }} kg</strong>
                       </div>
                     </div>
@@ -112,19 +112,19 @@
                 <table class="table table-borderless">
                   <tbody>
                     <tr>
-                      <td>Frais d'expedition</td>
+                      <td>{{ t('calculator.shippingCost') }}</td>
                       <td class="text-end">{{ formatCurrency(result.shippingCost) }}</td>
                     </tr>
                     <tr>
-                      <td>Assurance (1%)</td>
+                      <td>{{ t('calculator.insurance') }}</td>
                       <td class="text-end">{{ formatCurrency(result.insurance) }}</td>
                     </tr>
                     <tr>
-                      <td>Frais de manutention</td>
+                      <td>{{ t('calculator.handling') }}</td>
                       <td class="text-end">{{ formatCurrency(result.handling) }}</td>
                     </tr>
                     <tr class="border-top fw-bold fs-5">
-                      <td>TOTAL ESTIME</td>
+                      <td>{{ t('calculator.totalEstimate') }}</td>
                       <td class="text-end text-primary">{{ formatCurrency(result.total) }}</td>
                     </tr>
                   </tbody>
@@ -132,18 +132,15 @@
 
                 <div class="alert alert-info">
                   <i class="bi bi-info-circle me-2"></i>
-                  <small>
-                    Cette estimation n'inclut pas les frais de douane qui dependent de la nature des marchandises.
-                    Contactez-nous pour un devis precis.
-                  </small>
+                  <small>{{ t('calculator.customsNote') }}</small>
                 </div>
 
                 <div class="d-grid gap-2">
                   <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-success">
-                    <i class="bi bi-whatsapp me-2"></i>Obtenir un devis precis
+                    <i class="bi bi-whatsapp me-2"></i>{{ t('calculator.getPreciseQuote') }}
                   </a>
                   <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary">
-                    Commander via Personal Shopping
+                    {{ t('calculator.orderViaShopping') }}
                   </NuxtLink>
                 </div>
               </div>
@@ -164,6 +161,7 @@ definePageMeta({
   layout: 'default'
 })
 
+const { t, locale } = useI18n()
 const shippingStore = useShippingStore()
 const { formatCurrency } = useFormatters()
 
@@ -211,12 +209,12 @@ const getModeIcon = (mode: ShippingMode) => {
 }
 
 const getModeLabel = (mode: ShippingMode) => {
-  const labels: Record<ShippingMode, string> = {
-    'air_express': 'Aerien Express',
-    'air_normal': 'Aerien Standard',
-    'sea': 'Maritime'
+  const labels: Record<ShippingMode, Record<string, string>> = {
+    'air_express': { fr: 'Aerien Express', en: 'Express Air' },
+    'air_normal': { fr: 'Aerien Standard', en: 'Standard Air' },
+    'sea': { fr: 'Maritime', en: 'Sea' }
   }
-  return labels[mode]
+  return labels[mode][locale.value] || labels[mode]['fr']
 }
 
 const calculateCost = () => {

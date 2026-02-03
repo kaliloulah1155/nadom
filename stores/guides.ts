@@ -5,7 +5,8 @@ export interface Guide {
   id: string
   name: string
   languages: string[]
-  specializations: string[]
+  specializations_fr: string[]
+  specializations_en: string[]
   cities: string[]
   experience: number
   rating: number
@@ -13,7 +14,8 @@ export interface Guide {
   avatar: string
   pricePerDay: number
   pricePerHour: number
-  description: string
+  description_fr: string
+  description_en: string
   available: boolean
 }
 
@@ -65,7 +67,7 @@ export const useGuidesStore = defineStore('guides', {
     },
 
     getGuidesBySpecialization: (state) => (spec: string) => {
-      return state.guides.filter(g => g.specializations.includes(spec))
+      return state.guides.filter(g => g.specializations_fr.includes(spec) || g.specializations_en.includes(spec))
     },
 
     getBookingsByUser: (state) => (userId: string) => {
@@ -90,7 +92,10 @@ export const useGuidesStore = defineStore('guides', {
 
     allSpecializations: (state) => {
       const specs = new Set<string>()
-      state.guides.forEach(g => g.specializations.forEach(s => specs.add(s)))
+      state.guides.forEach(g => {
+        g.specializations_fr.forEach(s => specs.add(s))
+        g.specializations_en.forEach(s => specs.add(s))
+      })
       return Array.from(specs)
     }
   },
@@ -105,9 +110,21 @@ export const useGuidesStore = defineStore('guides', {
 
         if (typeof window !== 'undefined') {
           const saved = localStorage.getItem('guides')
-          this.guides = saved ? JSON.parse(saved) : [...FAKE_GUIDES]
+          this.guides = saved ? JSON.parse(saved).map((g: any) => ({
+            ...g,
+            specializations_fr: g.specializations_fr || g.specializations || [],
+            specializations_en: g.specializations_en || g.specializations || [],
+            description_fr: g.description_fr || g.description || '',
+            description_en: g.description_en || g.description || ''
+          })) : FAKE_GUIDES.map((g: any) => ({
+            ...g,
+            specializations_fr: g.specializations || [],
+            specializations_en: g.specializations || [],
+            description_fr: g.description || '',
+            description_en: g.description || ''
+          }))
         } else {
-          this.guides = [...FAKE_GUIDES]
+          this.guides = []
         }
       } catch (err) {
         this.error = 'Erreur lors du chargement des guides'
@@ -189,7 +206,7 @@ export const useGuidesStore = defineStore('guides', {
       return this.guides.filter(guide => {
         if (filters.city && !guide.cities.includes(filters.city)) return false
         if (filters.language && !guide.languages.includes(filters.language)) return false
-        if (filters.specialization && !guide.specializations.includes(filters.specialization)) return false
+        if (filters.specialization && !(guide.specializations_fr.includes(filters.specialization) || guide.specializations_en.includes(filters.specialization))) return false
         if (filters.minRating && guide.rating < filters.minRating) return false
         if (filters.maxPrice && guide.pricePerDay > filters.maxPrice) return false
         return true

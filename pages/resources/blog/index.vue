@@ -23,7 +23,7 @@
               <img
                 :src="post.image"
                 class="card-img-top"
-                :alt="post.title"
+                :alt="post.title_fr"
                 style="height: 200px; object-fit: cover;"
               />
               <div class="card-body">
@@ -31,8 +31,8 @@
                   <span class="badge bg-primary-subtle text-primary">{{ post.category }}</span>
                   <small class="text-muted">{{ post.readTime }}</small>
                 </div>
-                <h5 class="card-title">{{ post.title }}</h5>
-                <p class="card-text text-muted small">{{ post.excerpt }}</p>
+                <h5 class="card-title">{{ post[`title_${locale}`] || post.title_fr }}</h5>
+                <p class="card-text text-muted small">{{ post[`excerpt_${locale}`] || post.excerpt_fr }}</p>
               </div>
               <div class="card-footer bg-transparent border-0">
                 <div class="d-flex justify-content-between align-items-center">
@@ -63,7 +63,7 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { formatDate } = useFormatters()
 
 const blogPosts = FAKE_BLOG_POSTS

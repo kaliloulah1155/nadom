@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     head: {
       title: 'NADOM - Import-Export Chine | Personal Shopping',
       titleTemplate: '%s | NADOM',
-      htmlAttrs: {class:"light scroll-smooth", dir: 'ltr', lang: 'fr'},
+      htmlAttrs: { class: "light scroll-smooth", dir: 'ltr', lang: 'fr' },
 
       meta: [
         { charset: 'utf-8' },
@@ -47,7 +47,7 @@ export default defineNuxtConfig({
         { name: 'keywords', content: 'import export, chine, personal shopping, expedition, visa chine, guide chine, sourcing' },
       ],
       link: [
-      
+
         {
           rel: 'stylesheet',
           href: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css',
@@ -80,13 +80,19 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://unpkg.com/vue-multiselect/dist/vue-multiselect.min.css',
         },
+        {
+          rel: 'stylesheet',
+          href: 'https://cdn.quilljs.com/1.3.6/quill.snow.css',
+        }
       ],
 
       script: [
-        { src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js' },
+        { src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', tagPosition: 'bodyClose' },
+        { src: 'https://cdn.jsdelivr.net/npm/apexcharts' },
         { src: 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js' },
+        { src: 'https://cdn.quilljs.com/1.3.6/quill.min.js' },
       ],
-       
+
     },
   },
 })

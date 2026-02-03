@@ -23,7 +23,7 @@
   --bs-primary-bg-subtle: #fae8eb;
   --bs-primary-bg-dark: #dd2e3b;
   --bs-primary-border-subtle: #ffdee2;
-  --bs-danger-bg-subtle:#ffdee2;
+  --bs-danger-bg-subtle: #ffdee2;
   --headingColor: #2b2b2b;
   --bs-link-color: #212529;
   --bs-link-color-rgb: 28, 28, 28;
@@ -33,12 +33,20 @@
   --bs-code-color: #c71f37;
   --bs-highlight-color: #212529;
   --bs-highlight-bg: #fff3cd;
-  --bs-border-color: #efefef;
-  --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
+  --bs-border-color: #94a3b8;
+  --bs-border-color-translucent: rgba(0, 0, 0, 0.35);
   --bs-nav-color: #212529;
   --bs-dashboard-bg: #2e3338;
 
   --body-font-family: 'Jost', sans-serif;
+}
+
+// Global variables already set above
+
+.form-label {
+  color: var(--bs-dark-text);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 // Import Font Family

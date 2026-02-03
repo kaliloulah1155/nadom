@@ -3,16 +3,20 @@ import { FAKE_VISAS } from '~/utils/data/fakeData'
 
 export interface Visa {
   id: string
-  name?: string
+  name_fr: string
+  name_en: string
   type: string
-  duration: string
-  validity: string
-  processingTime: string
+  duration_fr: string
+  duration_en: string
+  validity_fr: string
+  validity_en: string
+  processingTime_fr: string
+  processingTime_en: string
   cost: number
-  price?: number
-  requirements: string[]
-  requiredDocs?: string[]
-  description: string
+  requirements_fr: string[]
+  requirements_en: string[]
+  description_fr: string
+  description_en: string
   pdfUrl?: string
   active?: boolean
 }
@@ -92,28 +96,48 @@ export const useVisasStore = defineStore('visas', {
           const saved = localStorage.getItem('visas')
           if (saved) {
             const adminVisas = JSON.parse(saved)
-            // Map admin structure to store structure
-            this.visaTypes = adminVisas
-              .filter((v: any) => v.active !== false)
-              .map((v: any) => ({
-                id: v.id,
-                name: v.name,
-                type: v.type || v.name,
-                duration: v.duration,
-                validity: v.validity,
-                processingTime: v.processingTime,
-                cost: v.price || v.cost,
-                requirements: v.requiredDocs || v.requirements || [],
-                description: v.description,
-                pdfUrl: v.pdfUrl,
-                active: v.active
-              }))
+            this.visaTypes = adminVisas.map((v: any) => ({
+              id: v.id,
+              name_fr: v.name_fr || v.name || '',
+              name_en: v.name_en || v.name || '',
+              type: v.type || v.name || '',
+              duration_fr: v.duration_fr || v.duration || '',
+              duration_en: v.duration_en || v.duration || '',
+              validity_fr: v.validity_fr || v.validity || '',
+              validity_en: v.validity_en || v.validity || '',
+              processingTime_fr: v.processingTime_fr || v.processingTime || '',
+              processingTime_en: v.processingTime_en || v.processingTime || '',
+              cost: v.price || v.cost || 0,
+              requirements_fr: v.requirements_fr || v.requiredDocs || v.requirements || [],
+              requirements_en: v.requirements_en || v.requiredDocs || v.requirements || [],
+              description_fr: v.description_fr || v.description || '',
+              description_en: v.description_en || v.description || '',
+              pdfUrl: v.pdfUrl,
+              active: v.active !== false
+            }))
           } else {
-            // Fallback to fake data
-            this.visaTypes = [...FAKE_VISAS]
+            this.visaTypes = FAKE_VISAS.map((v: any) => ({
+              id: v.id,
+              name_fr: v.name || '',
+              name_en: v.name || '',
+              type: v.type || v.name || '',
+              duration_fr: v.duration || '',
+              duration_en: v.duration || '',
+              validity_fr: v.validity || '',
+              validity_en: v.validity || '',
+              processingTime_fr: v.processingTime || '',
+              processingTime_en: v.processingTime || '',
+              cost: v.price || v.cost || 0,
+              requirements_fr: v.requiredDocs || v.requirements || [],
+              requirements_en: v.requiredDocs || v.requirements || [],
+              description_fr: v.description || '',
+              description_en: v.description || '',
+              pdfUrl: v.pdfUrl,
+              active: v.active !== false
+            }))
           }
         } else {
-          this.visaTypes = [...FAKE_VISAS]
+          this.visaTypes = []
         }
       } catch (err) {
         this.error = 'Erreur lors du chargement des types de visa'

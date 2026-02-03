@@ -163,7 +163,7 @@
               <i class="bi bi-chevron-down ms-1"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><NuxtLink class="dropdown-item" to="/profile"><i class="bi bi-person me-2"></i>Mon profil</NuxtLink></li>
+              <li><NuxtLink class="dropdown-item" to="/admin/profile"><i class="bi bi-person me-2"></i>Mon profil</NuxtLink></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" @click.prevent="handleLogout"><i class="bi bi-box-arrow-right me-2"></i>Deconnexion</a></li>
             </ul>

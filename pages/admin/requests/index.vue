@@ -36,8 +36,8 @@
           <div class="col-md-3">
             <select v-model="filters.category" class="form-select">
               <option value="">Toutes categories</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.name">
-                {{ cat.name }}
+              <option v-for="cat in (categories as any)" :key="cat.id" :value="cat.name_fr">
+                {{ cat.name_fr }}
               </option>
             </select>
           </div>
@@ -119,16 +119,16 @@
                 </td>
                 <td><small>{{ formatDateShort(request.createdAt) }}</small></td>
                 <td>
-                  <div class="btn-group btn-group-sm">
+                  <div class="d-flex">
                     <NuxtLink
                       :to="`/admin/requests/${request.id}`"
-                      class="btn btn-outline-primary"
+                      class="btn btn-outline-primary btn-sm me-2"
                       title="Voir"
                     >
                       <i class="bi bi-eye"></i>
                     </NuxtLink>
                     <button
-                      class="btn btn-outline-danger"
+                      class="btn btn-outline-danger btn-sm"
                       title="Supprimer"
                       @click="deleteRequest(request.id)"
                     >
@@ -143,25 +143,12 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="card-footer bg-transparent">
-        <nav>
-          <ul class="pagination pagination-sm justify-content-center mb-0">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-              <button class="page-link" @click="currentPage--">Precedent</button>
-            </li>
-            <li
-              v-for="page in totalPages"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page }"
-            >
-              <button class="page-link" @click="currentPage = page">{{ page }}</button>
-            </li>
-            <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-              <button class="page-link" @click="currentPage++">Suivant</button>
-            </li>
-          </ul>
-        </nav>
+      <div class="card-footer bg-transparent py-3">
+        <AdminPagination
+          v-model:current-page="currentPage"
+          v-model:limit="perPage"
+          :total-items="filteredRequests.length"
+        />
       </div>
     </div>
   </div>
@@ -184,7 +171,7 @@ const { success, error } = useNotification()
 
 const categories = FAKE_CATEGORIES
 const currentPage = ref(1)
-const perPage = 10
+const perPage = ref(10)
 
 const filters = reactive({
   search: '',
@@ -222,11 +209,11 @@ const filteredRequests = computed(() => {
   )
 })
 
-const totalPages = computed(() => Math.ceil(filteredRequests.value.length / perPage))
+const totalPages = computed(() => Math.ceil(filteredRequests.value.length / perPage.value))
 
 const paginatedRequests = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return filteredRequests.value.slice(start, start + perPage)
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredRequests.value.slice(start, start + perPage.value)
 })
 
 // Methods

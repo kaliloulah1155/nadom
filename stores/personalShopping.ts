@@ -33,7 +33,8 @@ export interface PersonalShoppingRequest {
 
 export interface Category {
   id: string
-  name: string
+  name_fr: string
+  name_en: string
   icon: string
   color: string
 }
@@ -109,7 +110,7 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
     },
 
     async fetchCategories() {
-      this.categories = [...FAKE_CATEGORIES]
+      this.categories = (FAKE_CATEGORIES as any)
       return this.categories
     },
 

@@ -32,20 +32,20 @@
                   Aucun guide configure
                 </td>
               </tr>
-              <tr v-for="guide in guides" :key="guide.id">
+              <tr v-for="guide in paginatedGuides" :key="guide.id">
                 <td>
                   <div class="d-flex align-items-center">
                     <div class="guide-icon me-3">
                       <i :class="[getCategoryIcon(guide.category), 'fs-4']"></i>
                     </div>
                     <div>
-                      <div class="fw-medium">{{ guide.name }}</div>
+                      <div class="fw-medium">{{ guide.name_fr || (guide as any).name }}</div>
                       <small class="text-muted">{{ guide.language }}</small>
                     </div>
                   </div>
                 </td>
                 <td><span class="badge bg-secondary">{{ guide.category }}</span></td>
-                <td><small>{{ truncate(guide.description, 50) }}</small></td>
+                <td><small v-html="truncate(guide.description_fr || (guide as any).description || '', 50)"></small></td>
                 <td>
                   <a v-if="guide.fileUrl" :href="guide.fileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -58,11 +58,11 @@
                   </span>
                 </td>
                 <td>
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" @click="openModal(guide)">
+                  <div class="d-flex">
+                    <button class="btn btn-outline-primary btn-sm me-2" @click="openModal(guide)">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger" @click="deleteGuide(guide.id)">
+                    <button class="btn btn-outline-danger btn-sm" @click="deleteGuide(guide.id)">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -71,6 +71,15 @@
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="guides.length > 0" class="card-footer bg-transparent py-3 border-top">
+        <AdminPagination
+          v-model:current-page="currentPage"
+          v-model:limit="perPage"
+          :total-items="guides.length"
+        />
       </div>
     </div>
 
@@ -84,11 +93,49 @@
           </div>
           <form @submit.prevent="saveGuide">
             <div class="modal-body">
-              <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label">Nom du guide *</label>
-                  <input v-model="form.name" type="text" class="form-control" required />
+              <!-- Tabs for Bilingual Support -->
+              <ul class="nav nav-tabs mb-3" id="guideLangTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="guide-fr-tab" data-bs-toggle="tab" data-bs-target="#guide-fr-content" type="button" role="tab">Français</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="guide-en-tab" data-bs-toggle="tab" data-bs-target="#guide-en-content" type="button" role="tab">English</button>
+                </li>
+              </ul>
+
+              <div class="tab-content" id="guideLangTabsContent">
+                <!-- French Tab -->
+                <div class="tab-pane fade show active" id="guide-fr-content" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Nom du guide (FR) *</label>
+                      <input v-model="form.name_fr" type="text" class="form-control" required />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Description (FR)</label>
+                      <WysiwygEditor v-model="form.description_fr" height="150px" />
+                    </div>
+                  </div>
                 </div>
+
+                <!-- English Tab -->
+                <div class="tab-pane fade" id="guide-en-content" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Guide Name (EN)</label>
+                      <input v-model="form.name_en" type="text" class="form-control" placeholder="English name..." />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Description (EN)</label>
+                      <WysiwygEditor v-model="form.description_en" height="150px" placeholder="English description..." />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">Categorie *</label>
                   <select v-model="form.category" class="form-select" required>
@@ -102,7 +149,7 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Langue</label>
+                  <label class="form-label">Langue d'origine</label>
                   <select v-model="form.language" class="form-select">
                     <option value="Francais">Francais</option>
                     <option value="English">English</option>
@@ -110,13 +157,8 @@
                   </select>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Description</label>
-                  <textarea v-model="form.description" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="col-12">
                   <label class="form-label">URL du fichier PDF</label>
                   <input v-model="form.fileUrl" type="url" class="form-control" placeholder="https://..." />
-                  <small class="text-muted">Lien vers le fichier PDF heberge</small>
                 </div>
                 <div class="col-12">
                   <div class="form-check form-switch">
@@ -127,8 +169,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">
+              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary btn-md">
                 <i class="bi bi-check-lg me-2"></i>Enregistrer
               </button>
             </div>
@@ -140,9 +182,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
+import WysiwygEditor from '~/components/admin/WysiwygEditor.vue'
 
 definePageMeta({
   layout: 'admin'
@@ -153,12 +196,18 @@ const { success, error } = useNotification()
 
 interface Guide {
   id: string
-  name: string
+  name_fr: string
+  name_en: string
   category: string
-  description: string
+  description_fr: string
+  description_en: string
   fileUrl: string
   language: string
   active: boolean
+
+  // compatibility
+  name?: string
+  description?: string
 }
 
 const modalRef = ref<HTMLElement | null>(null)
@@ -167,10 +216,20 @@ let modalInstance: any = null
 const guides = ref<Guide[]>([])
 const editingGuide = ref<Guide | null>(null)
 
+const currentPage = ref(1)
+const perPage = ref(10)
+
+const paginatedGuides = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return guides.value.slice(start, start + perPage.value)
+})
+
 const form = reactive({
-  name: '',
+  name_fr: '',
+  name_en: '',
   category: '',
-  description: '',
+  description_fr: '',
+  description_en: '',
   fileUrl: '',
   language: 'Francais',
   active: true
@@ -179,15 +238,22 @@ const form = reactive({
 onMounted(() => {
   loadGuides()
 
-  if (typeof window !== 'undefined' && window.bootstrap) {
-    modalInstance = new window.bootstrap.Modal(modalRef.value)
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
 
 const loadGuides = () => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('guides')
-    guides.value = saved ? JSON.parse(saved) : getDefaultGuides()
+    const data = saved ? JSON.parse(saved) : getDefaultGuides()
+    guides.value = data.map((g: any) => ({
+      ...g,
+      name_fr: g.name_fr || g.name || '',
+      name_en: g.name_en || '',
+      description_fr: g.description_fr || g.description || '',
+      description_en: g.description_en || ''
+    }))
   }
 }
 
@@ -200,27 +266,22 @@ const saveToLocalStorage = () => {
 const getDefaultGuides = (): Guide[] => [
   {
     id: 'guide_1',
-    name: 'Guide Import Chine-Afrique',
+    name_fr: 'Guide Import Chine-Afrique',
+    name_en: 'Import Guide China-Africa',
     category: 'import',
-    description: 'Guide complet pour importer des marchandises de Chine vers l\'Afrique',
+    description_fr: 'Guide complet pour importer des marchandises de Chine vers l\'Afrique',
+    description_en: 'Complete guide for importing goods from China to Africa',
     fileUrl: '',
     language: 'Francais',
     active: true
   },
   {
     id: 'guide_2',
-    name: 'Procedures Douanieres',
+    name_fr: 'Procedures Douanieres',
+    name_en: 'Customs Procedures',
     category: 'douane',
-    description: 'Tout savoir sur les procedures douanieres et les documents requis',
-    fileUrl: '',
-    language: 'Francais',
-    active: true
-  },
-  {
-    id: 'guide_3',
-    name: 'Modes de Paiement',
-    category: 'paiement',
-    description: 'Les differents modes de paiement securises pour vos transactions',
+    description_fr: 'Tout savoir sur les procedures douanieres et les documents requis',
+    description_en: 'All about customs procedures and required documents',
     fileUrl: '',
     language: 'Francais',
     active: true
@@ -240,9 +301,11 @@ const getCategoryIcon = (category: string): string => {
 }
 
 const resetForm = () => {
-  form.name = ''
+  form.name_fr = ''
+  form.name_en = ''
   form.category = ''
-  form.description = ''
+  form.description_fr = ''
+  form.description_en = ''
   form.fileUrl = ''
   form.language = 'Francais'
   form.active = true
@@ -251,9 +314,11 @@ const resetForm = () => {
 const openModal = (guide?: Guide) => {
   if (guide) {
     editingGuide.value = guide
-    form.name = guide.name
+    form.name_fr = guide.name_fr || (guide as any).name || ''
+    form.name_en = guide.name_en || ''
     form.category = guide.category
-    form.description = guide.description
+    form.description_fr = guide.description_fr || (guide as any).description || ''
+    form.description_en = guide.description_en || ''
     form.fileUrl = guide.fileUrl
     form.language = guide.language
     form.active = guide.active
@@ -265,32 +330,33 @@ const openModal = (guide?: Guide) => {
 }
 
 const saveGuide = () => {
+  const guideData: Partial<Guide> = {
+    name_fr: form.name_fr,
+    name_en: form.name_en,
+    category: form.category,
+    description_fr: form.description_fr,
+    description_en: form.description_en,
+    fileUrl: form.fileUrl,
+    language: form.language,
+    active: form.active
+  }
+
   if (editingGuide.value) {
     const idx = guides.value.findIndex(g => g.id === editingGuide.value!.id)
     if (idx !== -1) {
       guides.value[idx] = {
         ...guides.value[idx],
-        name: form.name,
-        category: form.category,
-        description: form.description,
-        fileUrl: form.fileUrl,
-        language: form.language,
-        active: form.active
-      }
+        ...guideData
+      } as Guide
     }
-    success('Guide modifie')
+    success('Guide modifié')
   } else {
     const newGuide: Guide = {
       id: `guide_${Date.now()}`,
-      name: form.name,
-      category: form.category,
-      description: form.description,
-      fileUrl: form.fileUrl,
-      language: form.language,
-      active: form.active
-    }
+      ...guideData
+    } as Guide
     guides.value.unshift(newGuide)
-    success('Guide cree')
+    success('Guide créé')
   }
 
   saveToLocalStorage()

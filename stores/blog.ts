@@ -3,10 +3,13 @@ import { FAKE_BLOG_POSTS, FAKE_FAQ } from '~/utils/data/fakeData'
 
 export interface BlogPost {
   id: string
-  title: string
+  title_fr: string
+  title_en: string
   slug: string
-  excerpt: string
-  content: string
+  excerpt_fr: string
+  excerpt_en: string
+  content_fr: string
+  content_en: string
   category: string
   author: string
   authorAvatar: string
@@ -19,8 +22,10 @@ export interface BlogPost {
 
 export interface FAQ {
   id: string
-  question: string
-  answer: string
+  question_fr: string
+  question_en: string
+  answer_fr: string
+  answer_en: string
   category: string
 }
 
@@ -120,10 +125,13 @@ export const useBlogStore = defineStore('blog', {
 
         const newPost: BlogPost = {
           id: `blog_${Date.now()}`,
-          title: postData.title || '',
-          slug: postData.slug || this.generateSlug(postData.title || ''),
-          excerpt: postData.excerpt || '',
-          content: postData.content || '',
+          title_fr: postData.title_fr || '',
+          title_en: postData.title_en || '',
+          slug: postData.slug || this.generateSlug(postData.title_fr || ''),
+          excerpt_fr: postData.excerpt_fr || '',
+          excerpt_en: postData.excerpt_en || '',
+          content_fr: postData.content_fr || '',
+          content_en: postData.content_en || '',
           category: postData.category || '',
           author: postData.author || '',
           authorAvatar: postData.authorAvatar || '',
@@ -176,8 +184,10 @@ export const useBlogStore = defineStore('blog', {
     async createFAQ(faqData: Partial<FAQ>) {
       const newFAQ: FAQ = {
         id: `faq_${Date.now()}`,
-        question: faqData.question || '',
-        answer: faqData.answer || '',
+        question_fr: faqData.question_fr || '',
+        question_en: faqData.question_en || '',
+        answer_fr: faqData.answer_fr || '',
+        answer_en: faqData.answer_en || '',
         category: faqData.category || ''
       }
 

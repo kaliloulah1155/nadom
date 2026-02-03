@@ -29,7 +29,7 @@
                 <span class="badge bg-primary me-2">{{ post.category }}</span>
                 <span class="opacity-75">{{ post.readTime }} {{ t('blog.readTime') }}</span>
               </div>
-              <h1 class="display-5 fw-bold mb-4 text-white">{{ post.title }}</h1>
+              <h1 class="display-5 fw-bold mb-4 text-white">{{ post[`title_${locale}`] || post.title_fr }}</h1>
               <div class="d-flex justify-content-center align-items-center gap-4">
                 <div class="d-flex align-items-center">
                   <img :src="post.authorAvatar" class="rounded-circle me-2" width="40" height="40" :alt="post.author" />
@@ -52,12 +52,14 @@
             <div class="col-lg-8">
               <!-- Featured Image -->
               <div class="mb-5">
-                <img :src="post.image" :alt="post.title" class="img-fluid rounded-4 shadow w-100" />
+                <img :src="post.image" :alt="post.title_fr" class="img-fluid rounded-4 shadow w-100" />
               </div>
 
               <!-- Article Content -->
               <article class="blog-content">
-                <p class="lead text-muted">{{ post.excerpt }}</p>
+                <p class="lead text-muted">{{ post[`excerpt_${locale}`] || post.excerpt_fr }}</p>
+                
+                <div v-html="post[`content_${locale}`] || post.content_fr"></div>
 
                 <hr class="my-4">
 
@@ -176,7 +178,7 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const blogStore = useBlogStore()
 const { formatDate } = useFormatters()

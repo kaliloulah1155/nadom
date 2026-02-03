@@ -13,11 +13,11 @@
 
     <!-- Articles Grid -->
     <div class="row g-4">
-      <div v-for="post in posts" :key="post.id" class="col-md-6 col-lg-4">
+      <div v-for="post in paginatedPosts" :key="post.id" class="col-md-6 col-lg-4">
         <div class="card border-0 shadow-sm h-100">
           <img
             :src="post.image"
-            :alt="post.title"
+            :alt="post.title_fr"
             class="card-img-top"
             style="height: 160px; object-fit: cover;"
           />
@@ -26,8 +26,8 @@
               <span class="badge bg-primary">{{ post.category }}</span>
               <small class="text-muted">{{ formatDateShort(post.publishedAt) }}</small>
             </div>
-            <h6 class="card-title">{{ truncate(post.title, 50) }}</h6>
-            <p class="card-text small text-muted">{{ truncate(post.excerpt, 80) }}</p>
+            <h6 class="card-title">{{ truncate(post.title_fr, 50) }}</h6>
+            <p class="card-text small text-muted">{{ truncate(post.excerpt_fr, 80) }}</p>
             <div class="d-flex gap-2">
               <span v-for="tag in post.tags?.slice(0, 2)" :key="tag" class="badge bg-light text-dark small">
                 {{ tag }}
@@ -35,8 +35,8 @@
             </div>
           </div>
           <div class="card-footer bg-transparent border-0">
-            <div class="btn-group w-100">
-              <button class="btn btn-sm btn-outline-primary" @click="openModal(post)">
+            <div class="d-flex w-100">
+              <button class="btn btn-sm btn-outline-primary me-2" @click="openModal(post)">
                 <i class="bi bi-pencil"></i> Modifier
               </button>
               <button class="btn btn-sm btn-outline-danger" @click="deletePost(post.id)">
@@ -62,6 +62,17 @@
       </div>
     </div>
 
+    <!-- Pagination -->
+    <div v-if="posts.length > 0" class="card border-0 shadow-sm mt-4">
+      <div class="card-footer bg-transparent py-3">
+        <AdminPagination
+          v-model:current-page="currentPage"
+          v-model:limit="perPage"
+          :total-items="posts.length"
+        />
+      </div>
+    </div>
+
     <!-- Modal -->
     <div class="modal fade" id="postModal" tabindex="-1" ref="modalRef">
       <div class="modal-dialog modal-lg">
@@ -72,59 +83,99 @@
           </div>
           <form @submit.prevent="savePost">
             <div class="modal-body">
-              <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label">Titre *</label>
-                  <input v-model="form.title" type="text" class="form-control" required />
+              <!-- Tabs for Bilingual Support -->
+              <ul class="nav nav-tabs mb-3" id="blogLangTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr-content" type="button" role="tab">Français</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="en-tab" data-bs-toggle="tab" data-bs-target="#en-content" type="button" role="tab">English</button>
+                </li>
+              </ul>
+
+              <div class="tab-content" id="blogLangTabsContent">
+                <!-- French Tab -->
+                <div class="tab-pane fade show active" id="fr-content" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Titre de l'article (FR) *</label>
+                      <input v-model="form.title_fr" type="text" class="form-control input-md" required />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Résumé (FR) *</label>
+                      <textarea v-model="form.excerpt_fr" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Contenu (FR) *</label>
+                      <WysiwygEditor v-model="form.content_fr" height="300px" />
+                    </div>
+                  </div>
                 </div>
+
+                <!-- English Tab -->
+                <div class="tab-pane fade" id="en-content" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Title (EN) *</label>
+                      <input v-model="form.title_en" type="text" class="form-control" placeholder="English title..." />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Excerpt (EN) *</label>
+                      <textarea v-model="form.excerpt_en" class="form-control" rows="2" placeholder="English excerpt..."></textarea>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Content (EN) *</label>
+                      <WysiwygEditor v-model="form.content_en" height="300px" placeholder="English content..." />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <!-- Settings (Common) -->
+              <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Categorie *</label>
+                  <label class="form-label">Catégorie *</label>
                   <select v-model="form.category" class="form-select" required>
-                    <option value="">Selectionnez</option>
+                    <option value="">Sélectionnez</option>
                     <option value="Import-Export">Import-Export</option>
                     <option value="Conseils">Conseils</option>
-                    <option value="Actualites">Actualites</option>
+                    <option value="Actualités">Actualités</option>
                     <option value="Tutoriels">Tutoriels</option>
-                    <option value="Temoignages">Temoignages</option>
+                    <option value="Témoignages">Témoignages</option>
                   </select>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Temps de lecture (min)</label>
-                  <input v-model.number="form.readTime" type="number" class="form-control" min="1" />
+                  <input v-model.number="form.readTime" type="number" class="form-control input-md" min="1" />
                 </div>
                 <div class="col-12">
                   <label class="form-label">Image URL *</label>
-                  <input v-model="form.image" type="url" class="form-control" required />
-                  <small class="text-muted">URL de l'image de couverture</small>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Resume *</label>
-                  <textarea v-model="form.excerpt" class="form-control" rows="2" required></textarea>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Contenu *</label>
-                  <textarea v-model="form.content" class="form-control" rows="8" required></textarea>
-                  <small class="text-muted">Supporte le format Markdown</small>
+                  <input v-model="form.image" type="url" class="form-control input-md" required placeholder="https://example.com/image.jpg" />
+                  <div v-if="form.image" class="mt-2 text-center">
+                    <img :src="form.image" class="img-thumbnail" style="max-height: 150px;" @error="(e: any) => e.target.style.display = 'none'" />
+                  </div>
                 </div>
                 <div class="col-12">
                   <label class="form-label">Tags</label>
-                  <input v-model="form.tagsInput" type="text" class="form-control" placeholder="tag1, tag2, tag3" />
-                  <small class="text-muted">Separes par des virgules</small>
+                  <input v-model="form.tagsInput" type="text" class="form-control input-md" placeholder="tag1, tag2, tag3" />
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Auteur</label>
-                  <input v-model="form.author" type="text" class="form-control" />
+                  <input v-model="form.author" type="text" class="form-control input-md" />
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Avatar auteur URL</label>
-                  <input v-model="form.authorAvatar" type="url" class="form-control" />
+                  <input v-model="form.authorAvatar" type="url" class="form-control input-md" />
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-lg me-2"></i>{{ editingPost ? 'Modifier' : 'Creer' }}
+              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary btn-md" :disabled="blogStore.loading">
+                <i v-if="blogStore.loading" class="spinner-border spinner-border-sm me-2"></i>
+                <i v-else class="bi bi-check-lg me-2"></i>{{ editingPost ? 'Modifier' : 'Créer' }}
               </button>
             </div>
           </form>
@@ -136,9 +187,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useBlogStore } from '~/stores/blog'
+import { useBlogStore, type BlogPost } from '~/stores/blog'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
+import WysiwygEditor from '~/components/admin/WysiwygEditor.vue'
 
 definePageMeta({
   layout: 'admin'
@@ -151,14 +203,25 @@ const { success, error } = useNotification()
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
-const editingPost = ref<any>(null)
+const editingPost = ref<BlogPost | null>(null)
+
+const currentPage = ref(1)
+const perPage = ref(6)
+
+const paginatedPosts = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return posts.value.slice(start, start + perPage.value)
+})
 
 const form = reactive({
-  title: '',
+  title_fr: '',
+  title_en: '',
   category: '',
   image: '',
-  excerpt: '',
-  content: '',
+  excerpt_fr: '',
+  excerpt_en: '',
+  content_fr: '',
+  content_en: '',
   readTime: 5,
   tagsInput: '',
   author: 'NADOM',
@@ -168,33 +231,39 @@ const form = reactive({
 onMounted(async () => {
   await blogStore.fetchPosts()
 
-  if (typeof window !== 'undefined' && window.bootstrap) {
-    modalInstance = new window.bootstrap.Modal(modalRef.value)
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
 
 const posts = computed(() => blogStore.posts)
 
 const resetForm = () => {
-  form.title = ''
+  form.title_fr = ''
+  form.title_en = ''
   form.category = ''
   form.image = ''
-  form.excerpt = ''
-  form.content = ''
+  form.excerpt_fr = ''
+  form.excerpt_en = ''
+  form.content_fr = ''
+  form.content_en = ''
   form.readTime = 5
   form.tagsInput = ''
   form.author = 'NADOM'
   form.authorAvatar = 'https://ui-avatars.com/api/?name=NADOM&background=0d6efd&color=fff'
 }
 
-const openModal = (post?: any) => {
+const openModal = (post?: BlogPost) => {
   if (post) {
     editingPost.value = post
-    form.title = post.title
+    form.title_fr = post.title_fr || ''
+    form.title_en = post.title_en || ''
     form.category = post.category
     form.image = post.image
-    form.excerpt = post.excerpt
-    form.content = post.content || ''
+    form.excerpt_fr = post.excerpt_fr || ''
+    form.excerpt_en = post.excerpt_en || ''
+    form.content_fr = post.content_fr || ''
+    form.content_en = post.content_en || ''
     form.readTime = post.readTime || 5
     form.tagsInput = post.tags?.join(', ') || ''
     form.author = post.author || 'NADOM'
@@ -208,17 +277,18 @@ const openModal = (post?: any) => {
 
 const savePost = async () => {
   const tags = form.tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-  const slug = form.title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+  const slug = blogStore.generateSlug(form.title_fr)
 
-  const postData = {
-    title: form.title,
+  const postData: Partial<BlogPost> = {
+    title_fr: form.title_fr,
+    title_en: form.title_en,
     slug,
     category: form.category,
     image: form.image,
-    excerpt: form.excerpt,
-    content: form.content,
+    excerpt_fr: form.excerpt_fr,
+    excerpt_en: form.excerpt_en,
+    content_fr: form.content_fr,
+    content_en: form.content_en,
     readTime: form.readTime,
     tags,
     author: form.author,
@@ -228,10 +298,10 @@ const savePost = async () => {
   try {
     if (editingPost.value) {
       await blogStore.updatePost(editingPost.value.id, postData)
-      success('Article modifie')
+      success('Article modifié avec succès')
     } else {
       await blogStore.createPost(postData)
-      success('Article cree')
+      success('Article créé avec succès')
     }
     modalInstance?.hide()
     resetForm()

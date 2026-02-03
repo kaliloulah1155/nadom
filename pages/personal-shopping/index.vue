@@ -63,7 +63,7 @@
                 <div class="category-icon mx-auto mb-3" :style="{ background: category.color + '20', color: category.color }">
                   <i :class="category.icon"></i>
                 </div>
-                <h6 class="mb-0">{{ category.name }}</h6>
+                <h6 class="mb-0">{{ (category as any)[`name_${locale}`] || (category as any).name_fr }}</h6>
               </div>
             </div>
           </div>
@@ -120,7 +120,6 @@
                   </div>
                   <span class="fw-bold">5K - 15K FCFA</span>
                 </div>
-
                 <div class="pricing-item">
                   <div class="d-flex align-items-center">
                     <div class="pricing-icon me-3">
