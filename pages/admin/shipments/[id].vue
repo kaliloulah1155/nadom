@@ -20,7 +20,7 @@
         </span>
       </div>
       <div class="btn-group">
-        <button class="btn btn-outline-primary" @click="showUpdateModal = true">
+        <button class="btn btn-outline-primary me-2" @click="showUpdateModal = true">
           <i class="bi bi-pencil me-2"></i>Mettre à jour
         </button>
         <button class="btn btn-primary">

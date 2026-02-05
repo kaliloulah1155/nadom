@@ -14,9 +14,17 @@
             <p class="lead opacity-75 mb-0 text-white">{{ t('personalShopping.subtitle') }}</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-            <NuxtLink to="/personal-shopping/new" class="btn btn-light btn-md">
-              <i class="bi bi-plus-circle me-2"></i>{{ t('personalShopping.newRequest') }}
-            </NuxtLink>
+            <div class="d-flex justify-content-lg-end gap-2">
+              <button class="btn btn-warning btn-md text-white position-relative" @click="toggleCart">
+                <i class="bi bi-cart3 me-2"></i>{{ t('personalShopping.myCart') || 'Mon Panier' }}
+                <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ cartStore.totalItems }}
+                </span>
+              </button>
+              <NuxtLink to="/personal-shopping/new" class="btn btn-light btn-md">
+                <i class="bi bi-plus-circle me-2"></i>{{ t('personalShopping.newRequest') }}
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
@@ -57,7 +65,7 @@
             <div
               class="card h-100 border-0 shadow-sm text-center category-card"
               :class="{ 'selected': selectedCategory === category.id }"
-              @click="selectedCategory = selectedCategory === category.id ? null : category.id"
+              @click="selectCategory(category.id)"
             >
               <div class="card-body py-4">
                 <div class="category-icon mx-auto mb-3" :style="{ background: category.color + '20', color: category.color }">
@@ -68,7 +76,64 @@
             </div>
           </div>
         </div>
+
+        <!-- Products Listing -->
+        <div v-if="selectedCategory" class="mt-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">{{ getCategoryName(selectedCategory) }}</h3>
+            <span class="text-muted">{{ filteredProducts.length }} produits</span>
+          </div>
+          
+          <div class="row g-4">
+            <div v-for="prod in filteredProducts" :key="prod.id" class="col-md-6 col-lg-4 col-xl-3">
+              <div class="card h-100 border-0 shadow-sm product-card">
+                    <div class="product-img-wrapper mb-3">
+                      <img :src="prod.image || 'https://placehold.co/400x400?text=No+Img'" :alt="prod[`name_${locale}`] || prod.name_fr" class="img-fluid rounded" />
+                      <div class="product-actions">
+                        <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openZoom(prod)" title="Zoom">
+                          <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-primary btn-sm rounded-circle shadow-sm" @click="addToCart(prod)" title="Ajouter au panier">
+                          <i class="bi bi-cart-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                <div class="card-body">
+                  <h6 class="fw-bold mb-1">{{ prod[`name_${locale}`] || prod.name_fr }}</h6>
+                  <p class="text-primary fw-bold mb-2">{{ prod.price.toLocaleString() }} FCFA</p>
+                  <p class="text-muted small mb-0">{{ prod[`description_${locale}`] || prod.description_fr }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                  <button class="btn btn-outline-primary w-100" @click="addToCart(prod)">
+                    <i class="bi bi-cart-plus me-2"></i>{{ t('personalShopping.addToCart') || 'Ajouter au panier' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div v-if="filteredProducts.length === 0" class="col-12 text-center py-5 bg-light rounded-4">
+              <i class="bi bi-box-seam fs-1 text-muted mb-3 d-block"></i>
+              <p class="text-muted mb-0">Aucun produit pré-enregistré dans cette catégorie.</p>
+              <p class="small text-muted">Vous pouvez toujours faire une demande personnalisée.</p>
+              <NuxtLink to="/personal-shopping/new" class="btn btn-sm btn-primary mt-3">
+                <i class="bi bi-plus-circle me-1"></i>Faire une demande
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
       </section>
+
+      <!-- Zoom Modal -->
+      <div class="modal fade" id="zoomModal" tabindex="-1" ref="zoomModalRef">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 position-relative text-center">
+              <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 1060;"></button>
+              <img v-if="zoomedProduct" :src="zoomedProduct.image" class="img-fluid rounded shadow-lg" style="max-height: 90vh; cursor: pointer;" @click="zoomModal?.hide()" />
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Pricing Section -->
       <section class="pricing-section mb-5">
@@ -193,17 +258,68 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { FAKE_CATEGORIES } from '~/utils/data/fakeData'
+import { ref, computed, onMounted } from 'vue'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { useCartStore } from '~/stores/cart'
+import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
   layout: 'default'
 })
 
 const { t, locale } = useI18n()
+const psStore = usePersonalShoppingStore()
+const cartStore = useCartStore()
+const { success } = useNotification()
+const config = useRuntimeConfig()
 
-const categories = FAKE_CATEGORIES
+const categories = computed(() => psStore.categories)
 const selectedCategory = ref<string | null>(null)
+
+onMounted(async () => {
+  await psStore.fetchCategories()
+  await psStore.fetchProducts()
+  cartStore.loadFromLocalStorage()
+  
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    zoomModal = new (window as any).bootstrap.Modal(zoomModalRef.value)
+  }
+})
+
+const filteredProducts = computed(() => {
+  if (!selectedCategory.value) return []
+  return psStore.getProductsByCategory(selectedCategory.value)
+})
+
+const selectCategory = (id: string) => {
+  selectedCategory.value = selectedCategory.value === id ? null : id
+}
+
+const getCategoryName = (id: string) => {
+  const cat = categories.value.find(c => c.id === id)
+  if (!cat) return ''
+  return (cat as any)[`name_${locale.value}`] || (cat as any).name_fr || ''
+}
+
+const addToCart = (product: any) => {
+  cartStore.addItem(product)
+  success(locale.value === 'fr' ? 'Produit ajouté au panier' : 'Product added to cart')
+  cartStore.openCart()
+}
+
+const toggleCart = () => {
+  cartStore.toggleCart()
+}
+
+const zoomedProduct = ref<any>(null)
+const zoomModalRef = ref<HTMLElement | null>(null)
+let zoomModal: any = null
+
+
+const openZoom = (product: any) => {
+  zoomedProduct.value = product
+  zoomModal?.show()
+}
 
 const steps = computed(() => locale.value === 'fr' ? [
   { title: 'Envoyez les images', description: 'Partagez des photos ou liens du produit que vous recherchez' },
@@ -366,5 +482,57 @@ const advantages = computed(() => locale.value === 'fr' ? [
   bottom: 0;
   background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
   pointer-events: none;
+}
+
+.product-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.product-img-wrapper {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.product-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.product-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-actions {
+  opacity: 1;
+}
+
+.x-small {
+  font-size: 0.75rem;
 }
 </style>

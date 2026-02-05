@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { FAKE_SHIPMENTS, FAKE_DESTINATIONS } from '~/utils/data/fakeData'
+import { usePersonalShoppingStore } from './personalShopping'
 
 export type ShippingMode = 'air_normal' | 'air_express' | 'sea'
 export type ShipmentStatus = 'pending' | 'picked_up' | 'in_transit' | 'in_customs' | 'out_for_delivery' | 'delivered'
@@ -144,6 +145,8 @@ export const useShippingStore = defineStore('shipping', {
       return this.destinations
     },
 
+
+
     calculateShippingCost(destination: string, weight: number, mode: ShippingMode): number {
       const dest = this.destinations.find(d => d.country === destination)
       if (!dest) return 0
@@ -165,7 +168,8 @@ export const useShippingStore = defineStore('shipping', {
       try {
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        const trackingNumber = `TRK-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`
+        // Use provided tracking number or generate one
+        const trackingNumber = shipmentData.trackingNumber || `TRK-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`
 
         const newShipment: Shipment = {
           id: `ship_${Date.now()}`,
@@ -182,7 +186,7 @@ export const useShippingStore = defineStore('shipping', {
           shippingCost: shipmentData.shippingCost || 0,
           timeline: [{
             date: new Date().toISOString(),
-            status: 'order_placed',
+            status: 'pending',
             location: 'Guangzhou, Chine',
             description: 'Commande créée'
           }],
@@ -195,10 +199,55 @@ export const useShippingStore = defineStore('shipping', {
         this.shipments.unshift(newShipment)
         this.saveToLocalStorage()
 
+        // Update linked request if exists
+        if (shipmentData.requestId) {
+          const psStore = usePersonalShoppingStore()
+          await psStore.updateRequest(shipmentData.requestId, {
+            status: 'shipped',
+            trackingNumber: trackingNumber,
+            shipmentId: newShipment.id
+          })
+        }
+
         return newShipment
       } finally {
         this.loading = false
       }
+    },
+
+    async updateShipment(id: string, updates: Partial<Shipment>) {
+      const idx = this.shipments.findIndex(s => s.id === id)
+      if (idx !== -1) {
+        const oldShipment = this.shipments[idx]
+
+        // Handle Request Link Changes
+        if (updates.requestId && updates.requestId !== oldShipment.requestId) {
+          const psStore = usePersonalShoppingStore()
+
+          // Unlink old request if it existed
+          if (oldShipment.requestId) {
+            // We generally wouldn't revert status automatically as it's complex, 
+            // but we should ideally clear the tracking/shipmentId from the old request.
+            // For simplicity/safety, we might skip this or handle it if needed.
+          }
+
+          // Link new request
+          await psStore.updateRequest(updates.requestId, {
+            status: 'shipped',
+            trackingNumber: updates.trackingNumber || oldShipment.trackingNumber,
+            shipmentId: id
+          })
+        }
+
+        this.shipments[idx] = {
+          ...oldShipment,
+          ...updates,
+          updatedAt: new Date().toISOString()
+        }
+        this.saveToLocalStorage()
+        return this.shipments[idx]
+      }
+      return null
     },
 
     async updateShipmentStatus(id: string, status: ShipmentStatus, location: string, description: string) {
@@ -217,6 +266,12 @@ export const useShippingStore = defineStore('shipping', {
 
         if (status === 'delivered') {
           shipment.actualDelivery = new Date().toISOString().split('T')[0]
+
+          // Also update linked request status to delivered
+          if (shipment.requestId) {
+            const psStore = usePersonalShoppingStore()
+            await psStore.updateRequestStatus(shipment.requestId, 'delivered')
+          }
         }
 
         this.saveToLocalStorage()

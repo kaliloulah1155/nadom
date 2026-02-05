@@ -110,9 +110,21 @@
 
               <hr class="my-4">
               <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12">
                   <label class="form-label">Icon (Bootstrap Icon class)</label>
-                  <input v-model="form.icon" type="text" class="form-control input-md" placeholder="bi-bag" />
+                  <div class="input-group">
+                    <input v-model="form.icon" type="text" class="form-control input-md" placeholder="bi-bag" />
+                    <a href="https://icons.getbootstrap.com/" target="_blank" class="btn btn-outline-secondary" title="Voir les icônes Bootstrap">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                  </div>
+                  <small class="text-muted">Exemple: bi-bag, bi-truck, bi-box, etc.</small>
+                  <div v-if="form.icon" class="mt-2">
+                    <span class="badge bg-light text-dark p-2">
+                      <i :class="['bi', form.icon, 'fs-4']"></i>
+                      <span class="ms-2">Aperçu</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -26,13 +26,12 @@
           <div class="col-md-4">
             <select v-model="filters.status" class="form-select">
               <option value="">Tous les statuts</option>
-              <option value="order_placed">Commande passée</option>
+              <option value="pending">En attente</option>
               <option value="picked_up">Collecté</option>
               <option value="in_transit">En transit</option>
               <option value="in_customs">En douane</option>
               <option value="out_for_delivery">En cours de livraison</option>
               <option value="delivered">Livré</option>
-              <option value="returned">Retourné</option>
             </select>
           </div>
           <div class="col-md-4">
@@ -138,9 +137,23 @@
                   <label class="form-label">Client (ID) *</label>
                   <input v-model="form.userId" type="text" class="form-control input-md" required />
                 </div>
+                <div class="col-12">
+                  <label class="form-label">Request ID *</label>
+                  <select v-model="form.requestId" class="form-select input-md" required @change="onRequestChange">
+                    <option value="">Sélectionner une demande</option>
+                    <option v-for="req in availableRequests" :key="req.id" :value="req.id">
+                      {{ req.id.slice(-6) }} - {{ req.title }}
+                    </option>
+                  </select>
+                </div>
                 <div class="col-md-6">
                   <label class="form-label">Pays de destination *</label>
-                  <input v-model="form.destinationCountry" type="text" class="form-control input-md" required />
+                  <select v-model="form.destinationCountry" class="form-select input-md" required>
+                    <option value="">Sélectionner un pays</option>
+                    <option v-for="dest in destinations" :key="dest.id" :value="dest.country">
+                      {{ dest.flag }} {{ dest.country }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Ville de destination *</label>
@@ -157,7 +170,7 @@
                 <div class="col-md-6">
                   <label class="form-label">Statut *</label>
                   <select v-model="form.status" class="form-select input-md" required>
-                    <option value="order_placed">Commande passée</option>
+                    <option value="pending">En attente</option>
                     <option value="picked_up">Collecté</option>
                     <option value="in_transit">En transit</option>
                     <option value="in_customs">En douane</option>
@@ -186,14 +199,17 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useShippingStore } from '~/stores/shipping'
+import { useShippingStore, type Shipment, type ShippingMode, type ShipmentStatus } from '~/stores/shipping'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useFormatters } from '~/composables/useFormatters'
+import { FAKE_DESTINATIONS } from '~/utils/data/fakeData'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const shippingStore = useShippingStore()
+const psStore = usePersonalShoppingStore()
 const { formatDateShort, formatShipmentStatus } = useFormatters()
 
 const currentPage = ref(1)
@@ -204,27 +220,56 @@ const filters = reactive({
   status: ''
 })
 
-
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
 const editingShipment = ref<any>(null)
-const form = reactive({
+const form = reactive<{
+  trackingNumber: string
+  userId: string
+  requestId: string
+  destinationCountry: string
+  destinationCity: string
+  shippingMode: ShippingMode
+  status: ShipmentStatus
+  weight: number
+}>({
   trackingNumber: '',
   userId: '',
+  requestId: '',
   destinationCountry: '',
   destinationCity: '',
   shippingMode: 'air_normal',
-  status: 'order_placed',
+  status: 'pending',
   weight: 0
 })
 
+const destinations = ref(FAKE_DESTINATIONS)
+
 onMounted(async () => {
-  await shippingStore.fetchShipments()
+  await Promise.all([
+    shippingStore.fetchShipments(),
+    psStore.fetchRequests()
+  ])
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
+
+const availableRequests = computed(() => {
+  return psStore.requests.filter(r => 
+    r.status === 'confirmed' || r.status === 'preparing' || (editingShipment.value && r.id === editingShipment.value.requestId)
+  )
+})
+
+// Auto-fill details when request is selected
+const onRequestChange = () => {
+  const req = psStore.requests.find(r => r.id === form.requestId)
+  if (req) {
+    form.userId = req.userId
+    // We could try to guess destination from user profile if we had it, but for now we leave it
+  }
+}
 
 const openModal = (shipment?: any) => {
   if (shipment) {
@@ -237,32 +282,32 @@ const openModal = (shipment?: any) => {
     form.shippingMode = s.shippingMode
     form.status = s.status
     form.weight = s.weight
+    form.requestId = s.requestId || ''
   } else {
     editingShipment.value = null
     form.trackingNumber = `TRK-${Date.now().toString().slice(-6)}`
     form.userId = 'user_demo'
+    form.requestId = ''
     form.destinationCountry = ''
     form.destinationCity = ''
     form.shippingMode = 'air_normal'
-    form.status = 'order_placed'
+    form.status = 'pending'
     form.weight = 0
   }
   modalInstance?.show()
 }
 
-const saveShipment = () => {
+const saveShipment = async () => {
   if (editingShipment.value) {
-    const idx = shippingStore.shipments.findIndex(s => s.id === editingShipment.value.id)
-    if (idx !== -1) {
-      shippingStore.shipments[idx] = { ...shippingStore.shipments[idx], ...form } as any
-    }
+    await shippingStore.updateShipment(editingShipment.value.id, form as Partial<Shipment>)
   } else {
-    shippingStore.shipments.push({
-      id: `shp_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...form
-    } as any)
+    // Determine shipping cost if not set (simple logic)
+    const cost = shippingStore.calculateShippingCost(form.destinationCountry, form.weight, form.shippingMode as any)
+    
+    await shippingStore.createShipment({
+      ...form,
+      shippingCost: cost
+    })
   }
   modalInstance?.hide()
 }

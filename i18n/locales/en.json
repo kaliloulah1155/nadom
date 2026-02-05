@@ -55,22 +55,42 @@
     "personalShopping": {
       "title": "Personal Shopping",
       "description": "We buy for you in China. Send us your references and we take care of everything.",
-      "features": ["Product research", "Price negotiation", "Quality control", "Secure shipping"]
+      "features": [
+        "Product research",
+        "Price negotiation",
+        "Quality control",
+        "Secure shipping"
+      ]
     },
     "shipping": {
       "title": "Shipping",
       "description": "Delivery of your goods from China to Africa by air or sea.",
-      "features": ["Express air freight", "Standard air freight", "Sea freight", "Real-time tracking"]
+      "features": [
+        "Express air freight",
+        "Standard air freight",
+        "Sea freight",
+        "Real-time tracking"
+      ]
     },
     "visa": {
       "title": "China Visa",
       "description": "Complete assistance for obtaining your Chinese visa.",
-      "features": ["Tourist visa", "Business visa", "Work visa", "Document support"]
+      "features": [
+        "Tourist visa",
+        "Business visa",
+        "Work visa",
+        "Document support"
+      ]
     },
     "guide": {
       "title": "Guide & Support",
       "description": "Our professional guides accompany you during your stay in China.",
-      "features": ["Interpretation", "Supplier visits", "Negotiation", "Local logistics"]
+      "features": [
+        "Interpretation",
+        "Supplier visits",
+        "Negotiation",
+        "Local logistics"
+      ]
     }
   },
   "personalShopping": {
@@ -79,6 +99,8 @@
     "badge": "Premium Service",
     "newRequest": "New Request",
     "myRequests": "My Requests",
+    "myCart": "My Cart",
+    "addToCart": "Add to Cart",
     "categories": "Categories",
     "allCategories": "All categories",
     "categoriesTitle": "Product Categories",

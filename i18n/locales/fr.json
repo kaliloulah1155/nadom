@@ -55,22 +55,42 @@
     "personalShopping": {
       "title": "Personal Shopping",
       "description": "Nous achetons pour vous en Chine. Envoyez-nous vos references et nous nous occupons de tout.",
-      "features": ["Recherche de produits", "Negociation des prix", "Controle qualite", "Expedition securisee"]
+      "features": [
+        "Recherche de produits",
+        "Negociation des prix",
+        "Controle qualite",
+        "Expedition securisee"
+      ]
     },
     "shipping": {
       "title": "Expedition",
       "description": "Livraison de vos marchandises de la Chine vers l'Afrique par voie aerienne ou maritime.",
-      "features": ["Fret aerien express", "Fret aerien standard", "Fret maritime", "Suivi en temps reel"]
+      "features": [
+        "Fret aerien express",
+        "Fret aerien standard",
+        "Fret maritime",
+        "Suivi en temps reel"
+      ]
     },
     "visa": {
       "title": "Visa Chine",
       "description": "Assistance complete pour l'obtention de votre visa chinois.",
-      "features": ["Visa tourisme", "Visa affaires", "Visa travail", "Accompagnement dossier"]
+      "features": [
+        "Visa tourisme",
+        "Visa affaires",
+        "Visa travail",
+        "Accompagnement dossier"
+      ]
     },
     "guide": {
       "title": "Guide & Accompagnement",
       "description": "Nos guides professionnels vous accompagnent durant votre sejour en Chine.",
-      "features": ["Interpretation", "Visite de fournisseurs", "Negociation", "Logistique locale"]
+      "features": [
+        "Interpretation",
+        "Visite de fournisseurs",
+        "Negociation",
+        "Logistique locale"
+      ]
     }
   },
   "personalShopping": {
@@ -79,6 +99,8 @@
     "badge": "Service Premium",
     "newRequest": "Nouvelle demande",
     "myRequests": "Mes demandes",
+    "myCart": "Mon Panier",
+    "addToCart": "Ajouter au panier",
     "categories": "Categories",
     "allCategories": "Toutes les categories",
     "categoriesTitle": "Categories de produits",

@@ -157,8 +157,11 @@
                   </select>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">URL du fichier PDF</label>
-                  <input v-model="form.fileUrl" type="url" class="form-control" placeholder="https://..." />
+                  <label class="form-label">Fichier PDF</label>
+                  <input type="file" class="form-control" accept=".pdf" @change="handlePdfUpload" />
+                  <small v-if="form.fileUrl" class="text-muted d-block mt-1">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Fichier chargé
+                  </small>
                 </div>
                 <div class="col-12">
                   <div class="form-check form-switch">
@@ -362,6 +365,18 @@ const saveGuide = () => {
   saveToLocalStorage()
   modalInstance?.hide()
   resetForm()
+}
+
+const handlePdfUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file && file.type === 'application/pdf') {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.fileUrl = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
 }
 
 const deleteGuide = (id: string) => {

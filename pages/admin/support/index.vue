@@ -88,7 +88,7 @@
                 </td>
                 <td><small>02/02/2026</small></td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary">
+                  <button class="btn btn-sm btn-outline-primary" @click="openReplyModal(i)">
                     <i class="bi bi-reply me-1"></i>Répondre
                   </button>
                 </td>
@@ -105,6 +105,39 @@
           v-model:limit="perPage"
           :total-items="128"
         />
+      </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div class="modal fade" id="replyModal" tabindex="-1" ref="replyModalRef">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Répondre au message</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form @submit.prevent="sendReply">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Message original</label>
+                <div class="p-3 bg-light rounded">
+                  <strong>Client #{{ selectedTicket ? 1000 + selectedTicket : '' }}</strong>
+                  <p class="mb-0 mt-2">Problème avec ma commande #TRK-123{{ selectedTicket }}</p>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Votre réponse *</label>
+                <textarea v-model="replyMessage" class="form-control" rows="5" required placeholder="Écrivez votre réponse..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send me-2"></i>Envoyer
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -141,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 definePageMeta({
   layout: 'admin'
@@ -151,15 +184,37 @@ const currentPage = ref(1)
 const perPage = ref(10)
 
 const modalRef = ref<HTMLElement | null>(null)
+const replyModalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
+let replyModalInstance: any = null
+
+const selectedTicket = ref<number | null>(null)
+const replyMessage = ref('')
 
 onMounted(() => {
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
+    replyModalInstance = new (window as any).bootstrap.Modal(replyModalRef.value)
   }
 })
 
 const openSettings = () => {
   modalInstance?.show()
+}
+
+const openReplyModal = (ticketId: number) => {
+  selectedTicket.value = ticketId
+  replyMessage.value = ''
+  replyModalInstance?.show()
+}
+
+const sendReply = () => {
+  // In a real app, this would send the reply to the backend
+  console.log('Sending reply to ticket', selectedTicket.value, ':', replyMessage.value)
+  replyModalInstance?.hide()
+  // Show success notification
+  if (typeof window !== 'undefined') {
+    alert('Réponse envoyée avec succès!')
+  }
 }
 </script>

@@ -42,8 +42,42 @@
       <div class="row g-4">
         <!-- Main Content -->
         <div class="col-lg-8">
-          <!-- Product Info -->
-          <div class="card border-0 shadow-sm mb-4">
+          <!-- Ordered Items (from Catalog) -->
+          <div v-if="request.items && request.items.length > 0" class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0">Produits commandés</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Produit</th>
+                      <th>Prix</th>
+                      <th>Qté</th>
+                      <th class="text-end">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in request.items" :key="item.productId">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img :src="item.image || 'https://via.placeholder.com/40'" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
+                          <span>{{ item.name_fr }}</span>
+                        </div>
+                      </td>
+                      <td>{{ formatCurrency(item.price) }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td class="text-end fw-bold">{{ formatCurrency(item.price * item.quantity) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Info (Original Request) -->
+          <div v-else class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-transparent">
               <h5 class="mb-0">Informations produit</h5>
             </div>
@@ -89,13 +123,29 @@
           <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
               <h5 class="mb-0">Devis</h5>
-              <button
-                v-if="!showQuotationForm && !request.quotedPrice"
-                class="btn btn-sm btn-primary"
-                @click="showQuotationForm = true"
-              >
-                <i class="bi bi-plus me-1"></i>Creer devis
-              </button>
+              <div class="d-flex gap-2">
+                <button
+                  v-if="!showQuotationForm && !request.quotedPrice && request.status !== 'cancelled'"
+                  class="btn btn-sm btn-primary"
+                  @click="showQuotationForm = true"
+                >
+                  <i class="bi bi-plus me-1"></i>Creer devis
+                </button>
+                <button
+                  v-if="request.status === 'confirmed' || request.status === 'preparing'"
+                  class="btn btn-sm btn-success"
+                  @click="openShipmentModal"
+                >
+                  <i class="bi bi-box-seam me-1"></i>Créer expédition
+                </button>
+                <NuxtLink
+                  v-if="request.shipmentId || request.trackingNumber"
+                  :to="`/admin/shipments/${request.trackingNumber || request.shipmentId}`"
+                  class="btn btn-sm btn-info text-white"
+                >
+                  <i class="bi bi-box-seam me-1"></i>Voir expédition
+                </NuxtLink>
+              </div>
             </div>
             <div class="card-body">
               <!-- Existing Quotation -->
@@ -199,6 +249,13 @@
                 <small class="text-muted d-block">Client ID</small>
                 <code>{{ request.userId }}</code>
               </div>
+              <div v-if="request.contactNumber" class="mb-2">
+                <small class="text-muted d-block">Contact Client</small>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-whatsapp text-success me-2"></i>
+                  <strong>{{ request.contactNumber }}</strong>
+                </div>
+              </div>
               <div class="mb-2">
                 <small class="text-muted d-block">Creee le</small>
                 <span>{{ formatDate(request.createdAt) }}</span>
@@ -231,12 +288,50 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Shipment Modal -->
+    <div v-if="showShipmentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title">Créer une expédition</h5>
+            <button type="button" class="btn-close" @click="showShipmentModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <p>Voulez-vous créer une expédition pour cette demande ?</p>
+            <div class="mb-3">
+              <label class="form-label">Mode d'expédition</label>
+              <select v-model="shipmentForm.shippingMode" class="form-select">
+                <option value="air_normal">Aérien Normal</option>
+                <option value="air_express">Aérien Express</option>
+                <option value="sea">Maritime</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Poids estimé (kg)</label>
+              <input v-model.number="shipmentForm.weight" type="number" step="0.1" class="form-control" />
+            </div>
+            <div class="alert alert-info">
+              Cela créera un nouveau colis et mettra à jour le statut de la demande à "Expédié".
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="showShipmentModal = false">Annuler</button>
+            <button class="btn btn-primary" @click="createShipment" :disabled="creatingShipment">
+              <span v-if="creatingShipment" class="spinner-border spinner-border-sm me-2"></span>
+              Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalShopping'
+import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
 
@@ -247,17 +342,25 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const psStore = usePersonalShoppingStore()
+const shippingStore = useShippingStore()
 const { formatCurrency, formatDate, formatRequestStatus } = useFormatters()
 const { success, error: notifyError } = useNotification()
 
 const loading = ref(true)
 const showQuotationForm = ref(false)
+const showShipmentModal = ref(false)
+const creatingShipment = ref(false)
 
 const quotation = reactive({
   productCost: 0,
   inspectionFee: 5000,
   packagingFee: 3000,
   shippingCost: 0
+})
+
+const shipmentForm = reactive({
+  shippingMode: 'air_normal' as any,
+  weight: 1
 })
 
 const requestId = route.params.id as string
@@ -281,6 +384,41 @@ const updateStatus = async (status: string) => {
     success('Statut mis a jour')
   } catch (err) {
     notifyError('Erreur')
+  }
+}
+
+const openShipmentModal = () => {
+  showShipmentModal.value = true
+}
+
+const createShipment = async () => {
+  if (!request.value) return
+  
+  creatingShipment.value = true
+  try {
+    const newShipment = await shippingStore.createShipment({
+      userId: request.value.userId,
+      requestId: request.value.id,
+      destinationCountry: 'Côte d\'Ivoire', // Default
+      destinationCity: 'Abidjan', // Default
+      shippingMode: shipmentForm.shippingMode,
+      weight: shipmentForm.weight,
+      declaredValue: request.value.budgetEstimated,
+      shippingCost: request.value.quotedDetails?.shippingCost || 0
+    })
+    
+    success('Expédition créée avec succès')
+    showShipmentModal.value = false
+    
+    // Refresh to show new status
+    await psStore.fetchRequests()
+    
+    // Redirect to shipment
+    router.push(`/admin/shipments/${newShipment.trackingNumber}`)
+  } catch (err) {
+    notifyError('Erreur lors de la création de l\'expédition')
+  } finally {
+    creatingShipment.value = false
   }
 }
 

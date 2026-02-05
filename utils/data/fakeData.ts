@@ -88,6 +88,39 @@ export const FAKE_CATEGORIES = [
 // ==================== PERSONAL SHOPPING REQUESTS ====================
 export const FAKE_PERSONAL_SHOPPING_REQUESTS = [
   {
+    id: 'req_direct_1',
+    userId: 'user_1',
+    contactNumber: '+225 05 06 07 08 09',
+    status: 'pending' as const,
+    category: 'Mise en relation',
+    title: 'Commande de 2 produits',
+    description: 'Commande effectuée via le catalogue.',
+    images: [],
+    items: [
+      {
+        productId: 'prod_1',
+        name_fr: 'iPhone 15 Pro 256GB',
+        name_en: 'iPhone 15 Pro 256GB',
+        price: 850000,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1696446701796-da61225697cc?w=400'
+      },
+      {
+        productId: 'prod_3',
+        name_fr: 'Sneakers Nike Air Max',
+        name_en: 'Sneakers Nike Air Max',
+        price: 75000,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'
+      }
+    ],
+    budgetEstimated: 925000,
+    quantity: 2,
+    whatsappMessages: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
     id: 'req_1',
     userId: 'user_1',
     status: 'negotiating' as const,
@@ -199,6 +232,7 @@ export const FAKE_PERSONAL_SHOPPING_REQUESTS = [
     assignedAgent: 'user_3',
     whatsappMessages: 25,
     trackingNumber: 'TRK-2024-001234',
+    shipmentId: 'ship_1',
     createdAt: '2024-01-05T09:00:00Z',
     updatedAt: '2024-01-25T11:00:00Z'
   },
@@ -215,6 +249,8 @@ export const FAKE_PERSONAL_SHOPPING_REQUESTS = [
     budgetEstimated: 350000,
     quantity: 1,
     quotedPrice: 320000,
+    trackingNumber: 'TRK-2024-000987',
+    shipmentId: 'ship_2',
     quotedDetails: {
       productCost: 250000,
       serviceFee: 12500,
@@ -225,7 +261,7 @@ export const FAKE_PERSONAL_SHOPPING_REQUESTS = [
     },
     assignedAgent: 'user_3',
     whatsappMessages: 30,
-    trackingNumber: 'TRK-2024-000987',
+
     createdAt: '2023-12-15T10:00:00Z',
     updatedAt: '2024-01-15T14:00:00Z'
   }
@@ -563,3 +599,37 @@ export const FAKE_ADMIN_STATS = {
   monthlyGrowth: 12.5,
   customerSatisfaction: 4.7
 }
+
+// ==================== PRODUCTS ====================
+export const FAKE_PRODUCTS = [
+  {
+    id: 'prod_1',
+    categoryId: 'cat_1',
+    name_fr: 'iPhone 15 Pro 256GB',
+    name_en: 'iPhone 15 Pro 256GB',
+    description_fr: 'Dernier iPhone avec puce A17 Pro et cadre en titane.',
+    description_en: 'Latest iPhone with A17 Pro chip and titanium frame.',
+    price: 850000,
+    image: 'https://images.unsplash.com/photo-1696446701796-da61225697cc?w=400'
+  },
+  {
+    id: 'prod_2',
+    categoryId: 'cat_1',
+    name_fr: 'MacBook Air M2',
+    name_en: 'MacBook Air M2',
+    description_fr: 'Léger, performant et élégant.',
+    description_en: 'Lightweight, powerful, and elegant.',
+    price: 750000,
+    image: 'https://images.unsplash.com/photo-1611186871348-b1ec696e52c9?w=400'
+  },
+  {
+    id: 'prod_3',
+    categoryId: 'cat_2',
+    name_fr: 'Sneakers Nike Air Max',
+    name_en: 'Sneakers Nike Air Max',
+    description_fr: 'Confort et style pour vos tenues décontractées.',
+    description_en: 'Comfort and style for your casual outfits.',
+    price: 75000,
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'
+  }
+]

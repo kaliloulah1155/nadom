@@ -16,6 +16,12 @@
 
           <!-- Mobile Actions -->
           <div class="mobile-actions d-lg-none">
+            <a href="#" class="mobile-action-btn me-2" @click.prevent="cartStore.toggleCart">
+              <i class="bi bi-cart3"></i>
+              <span v-if="cartStore.totalItems > 0" class="badge bg-danger rounded-circle position-absolute" style="font-size: 0.6rem; transform: translate(-30%, -30%);">
+                {{ cartStore.totalItems }}
+              </span>
+            </a>
             <NuxtLink v-if="!isAuthenticated" to="/login" class="mobile-action-btn">
               <i class="bi bi-person-circle"></i>
             </NuxtLink>
@@ -149,6 +155,14 @@
 
             <!-- Right Side -->
             <ul class="lh-nav lh-nav-right">
+              <!-- Cart Icon -->
+              <li class="lh-nav-item lh-nav-cart">
+                <a href="#" class="lh-link" @click.prevent="cartStore.toggleCart">
+                  <i class="bi bi-cart3 fs-5"></i>
+                  <span v-if="cartStore.totalItems > 0" class="lh-badge">{{ cartStore.totalItems }}</span>
+                </a>
+              </li>
+
               <!-- Language Switcher -->
               <li class="lh-nav-item lh-dropdown d-none d-lg-block">
                 <a class="lh-link" href="#" @click.prevent="toggleDropdown('lang')">
@@ -323,17 +337,22 @@
     <div v-show="isScrolled" class="back-to-top" @click="scrollToTop">
       <i class="bi bi-chevron-up"></i>
     </div>
+
+    <!-- Global Cart Sidebar -->
+    <CartSidebar />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import { useCartStore } from '~/stores/cart'
 import { useNotification } from '~/composables/useNotification'
 
 const route = useRoute()
 const config = useRuntimeConfig()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 const { notifications, removeNotification } = useNotification()
 const { locale, setLocale, t } = useI18n()
 

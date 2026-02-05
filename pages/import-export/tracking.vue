@@ -111,6 +111,52 @@
                 </div>
               </div>
 
+              <!-- Project/Request Details -->
+              <div v-if="linkedRequest" class="card bg-light border-0 mb-4">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-3">
+                    <i class="bi bi-bag-check me-2 text-primary"></i>
+                    {{ locale === 'fr' ? 'Détails du projet' : 'Project Details' }}
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Titre' : 'Title' }}</small>
+                      <strong>{{ linkedRequest.title }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Catégorie' : 'Category' }}</small>
+                      <strong>{{ linkedRequest.category }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Statut du projet' : 'Project Status' }}</small>
+                      <span class="badge" :class="getRequestStatusClass(linkedRequest.status)">
+                        {{ getRequestStatusLabel(linkedRequest.status) }}
+                      </span>
+                    </div>
+                    <div class="col-md-6">
+                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Budget' : 'Budget' }}</small>
+                      <strong>{{ linkedRequest.budgetEstimated }} FCFA</strong>
+                    </div>
+                    <div v-if="linkedRequest.description" class="col-12">
+                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Description' : 'Description' }}</small>
+                      <p class="mb-0">{{ linkedRequest.description }}</p>
+                    </div>
+                    <div v-if="linkedRequest.images && linkedRequest.images.length > 0" class="col-12">
+                      <small class="text-muted d-block mb-2">{{ locale === 'fr' ? 'Images du projet' : 'Project Images' }}</small>
+                      <div class="d-flex flex-wrap gap-2">
+                        <div
+                          v-for="(image, idx) in linkedRequest.images"
+                          :key="idx"
+                          class="project-image-thumb"
+                        >
+                          <img :src="image" :alt="`Image ${idx + 1}`" class="img-thumbnail" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Timeline -->
               <h6 class="fw-bold mb-3">Historique</h6>
               <div class="timeline">
@@ -201,8 +247,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useShippingStore, type Shipment } from '~/stores/shipping'
+import { usePersonalShoppingStore, type PersonalShoppingRequest } from '~/stores/personalShopping'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -212,6 +259,7 @@ definePageMeta({
 const { t, locale } = useI18n()
 const route = useRoute()
 const shippingStore = useShippingStore()
+const psStore = usePersonalShoppingStore()
 const { formatShipmentStatus, formatDateShort } = useFormatters()
 
 const trackingNumber = ref('')
@@ -220,9 +268,16 @@ const loading = ref(false)
 const error = ref('')
 const searched = ref(false)
 
+// Computed property for linked request
+const linkedRequest = computed(() => {
+  if (!shipment.value?.requestId) return null
+  return psStore.getRequestById(shipment.value.requestId)
+})
+
 // Check for query param
 onMounted(async () => {
   await shippingStore.fetchShipments()
+  await psStore.fetchRequests()
 
   const tracking = route.query.tracking as string
   if (tracking) {
@@ -253,6 +308,34 @@ const resetSearch = () => {
   shipment.value = null
   error.value = ''
   searched.value = false
+}
+
+const getRequestStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    pending: locale.value === 'fr' ? 'En attente' : 'Pending',
+    searching: locale.value === 'fr' ? 'Recherche en cours' : 'Searching',
+    negotiating: locale.value === 'fr' ? 'Négociation' : 'Negotiating',
+    confirmed: locale.value === 'fr' ? 'Confirmé' : 'Confirmed',
+    preparing: locale.value === 'fr' ? 'Préparation' : 'Preparing',
+    shipped: locale.value === 'fr' ? 'Expédié' : 'Shipped',
+    delivered: locale.value === 'fr' ? 'Livré' : 'Delivered',
+    cancelled: locale.value === 'fr' ? 'Annulé' : 'Cancelled'
+  }
+  return labels[status] || status
+}
+
+const getRequestStatusClass = (status: string) => {
+  const classes: Record<string, string> = {
+    pending: 'bg-warning-subtle text-warning',
+    searching: 'bg-info-subtle text-info',
+    negotiating: 'bg-primary-subtle text-primary',
+    confirmed: 'bg-success-subtle text-success',
+    preparing: 'bg-secondary-subtle text-secondary',
+    shipped: 'bg-dark-subtle text-dark',
+    delivered: 'bg-success text-white',
+    cancelled: 'bg-danger-subtle text-danger'
+  }
+  return classes[status] || 'bg-secondary-subtle'
 }
 </script>
 
@@ -333,5 +416,24 @@ const resetSearch = () => {
   padding: 10px 15px;
   background: #f8f9fa;
   border-radius: 8px;
+}
+
+.project-image-thumb {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.project-image-thumb:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.project-image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>

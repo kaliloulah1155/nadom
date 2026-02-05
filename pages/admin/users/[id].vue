@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="btn-group">
-        <button class="btn btn-outline-primary">
+        <button class="btn btn-outline-primary me-2" @click="openEditModal">
           <i class="bi bi-pencil me-2"></i>Modifier profil
         </button>
         <button class="btn btn-outline-danger">
@@ -180,6 +180,57 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" ref="modalRef">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modifier le profil</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form @submit.prevent="saveUser">
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Prénom</label>
+                  <input v-model="editForm.firstName" type="text" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nom</label>
+                  <input v-model="editForm.lastName" type="text" class="form-control" required />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Email</label>
+                  <input v-model="editForm.email" type="email" class="form-control" required />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Téléphone</label>
+                  <input v-model="editForm.phone" type="tel" class="form-control" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Ville</label>
+                  <input v-model="editForm.city" type="text" class="form-control" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Pays *</label>
+                  <select v-model="editForm.country" class="form-select" required>
+                    <option value="">Sélectionnez un pays</option>
+                    <option v-for="country in countries" :key="country" :value="country">{{ country }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-2"></i>Enregistrer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
   <div v-else class="text-center py-5">
     <div class="spinner-border text-primary"></div>
@@ -187,7 +238,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { FAKE_USERS } from '~/utils/data/fakeData'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
@@ -210,10 +261,83 @@ const user = computed(() => FAKE_USERS.find(u => u.id === id))
 const userRequests = computed(() => psStore.requests.filter(r => r.userId === id))
 const userShipments = computed(() => shippingStore.shipments.filter(s => s.userId === id))
 
+const modalRef = ref<HTMLElement | null>(null)
+let modalInstance: any = null
+
+const editForm = reactive({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  city: '',
+  country: ''
+})
+
+const countries = [
+  'Afghanistan', 'Afrique du Sud', 'Albanie', 'Algérie', 'Allemagne', 'Andorre', 'Angola', 'Arabie Saoudite', 'Argentine', 'Arménie', 'Australie', 'Autriche', 'Azerbaïdjan',
+  'Bahamas', 'Bahreïn', 'Bangladesh', 'Barbade', 'Belgique', 'Belize', 'Bénin', 'Bhoutan', 'Biélorussie', 'Birmanie', 'Bolivie', 'Bosnie-Herzégovine', 'Botswana', 'Brésil', 'Brunei', 'Bulgarie', 'Burkina Faso', 'Burundi',
+  'Cambodge', 'Cameroun', 'Canada', 'Cap-Vert', 'Chili', 'Chine', 'Chypre', 'Colombie', 'Comores', 'Congo', 'Corée du Nord', 'Corée du Sud', 'Costa Rica', 'Côte d\'Ivoire', 'Croatie', 'Cuba',
+  'Danemark', 'Djibouti', 'Dominique',
+  'Égypte', 'Émirats Arabes Unis', 'Équateur', 'Érythrée', 'Espagne', 'Estonie', 'Eswatini', 'États-Unis', 'Éthiopie',
+  'Fidji', 'Finlande', 'France',
+  'Gabon', 'Gambie', 'Géorgie', 'Ghana', 'Grèce', 'Grenade', 'Guatemala', 'Guinée', 'Guinée-Bissau', 'Guinée Équatoriale', 'Guyana',
+  'Haïti', 'Honduras', 'Hongrie',
+  'Inde', 'Indonésie', 'Irak', 'Iran', 'Irlande', 'Islande', 'Israël', 'Italie',
+  'Jamaïque', 'Japon', 'Jordanie',
+  'Kazakhstan', 'Kenya', 'Kirghizistan', 'Kiribati', 'Koweït',
+  'Laos', 'Lesotho', 'Lettonie', 'Liban', 'Liberia', 'Libye', 'Liechtenstein', 'Lituanie', 'Luxembourg',
+  'Macédoine du Nord', 'Madagascar', 'Malaisie', 'Malawi', 'Maldives', 'Mali', 'Malte', 'Maroc', 'Maurice', 'Mauritanie', 'Mexique', 'Moldavie', 'Monaco', 'Mongolie', 'Monténégro', 'Mozambique',
+  'Namibie', 'Nauru', 'Népal', 'Nicaragua', 'Niger', 'Nigeria', 'Norvège', 'Nouvelle-Zélande',
+  'Oman', 'Ouganda', 'Ouzbékistan',
+  'Pakistan', 'Palaos', 'Palestine', 'Panama', 'Papouasie-Nouvelle-Guinée', 'Paraguay', 'Pays-Bas', 'Pérou', 'Philippines', 'Pologne', 'Portugal',
+  'Qatar',
+  'République Centrafricaine', 'République Démocratique du Congo', 'République Dominicaine', 'République Tchèque', 'Roumanie', 'Royaume-Uni', 'Russie', 'Rwanda',
+  'Saint-Marin', 'Sainte-Lucie', 'Salvador', 'Samoa', 'São Tomé-et-Príncipe', 'Sénégal', 'Serbie', 'Seychelles', 'Sierra Leone', 'Singapour', 'Slovaquie', 'Slovénie', 'Somalie', 'Soudan', 'Soudan du Sud', 'Sri Lanka', 'Suède', 'Suisse', 'Suriname', 'Syrie',
+  'Tadjikistan', 'Tanzanie', 'Tchad', 'Thaïlande', 'Timor Oriental', 'Togo', 'Tonga', 'Trinité-et-Tobago', 'Tunisie', 'Turkménistan', 'Turquie', 'Tuvalu',
+  'Ukraine', 'Uruguay',
+  'Vanuatu', 'Vatican', 'Venezuela', 'Vietnam',
+  'Yémen',
+  'Zambie', 'Zimbabwe'
+]
+
 onMounted(async () => {
   if (psStore.requests.length === 0) await psStore.fetchRequests()
   if (shippingStore.shipments.length === 0) await shippingStore.fetchShipments()
+  
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
+  }
 })
+
+const openEditModal = () => {
+  if (user.value) {
+    editForm.firstName = user.value.firstName
+    editForm.lastName = user.value.lastName
+    editForm.email = user.value.email
+    editForm.phone = user.value.phone || ''
+    editForm.city = user.value.city || ''
+    editForm.country = user.value.country || ''
+  }
+  modalInstance?.show()
+}
+
+const saveUser = () => {
+  // In a real app, this would call an API to update the user
+  // For now, we'll just update the FAKE_USERS array
+  const userIndex = FAKE_USERS.findIndex(u => u.id === id)
+  if (userIndex !== -1) {
+    FAKE_USERS[userIndex] = {
+      ...FAKE_USERS[userIndex],
+      firstName: editForm.firstName,
+      lastName: editForm.lastName,
+      email: editForm.email,
+      phone: editForm.phone,
+      city: editForm.city,
+      country: editForm.country
+    }
+  }
+  modalInstance?.hide()
+}
 
 const getStatusBadgeClass = (status: string) => {
   const classes: Record<string, string> = {

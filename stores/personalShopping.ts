@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { FAKE_PERSONAL_SHOPPING_REQUESTS, FAKE_CATEGORIES } from '~/utils/data/fakeData'
+import { FAKE_PERSONAL_SHOPPING_REQUESTS, FAKE_CATEGORIES, FAKE_PRODUCTS } from '~/utils/data/fakeData'
 
 export type RequestStatus = 'pending' | 'searching' | 'negotiating' | 'confirmed' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -12,14 +12,25 @@ export interface QuotedDetails {
   totalPrice: number
 }
 
+export interface RequestItem {
+  productId: string
+  name_fr: string
+  name_en: string
+  price: number
+  quantity: number
+  image: string
+}
+
 export interface PersonalShoppingRequest {
   id: string
   userId: string
+  contactNumber?: string
   status: RequestStatus
   category: string
   title: string
   description: string
   images: string[]
+  items?: RequestItem[]
   budgetEstimated: number
   quantity: number
   quotedPrice?: number
@@ -27,6 +38,7 @@ export interface PersonalShoppingRequest {
   assignedAgent?: string
   whatsappMessages: number
   trackingNumber?: string
+  shipmentId?: string
   createdAt: string
   updatedAt: string
 }
@@ -39,9 +51,23 @@ export interface Category {
   color: string
 }
 
+export interface Product {
+  id: string
+  categoryId: string
+  name_fr: string
+  name_en: string
+  description_fr: string
+  description_en: string
+  price: number
+  image: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface PersonalShoppingState {
   requests: PersonalShoppingRequest[]
   categories: Category[]
+  products: Product[]
   loading: boolean
   error: string | null
 }
@@ -50,6 +76,7 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
   state: (): PersonalShoppingState => ({
     requests: [],
     categories: [],
+    products: [],
     loading: false,
     error: null
   }),
@@ -84,6 +111,14 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
 
     totalRevenue: (state) => {
       return state.requests.reduce((total, req) => total + (req.quotedPrice || 0), 0)
+    },
+
+    getProductsByCategory: (state) => (categoryId: string) => {
+      return state.products.filter(p => p.categoryId === categoryId)
+    },
+
+    getProductById: (state) => (id: string) => {
+      return state.products.find(p => p.id === id)
     }
   },
 
@@ -110,8 +145,100 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
     },
 
     async fetchCategories() {
-      this.categories = (FAKE_CATEGORIES as any)
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('personalShoppingCategories')
+        this.categories = saved ? JSON.parse(saved) : (FAKE_CATEGORIES as any)
+      } else {
+        this.categories = (FAKE_CATEGORIES as any)
+      }
       return this.categories
+    },
+
+    async addCategory(category: Partial<Category>) {
+      const newCategory: Category = {
+        id: `cat_${Date.now()}`,
+        name_fr: category.name_fr || '',
+        name_en: category.name_en || '',
+        icon: category.icon || 'bi-tag',
+        color: category.color || '#3498db'
+      }
+      this.categories.unshift(newCategory)
+      this.saveCategoriesToLocalStorage()
+      return newCategory
+    },
+
+    async updateCategory(id: string, updates: Partial<Category>) {
+      const idx = this.categories.findIndex(c => c.id === id)
+      if (idx !== -1) {
+        this.categories[idx] = { ...this.categories[idx], ...updates }
+        this.saveCategoriesToLocalStorage()
+      }
+    },
+
+    async deleteCategory(id: string) {
+      this.categories = this.categories.filter(c => c.id !== id)
+      this.saveCategoriesToLocalStorage()
+    },
+
+    saveCategoriesToLocalStorage() {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('personalShoppingCategories', JSON.stringify(this.categories))
+      }
+    },
+
+    async fetchProducts() {
+      this.loading = true
+      try {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('personalShoppingProducts')
+          this.products = saved ? JSON.parse(saved) : (FAKE_PRODUCTS as Product[])
+        }
+      } catch (err) {
+        this.error = 'Erreur lors du chargement des produits'
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createProduct(productData: Partial<Product>) {
+      const newProduct: Product = {
+        id: `prod_${Date.now()}`,
+        categoryId: productData.categoryId || '',
+        name_fr: productData.name_fr || '',
+        name_en: productData.name_en || '',
+        description_fr: productData.description_fr || '',
+        description_en: productData.description_en || '',
+        price: productData.price || 0,
+        image: productData.image || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      this.products.unshift(newProduct)
+      this.saveProductsToLocalStorage()
+      return newProduct
+    },
+
+    async updateProduct(id: string, updates: Partial<Product>) {
+      const idx = this.products.findIndex(p => p.id === id)
+      if (idx !== -1) {
+        this.products[idx] = {
+          ...this.products[idx],
+          ...updates,
+          updatedAt: new Date().toISOString()
+        }
+        this.saveProductsToLocalStorage()
+      }
+    },
+
+    async deleteProduct(id: string) {
+      this.products = this.products.filter(p => p.id !== id)
+      this.saveProductsToLocalStorage()
+    },
+
+    saveProductsToLocalStorage() {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('personalShoppingProducts', JSON.stringify(this.products))
+      }
     },
 
     async createRequest(requestData: Partial<PersonalShoppingRequest>) {
@@ -124,11 +251,13 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         const newRequest: PersonalShoppingRequest = {
           id: `req_${Date.now()}`,
           userId: requestData.userId || '',
+          contactNumber: requestData.contactNumber || '',
           status: 'pending',
           category: requestData.category || '',
           title: requestData.title || '',
           description: requestData.description || '',
           images: requestData.images || [],
+          items: requestData.items || [],
           budgetEstimated: requestData.budgetEstimated || 0,
           quantity: requestData.quantity || 1,
           whatsappMessages: 0,

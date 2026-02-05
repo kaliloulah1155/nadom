@@ -151,10 +151,10 @@
                   <input v-model.number="form.readTime" type="number" class="form-control input-md" min="1" />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Image URL *</label>
-                  <input v-model="form.image" type="url" class="form-control input-md" required placeholder="https://example.com/image.jpg" />
+                  <label class="form-label">Image *</label>
+                  <input type="file" class="form-control input-md" accept="image/*" @change="handleImageUpload" required />
                   <div v-if="form.image" class="mt-2 text-center">
-                    <img :src="form.image" class="img-thumbnail" style="max-height: 150px;" @error="(e: any) => e.target.style.display = 'none'" />
+                    <img :src="form.image" class="img-thumbnail" style="max-height: 150px;" alt="Aperçu" />
                   </div>
                 </div>
                 <div class="col-12">
@@ -166,8 +166,11 @@
                   <input v-model="form.author" type="text" class="form-control input-md" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Avatar auteur URL</label>
-                  <input v-model="form.authorAvatar" type="url" class="form-control input-md" />
+                  <label class="form-label">Avatar auteur</label>
+                  <input type="file" class="form-control input-md" accept="image/*" @change="handleAvatarUpload" />
+                  <div v-if="form.authorAvatar" class="mt-2">
+                    <img :src="form.authorAvatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="Avatar" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -307,6 +310,30 @@ const savePost = async () => {
     resetForm()
   } catch (err) {
     error('Erreur lors de l\'enregistrement')
+  }
+}
+
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.image = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const handleAvatarUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.authorAvatar = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
   }
 }
 

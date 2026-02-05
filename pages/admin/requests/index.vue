@@ -78,14 +78,19 @@
                 <td>
                   <div class="d-flex align-items-center">
                     <img
-                      :src="request.images[0] || 'https://via.placeholder.com/40'"
+                      :src="(request.items && request.items[0]?.image) || request.images[0] || 'https://via.placeholder.com/40'"
                       class="rounded me-2"
                       width="40"
                       height="40"
                       style="object-fit: cover;"
                     />
                     <div>
-                      <div class="fw-medium">{{ truncate(request.title, 25) }}</div>
+                      <div class="fw-medium">
+                        {{ truncate(request.title, 25) }}
+                        <span v-if="request.items?.length" class="badge bg-info-subtle text-info ms-1" style="font-size: 0.6rem;">
+                          {{ request.items.length }} art.
+                        </span>
+                      </div>
                       <small class="text-muted">{{ request.category }}</small>
                     </div>
                   </div>

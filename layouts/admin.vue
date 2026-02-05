@@ -2,10 +2,10 @@
   <div class="admin-wrapper d-flex">
     <!-- Sidebar -->
     <aside class="admin-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
-      <div class="sidebar-header">
+      <div class="sidebar-header  d-flex justify-content-center">
         <NuxtLink to="/" class="sidebar-logo">
-          <img v-if="!sidebarCollapsed" src="~/assets/img/logo.svg" alt="NADOM" class="img-fluid" />
-          <img v-else src="~/assets/img/logo.svg" alt="NADOM" class="img-fluid logo-small" />
+          <img v-if="!sidebarCollapsed" :src="config.public.logo" alt="NADOM" class="img-fluid" />
+          <img v-else :src="config.public.logo" alt="NADOM" class="img-fluid logo-small" />
         </NuxtLink>
       </div>
 
@@ -106,6 +106,33 @@
               <i class="bi bi-bar-chart"></i>
               <span v-if="!sidebarCollapsed">Rapports</span>
             </NuxtLink>
+          </li>
+
+          <li class="nav-divider"></li>
+
+          <!-- Personal Shopping Admin -->
+          <li class="nav-item">
+            <div class="nav-link d-flex align-items-center justify-content-between" @click="togglePSMenu" :class="{ 'active': isActive('/admin/personal-shopping') }" style="cursor: pointer;">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-cart4"></i>
+                <span v-if="!sidebarCollapsed">Personal Shopping</span>
+              </div>
+              <i v-if="!sidebarCollapsed" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="psMenuOpen && !sidebarCollapsed" class="nav flex-column ms-4 small-nav">
+              <li class="nav-item">
+                <NuxtLink to="/admin/categories" class="nav-link py-1" :class="{ 'active': isActive('/admin/categories') }">
+                  <i class="bi bi-tags"></i>
+                  <span>Catégories</span>
+                </NuxtLink>
+              </li>
+              <li class="nav-item">
+                <NuxtLink to="/admin/products" class="nav-link py-1" :class="{ 'active': isActive('/admin/products') }">
+                  <i class="bi bi-grid-3x3-gap"></i>
+                  <span>Produits</span>
+                </NuxtLink>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>
@@ -215,9 +242,11 @@ const router = useRouter()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
 const { notifications, removeNotification } = useNotification()
+const config = useRuntimeConfig()
 
 // State
 const sidebarCollapsed = ref(false)
+const psMenuOpen = ref(false)
 
 // Computed
 const currentUser = computed(() => authStore.currentUser)
@@ -249,6 +278,10 @@ const isActive = (path: string) => {
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
+}
+
+const togglePSMenu = () => {
+  psMenuOpen.value = !psMenuOpen.value
 }
 
 // Lifecycle & Guards
