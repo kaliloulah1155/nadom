@@ -24,7 +24,7 @@ export const useWhatsApp = () => {
     return link
   }
 
-  // Message pour une nouvelle demande
+  // Message pour une nouvelle demande (cote client → equipe support)
   const contactForRequest = (requestTitle: string, requestId: string) => {
     const message = `Bonjour ! Je souhaite discuter de ma demande Personal Shopping :
 
@@ -34,6 +34,23 @@ export const useWhatsApp = () => {
 Merci de me contacter pour plus d'informations.`
 
     return openChat(defaultNumber, message)
+  }
+
+  // Message cote admin/agent → client (target le numero du client)
+  const contactClientForRequest = (
+    clientPhone: string | undefined | null,
+    requestTitle: string,
+    requestId: string,
+  ) => {
+    if (!clientPhone) return contactForRequest(requestTitle, requestId)
+    const message = `Bonjour, NADOM Support 👋
+
+Concernant votre demande Personal Shopping :
+📦 Produit : ${requestTitle}
+🔖 Référence : ${requestId}
+
+Pourrions-nous échanger pour finaliser votre commande ?`
+    return openChat(clientPhone, message)
   }
 
   // Message pour suivi de colis
@@ -85,6 +102,7 @@ Merci de me donner plus de détails sur les démarches.`
     generateLink,
     openChat,
     contactForRequest,
+    contactClientForRequest,
     contactForTracking,
     contactForGuide,
     contactForVisa,

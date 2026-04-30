@@ -1,21 +1,18 @@
-export default defineNuxtRouteMiddleware((to, from) => {
-  // Check if we're on client side
+import { useAuthStore } from '~/stores/auth'
+import { getToken } from '~/composables/useApi'
+
+export default defineNuxtRouteMiddleware(async (to) => {
   if (typeof window === 'undefined') return
 
-  // Check auth from localStorage
-  const authData = localStorage.getItem('auth')
+  const token = getToken()
+  if (!token) return navigateTo('/login')
 
-  if (!authData) {
-    return navigateTo('/login')
+  const authStore = useAuthStore()
+  if (!authStore.isAuthenticated) {
+    await authStore.initializeAuth()
   }
 
-  try {
-    const { user, token } = JSON.parse(authData)
-    if (!user || !token) {
-      return navigateTo('/login')
-    }
-  } catch (e) {
-    localStorage.removeItem('auth')
+  if (!authStore.isAuthenticated) {
     return navigateTo('/login')
   }
 })

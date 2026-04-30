@@ -338,7 +338,8 @@
     "docSubtitle": "Practical resources for your import-export operations",
     "interpretersTitle": "Interpreters & Guides",
     "interpretersSubtitle": "Our professional guides on the ground in China",
-    "downloadPdf": "Download PDF",
+    "downloadPdf": "Download",
+    "viewDoc": "View",
     "requestDoc": "Request Document",
     "filterCity": "City",
     "filterSpec": "Specialty",
@@ -466,5 +467,9 @@
     "reports": "Reports",
     "settings": "Settings",
     "backToSite": "Back to Site"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "noQuestions": "No questions available at the moment."
   }
 }

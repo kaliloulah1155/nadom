@@ -30,60 +30,39 @@
           <p class="text-muted">{{ t('importExport.shippingModesSubtitle') }}</p>
         </div>
 
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body p-4 text-center">
-                <div class="shipping-icon mx-auto mb-3 bg-danger-subtle text-danger">
-                  <i class="bi bi-airplane"></i>
-                </div>
-                <h5>{{ t('importExport.airExpress') }}</h5>
-                <p class="text-muted">{{ t('importExport.airExpressDesc') }}</p>
-                <ul class="list-unstyled text-start">
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airExpressTransit') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airExpressTracking') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airExpressIdeal') }}</li>
-                </ul>
-                <p class="fw-bold text-primary mb-0">{{ t('pricing.from') }} 12 500 FCFA/kg</p>
-              </div>
-            </div>
-          </div>
+        <div v-if="loadingModes && shippingModes.length === 0" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+          <p class="text-muted mt-3 mb-0">Chargement des modes...</p>
+        </div>
 
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm border-primary">
-              <div class="card-header bg-primary text-white text-center py-2">
+        <div v-else-if="shippingModes.length === 0" class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          Aucun mode d'expedition configuré.
+        </div>
+
+        <div v-else class="row g-4">
+          <div
+            v-for="(mode, idx) in shippingModes"
+            :key="mode.uuid || mode.id"
+            class="col-md-4"
+          >
+            <div class="card h-100 border-0 shadow-sm" :class="{ 'border-primary': isFeatured(idx) }">
+              <div v-if="isFeatured(idx)" class="card-header bg-primary text-white text-center py-2">
                 <small class="fw-medium">{{ t('pricing.popular') }}</small>
               </div>
               <div class="card-body p-4 text-center">
-                <div class="shipping-icon mx-auto mb-3 bg-primary-subtle text-primary">
-                  <i class="bi bi-airplane"></i>
+                <div
+                  class="shipping-icon mx-auto mb-3"
+                  :class="iconBgClass(mode.code)"
+                >
+                  <i :class="mode.icon || defaultIcon(mode.code)"></i>
                 </div>
-                <h5>{{ t('importExport.airStandard') }}</h5>
-                <p class="text-muted">{{ t('importExport.airStandardDesc') }}</p>
-                <ul class="list-unstyled text-start">
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airStandardTransit') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airStandardTracking') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.airStandardIdeal') }}</li>
-                </ul>
-                <p class="fw-bold text-primary mb-0">{{ t('pricing.from') }} 9 000 FCFA/kg</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body p-4 text-center">
-                <div class="shipping-icon mx-auto mb-3 bg-info-subtle text-info">
-                  <i class="bi bi-water"></i>
-                </div>
-                <h5>{{ t('importExport.seaFreight') }}</h5>
-                <p class="text-muted">{{ t('importExport.seaFreightDesc') }}</p>
-                <ul class="list-unstyled text-start">
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.seaFreightTransit') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.seaFreightPrice') }}</li>
-                  <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>{{ t('importExport.seaFreightIdeal') }}</li>
-                </ul>
-                <p class="fw-bold text-primary mb-0">{{ t('pricing.from') }} 2 000 FCFA/kg</p>
+                <h5>{{ mode.label }}</h5>
+                <div
+                  v-if="mode.description"
+                  class="shipping-mode-desc text-muted text-start"
+                  v-html="mode.description"
+                ></div>
               </div>
             </div>
           </div>
@@ -99,13 +78,28 @@
           <p class="text-muted">{{ t('importExport.destinationsSubtitle') }}</p>
         </div>
 
-        <div class="row g-3">
-          <div v-for="dest in destinations" :key="dest.id" class="col-6 col-md-4 col-lg-3">
+        <div v-if="countriesStore.loading && destinationCountries.length === 0" class="text-center py-4">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <div v-else-if="destinationCountries.length === 0" class="text-center py-4 text-muted">
+          <i class="bi bi-globe fs-1 d-block mb-2"></i>
+          Aucun pays configuré.
+        </div>
+
+        <div v-else class="row g-3">
+          <div
+            v-for="country in destinationCountries"
+            :key="country.uuid"
+            class="col-6 col-md-4 col-lg-3"
+          >
             <div class="card h-100 border-0 shadow-sm text-center">
               <div class="card-body py-3">
-                <span class="fs-2">{{ dest.flag }}</span>
-                <h6 class="mb-0 mt-2">{{ dest.country }}</h6>
-                <small class="text-muted">{{ dest.city }}</small>
+                <span class="fs-2">{{ country.flag_emoji || '🌍' }}</span>
+                <h6 class="mb-0 mt-2">{{ countryName(country) }}</h6>
+                <small class="text-muted">
+                  {{ country.code }} · {{ country.currency || '—' }}
+                </small>
               </div>
             </div>
           </div>
@@ -171,21 +165,54 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useShippingStore } from '~/stores/shipping'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { useCountriesStore } from '~/stores/countries'
 
 definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const shippingStore = useShippingStore()
+const psStore = usePersonalShoppingStore()
+const countriesStore = useCountriesStore()
+const loadingModes = ref(true)
 
 onMounted(async () => {
-  await shippingStore.fetchDestinations()
+  try {
+    await Promise.all([
+      shippingStore.fetchDestinations(),
+      psStore.fetchCategories(),
+      countriesStore.fetchAll(),
+    ])
+  } finally {
+    loadingModes.value = false
+  }
 })
 
-const destinations = computed(() => shippingStore.destinations)
+const destinationCountries = computed(() => countriesStore.activeCountries)
+const countryName = (c: any) => (locale.value === 'en' ? c.name_en : c.name_fr) || c.label || c.code
+
+const shippingModes = computed(() => {
+  return (psStore.categories || [])
+    .filter((c: any) => c.slug === 'MEX' && (c.status === '1' || c.status === 1))
+    .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+})
+
+const isFeatured = (idx: number) => idx === 1 // 2e mode = mis en avant
+const defaultIcon = (code: string) => {
+  if (code === 'sea') return 'bi bi-water'
+  if (code === 'air_express' || code === 'air_normal') return 'bi bi-airplane'
+  return 'bi bi-truck'
+}
+const iconBgClass = (code: string) => {
+  if (code === 'air_express') return 'bg-danger-subtle text-danger'
+  if (code === 'air_normal') return 'bg-primary-subtle text-primary'
+  if (code === 'sea') return 'bg-info-subtle text-info'
+  return 'bg-secondary-subtle text-secondary'
+}
 </script>
 
 <style scoped>
@@ -214,4 +241,8 @@ const destinations = computed(() => shippingStore.destinations)
   justify-content: center;
   font-size: 1.5rem;
 }
+
+.shipping-mode-desc :deep(p) { margin-bottom: 0.6rem; }
+.shipping-mode-desc :deep(ul) { padding-left: 1.1rem; margin-bottom: 0; }
+.shipping-mode-desc :deep(li) { margin-bottom: 0.25rem; }
 </style>

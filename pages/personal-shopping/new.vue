@@ -179,9 +179,51 @@
                   </div>
                 </div>
 
+                <!-- Client Info -->
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label fw-medium"
+                      >{{ locale === "fr" ? "Nom complet" : "Full name" }} *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-person"></i></span>
+                      <input
+                        v-model="form.contactFullname"
+                        type="text"
+                        class="form-control form-control-lg"
+                        :class="{ 'is-invalid': errors.contactFullname }"
+                        :placeholder="locale === 'fr' ? 'Prenom Nom' : 'First Last'"
+                        required
+                      />
+                    </div>
+                    <div v-if="errors.contactFullname" class="invalid-feedback d-block">
+                      {{ errors.contactFullname }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label fw-medium"
+                      >{{ locale === "fr" ? "Email" : "Email" }} *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                      <input
+                        v-model="form.contactEmail"
+                        type="email"
+                        class="form-control form-control-lg"
+                        :class="{ 'is-invalid': errors.contactEmail }"
+                        placeholder="email@exemple.com"
+                        required
+                      />
+                    </div>
+                    <div v-if="errors.contactEmail" class="invalid-feedback d-block">
+                      {{ errors.contactEmail }}
+                    </div>
+                  </div>
+                </div>
+
                 <div class="row">
                   <!-- Quantity -->
-                  <div class="col-md-6 mb-4">
+                  <div class="col-md-4 mb-4">
                     <label class="form-label fw-medium"
                       >{{ t("personalShopping.form.quantity") }} *</label
                     >
@@ -199,28 +241,71 @@
                   </div>
 
                   <!-- Budget -->
-                  <div class="col-md-6 mb-4">
+                  <div class="col-md-4 mb-4">
                     <label class="form-label fw-medium"
-                      >{{ t("personalShopping.form.budget") }} ({{
-                        t("common.currency")
-                      }}) *</label
+                      >{{ t("personalShopping.form.budget") }} *</label
                     >
-                    <input
-                      v-model.number="form.budgetEstimated"
-                      type="number"
-                      class="form-control form-control-lg"
-                      :class="{ 'is-invalid': errors.budgetEstimated }"
-                      placeholder="500000"
-                      min="10000"
-                      required
-                    />
-                    <div v-if="errors.budgetEstimated" class="invalid-feedback">
+                    <div class="input-group">
+                      <input
+                        v-model.number="form.budgetEstimated"
+                        type="number"
+                        class="form-control form-control-lg"
+                        :class="{ 'is-invalid': errors.budgetEstimated }"
+                        placeholder="500000"
+                        min="0"
+                        step="any"
+                        required
+                      />
+                      <select
+                        v-model="form.currency"
+                        class="form-select form-select-lg"
+                        style="max-width: 130px;"
+                      >
+                        <option
+                          v-for="cur in currencies"
+                          :key="cur.id"
+                          :value="cur.code"
+                        >
+                          {{ cur.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div v-if="errors.budgetEstimated" class="invalid-feedback d-block">
                       {{ errors.budgetEstimated }}
                     </div>
                     <small class="text-muted">{{
                       locale === "fr"
-                        ? "Budget pour la totalite (produit + expedition)"
-                        : "Budget for everything (product + shipping)"
+                        ? "Budget total (produit + expedition) - choisissez votre devise"
+                        : "Total budget (product + shipping) - pick your currency"
+                    }}</small>
+                  </div>
+
+                  <!-- Contact Number -->
+                  <div class="col-md-4 mb-4">
+                    <label class="form-label fw-medium"
+                      >{{ locale === "fr" ? "Contact WhatsApp" : "WhatsApp Contact" }} *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-whatsapp text-success"></i>
+                      </span>
+                      <input
+                        v-model="form.contactNumber"
+                        type="tel"
+                        class="form-control form-control-lg"
+                        :class="{ 'is-invalid': errors.contactNumber }"
+                        placeholder="+225 07 XX XX XX XX"
+                        pattern="^[\+]?[0-9\s\-]{8,20}$"
+                        required
+                      />
+                    </div>
+                    <div v-if="errors.contactNumber" class="invalid-feedback d-block">
+                      {{ errors.contactNumber }}
+                    </div>
+                    <small class="text-muted">{{
+                      locale === "fr"
+                        ? "Un agent vous contactera via ce numero"
+                        : "An agent will contact you via this number"
                     }}</small>
                   </div>
                 </div>
@@ -290,8 +375,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-import { FAKE_CATEGORIES } from "~/utils/data/fakeData";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { usePersonalShoppingStore } from "~/stores/personalShopping";
 import { useNotification } from "~/composables/useNotification";
@@ -306,7 +390,46 @@ const authStore = useAuthStore();
 const psStore = usePersonalShoppingStore();
 const { success, error: notifyError } = useNotification();
 
-const categories = FAKE_CATEGORIES;
+const categories = computed(() =>
+  (psStore.categories || []).filter(c => c.slug === 'POD').map((c: any) => ({
+    id: c.uuid || c.id,
+    name_fr: c.label || c.name_fr || c.name,
+    name_en: c.label || c.name_en || c.name,
+  })),
+);
+
+const currencies = computed(() => {
+  const fromStore = (psStore.categories || [])
+    .filter((c: any) => {
+      const slug = (c.slug || '').toString()
+      return slug === 'DVS' || slug.startsWith('DVS-')
+    })
+    .map((c: any) => ({
+      id: c.uuid || c.id,
+      code: (c.code || c.label || '').toString().toUpperCase(),
+      label: c.label || c.code || '',
+    }))
+    .filter((c: any) => c.code)
+  return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA' }]
+})
+
+onMounted(async () => {
+  if (!psStore.categories || psStore.categories.length === 0) {
+    await psStore.fetchCategories();
+  }
+  if (!form.currency && currencies.value.length > 0) {
+    form.currency = currencies.value[0].code
+  }
+  // Pre-remplit avec les infos du compte connecte (le client peut les modifier).
+  const u: any = authStore.currentUser
+  if (u) {
+    if (!form.contactFullname) {
+      form.contactFullname = [u.firstname, u.lastname].filter(Boolean).join(' ').trim()
+    }
+    if (!form.contactEmail) form.contactEmail = u.email || ''
+    if (!form.contactNumber) form.contactNumber = u.phone || ''
+  }
+});
 const loading = ref(false);
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -320,6 +443,10 @@ const form = reactive({
   description: "",
   quantity: 1,
   budgetEstimated: null as number | null,
+  currency: "" as string,
+  contactNumber: "",
+  contactFullname: "",
+  contactEmail: "",
 });
 
 const errors = reactive({
@@ -328,6 +455,9 @@ const errors = reactive({
   description: "",
   quantity: "",
   budgetEstimated: "",
+  contactNumber: "",
+  contactFullname: "",
+  contactEmail: "",
 });
 
 // File handling
@@ -403,14 +533,16 @@ const validateForm = () => {
           title: "Titre trop court (min 5 caracteres)",
           description: "Description trop courte (min 20 caracteres)",
           quantity: "Quantite invalide",
-          budget: "Budget minimum 10 000 FCFA",
+          budget: "Budget invalide",
+          contact: "Numero de contact invalide",
         }
       : {
           category: "Select a category",
           title: "Title too short (min 5 characters)",
           description: "Description too short (min 20 characters)",
           quantity: "Invalid quantity",
-          budget: "Minimum budget 10,000 FCFA",
+          budget: "Invalid budget",
+          contact: "Invalid contact number",
         };
 
   if (!form.category) errors.category = msgs.category;
@@ -418,8 +550,14 @@ const validateForm = () => {
   if (!form.description || form.description.length < 20)
     errors.description = msgs.description;
   if (!form.quantity || form.quantity < 1) errors.quantity = msgs.quantity;
-  if (!form.budgetEstimated || form.budgetEstimated < 10000)
+  if (form.budgetEstimated == null || form.budgetEstimated <= 0)
     errors.budgetEstimated = msgs.budget;
+  if (!form.contactNumber || !/^[\+]?[0-9\s\-]{8,20}$/.test(form.contactNumber))
+    errors.contactNumber = msgs.contact;
+  if (!form.contactFullname || form.contactFullname.trim().length < 2)
+    errors.contactFullname = locale.value === "fr" ? "Nom complet requis" : "Full name required";
+  if (!form.contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail))
+    errors.contactEmail = locale.value === "fr" ? "Email invalide" : "Invalid email";
 
   return !Object.values(errors).some((e) => e);
 };
@@ -427,35 +565,28 @@ const validateForm = () => {
 const handleSubmit = async () => {
   if (!validateForm()) return;
 
-  if (!authStore.isAuthenticated) {
-    notifyError(
-      locale.value === "fr"
-        ? "Veuillez vous connecter pour soumettre une demande"
-        : "Please login to submit a request",
-    );
-    router.push("/login");
-    return;
-  }
-
   loading.value = true;
 
   try {
-    const request = await psStore.createRequest({
-      userId: authStore.userId,
+    const request: any = await psStore.createRequest({
       category: form.category,
       title: form.title,
       description: form.description,
       images: imagePreviews.value,
       quantity: form.quantity,
       budgetEstimated: form.budgetEstimated!,
-    });
+      currency: form.currency,
+      contactNumber: form.contactNumber,
+      contactFullname: form.contactFullname,
+      contactEmail: form.contactEmail,
+    } as any);
 
     success(
       locale.value === "fr"
         ? "Demande soumise avec succes !"
         : "Request submitted successfully!",
     );
-    router.push(`/personal-shopping/${request.id}`);
+    router.push(`/personal-shopping/${request?.id ?? ''}`);
   } catch (err: any) {
     notifyError(
       err.message ||

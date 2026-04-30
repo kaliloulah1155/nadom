@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-1">Gestion de la FAQ</h4>
-        <p class="text-muted mb-0">{{ faqs.length }} questions configurées</p>
+        <p class="text-muted mb-0">{{ blogStore.faqMeta.total }} questions configurées</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
         <i class="bi bi-plus-lg me-2"></i>Nouvelle question
@@ -24,18 +24,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="filteredFaqs.length === 0">
+              <tr v-if="faqs.length === 0">
                 <td colspan="3" class="text-center py-4 text-muted">
                   Aucune question trouvée
                 </td>
               </tr>
-              <tr v-for="faq in paginatedFaqs" :key="faq.id">
+              <tr v-for="faq in faqs" :key="faq.id">
                 <td>
                   <span class="badge bg-light text-dark">{{ faq.category }}</span>
                 </td>
                 <td>
                   <div class="fw-medium mb-1">{{ faq.question_fr }}</div>
-                  <small class="text-muted d-block text-truncate" style="max-width: 500px;" v-html="truncate(faq.answer_fr, 100)">
+                  <small class="text-muted d-block text-truncate" style="max-width: 500px;" v-html="truncate(faq.answer_fr || '', 100)">
                   </small>
                 </td>
                 <td>
@@ -57,9 +57,11 @@
       <!-- Pagination -->
       <div class="card-footer bg-transparent py-3">
         <AdminPagination
-          v-model:current-page="currentPage"
-          v-model:limit="perPage"
-          :total-items="filteredFaqs.length"
+          v-model:current-page="blogStore.faqMeta.currentPage"
+          v-model:limit="blogStore.faqMeta.perPage"
+          :total-items="blogStore.faqMeta.total"
+          @update:current-page="(p: number) => fetchFAQ(p)"
+          @update:limit="(l: number) => fetchFAQ(1, l)"
         />
       </div>
     </div>
@@ -74,19 +76,17 @@
           </div>
           <form @submit.prevent="saveFaq">
             <div class="modal-body">
-              <!-- Tabs for Bilingual Support -->
-              <ul class="nav nav-tabs mb-3" id="faqLangTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="faq-fr-tab" data-bs-toggle="tab" data-bs-target="#faq-fr-content" type="button" role="tab">Français</button>
+              <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#faq-fr">Français</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="faq-en-tab" data-bs-toggle="tab" data-bs-target="#faq-en-content" type="button" role="tab">English</button>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#faq-en">English</button>
                 </li>
               </ul>
 
-              <div class="tab-content" id="faqLangTabsContent">
-                <!-- French Tab -->
-                <div class="tab-pane fade show active" id="faq-fr-content" role="tabpanel">
+              <div class="tab-content mb-3">
+                <div class="tab-pane fade show active" id="faq-fr">
                   <div class="row g-3">
                     <div class="col-12">
                       <label class="form-label">Question (FR) *</label>
@@ -98,42 +98,30 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- English Tab -->
-                <div class="tab-pane fade" id="faq-en-content" role="tabpanel">
+                <div class="tab-pane fade" id="faq-en">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Question (EN)</label>
-                      <input v-model="form.question_en" type="text" class="form-control" placeholder="English question..." />
+                      <label class="form-label">Question (EN) *</label>
+                      <input v-model="form.question_en" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Answer (EN)</label>
-                      <WysiwygEditor v-model="form.answer_en" height="200px" placeholder="English answer..." />
+                      <label class="form-label">Answer (EN) *</label>
+                      <WysiwygEditor v-model="form.answer_en" height="200px" />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <hr class="my-4">
-
               <div class="row g-3">
-                <div class="col-md-12">
-                  <label class="form-label">Catégorie *</label>
-                  <select v-model="form.category" class="form-select" required>
-                    <option value="">Sélectionnez</option>
-                    <option value="Général">Général</option>
-                    <option value="Visas">Visas</option>
-                    <option value="Shipping">Shipping</option>
-                    <option value="Pricing">Pricing</option>
-                  </select>
+                <div class="col-12">
+                  <label class="form-label">Catégorie</label>
+                  <input v-model="form.category" type="text" class="form-control" placeholder="Général, Shipping, Visa, etc." />
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary btn-md">
-                <i class="bi bi-check-lg me-2"></i>Enregistrer
-              </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
             </div>
           </form>
         </div>
@@ -144,10 +132,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useBlogStore, type FAQ } from '~/stores/blog'
+import { useBlogStore } from '~/stores/blog'
 import { useNotification } from '~/composables/useNotification'
-import { useFormatters } from '~/composables/useFormatters'
-import WysiwygEditor from '~/components/admin/WysiwygEditor.vue'
 
 definePageMeta({
   layout: 'admin'
@@ -155,14 +141,12 @@ definePageMeta({
 
 const blogStore = useBlogStore()
 const { success, error } = useNotification()
-const { truncate } = useFormatters()
 
+const faqs = computed(() => blogStore.faq)
+
+const editingFaq = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
-
-const editingFaq = ref<FAQ | null>(null)
-const currentPage = ref(1)
-const perPage = ref(10)
 
 const form = reactive({
   question_fr: '',
@@ -172,66 +156,73 @@ const form = reactive({
   category: ''
 })
 
+const fetchFAQ = async (page?: number, limit?: number) => {
+  await blogStore.fetchFAQ({
+    page: page ?? blogStore.faqMeta.currentPage,
+    limit: limit ?? blogStore.faqMeta.perPage
+  })
+}
+
+const truncate = (str: string, len: number) => {
+  if (!str) return ''
+  return str.length > len ? str.slice(0, len) + '...' : str
+}
+
 onMounted(async () => {
-  await blogStore.fetchFAQ()
+  await fetchFAQ(1)
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
 
-const faqs = computed(() => blogStore.faq)
-
-const filteredFaqs = computed(() => {
-  // Add search filtering if needed later
-  return faqs.value
-})
-
-const paginatedFaqs = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  return filteredFaqs.value.slice(start, start + perPage.value)
-})
-
-const resetForm = () => {
-  form.question_fr = ''
-  form.question_en = ''
-  form.answer_fr = ''
-  form.answer_en = ''
-  form.category = ''
-}
-
-const openModal = (faq?: FAQ) => {
+const openModal = (faq?: any) => {
   if (faq) {
     editingFaq.value = faq
     form.question_fr = faq.question_fr || ''
     form.question_en = faq.question_en || ''
     form.answer_fr = faq.answer_fr || ''
     form.answer_en = faq.answer_en || ''
-    form.category = faq.category
+    form.category = faq.category || ''
   } else {
     editingFaq.value = null
-    resetForm()
+    form.question_fr = ''
+    form.question_en = ''
+    form.answer_fr = ''
+    form.answer_en = ''
+    form.category = ''
   }
   modalInstance?.show()
 }
 
 const saveFaq = async () => {
-  const faqData: Partial<FAQ> = { ...form }
-  
-  if (editingFaq.value) {
-    await blogStore.updateFAQ(editingFaq.value.id, faqData)
-    success('Question modifiée')
-  } else {
-    await blogStore.createFAQ(faqData)
-    success('Question créée')
+  const data = {
+    question_fr: form.question_fr,
+    question_en: form.question_en || null,
+    answer_fr: form.answer_fr,
+    answer_en: form.answer_en || null,
+    category: form.category || null
   }
-  
-  modalInstance?.hide()
-  resetForm()
+
+  try {
+    if (editingFaq.value) {
+      await blogStore.updateFAQ(editingFaq.value.id, data as any)
+      success('FAQ modifiée')
+    } else {
+      await blogStore.createFAQ(data as any)
+      success('FAQ créée')
+    }
+    modalInstance?.hide()
+    await fetchFAQ(blogStore.faqMeta.currentPage)
+  } catch (err: any) {
+    error(err.message || 'Erreur lors de l\'enregistrement')
+  }
 }
 
-const deleteFaq = async (id: string) => {
-  if (!confirm('Supprimer cette question ?')) return
-  await blogStore.deleteFAQ(id)
-  success('Question supprimée')
+const deleteFaq = async (id: number) => {
+  if (confirm('Supprimer cette question ?')) {
+    await blogStore.deleteFAQ(id)
+    success('FAQ supprimée')
+    await fetchFAQ(blogStore.faqMeta.currentPage)
+  }
 }
 </script>

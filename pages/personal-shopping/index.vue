@@ -100,8 +100,8 @@
                     </div>
                 <div class="card-body">
                   <h6 class="fw-bold mb-1">{{ prod[`name_${locale}`] || prod.name_fr }}</h6>
-                  <p class="text-primary fw-bold mb-2">{{ prod.price.toLocaleString() }} FCFA</p>
-                  <p class="text-muted small mb-0">{{ prod[`description_${locale}`] || prod.description_fr }}</p>
+                  <p class="text-primary fw-bold mb-2">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</p>
+                  <p class="text-muted small mb-0" v-html="prod[`description_${locale}`] || prod.description_fr || ''"></p>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0">
                   <button class="btn btn-outline-primary w-100" @click="addToCart(prod)">
@@ -147,57 +147,30 @@
           <div class="col-lg-8">
             <div class="card border-0 shadow-lg pricing-card">
               <div class="card-body p-4">
-                <div class="pricing-item">
-                  <div class="d-flex align-items-center">
-                    <div class="pricing-icon me-3">
-                      <i class="bi bi-search"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0">{{ t('personalShopping.pricing.search') }}</h6>
-                      <small class="text-muted">{{ t('personalShopping.pricing.searchDesc') }}</small>
-                    </div>
-                  </div>
-                  <span class="badge bg-success fs-6">{{ t('personalShopping.pricing.free') }}</span>
+                <div v-if="pricingStore.loading && pricingServices.length === 0" class="text-center py-4">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                  <p class="text-muted small mb-0 mt-2">Chargement des tarifs...</p>
                 </div>
 
-                <div class="pricing-item">
+                <div
+                  v-for="(service, idx) in pricingServices"
+                  :key="service.id"
+                  class="pricing-item"
+                  :class="{ 'border-0': idx === pricingServices.length - 1 }"
+                >
                   <div class="d-flex align-items-center">
                     <div class="pricing-icon me-3">
-                      <i class="bi bi-percent"></i>
+                      <i :class="serviceIcon(service.slug)"></i>
                     </div>
                     <div>
-                      <h6 class="mb-0">{{ t('personalShopping.pricing.commission') }}</h6>
-                      <small class="text-muted">{{ t('personalShopping.pricing.commissionDesc') }}</small>
+                      <h6 class="mb-0">{{ formatServiceName(service.key) }}</h6>
+                      <small class="text-muted">{{ service.description || '—' }}</small>
                     </div>
                   </div>
-                  <span class="fw-bold text-primary">5%</span>
+                  <span class="fw-bold text-primary">{{ formatServiceValue(service.value) }}</span>
                 </div>
 
-                <div class="pricing-item">
-                  <div class="d-flex align-items-center">
-                    <div class="pricing-icon me-3">
-                      <i class="bi bi-eye"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0">{{ t('personalShopping.pricing.inspection') }}</h6>
-                      <small class="text-muted">{{ t('personalShopping.pricing.inspectionDesc') }}</small>
-                    </div>
-                  </div>
-                  <span class="fw-bold">5K - 15K FCFA</span>
-                </div>
-                <div class="pricing-item">
-                  <div class="d-flex align-items-center">
-                    <div class="pricing-icon me-3">
-                      <i class="bi bi-box-seam"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0">{{ t('personalShopping.pricing.packaging') }}</h6>
-                      <small class="text-muted">{{ t('personalShopping.pricing.packagingDesc') }}</small>
-                    </div>
-                  </div>
-                  <span class="fw-bold">3K - 10K FCFA</span>
-                </div>
-
+                <!-- Lien calcul expedition (toujours dispo) -->
                 <div class="pricing-item border-0">
                   <div class="d-flex align-items-center">
                     <div class="pricing-icon me-3">
@@ -261,7 +234,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useCartStore } from '~/stores/cart'
+import { usePricingStore } from '~/stores/pricing'
 import { useNotification } from '~/composables/useNotification'
+import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'default'
@@ -270,17 +245,66 @@ definePageMeta({
 const { t, locale } = useI18n()
 const psStore = usePersonalShoppingStore()
 const cartStore = useCartStore()
+const pricingStore = usePricingStore()
 const { success } = useNotification()
+const { formatCurrency } = useFormatters()
 const config = useRuntimeConfig()
 
-const categories = computed(() => psStore.categories)
+const pricingServices = computed(() =>
+  (pricingStore.services || []).filter((s: any) => Number(s.status) === 1)
+)
+
+const formatServiceName = (key: string) => {
+  if (!key) return ''
+  return key.replace(/^SERVICE_/, '').replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
+}
+
+const formatServiceValue = (value: string | number) => {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n === 0) return t('personalShopping.pricing.free') || 'Gratuit'
+  if (n > 0 && n <= 100) return n + '%'
+  return formatCurrency(n)
+}
+
+const SERVICE_ICONS: Record<string, string> = {
+  search: 'bi bi-search',
+  commission: 'bi bi-percent',
+  inspection: 'bi bi-eye',
+  packaging: 'bi bi-box-seam',
+  shipping: 'bi bi-truck',
+  personal_shopping: 'bi bi-bag-check',
+  visa: 'bi bi-passport',
+  guide: 'bi bi-person-badge',
+}
+const serviceIcon = (slug: string) => {
+  const key = (slug || '').replace(/^service_/, '').toLowerCase()
+  return SERVICE_ICONS[key] || 'bi bi-tag'
+}
+
+const ICONS = ['bi bi-phone', 'bi bi-bag', 'bi bi-house', 'bi bi-heart', 'bi bi-bicycle', 'bi bi-gift', 'bi bi-car-front', 'bi bi-gear', 'bi bi-cup-hot', 'bi bi-lamp', 'bi bi-hospital', 'bi bi-scissors']
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#22c55e', '#6366f1', '#f97316', '#14b8a6', '#a855f7']
+
+const categories = computed(() =>
+  (psStore.categories || [])
+    .filter((c: any) => c.slug === 'POD')
+    .map((c: any, i: number) => ({
+      id: c.uuid || c.id,
+      name_fr: c.label || c.name_fr || c.name || '',
+      name_en: c.label || c.name_en || c.name || '',
+      icon: ICONS[i % ICONS.length],
+      color: COLORS[i % COLORS.length],
+    })),
+)
 const selectedCategory = ref<string | null>(null)
 
 onMounted(async () => {
-  await psStore.fetchCategories()
-  await psStore.fetchProducts()
+  await Promise.all([
+    psStore.fetchCategories(),
+    psStore.fetchProducts(),
+    pricingStore.fetchServices({ page: 1, limit: 50, status: 1 }),
+  ])
   cartStore.loadFromLocalStorage()
-  
+
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     zoomModal = new (window as any).bootstrap.Modal(zoomModalRef.value)
   }

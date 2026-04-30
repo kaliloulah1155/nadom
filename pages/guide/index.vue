@@ -63,14 +63,22 @@
                 </div>
               </div>
               <div class="card-footer bg-transparent border-0 p-4 pt-0">
-                <a
-                  v-if="doc.fileUrl"
-                  :href="doc.fileUrl"
-                  target="_blank"
-                  class="btn btn-primary w-100"
-                >
-                  <i class="bi bi-file-earmark-pdf me-2"></i>{{ t('guide.downloadPdf') }}
-                </a>
+                <div v-if="doc.fileUrl" class="d-flex gap-2">
+                  <a
+                    :href="doc.fileUrl"
+                    target="_blank"
+                    class="btn btn-outline-primary flex-fill"
+                  >
+                    <i class="bi bi-eye me-2"></i>{{ t('guide.viewDoc') }}
+                  </a>
+                  <a
+                    :href="doc.fileUrl"
+                    :download="doc.name + '.pdf'"
+                    class="btn btn-primary flex-fill"
+                  >
+                    <i class="bi bi-download me-2"></i>{{ t('guide.downloadPdf') }}
+                  </a>
+                </div>
                 <a
                   v-else
                   :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`"
@@ -181,7 +189,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <small class="text-muted">{{ locale === 'fr' ? 'A partir de' : 'From' }}</small>
-                    <div class="fw-bold text-primary">{{ formatCurrency(guide.pricePerDay) }}/{{ locale === 'fr' ? 'jour' : 'day' }}</div>
+                    <div class="fw-bold text-primary">{{ formatCurrency(Number(guide.price_per_day || guide.pricePerDay) || 0) }}/{{ locale === 'fr' ? 'jour' : 'day' }}</div>
                   </div>
                   <span v-if="guide.available" class="badge bg-success">{{ locale === 'fr' ? 'Disponible' : 'Available' }}</span>
                   <span v-else class="badge bg-secondary">{{ locale === 'fr' ? 'Indisponible' : 'Unavailable' }}</span>
@@ -253,7 +261,6 @@
 import { reactive, computed, onMounted, ref } from 'vue'
 import { useGuidesStore } from '~/stores/guides'
 import { useFormatters } from '~/composables/useFormatters'
-import { FAKE_GUIDES } from '~/utils/data/fakeData'
 
 definePageMeta({
   layout: 'default'
@@ -278,29 +285,11 @@ const filters = reactive({
 const tourGuides = ref<any[]>([])
 
 onMounted(async () => {
-  // Load documentation guides from localStorage
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('guides')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      // Check if it's documentation guides (has category property but no cities)
-      if (parsed.length > 0 && parsed[0].category && !parsed[0].cities) {
-        documentationGuides.value = parsed.filter((g: any) => g.active !== false)
-      }
-    }
-  }
-
-  // If no docs from localStorage, use defaults
-  if (documentationGuides.value.length === 0) {
-    documentationGuides.value = [
-      { id: 'doc_1', name: locale.value === 'fr' ? 'Guide Import Chine-Afrique' : 'China-Africa Import Guide', category: 'import', description: locale.value === 'fr' ? 'Guide complet pour importer des marchandises de Chine vers l\'Afrique' : 'Complete guide to importing goods from China to Africa', language: locale.value === 'fr' ? 'Francais' : 'French', fileUrl: '', active: true },
-      { id: 'doc_2', name: locale.value === 'fr' ? 'Procedures Douanieres' : 'Customs Procedures', category: 'douane', description: locale.value === 'fr' ? 'Tout savoir sur les procedures douanieres et les documents requis' : 'Everything about customs procedures and required documents', language: locale.value === 'fr' ? 'Francais' : 'French', fileUrl: '', active: true },
-      { id: 'doc_3', name: locale.value === 'fr' ? 'Modes de Paiement' : 'Payment Methods', category: 'paiement', description: locale.value === 'fr' ? 'Les differents modes de paiement securises pour vos transactions' : 'Different secure payment methods for your transactions', language: locale.value === 'fr' ? 'Francais' : 'French', fileUrl: '', active: true }
-    ]
-  }
-
-  // Load tour guides - use FAKE_GUIDES directly
-  tourGuides.value = [...FAKE_GUIDES]
+  await guidesStore.fetchGuides({ page: 1, limit: 100, is_active: true })
+  const all = guidesStore.guides || []
+  // Documentation guides have a `category` field; tour guides have `cities`/`specializations`
+  documentationGuides.value = all.filter((g: any) => g.category && !(g.cities || g.specializations))
+  tourGuides.value = all.filter((g: any) => (g.cities || g.specializations))
 })
 
 // Documentation categories

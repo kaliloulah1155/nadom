@@ -338,7 +338,8 @@
     "docSubtitle": "Ressources pratiques pour vos operations import-export",
     "interpretersTitle": "Interpretes & Accompagnateurs",
     "interpretersSubtitle": "Nos guides professionnels sur le terrain en Chine",
-    "downloadPdf": "Telecharger le PDF",
+    "downloadPdf": "Telecharger",
+    "viewDoc": "Consulter",
     "requestDoc": "Demander le document",
     "filterCity": "Ville",
     "filterSpec": "Specialite",
@@ -466,5 +467,9 @@
     "reports": "Rapports",
     "settings": "Parametres",
     "backToSite": "Retour au site"
+  },
+  "faq": {
+    "title": "Questions frequentes",
+    "noQuestions": "Aucune question disponible pour le moment."
   }
 }

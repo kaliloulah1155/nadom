@@ -21,7 +21,7 @@
           <div v-for="post in blogPosts" :key="post.id" class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm">
               <img
-                :src="post.image"
+                :src="resolveImage(post.image)"
                 class="card-img-top"
                 :alt="post.title_fr"
                 style="height: 200px; object-fit: cover;"
@@ -36,7 +36,7 @@
               </div>
               <div class="card-footer bg-transparent border-0">
                 <div class="d-flex justify-content-between align-items-center">
-                  <small class="text-muted">{{ formatDate(post.publishedAt) }}</small>
+                  <small class="text-muted">{{ formatDate(post.published_at || post.publishedAt) }}</small>
                   <NuxtLink :to="`/resources/blog/${post.slug}`" class="btn btn-sm btn-outline-primary">
                     {{ t('blog.readMore') }} <i class="bi bi-arrow-right ms-1"></i>
                   </NuxtLink>
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { FAKE_BLOG_POSTS } from '~/utils/data/fakeData'
+import { useBlogStore } from '~/stores/blog'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -65,8 +65,18 @@ definePageMeta({
 
 const { t, locale } = useI18n()
 const { formatDate } = useFormatters()
+const blogStore = useBlogStore()
+const config = useRuntimeConfig()
 
-const blogPosts = FAKE_BLOG_POSTS
+const blogPosts = computed(() => blogStore.posts)
+
+const resolveImage = (img: string | null) => {
+  if (!img) return 'https://placehold.co/600x400?text=No+Image'
+  if (/^https?:\/\//i.test(img)) return img
+  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+}
+
+await blogStore.fetchPosts({ page: 1, limit: 24, is_published: true })
 </script>
 
 <style scoped>

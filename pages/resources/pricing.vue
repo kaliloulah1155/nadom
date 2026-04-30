@@ -196,8 +196,17 @@
                   <span class="me-2">{{ dest.flag }}</span>
                   {{ dest.country }}
                 </td>
-                <td class="text-center" v-for="mode in dest.shippingModes" :key="mode.mode">
-                  <strong>{{ formatCurrency(mode.costPerKg) }}</strong>/kg
+                <td class="text-center">
+                  <strong v-if="getCost(dest, 'air_express')">{{ formatCurrency(getCost(dest, 'air_express')) }}</strong>
+                  <span v-else class="text-muted">-</span>/kg
+                </td>
+                <td class="text-center">
+                  <strong v-if="getCost(dest, 'air_normal')">{{ formatCurrency(getCost(dest, 'air_normal')) }}</strong>
+                  <span v-else class="text-muted">-</span>/kg
+                </td>
+                <td class="text-center">
+                  <strong v-if="getCost(dest, 'sea')">{{ formatCurrency(getCost(dest, 'sea')) }}</strong>
+                  <span v-else class="text-muted">-</span>/kg
                 </td>
               </tr>
             </tbody>
@@ -282,7 +291,7 @@
 </template>
 
 <script setup lang="ts">
-import { FAKE_DESTINATIONS } from '~/utils/data/fakeData'
+import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -291,7 +300,19 @@ definePageMeta({
 
 const { t } = useI18n()
 const { formatCurrency } = useFormatters()
-const destinations = FAKE_DESTINATIONS
+const shippingStore = useShippingStore()
+
+const destinations = computed(() => shippingStore.destinations)
+
+const getCost = (dest: any, mode: string): number => {
+  const modes = dest.shipping_modes || dest.shippingModes || []
+  const found = modes.find((m: any) => m.mode === mode)
+  if (!found) return 0
+  const v = found.cost_per_kg ?? found.costPerKg
+  return Number(v) || 0
+}
+
+await shippingStore.fetchDestinations()
 </script>
 
 <style scoped>

@@ -21,23 +21,23 @@
     <template v-else>
       <!-- Hero -->
       <section class="blog-hero position-relative">
-        <div class="hero-bg" :style="{ backgroundImage: `url(${post.image})` }"></div>
+        <div class="hero-bg" :style="{ backgroundImage: `url(${resolveImage(post.image)})` }"></div>
         <div class="container position-relative py-5">
           <div class="row justify-content-center">
             <div class="col-lg-8 text-center text-white">
               <div class="mb-3">
-                <span class="badge bg-primary me-2">{{ post.category }}</span>
-                <span class="opacity-75">{{ post.readTime }} {{ t('blog.readTime') }}</span>
+                <span v-if="post.category" class="badge bg-primary me-2">{{ post.category }}</span>
+                <span v-if="post.read_time" class="opacity-75">{{ post.read_time }} {{ t('blog.readTime') }}</span>
               </div>
               <h1 class="display-5 fw-bold mb-4 text-white">{{ post[`title_${locale}`] || post.title_fr }}</h1>
-              <div class="d-flex justify-content-center align-items-center gap-4">
-                <div class="d-flex align-items-center">
-                  <img :src="post.authorAvatar" class="rounded-circle me-2" width="40" height="40" :alt="post.author" />
+              <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap">
+                <div v-if="post.author" class="d-flex align-items-center">
+                  <img :src="resolveAvatar(post.author_avatar, post.author)" class="rounded-circle me-2" width="40" height="40" :alt="post.author" />
                   <span>{{ post.author }}</span>
                 </div>
-                <div>
+                <div v-if="post.published_at">
                   <i class="bi bi-calendar3 me-1"></i>
-                  {{ formatDate(post.publishedAt) }}
+                  {{ formatDate(post.published_at) }}
                 </div>
               </div>
             </div>
@@ -51,67 +51,21 @@
           <div class="row justify-content-center">
             <div class="col-lg-8">
               <!-- Featured Image -->
-              <div class="mb-5">
-                <img :src="post.image" :alt="post.title_fr" class="img-fluid rounded-4 shadow w-100" />
+              <div v-if="post.image" class="mb-5">
+                <img :src="resolveImage(post.image)" :alt="post.title_fr || ''" class="img-fluid rounded-4 shadow w-100" />
               </div>
 
               <!-- Article Content -->
               <article class="blog-content">
-                <p class="lead text-muted">{{ post[`excerpt_${locale}`] || post.excerpt_fr }}</p>
-                
-                <div v-html="post[`content_${locale}`] || post.content_fr"></div>
+                <p v-if="post[`excerpt_${locale}`] || post.excerpt_fr" class="lead text-muted">
+                  {{ post[`excerpt_${locale}`] || post.excerpt_fr }}
+                </p>
 
-                <hr class="my-4">
-
-                <!-- Example Content -->
-                <h2>{{ t('blog.introduction') }}</h2>
-                <p>{{ t('blog.introText1') }}</p>
-                <p>{{ t('blog.introText2') }}</p>
-
-                <h2>{{ t('blog.advantagesTitle') }}</h2>
-                <ul>
-                  <li><strong>{{ t('blog.advantage1') }}</strong> {{ t('blog.advantage1Desc') }}</li>
-                  <li><strong>{{ t('blog.advantage2') }}</strong> {{ t('blog.advantage2Desc') }}</li>
-                  <li><strong>{{ t('blog.advantage3') }}</strong> {{ t('blog.advantage3Desc') }}</li>
-                  <li><strong>{{ t('blog.advantage4') }}</strong> {{ t('blog.advantage4Desc') }}</li>
-                </ul>
-
-                <blockquote class="blockquote bg-light p-4 rounded my-4">
-                  <p class="mb-0 fst-italic">"{{ t('blog.quote') }}"</p>
-                  <footer class="blockquote-footer mt-2">{{ t('blog.quoteAuthor') }}</footer>
-                </blockquote>
-
-                <h2>{{ t('blog.stepsTitle') }}</h2>
-                <ol>
-                  <li class="mb-3">
-                    <strong>{{ t('blog.stepIdentify') }}</strong> {{ t('blog.stepIdentifyDesc') }}
-                  </li>
-                  <li class="mb-3">
-                    <strong>{{ t('blog.stepSupplier') }}</strong> {{ t('blog.stepSupplierDesc') }}
-                  </li>
-                  <li class="mb-3">
-                    <strong>{{ t('blog.stepNegotiate') }}</strong> {{ t('blog.stepNegotiateDesc') }}
-                  </li>
-                  <li class="mb-3">
-                    <strong>{{ t('blog.stepQuality') }}</strong> {{ t('blog.stepQualityDesc') }}
-                  </li>
-                  <li class="mb-3">
-                    <strong>{{ t('blog.stepShipping') }}</strong> {{ t('blog.stepShippingDesc') }}
-                  </li>
-                </ol>
-
-                <div class="alert alert-primary my-4">
-                  <i class="bi bi-lightbulb me-2"></i>
-                  <strong>{{ t('blog.tip') }}</strong> {{ t('blog.tipText') }}
-                </div>
-
-                <h2>{{ t('blog.conclusion') }}</h2>
-                <p>{{ t('blog.conclusionText1') }}</p>
-                <p>{{ t('blog.conclusionText2') }}</p>
+                <div v-html="post[`content_${locale}`] || post.content_fr || ''"></div>
               </article>
 
               <!-- Tags -->
-              <div class="mt-5 pt-4 border-top">
+              <div v-if="post.tags && post.tags.length" class="mt-5 pt-4 border-top">
                 <h6 class="mb-3">{{ t('blog.tags') }}</h6>
                 <div class="d-flex flex-wrap gap-2">
                   <span v-for="tag in post.tags" :key="tag" class="badge bg-light text-dark">
@@ -124,16 +78,16 @@
               <div class="mt-4 pt-4 border-top">
                 <h6 class="mb-3">{{ t('blog.shareArticle') }}</h6>
                 <div class="d-flex gap-2">
-                  <a href="#" class="btn btn-outline-primary btn-sm">
+                  <a :href="shareUrl('facebook')" target="_blank" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-facebook"></i>
                   </a>
-                  <a href="#" class="btn btn-outline-info btn-sm">
+                  <a :href="shareUrl('twitter')" target="_blank" class="btn btn-outline-info btn-sm">
                     <i class="bi bi-twitter"></i>
                   </a>
-                  <a href="#" class="btn btn-outline-success btn-sm">
+                  <a :href="shareUrl('whatsapp')" target="_blank" class="btn btn-outline-success btn-sm">
                     <i class="bi bi-whatsapp"></i>
                   </a>
-                  <a href="#" class="btn btn-outline-primary btn-sm">
+                  <a :href="shareUrl('linkedin')" target="_blank" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-linkedin"></i>
                   </a>
                 </div>
@@ -182,14 +136,43 @@ const { t, locale } = useI18n()
 const route = useRoute()
 const blogStore = useBlogStore()
 const { formatDate } = useFormatters()
+const config = useRuntimeConfig()
 
 const loading = ref(true)
 const post = ref<any>(null)
 
+const resolveImage = (img: string | null) => {
+  if (!img) return 'https://placehold.co/1200x600?text=NADOM'
+  if (/^https?:\/\//i.test(img)) return img
+  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+}
+
+const resolveAvatar = (avatar: string | null, name: string | null) => {
+  if (avatar) {
+    if (/^https?:\/\//i.test(avatar)) return avatar
+    return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(avatar).replace(/^\/+/, '')
+  }
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Author')}&background=random&color=fff`
+}
+
+const shareUrl = (platform: string) => {
+  const url = typeof window !== 'undefined' ? window.location.href : ''
+  const title = post.value?.[`title_${locale.value}`] || post.value?.title_fr || ''
+  const u = encodeURIComponent(url)
+  const t = encodeURIComponent(title)
+  const map: Record<string, string> = {
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
+    twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
+    whatsapp: `https://wa.me/?text=${t}%20${u}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`
+  }
+  return map[platform] || '#'
+}
+
 onMounted(async () => {
-  await blogStore.fetchPosts()
+  loading.value = true
   const slug = route.params.slug as string
-  post.value = blogStore.getPostBySlug(slug)
+  post.value = await blogStore.fetchPostBySlug(slug)
   loading.value = false
 })
 </script>
@@ -218,22 +201,35 @@ onMounted(async () => {
   line-height: 1.8;
 }
 
-.blog-content h2 {
+.blog-content :deep(h2) {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-weight: 600;
 }
 
-.blog-content ul,
-.blog-content ol {
+.blog-content :deep(ul),
+.blog-content :deep(ol) {
   margin-bottom: 1.5rem;
 }
 
-.blog-content li {
+.blog-content :deep(li) {
   margin-bottom: 0.5rem;
 }
 
-.blog-content p {
+.blog-content :deep(p) {
   margin-bottom: 1.5rem;
+}
+
+.blog-content :deep(blockquote) {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  font-style: italic;
+}
+
+.blog-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
 }
 </style>

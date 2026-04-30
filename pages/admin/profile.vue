@@ -76,7 +76,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin'
 })
 
 const authStore = useAuthStore()
