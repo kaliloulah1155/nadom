@@ -29,8 +29,8 @@
                     @change="onDestinationChange"
                   >
                     <option value="">{{ t('calculator.selectCountry') }}</option>
-                    <option v-for="dest in destinations" :key="dest.id" :value="dest.country">
-                      {{ dest.flag }} {{ dest.country }} - {{ dest.city }}
+                    <option v-for="dest in destinationOptions" :key="dest.id" :value="dest.country">
+                      <template v-if="dest.flag">{{ dest.flag }} </template>{{ dest.country }}<template v-if="dest.city"> - {{ dest.city }}</template>
                     </option>
                   </select>
                 </div>
@@ -155,6 +155,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useShippingStore, type ShippingMode } from '~/stores/shipping'
+import { useCountriesStore } from '~/stores/countries'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -163,6 +164,7 @@ definePageMeta({
 
 const { t, locale } = useI18n()
 const shippingStore = useShippingStore()
+const countriesStore = useCountriesStore()
 const { formatCurrency } = useFormatters()
 
 const form = reactive({
@@ -178,12 +180,30 @@ const result = ref<{
   total: number
 } | null>(null)
 
-// Load destinations
+// Load destinations + countries
 onMounted(async () => {
-  await shippingStore.fetchDestinations()
+  await Promise.all([
+    shippingStore.fetchDestinations(),
+    countriesStore.fetchAll()
+  ])
 })
 
 const destinations = computed(() => shippingStore.destinations)
+
+// Merge: prefer shipping destinations (have pricing) and fall back to all countries
+const destinationOptions = computed(() => {
+  const fromShipping = (shippingStore.destinations || []).map((d: any) => ({
+    id: `s-${d.id}`,
+    country: d.country,
+    city: d.city,
+    flag: d.flag
+  }))
+  const shippingCountries = new Set(fromShipping.map(d => d.country))
+  const fromCountries = (countriesStore.activeCountries || [])
+    .filter(c => !shippingCountries.has(c.label))
+    .map(c => ({ id: `c-${c.uuid}`, country: c.label, city: '', flag: '' }))
+  return [...fromShipping, ...fromCountries]
+})
 
 const availableModes = computed(() => {
   if (!form.destination) return []

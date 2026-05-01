@@ -1,23 +1,28 @@
 export const useFormatters = () => {
   // Formatage monétaire
   const formatCurrency = (
-    amount: number,
+    amount: number | string | null | undefined,
     currency: string = 'XOF',
     locale: string = 'fr-FR'
   ): string => {
-    if (currency === 'XOF' || currency === 'FCFA') {
-      // Format spécial pour le Franc CFA
+    const n = Number(amount)
+    const safe = Number.isFinite(n) ? n : 0
+    const code = (currency || 'XOF').toString().toUpperCase()
+    if (code === 'XOF' || code === 'FCFA') {
       return new Intl.NumberFormat(locale, {
         style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-      }).format(amount) + ' FCFA'
+      }).format(safe) + ' FCFA'
     }
-
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency
-    }).format(amount)
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: code,
+      }).format(safe)
+    } catch (_) {
+      return new Intl.NumberFormat(locale).format(safe) + ' ' + code
+    }
   }
 
   // Formatage des nombres
@@ -153,7 +158,9 @@ export const useFormatters = () => {
       in_transit: { label: 'En transit', color: '#8b5cf6', icon: 'bi-truck' },
       in_customs: { label: 'En douane', color: '#f97316', icon: 'bi-building' },
       out_for_delivery: { label: 'En livraison', color: '#06b6d4', icon: 'bi-bicycle' },
-      delivered: { label: 'Livré', color: '#22c55e', icon: 'bi-check-circle' }
+      delivered: { label: 'Livré', color: '#22c55e', icon: 'bi-check-circle' },
+      order_placed: { label: 'Commande passée', color: '#6b7280', icon: 'bi-cart-check' },
+      returned: { label: 'Retourné', color: '#ef4444', icon: 'bi-arrow-return-left' }
     }
 
     return statusMap[status] || { label: status, color: '#6b7280', icon: 'bi-question-circle' }

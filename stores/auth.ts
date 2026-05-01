@@ -1,16 +1,24 @@
 import { defineStore } from 'pinia'
-import { FAKE_USERS } from '~/utils/data/fakeData'
+import { useApi, setToken, clearToken, getToken } from '~/composables/useApi'
 
 interface User {
-  id: string
+  id?: string
+  uuid?: string
   email: string
-  firstName: string
-  lastName: string
-  role: 'client' | 'admin' | 'agent'
+  firstname?: string
+  lastname?: string
+  firstName?: string
+  lastName?: string
   phone?: string
   country?: string
   city?: string
   avatar?: string
+  picture?: string
+  role?: any
+  company?: any
+  perm?: Record<string, boolean>
+  ability?: { rules: Array<{ action: string; subject: string }> }
+  wallet?: any
 }
 
 interface AuthState {
@@ -31,56 +39,50 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAdmin: (state) => state.currentUser?.role === 'admin',
-    isClient: (state) => state.currentUser?.role === 'client',
-    isAgent: (state) => state.currentUser?.role === 'agent',
+    isAdmin: (state) => state.currentUser?.role?.code === 'admin' || state.currentUser?.role === 'admin',
+    isClient: (state) => state.currentUser?.role?.code === 'client' || state.currentUser?.role === 'client',
+    isAgent: (state) => state.currentUser?.role?.code === 'agent' || state.currentUser?.role === 'agent',
+    hasBackofficeAccess: (state) => {
+      if (!state.currentUser) return false
+      const roleData = state.currentUser.role
+      const roleCode = (typeof roleData === 'object' ? roleData?.code : roleData) || ''
+      const normalizedCode = roleCode.toString().toLowerCase().trim()
+      return ['admin', 'agent'].includes(normalizedCode)
+    },
     userEmail: (state) => state.currentUser?.email || '',
-    userFullName: (state) => state.currentUser
-      ? `${state.currentUser.firstName} ${state.currentUser.lastName}`
-      : '',
-    userId: (state) => state.currentUser?.id || ''
+    userFullName: (state) => {
+      if (!state.currentUser) return ''
+      const first = state.currentUser.firstname || state.currentUser.firstName || ''
+      const last = state.currentUser.lastname || state.currentUser.lastName || ''
+      return `${first} ${last}`.trim()
+    },
+    userId: (state) => state.currentUser?.uuid || state.currentUser?.id || ''
   },
 
   actions: {
-    async login(email: string, password: string) {
+    async login(credentials: { email?: string; phone?: string; password: string }) {
       this.loading = true
       this.error = null
 
       try {
-        // Simule un délai réseau
-        await new Promise(resolve => setTimeout(resolve, 500))
+        const api = useApi()
+        const res = await api.post<{ token: string; token_type: string }>('/auth/login', credentials)
+        console.log('[Store] Login response:', res)
 
-        // Recherche utilisateur dans fake data
-        const user = FAKE_USERS.find(u => u.email === email)
-
-        if (user && user.password === password) {
-          this.currentUser = {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            role: user.role,
-            phone: user.phone,
-            country: user.country,
-            city: user.city,
-            avatar: user.avatar
-          }
-          this.token = `token_${Date.now()}_${user.id}`
-          this.isAuthenticated = true
-
-          // Sauvegarde localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth', JSON.stringify({
-              user: this.currentUser,
-              token: this.token
-            }))
-          }
-
-          return this.currentUser
-        } else {
-          throw new Error('Email ou mot de passe incorrect')
+        if (!res.success || !res.data?.token) {
+          console.error('[Store] Login failed or no token:', res.message)
+          throw new Error(res.message || 'Échec de connexion')
         }
+
+        setToken(res.data.token)
+        this.token = res.data.token
+        console.log('[Store] Token set, fetching user...')
+
+        await this.fetchUser()
+        console.log('[Store] Fetch user done. User:', this.currentUser)
+        return this.currentUser
       } catch (err: any) {
+        console.error('[Store] Login Error catch:', err)
         this.error = err.message
         throw err
       } finally {
@@ -91,8 +93,8 @@ export const useAuthStore = defineStore('auth', {
     async register(userData: {
       email: string
       password: string
-      firstName: string
-      lastName: string
+      firstname: string
+      lastname: string
       phone?: string
       country?: string
       city?: string
@@ -101,40 +103,14 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
 
       try {
-        await new Promise(resolve => setTimeout(resolve, 500))
+        const api = useApi()
+        const res = await api.post('/user', userData)
 
-        // Vérifie si email existe déjà
-        const existingUser = FAKE_USERS.find(u => u.email === userData.email)
-        if (existingUser) {
-          throw new Error('Cet email est déjà utilisé')
+        if (!res.success) {
+          throw new Error(res.message || 'Erreur lors de la création du compte')
         }
 
-        // Crée nouvel utilisateur
-        const newUser: User = {
-          id: `user_${Date.now()}`,
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          role: 'client',
-          phone: userData.phone,
-          country: userData.country,
-          city: userData.city,
-          avatar: `https://ui-avatars.com/api/?name=${userData.firstName}+${userData.lastName}&background=random`
-        }
-
-        this.currentUser = newUser
-        this.token = `token_${Date.now()}_${newUser.id}`
-        this.isAuthenticated = true
-
-        // Sauvegarde localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth', JSON.stringify({
-            user: this.currentUser,
-            token: this.token
-          }))
-        }
-
-        return newUser
+        return res.data
       } catch (err: any) {
         this.error = err.message
         throw err
@@ -143,30 +119,54 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async logout() {
-      this.currentUser = null
-      this.token = null
-      this.isAuthenticated = false
-      this.error = null
+    async fetchUser() {
+      const api = useApi()
+      const res = await api.get<User>('/auth/user')
 
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth')
+      if (res.success && res.data) {
+        this.currentUser = res.data
+        this.isAuthenticated = true
+        return res.data
+      }
+
+      this.currentUser = null
+      this.isAuthenticated = false
+      return null
+    },
+
+    async logout() {
+      try {
+        const api = useApi()
+        await api.post('/auth/logout')
+      } catch (e) {
+        // Token déjà révoqué côté serveur — on nettoie le local quand même
+      } finally {
+        // Nettoyage des canaux Pusher pour eviter de garder une souscription orpheline
+        try {
+          const { useNotificationsStore } = await import('~/stores/notifications')
+          useNotificationsStore().unbindRealtime()
+        } catch (_) {
+          // ignore
+        }
+        clearToken()
+        this.currentUser = null
+        this.token = null
+        this.isAuthenticated = false
+        this.error = null
       }
     },
 
-    initializeAuth() {
-      if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('auth')
-        if (saved) {
-          try {
-            const { user, token } = JSON.parse(saved)
-            this.currentUser = user
-            this.token = token
-            this.isAuthenticated = true
-          } catch (e) {
-            localStorage.removeItem('auth')
-          }
-        }
+    async initializeAuth() {
+      const token = getToken()
+      if (!token) return
+
+      this.token = token
+      try {
+        await this.fetchUser()
+      } catch (e) {
+        clearToken()
+        this.token = null
+        this.isAuthenticated = false
       }
     },
 
@@ -175,18 +175,12 @@ export const useAuthStore = defineStore('auth', {
 
       this.loading = true
       try {
-        await new Promise(resolve => setTimeout(resolve, 300))
+        const api = useApi()
+        const uuid = this.currentUser.uuid || this.currentUser.id
+        const res = await api.post<User>(`/user/${uuid}`, { ...updates, _method: 'PUT' })
 
-        this.currentUser = {
-          ...this.currentUser,
-          ...updates
-        }
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth', JSON.stringify({
-            user: this.currentUser,
-            token: this.token
-          }))
+        if (res.success && res.data) {
+          this.currentUser = { ...this.currentUser, ...res.data }
         }
 
         return this.currentUser

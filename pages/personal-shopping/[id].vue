@@ -83,7 +83,7 @@
                 </div>
 
                 <h6 class="fw-medium">Description</h6>
-                <p class="text-muted">{{ request.description }}</p>
+                <div class="text-muted request-description" v-html="request.description"></div>
 
                 <div class="row g-3 mt-3">
                   <div class="col-6 col-md-3">
@@ -95,7 +95,7 @@
                   <div class="col-6 col-md-3">
                     <div class="p-3 bg-light rounded">
                       <small class="text-muted d-block">Budget estime</small>
-                      <strong>{{ formatCurrency(request.budgetEstimated) }}</strong>
+                      <strong>{{ formatCurrency(request.budgetEstimated, requestCurrency) }}</strong>
                     </div>
                   </div>
                   <div class="col-6 col-md-3">
@@ -124,27 +124,27 @@
                   <tbody>
                     <tr v-if="request.quotedDetails">
                       <td>Cout produit</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
                     </tr>
                     <tr v-if="request.quotedDetails">
                       <td>Frais de service (5%)</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
                     </tr>
                     <tr v-if="request.quotedDetails">
                       <td>Inspection</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
                     </tr>
                     <tr v-if="request.quotedDetails">
                       <td>Emballage</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
                     </tr>
                     <tr v-if="request.quotedDetails">
                       <td>Expedition</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
                     </tr>
                     <tr class="border-top fw-bold fs-5">
                       <td>TOTAL</td>
-                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice) }}</td>
+                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -204,6 +204,9 @@
               <div class="card-body">
                 <h6 class="fw-medium mb-3">Actions</h6>
                 <div class="d-grid gap-2">
+                  <button class="btn btn-warning position-relative" @click="addRequestToCart">
+                    <i class="bi bi-cart-plus me-2"></i>Ajouter au panier
+                  </button>
                   <a
                     href="#"
                     class="btn btn-success"
@@ -240,6 +243,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { useCartStore } from '~/stores/cart'
 import { useFormatters } from '~/composables/useFormatters'
 import { useWhatsApp } from '~/composables/useWhatsApp'
 import { useNotification } from '~/composables/useNotification'
@@ -250,9 +254,11 @@ definePageMeta({
 
 const route = useRoute()
 const psStore = usePersonalShoppingStore()
+const cartStore = useCartStore()
 const { formatCurrency, formatDateShort, formatRequestStatus } = useFormatters()
 const { contactForRequest } = useWhatsApp()
 const { success } = useNotification()
+const { t, locale } = useI18n()
 
 const loading = ref(true)
 const selectedImage = ref<string | null>(null)
@@ -266,6 +272,10 @@ onMounted(async () => {
 })
 
 const request = computed(() => psStore.getRequestById(requestId))
+const requestCurrency = computed<string>(() => {
+  const r: any = request.value
+  return (r?.currency || 'XOF').toString().toUpperCase()
+})
 
 const statusTimeline = [
   { key: 'pending', label: 'En attente' },
@@ -296,6 +306,22 @@ const acceptQuotation = async () => {
   if (request.value) {
     await psStore.updateRequestStatus(request.value.id, 'confirmed')
     success('Devis accepte ! Nous vous contacterons pour la suite.')
+  }
+}
+
+const addRequestToCart = () => {
+  if (request.value) {
+    cartStore.addItem({
+      id: request.value.id,
+      title: request.value.title,
+      name_fr: request.value.title,
+      name_en: request.value.title,
+      price: request.value.budgetEstimated || 0,
+      image: request.value.images?.[0] || 'https://placehold.co/400x400?text=Request',
+      quantity: request.value.quantity
+    }, request.value.quantity)
+    success(locale.value === 'fr' ? 'Demande ajoutee au panier' : 'Request added to cart')
+    cartStore.openCart()
   }
 }
 </script>
@@ -361,5 +387,18 @@ const acceptQuotation = async () => {
 .timeline-item.current .timeline-content {
   color: var(--bs-primary);
   font-weight: 600;
+}
+
+.request-description :deep(img),
+.request-description img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 12px;
+  margin: 15px 0;
+  display: block;
+}
+
+.request-description {
+  line-height: 1.7;
 }
 </style>

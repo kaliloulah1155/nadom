@@ -55,8 +55,8 @@
             <div class="card-header bg-transparent py-3">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="mb-1">{{ shipment.trackingNumber }}</h5>
-                  <small class="text-muted">{{ shipment.destinationCountry }} - {{ shipment.destinationCity }}</small>
+                  <h5 class="mb-1">{{ shipment.tracking_number }}</h5>
+                  <small class="text-muted">{{ shipment.destination_country }} - {{ shipment.destination_city }}</small>
                 </div>
                 <span
                   class="badge fs-6"
@@ -77,25 +77,25 @@
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
                     <small class="text-muted d-block">Mode</small>
-                    <strong>{{ shippingStore.getShippingModeLabel(shipment.shippingMode) }}</strong>
+                    <strong>{{ shippingStore.getShippingModeLabel(shipment.shipping_mode) }}</strong>
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
                     <small class="text-muted d-block">Poids</small>
-                    <strong>{{ shipment.weight }} kg</strong>
+                    <strong>{{ shipment.weight ?? '-' }} kg</strong>
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
                     <small class="text-muted d-block">Expedition</small>
-                    <strong>{{ formatDateShort(shipment.createdAt) }}</strong>
+                    <strong>{{ formatDateShort(shipment.created_at) }}</strong>
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
-                    <small class="text-muted d-block">Livraison estimee</small>
-                    <strong>{{ shipment.estimatedDelivery }}</strong>
+                    <small class="text-muted d-block">Livraison estimée</small>
+                    <strong>{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : '-' }}</strong>
                   </div>
                 </div>
               </div>
@@ -106,7 +106,7 @@
                   <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
                   <div>
                     <strong>Position actuelle</strong>
-                    <p class="mb-0">{{ shipment.currentLocation }}</p>
+                    <p class="mb-0">{{ shipment.current_location || '-' }}</p>
                   </div>
                 </div>
               </div>
@@ -135,11 +135,11 @@
                     </div>
                     <div class="col-md-6">
                       <small class="text-muted d-block">{{ locale === 'fr' ? 'Budget' : 'Budget' }}</small>
-                      <strong>{{ linkedRequest.budgetEstimated }} FCFA</strong>
+                      <strong>{{ formatCurrency(linkedRequest.budget_estimated ?? linkedRequest.budgetEstimated, linkedRequest.currency || 'XOF') }}</strong>
                     </div>
                     <div v-if="linkedRequest.description" class="col-12">
                       <small class="text-muted d-block">{{ locale === 'fr' ? 'Description' : 'Description' }}</small>
-                      <p class="mb-0">{{ linkedRequest.description }}</p>
+                      <div class="mb-0 request-description" v-html="linkedRequest.description"></div>
                     </div>
                     <div v-if="linkedRequest.images && linkedRequest.images.length > 0" class="col-12">
                       <small class="text-muted d-block mb-2">{{ locale === 'fr' ? 'Images du projet' : 'Project Images' }}</small>
@@ -149,7 +149,12 @@
                           :key="idx"
                           class="project-image-thumb"
                         >
-                          <img :src="image" :alt="`Image ${idx + 1}`" class="img-thumbnail" />
+                          <img
+                            :src="image"
+                            :alt="`Image ${Number(idx) + 1}`"
+                            class="img-thumbnail"
+                            @click="openZoom(image)"
+                          />
                         </div>
                       </div>
                     </div>
@@ -158,10 +163,10 @@
               </div>
 
               <!-- Timeline -->
-              <h6 class="fw-bold mb-3">Historique</h6>
+              <h6 class="fw-bold mb-3">Historique des étapes</h6>
               <div class="timeline">
                 <div
-                  v-for="(event, index) in [...shipment.timeline].reverse()"
+                  v-for="(event, index) in timelineEvents"
                   :key="index"
                   class="timeline-item"
                   :class="{ 'active': index === 0 }"
@@ -170,10 +175,14 @@
                   <div class="timeline-content">
                     <div class="d-flex justify-content-between align-items-start">
                       <div>
-                        <strong>{{ event.description }}</strong>
+                        <h6 class="fw-bold mb-1 text-primary">
+                          <i :class="formatShipmentStatus(event.status).icon" class="me-2"></i>
+                          {{ formatShipmentStatus(event.status).label }}
+                        </h6>
+                        <div class="request-description" v-html="event.description"></div>
                         <p class="text-muted small mb-0">{{ event.location }}</p>
                       </div>
-                      <small class="text-muted">{{ formatDateShort(event.date) }}</small>
+                      <small class="text-muted">{{ formatDateShort(event.sdate || event.date) }}</small>
                     </div>
                   </div>
                 </div>
@@ -243,13 +252,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Zoom Modal -->
+    <div v-if="zoomedImage" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.8); z-index: 2000;">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+          <div class="modal-body p-0 position-relative text-center">
+            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" @click="zoomedImage = null"></button>
+            <img :src="zoomedImage" class="img-fluid rounded shadow-lg" style="max-height: 90vh; cursor: pointer;" @click="zoomedImage = null" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useShippingStore, type Shipment } from '~/stores/shipping'
-import { usePersonalShoppingStore, type PersonalShoppingRequest } from '~/stores/personalShopping'
+import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -259,26 +279,33 @@ definePageMeta({
 const { t, locale } = useI18n()
 const route = useRoute()
 const shippingStore = useShippingStore()
-const psStore = usePersonalShoppingStore()
-const { formatShipmentStatus, formatDateShort } = useFormatters()
+const { formatShipmentStatus, formatDateShort, formatCurrency } = useFormatters()
 
 const trackingNumber = ref('')
-const shipment = ref<Shipment | null>(null)
+const shipment = ref<any>(null)
+const zoomedImage = ref<string | null>(null)
+
+const openZoom = (image: string) => {
+  zoomedImage.value = image
+}
 const loading = ref(false)
 const error = ref('')
 const searched = ref(false)
 
-// Computed property for linked request
-const linkedRequest = computed(() => {
-  if (!shipment.value?.requestId) return null
-  return psStore.getRequestById(shipment.value.requestId)
+// Linked request comes eager-loaded from the public track endpoint
+const linkedRequest = computed(() => shipment.value?.request || null)
+
+const timelineEvents = computed(() => {
+  const list = shipment.value?.timeline || []
+  return [...list].sort((a, b) => {
+    const dateA = new Date(a.sdate || a.date).getTime()
+    const dateB = new Date(b.sdate || b.date).getTime()
+    return dateB - dateA
+  })
 })
 
 // Check for query param
 onMounted(async () => {
-  await shippingStore.fetchShipments()
-  await psStore.fetchRequests()
-
   const tracking = route.query.tracking as string
   if (tracking) {
     trackingNumber.value = tracking
@@ -435,5 +462,18 @@ const getRequestStatusClass = (status: string) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.request-description :deep(img),
+.request-description img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: block;
+}
+
+.request-description {
+  line-height: 1.5;
+  margin-bottom: 4px;
 }
 </style>

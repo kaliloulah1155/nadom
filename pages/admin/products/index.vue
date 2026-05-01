@@ -4,9 +4,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-1">Gestion des produits</h4>
-        <p class="text-muted mb-0">{{ products.length }} produits configurés</p>
+        <p class="text-muted mb-0">{{ psStore.productsMeta.total }} produits configurés</p>
       </div>
-      <button class="btn btn-primary" @click="openModal()">
+      <button v-can="['create', 'products']" class="btn btn-primary" @click="openModal()">
         <i class="bi bi-plus-lg me-2"></i>Nouveau produit
       </button>
     </div>
@@ -14,22 +14,39 @@
     <!-- Tools -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
-        <div class="row g-3">
+        <div class="row g-3 align-items-end">
           <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">Recherche</label>
             <div class="input-group">
               <span class="input-group-text bg-transparent border-end-0">
                 <i class="bi bi-search text-muted"></i>
               </span>
-              <input v-model="searchQuery" type="text" class="form-control border-start-0" placeholder="Rechercher un produit..." />
+              <input v-model="searchQuery" type="text" class="form-control border-start-0" placeholder="Rechercher un produit..." @input="debouncedFetch" />
             </div>
           </div>
           <div class="col-md-4">
-            <select v-model="categoryFilter" class="form-select">
+            <label class="form-label small text-muted mb-1">Catégorie produit</label>
+            <select v-model="categoryFilter" class="form-select" @change="fetchProducts(1)">
               <option value="">Toutes les catégories</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                {{ cat.name_fr }}
+              <option v-for="cat in productCategories" :key="cat.uuid" :value="cat.uuid">
+                {{ cat.label }}
               </option>
             </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">Lignes / page</label>
+            <select
+              :value="psStore.productsMeta.perPage"
+              class="form-select"
+              @change="(e) => fetchProducts(1, Number((e.target as HTMLSelectElement).value))"
+            >
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+              <option :value="50">50</option>
+            </select>
+          </div>
+          <div class="col-md-2 text-md-end small text-muted">
+            Page {{ psStore.productsMeta.currentPage }} / {{ psStore.productsMeta.lastPage }}
           </div>
         </div>
       </div>
@@ -49,36 +66,34 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="prod in paginatedProducts" :key="prod.id">
+<tr v-for="prod in products" :key="prod.id">
               <td class="px-4">
                 <div class="d-flex align-items-center gap-3">
                   <img :src="prod.image || 'https://placehold.co/50x50?text=No+Img'" class="rounded border" width="45" height="45" style="object-fit: cover;" />
-                  <div class="fw-bold">{{ prod.name_fr }}</div>
+                  <div class="fw-bold">{{ prod.name_fr || prod.name_en }}</div>
                 </div>
               </td>
               <td>
                 <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1">
-                  {{ getCategoryName(prod.categoryId) }}
+                  {{ getCategoryName(prod.category_id) }}
                 </span>
               </td>
-              <td class="fw-bold text-primary">{{ prod.price.toLocaleString() }} FCFA</td>
+              <td class="fw-bold text-primary">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</td>
               <td>
-                <div class="text-muted small text-truncate" style="max-width: 250px;">
-                  {{ prod.description_fr }}
-                </div>
+                <div class="text-muted small text-truncate" style="max-width: 250px;" v-html="prod.description_fr || prod.description_en || ''"></div>
               </td>
               <td class="text-end px-4">
                 <div class="d-flex justify-content-end gap-2">
-                  <button class="btn btn-sm btn-outline-primary" @click="openModal(prod)">
+                  <button v-can="['update', 'products']" class="btn btn-sm btn-outline-primary" @click="openModal(prod)">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(prod.id)">
+                  <button v-can="['delete', 'products']" class="btn btn-sm btn-outline-danger" @click="confirmDelete(prod.id)">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredProducts.length === 0">
+            <tr v-if="products.length === 0">
               <td colspan="5" class="text-center py-5">
                 <i class="bi bi-box-seam fs-1 text-muted mb-3 d-block"></i>
                 <p class="text-muted mb-0">Aucun produit trouvé</p>
@@ -89,9 +104,11 @@
       </div>
       <div class="card-footer bg-transparent py-3 border-top-0">
         <AdminPagination
-          v-model:current-page="currentPage"
-          v-model:limit="perPage"
-          :total-items="filteredProducts.length"
+          v-model:current-page="psStore.productsMeta.currentPage"
+          v-model:limit="psStore.productsMeta.perPage"
+          :total-items="psStore.productsMeta.total"
+          @update:current-page="(p: number) => fetchProducts(p)"
+          @update:limit="(l: number) => fetchProducts(1, l)"
         />
       </div>
     </div>
@@ -123,7 +140,9 @@
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Description (FR)</label>
-                    <textarea v-model="form.description_fr" class="form-control" rows="3"></textarea>
+                    <ClientOnly>
+                      <WysiwygEditor v-model="form.description_fr" height="180px" placeholder="Décrivez le produit..." />
+                    </ClientOnly>
                   </div>
                 </div>
                 <div class="tab-pane fade" id="prod-en">
@@ -133,7 +152,9 @@
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Description (EN)</label>
-                    <textarea v-model="form.description_en" class="form-control" rows="3"></textarea>
+                    <ClientOnly>
+                      <WysiwygEditor v-model="form.description_en" height="180px" placeholder="Describe the product..." />
+                    </ClientOnly>
                   </div>
                 </div>
               </div>
@@ -141,16 +162,27 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">Catégorie *</label>
-                  <select v-model="form.categoryId" class="form-select" required>
+                  <select v-model="form.category_id" class="form-select" required>
                     <option value="">Sélectionnez une catégorie</option>
-                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                      {{ cat.name_fr }}
+                    <option v-for="cat in productCategories" :key="cat.uuid" :value="cat.uuid">
+                      {{ cat.label }}
                     </option>
                   </select>
+                  <small v-if="productCategories.length === 0" class="text-warning">
+                    Aucune catégorie POD configurée. Créez-en dans /admin/categories.
+                  </small>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Prix (FCFA) *</label>
-                  <input v-model.number="form.price" type="number" class="form-control" required min="0" />
+                <div class="col-md-4">
+                  <label class="form-label">Prix *</label>
+                  <input v-model.number="form.price" type="number" class="form-control" required min="0" step="any" />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Devise *</label>
+                  <select v-model="form.currency" class="form-select" required>
+                    <option v-for="cur in currencies" :key="cur.uuid || cur.code" :value="cur.code">
+                      {{ cur.label }}
+                    </option>
+                  </select>
                 </div>
                 
                 <div class="col-12">
@@ -197,6 +229,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotification } from '~/composables/useNotification'
+import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'admin'
@@ -204,14 +237,31 @@ definePageMeta({
 
 const psStore = usePersonalShoppingStore()
 const { success, error } = useNotification()
+const { formatCurrency } = useFormatters()
 
 const products = computed(() => psStore.products)
-const categories = computed(() => psStore.categories)
+// Filtre catégories produits = slug POD uniquement
+const productCategories = computed(() =>
+  (psStore.categories || []).filter((c: any) => c.slug === 'POD')
+)
+// Devises = catégories slug DVS (avec fallback FCFA)
+const currencies = computed(() => {
+  const list = (psStore.categories || [])
+    .filter((c: any) => {
+      const s = (c.slug || '').toString()
+      return s === 'DVS' || s.startsWith('DVS-')
+    })
+    .map((c: any) => ({
+      uuid: c.uuid,
+      code: (c.code || c.label || '').toString().toUpperCase(),
+      label: c.label || c.code || '',
+    }))
+    .filter((c: any) => c.code)
+  return list.length > 0 ? list : [{ uuid: 'xof', code: 'XOF', label: 'CFA' }]
+})
 
 const searchQuery = ref('')
 const categoryFilter = ref('')
-const currentPage = ref(1)
-const perPage = ref(12)
 
 const editingProduct = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
@@ -219,40 +269,49 @@ const isUploading = ref(false)
 let modalInstance: any = null
 
 const form = reactive({
-  categoryId: '',
+  category_id: '',
   name_fr: '',
   name_en: '',
   description_fr: '',
   description_en: '',
   price: 0,
-  image: ''
+  currency: 'XOF',
+  image: '',
+  is_active: true,
+  stock_status: 'on_demand' as 'in_stock' | 'out_of_stock' | 'on_demand'
 })
 
+const fetchProducts = async (page?: number, limit?: number) => {
+  await psStore.fetchProducts({
+    page: page ?? psStore.productsMeta.currentPage,
+    limit: limit ?? psStore.productsMeta.perPage,
+    search: searchQuery.value || undefined,
+    category_id: categoryFilter.value || undefined
+  })
+}
+
+let debounceTimer: any = null
+const debouncedFetch = () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => fetchProducts(1), 400)
+}
+
 onMounted(async () => {
-  await psStore.fetchCategories()
-  await psStore.fetchProducts()
+  // On charge un nombre suffisant de catégories pour récupérer POD + DVS
+  await psStore.fetchCategories({ page: 1, limit: 200 })
+  await fetchProducts(1)
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
 
-const filteredProducts = computed(() => {
-  return products.value.filter(p => {
-    const matchesSearch = p.name_fr.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          p.name_en.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = !categoryFilter.value || p.categoryId === categoryFilter.value
-    return matchesSearch && matchesCategory
-  })
-})
-
-const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  return filteredProducts.value.slice(start, start + perPage.value)
-})
-
-const getCategoryName = (id: string) => {
-  const cat = categories.value.find(c => c.id === id)
-  return cat ? cat.name_fr : 'Inconnue'
+const getCategoryName = (id: string | null | number) => {
+  if (id === null || id === undefined || id === '') return 'Aucune'
+  const idStr = String(id)
+  const cat = (psStore.categories || []).find((c: any) =>
+    String(c.uuid) === idStr || String(c.id) === idStr
+  )
+  return cat ? cat.label : 'Inconnue'
 }
 
 const handleImageUpload = (event: any) => {
@@ -280,17 +339,31 @@ const handleImageUpload = (event: any) => {
 const openModal = (prod?: any) => {
   if (prod) {
     editingProduct.value = prod
-    Object.assign(form, prod)
+    Object.assign(form, {
+      category_id: prod.category_id || '',
+      name_fr: prod.name_fr || '',
+      name_en: prod.name_en || '',
+      description_fr: prod.description_fr || '',
+      description_en: prod.description_en || '',
+      price: Number(prod.price) || 0,
+      currency: prod.currency || 'XOF',
+      image: prod.image || '',
+      is_active: prod.is_active ?? true,
+      stock_status: prod.stock_status || 'on_demand'
+    })
   } else {
     editingProduct.value = null
     Object.assign(form, {
-      categoryId: '',
+      category_id: productCategories.value[0]?.uuid || '',
       name_fr: '',
       name_en: '',
       description_fr: '',
       description_en: '',
       price: 0,
-      image: ''
+      currency: currencies.value[0]?.code || 'XOF',
+      image: '',
+      is_active: true,
+      stock_status: 'on_demand'
     })
   }
   modalInstance?.show()
@@ -306,6 +379,7 @@ const saveProduct = async () => {
       success('Produit créé')
     }
     modalInstance?.hide()
+    await fetchProducts(psStore.productsMeta.currentPage)
   } catch (err) {
     error('Erreur lors de l\'enregistrement')
   }
@@ -315,6 +389,7 @@ const confirmDelete = async (id: string) => {
   if (confirm('Supprimer ce produit ?')) {
     await psStore.deleteProduct(id)
     success('Produit supprimé')
+    await fetchProducts(psStore.productsMeta.currentPage)
   }
 }
 

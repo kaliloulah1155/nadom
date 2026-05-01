@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { FAKE_GUIDES } from '~/utils/data/fakeData'
+import { useApi } from '~/composables/useApi'
 
 export interface Guide {
-  id: string
+  id: number
   name: string
   languages: string[]
   specializations_fr: string[]
@@ -11,189 +11,225 @@ export interface Guide {
   experience: number
   rating: number
   reviews: number
-  avatar: string
-  pricePerDay: number
-  pricePerHour: number
-  description_fr: string
-  description_en: string
+  avatar: string | null
+  price_per_day: number | null
+  price_per_hour: number | null
+  description_fr: string | null
+  description_en: string | null
   available: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface GuideBooking {
-  id: string
-  guideId: string
-  userId: string
-  startDate: string
-  endDate: string
-  serviceType: 'hourly' | 'daily'
+  id: number
+  guide_id: number
+  user_id: number
+  start_date: string
+  end_date: string
+  service_type: 'hourly' | 'daily'
   hours?: number
   days?: number
-  totalPrice: number
+  total_price: number
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   notes?: string
-  createdAt: string
+  created_at?: string
 }
+
+interface Meta {
+  total: number
+  currentPage: number
+  perPage: number
+  lastPage: number
+}
+
+const newMeta = (perPage = 15): Meta => ({ total: 0, currentPage: 1, perPage, lastPage: 1 })
 
 interface GuidesState {
   guides: Guide[]
+  guidesMeta: Meta
   bookings: GuideBooking[]
+  bookingsMeta: Meta
   loading: boolean
   error: string | null
+}
+
+function applyPaginator<T>(res: any, items: T[], meta: Meta) {
+  const d = res.data
+  if (d && typeof d === 'object' && Array.isArray(d.data)) {
+    items.splice(0, items.length, ...d.data)
+    meta.total = d.total ?? d.data.length
+    meta.currentPage = d.current_page ?? meta.currentPage
+    meta.perPage = d.per_page ?? meta.perPage
+    meta.lastPage = d.last_page ?? 1
+  } else if (Array.isArray(d)) {
+    items.splice(0, items.length, ...d)
+    meta.total = d.length
+    meta.currentPage = 1
+    meta.lastPage = 1
+  } else {
+    items.splice(0, items.length)
+    meta.total = 0
+    meta.lastPage = 1
+  }
 }
 
 export const useGuidesStore = defineStore('guides', {
   state: (): GuidesState => ({
     guides: [],
+    guidesMeta: newMeta(15),
     bookings: [],
+    bookingsMeta: newMeta(15),
     loading: false,
     error: null
   }),
 
   getters: {
-    getGuideById: (state) => (id: string) => {
-      return state.guides.find(g => g.id === id)
-    },
-
-    getAvailableGuides: (state) => {
-      return state.guides.filter(g => g.available)
-    },
-
-    getGuidesByCity: (state) => (city: string) => {
-      return state.guides.filter(g => g.cities.includes(city))
-    },
-
-    getGuidesByLanguage: (state) => (language: string) => {
-      return state.guides.filter(g => g.languages.includes(language))
-    },
-
-    getGuidesBySpecialization: (state) => (spec: string) => {
-      return state.guides.filter(g => g.specializations_fr.includes(spec) || g.specializations_en.includes(spec))
-    },
-
-    getBookingsByUser: (state) => (userId: string) => {
-      return state.bookings.filter(b => b.userId === userId)
-    },
-
-    getBookingsByGuide: (state) => (guideId: string) => {
-      return state.bookings.filter(b => b.guideId === guideId)
-    },
-
+    getGuideById: (state) => (id: string) => state.guides.find(g => g.id === id),
+    getAvailableGuides: (state) => state.guides.filter(g => g.available),
+    getGuidesByCity: (state) => (city: string) => state.guides.filter(g => g.cities?.includes(city)),
+    getGuidesByLanguage: (state) => (language: string) => state.guides.filter(g => g.languages?.includes(language)),
+    getGuidesBySpecialization: (state) => (spec: string) =>
+      state.guides.filter(g => g.specializations_fr?.includes(spec) || g.specializations_en?.includes(spec)),
+    getBookingsByUser: (state) => (userId: string) => state.bookings.filter(b => b.userId === userId),
+    getBookingsByGuide: (state) => (guideId: string) => state.bookings.filter(b => b.guideId === guideId),
     allCities: (state) => {
       const cities = new Set<string>()
-      state.guides.forEach(g => g.cities.forEach(c => cities.add(c)))
+      state.guides.forEach(g => g.cities?.forEach(c => cities.add(c)))
       return Array.from(cities)
     },
-
     allLanguages: (state) => {
-      const languages = new Set<string>()
-      state.guides.forEach(g => g.languages.forEach(l => languages.add(l)))
-      return Array.from(languages)
+      const langs = new Set<string>()
+      state.guides.forEach(g => g.languages?.forEach(l => langs.add(l)))
+      return Array.from(langs)
     },
-
     allSpecializations: (state) => {
       const specs = new Set<string>()
       state.guides.forEach(g => {
-        g.specializations_fr.forEach(s => specs.add(s))
-        g.specializations_en.forEach(s => specs.add(s))
+        g.specializations_fr?.forEach(s => specs.add(s))
+        g.specializations_en?.forEach(s => specs.add(s))
       })
       return Array.from(specs)
     }
   },
 
   actions: {
-    async fetchGuides() {
+    async fetchGuides(params: {
+      page?: number
+      limit?: number
+      city?: string
+      language?: string
+      available?: boolean
+    } = {}) {
       this.loading = true
       this.error = null
-
       try {
-        await new Promise(resolve => setTimeout(resolve, 300))
-
-        if (typeof window !== 'undefined') {
-          const saved = localStorage.getItem('guides')
-          this.guides = saved ? JSON.parse(saved).map((g: any) => ({
-            ...g,
-            specializations_fr: g.specializations_fr || g.specializations || [],
-            specializations_en: g.specializations_en || g.specializations || [],
-            description_fr: g.description_fr || g.description || '',
-            description_en: g.description_en || g.description || ''
-          })) : FAKE_GUIDES.map((g: any) => ({
-            ...g,
-            specializations_fr: g.specializations || [],
-            specializations_en: g.specializations || [],
-            description_fr: g.description || '',
-            description_en: g.description || ''
-          }))
+        const api = useApi()
+        const hasPaging = params.page !== undefined || params.limit !== undefined || params.city || params.language || params.available !== undefined
+        if (hasPaging) {
+          const page = params.page ?? this.guidesMeta.currentPage
+          const limit = params.limit ?? this.guidesMeta.perPage
+          const body: Record<string, any> = { page, limit }
+          if (params.city) body.city = params.city
+          if (params.language) body.language = params.language
+          if (params.available !== undefined) body.available = params.available
+          const res = await api.post<any>('/guides/all', body, { query: { page, limit } })
+          if (res.success) {
+            applyPaginator(res, this.guides, this.guidesMeta)
+          } else {
+            this.error = res.message
+          }
         } else {
-          this.guides = []
+          const res = await api.get<Guide[]>('/guides/all')
+          if (res.success) {
+            this.guides = res.data || []
+            this.guidesMeta.total = this.guides.length
+            this.guidesMeta.lastPage = 1
+            this.guidesMeta.currentPage = 1
+          } else {
+            this.error = res.message
+          }
         }
-      } catch (err) {
-        this.error = 'Erreur lors du chargement des guides'
+      } catch (err: any) {
+        this.error = err.message || 'Erreur lors du chargement des guides'
       } finally {
         this.loading = false
       }
     },
 
     async fetchBookings() {
-      if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('guideBookings')
-        this.bookings = saved ? JSON.parse(saved) : []
+      try {
+        const api = useApi()
+        const res = await api.get<GuideBooking[]>('/guide-bookings')
+        if (res.success) {
+          this.bookings = res.data || []
+          this.bookingsMeta.total = this.bookings.length
+          this.bookingsMeta.lastPage = 1
+          this.bookingsMeta.currentPage = 1
+        }
+      } catch (err: any) {
+        this.error = err.message
       }
     },
 
     async createBooking(bookingData: Partial<GuideBooking>) {
       this.loading = true
-
       try {
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        const guide = this.getGuideById(bookingData.guideId || '')
-        if (!guide) throw new Error('Guide non trouvé')
-
-        let totalPrice = 0
-        if (bookingData.serviceType === 'hourly' && bookingData.hours) {
-          totalPrice = guide.pricePerHour * bookingData.hours
-        } else if (bookingData.serviceType === 'daily' && bookingData.days) {
-          totalPrice = guide.pricePerDay * bookingData.days
+        const api = useApi()
+        const res = await api.post<GuideBooking>('/guide-bookings', bookingData)
+        if (res.success && res.data) {
+          this.bookings.unshift(res.data)
+          this.bookingsMeta.total++
+          return res.data
         }
-
-        const newBooking: GuideBooking = {
-          id: `booking_${Date.now()}`,
-          guideId: bookingData.guideId || '',
-          userId: bookingData.userId || '',
-          startDate: bookingData.startDate || '',
-          endDate: bookingData.endDate || '',
-          serviceType: bookingData.serviceType || 'daily',
-          hours: bookingData.hours,
-          days: bookingData.days,
-          totalPrice,
-          status: 'pending',
-          notes: bookingData.notes,
-          createdAt: new Date().toISOString()
-        }
-
-        this.bookings.unshift(newBooking)
-        this.saveBookingsToLocalStorage()
-
-        return newBooking
+        throw new Error(res.message)
       } finally {
         this.loading = false
       }
     },
 
     async updateBookingStatus(id: string, status: GuideBooking['status']) {
-      const booking = this.bookings.find(b => b.id === id)
-      if (booking) {
-        booking.status = status
-        this.saveBookingsToLocalStorage()
-        return booking
+      const api = useApi()
+      const res = await api.put<GuideBooking>(`/guide-bookings/${id}/status`, { status })
+      if (res.success && res.data) {
+        const idx = this.bookings.findIndex(b => b.id === id)
+        if (idx !== -1) this.bookings[idx] = res.data
+        return res.data
       }
       return null
     },
 
-    saveBookingsToLocalStorage() {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('guideBookings', JSON.stringify(this.bookings))
+    async createGuide(guideData: Partial<Guide>) {
+      const api = useApi()
+      const res = await api.post<Guide>('/guides', guideData)
+      if (res.success && res.data) {
+        this.guides.unshift(res.data)
+        this.guidesMeta.total++
+        return res.data
       }
+      throw new Error(res.message)
+    },
+
+    async updateGuide(id: number, guideData: Partial<Guide>) {
+      const api = useApi()
+      const res = await api.put<Guide>(`/guides/${id}`, guideData)
+      if (res.success && res.data) {
+        const idx = this.guides.findIndex(g => g.id === id)
+        if (idx !== -1) this.guides[idx] = res.data
+        return res.data
+      }
+      throw new Error(res.message)
+    },
+
+    async deleteGuide(id: number) {
+      const api = useApi()
+      const res = await api.delete(`/guides/${id}`)
+      if (res.success) {
+        this.guides = this.guides.filter(g => g.id !== id)
+        this.guidesMeta.total = Math.max(0, this.guidesMeta.total - 1)
+        return true
+      }
+      throw new Error(res.message)
     },
 
     filterGuides(filters: {
@@ -204,9 +240,9 @@ export const useGuidesStore = defineStore('guides', {
       maxPrice?: number
     }) {
       return this.guides.filter(guide => {
-        if (filters.city && !guide.cities.includes(filters.city)) return false
-        if (filters.language && !guide.languages.includes(filters.language)) return false
-        if (filters.specialization && !(guide.specializations_fr.includes(filters.specialization) || guide.specializations_en.includes(filters.specialization))) return false
+        if (filters.city && !guide.cities?.includes(filters.city)) return false
+        if (filters.language && !guide.languages?.includes(filters.language)) return false
+        if (filters.specialization && !(guide.specializations_fr?.includes(filters.specialization) || guide.specializations_en?.includes(filters.specialization))) return false
         if (filters.minRating && guide.rating < filters.minRating) return false
         if (filters.maxPrice && guide.pricePerDay > filters.maxPrice) return false
         return true

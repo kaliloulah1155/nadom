@@ -4,9 +4,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-1">Gestion des utilisateurs</h4>
-        <p class="text-muted mb-0">{{ users.length }} utilisateurs au total</p>
+        <p class="text-muted mb-0">{{ usersStore.total }} utilisateurs au total</p>
       </div>
-      <button class="btn btn-primary" @click="openModal()">
+      <button v-can="['create', 'users']" class="btn btn-primary" @click="openModal()">
         <i class="bi bi-person-plus me-2"></i>Nouvel utilisateur
       </button>
     </div>
@@ -21,22 +21,22 @@
               type="text"
               class="form-control"
               placeholder="Nom, email, téléphone..."
+              @input="debouncedFetch"
             />
           </div>
           <div class="col-md-3">
-            <select v-model="filters.role" class="form-select">
+            <select v-model="filters.role" class="form-select" @change="fetchUsers(1)">
               <option value="">Tous les rôles</option>
-              <option value="client">Client</option>
-              <option value="admin">Administrateur</option>
-              <option value="agent">Agent (Chine)</option>
+              <option v-for="role in rolesStore.roles" :key="role.role.uuid" :value="role.role.code">
+                {{ role.role.libelle }}
+              </option>
             </select>
           </div>
           <div class="col-md-3">
-            <select v-model="filters.status" class="form-select">
+            <select v-model="filters.status" class="form-select" @change="fetchUsers(1)">
               <option value="">Tous les statuts</option>
-              <option value="active">Actif</option>
-              <option value="inactive">Inactif</option>
-              <option value="pending">En attente</option>
+              <option value="1">Actif</option>
+              <option value="0">Inactif</option>
             </select>
           </div>
           <div class="col-md-2">
@@ -49,73 +49,75 @@
     </div>
 
     <!-- Table -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-0">
+    <div class="card border-0 shadow-sm overflow-hidden">
+      <div v-if="usersStore.loading" class="card-body text-center py-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2 text-muted">Chargement des utilisateurs...</p>
+      </div>
+      <div v-else class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover mb-0">
+          <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
                 <th>Utilisateur</th>
                 <th>Rôle</th>
                 <th>Contact</th>
                 <th>Localisation</th>
-                <th>Date d'inscription</th>
+                <th>Inscription</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-if="filteredUsers.length === 0">
+              <tr v-if="usersStore.users.length === 0">
                 <td colspan="7" class="text-center py-4 text-muted">
                   Aucun utilisateur trouvé
                 </td>
               </tr>
-              <tr v-for="user in paginatedUsers" :key="user.id">
+              <tr v-for="user in usersStore.users" :key="user.uuid">
                 <td>
-                  <NuxtLink :to="`/admin/users/${user.id}`" class="d-flex align-items-center text-decoration-none text-dark">
+                  <div class="d-flex align-items-center">
                     <img 
-                      :src="user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}`" 
-                      class="rounded-circle me-3" 
+                      :src="getUserAvatar(user)" 
+                      class="rounded-circle me-3 border" 
                       width="40" 
                       height="40"
                     />
                     <div>
-                      <div class="fw-medium">{{ user.firstName }} {{ user.lastName }}</div>
-                      <small class="text-muted">{{ user.email }}</small>
+                      <div class="fw-medium text-dark">{{ user.firstname }} {{ user.lastname }}</div>
+                      <small class="text-muted d-block">{{ user.email }}</small>
                     </div>
-                  </NuxtLink>
+                  </div>
                 </td>
                 <td>
                   <span 
                     class="badge"
-                    :class="{
-                      'bg-primary-subtle text-primary': user.role === 'admin',
-                      'bg-info-subtle text-info': user.role === 'agent',
-                      'bg-secondary-subtle text-secondary': user.role === 'client'
-                    }"
+                    :class="getRoleBadgeClass(user.role?.code)"
                   >
-                    {{ user.role.toUpperCase() }}
+                    {{ user.role?.label || 'Utilisateur' }}
                   </span>
                 </td>
                 <td>
-                  <div class="small">{{ user.phone || '-' }}</div>
+                  <div class="small fw-medium">{{ user.phone || '-' }}</div>
                 </td>
                 <td>
-                  <div class="small">{{ user.city }}, {{ user.country }}</div>
+                  <div class="small text-muted">{{ (user.city || user.country) ? `${user.city || ''} ${user.country || ''}`.trim() : '-' }}</div>
                 </td>
                 <td>
-                  <small>{{ user.createdAt || '-' }}</small>
+                  <small class="text-muted">{{ formatDate(user.created_at) }}</small>
                 </td>
                 <td>
-                  <span class="badge bg-success-subtle text-success">Actif</span>
+                  <span class="badge rounded-pill" :class="user.status === 1 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                    {{ user.status === 1 ? 'Actif' : 'Inactif' }}
+                  </span>
                 </td>
                 <td>
                   <div class="d-flex">
-                    <button class="btn btn-outline-info btn-sm me-2" title="Modifier" @click="openModal(user)">
+                    <button v-can="['update', 'users']" class="btn btn-sm btn-icon btn-outline-info me-2" @click="openModal(user)">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" title="Désactiver">
-                      <i class="bi bi-slash-circle"></i>
+                    <button v-can="['delete', 'users']" class="btn btn-sm btn-icon btn-outline-danger" @click="handleDelete(user)">
+                      <i class="bi bi-trash"></i>
                     </button>
                   </div>
                 </td>
@@ -128,66 +130,100 @@
       <!-- Pagination -->
       <div class="card-footer bg-transparent py-3">
         <AdminPagination
-          v-model:current-page="currentPage"
-          v-model:limit="perPage"
-          :total-items="filteredUsers.length"
+          v-model:current-page="usersStore.currentPage"
+          v-model:limit="usersStore.perPage"
+          :total-items="usersStore.total"
+          @update:current-page="(p: number) => fetchUsers(p)"
+          @update:limit="(l: number) => fetchUsers(1, l)"
         />
       </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="userModal" tabindex="-1" ref="modalRef">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ editingUser ? 'Modifier' : 'Nouvel' }} utilisateur</h5>
+    <!-- Modal User -->
+    <div class="modal fade shadow" id="userModal" tabindex="-1" ref="modalRef">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0">
+          <div class="modal-header border-bottom-0 pt-4 px-4">
+            <h5 class="modal-title fw-bold">
+              {{ editingUser ? 'Modifier l\'utilisateur' : 'Créer un nouvel utilisateur' }}
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          <form @submit.prevent="saveUser">
-            <div class="modal-body">
-              <div class="row g-3">
+          <form @submit.prevent="handleSave">
+            <div class="modal-body p-4">
+              <div class="row g-4">
+                <!-- Photo Upload -->
+                <div class="col-12 text-center mb-2">
+                  <div class="position-relative d-inline-block">
+                    <img 
+                      :src="previewAvatar || getUserAvatar(editingUser)" 
+                      class="rounded-circle border p-1" 
+                      width="100" 
+                      height="100"
+                      style="object-fit: cover"
+                    />
+                    <label class="btn btn-sm btn-light btn-icon rounded-circle shadow-sm position-absolute bottom-0 end-0">
+                      <i class="bi bi-camera"></i>
+                      <input type="file" hidden accept="image/*" @change="onFileChange" />
+                    </label>
+                  </div>
+                </div>
+
                 <div class="col-md-6">
-                  <label class="form-label">Prénom *</label>
-                  <input v-model="form.firstName" type="text" class="form-control input-md" required />
+                  <label class="form-label fw-medium small text-uppercase">Prénom *</label>
+                  <input v-model="form.firstname" type="text" class="form-control" required placeholder="Ex: Jean" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Nom *</label>
-                  <input v-model="form.lastName" type="text" class="form-control input-md" required />
+                  <label class="form-label fw-medium small text-uppercase">Nom *</label>
+                  <input v-model="form.lastname" type="text" class="form-control" required placeholder="Ex: Dupont" />
                 </div>
                 <div class="col-md-12">
-                  <label class="form-label">Email *</label>
-                  <input v-model="form.email" type="email" class="form-control input-md" required />
+                  <label class="form-label fw-medium small text-uppercase">Email *</label>
+                  <input v-model="form.email" type="email" class="form-control" required placeholder="email@exemple.com" />
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Rôle *</label>
-                  <select v-model="form.role" class="form-select input-md" required>
-                    <option value="client">Client</option>
-                    <option value="admin">Administrateur</option>
-                    <option value="agent">Agent</option>
-                  </select>
+                
+                <div v-if="!editingUser" class="col-md-6">
+                  <label class="form-label fw-medium small text-uppercase">Mot de passe *</label>
+                  <input v-model="form.password" type="password" class="form-control" required />
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Téléphone</label>
-                  <input v-model="form.phone" type="text" class="form-control" />
+                <div v-if="!editingUser" class="col-md-6">
+                  <label class="form-label fw-medium small text-uppercase">Confirmer le mot de passe *</label>
+                  <input v-model="form.password_confirmation" type="password" class="form-control" required />
                 </div>
+
                 <div class="col-md-6">
-                  <label class="form-label">Pays</label>
-                  <select v-model="form.country" class="form-select">
-                    <option v-for="country in countries" :key="country" :value="country">
-                      {{ country }}
+                  <label class="form-label fw-medium small text-uppercase">Rôle / Profil *</label>
+                  <select v-model="form.role_uuid" class="form-select" required>
+                    <option v-for="role in rolesStore.roles" :key="role.role.uuid" :value="role.role.uuid">
+                      {{ role.role.libelle }}
                     </option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Ville</label>
-                  <input v-model="form.city" type="text" class="form-control" />
+                  <label class="form-label fw-medium small text-uppercase">Téléphone</label>
+                  <input v-model="form.phone" type="text" class="form-control" placeholder="+225..." />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-medium small text-uppercase">Status</label>
+                  <select v-model="form.status" class="form-select">
+                    <option :value="1">Actif</option>
+                    <option :value="0">Inactif</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-medium small text-uppercase">Sexe</label>
+                  <select v-model="form.sex" class="form-select">
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                  </select>
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary btn-md">
-                <i class="bi bi-check-lg me-2"></i>{{ editingUser ? 'Enregistrer' : 'Créer' }}
+            <div class="modal-footer border-top-0 pb-4 px-4">
+              <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary px-4" :disabled="submitting">
+                <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
+                {{ editingUser ? 'Mettre à jour' : 'Créer l\'utilisateur' }}
               </button>
             </div>
           </form>
@@ -198,107 +234,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { FAKE_USERS } from '~/utils/data/fakeData'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useUsersStore } from '~/stores/users'
+import { useRolesStore } from '~/stores/roles'
+import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const users = ref(FAKE_USERS)
-const currentPage = ref(1)
-const perPage = ref(10)
+const config = useRuntimeConfig()
+const usersStore = useUsersStore()
+const rolesStore = useRolesStore()
+const { success, error } = useNotification()
 
+// State
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
-
 const editingUser = ref<any>(null)
-const form = reactive<any>({
-  firstName: '',
-  lastName: '',
-  email: '',
-  role: 'client',
-  phone: '',
-  country: 'Côte d\'Ivoire',
-  city: 'Abidjan'
-})
-
-const countries = [
-  'Afghanistan', 'Afrique du Sud', 'Albanie', 'Algérie', 'Allemagne', 'Andorre', 'Angola',
-  'Antigua-et-Barbuda', 'Arabie Saoudite', 'Argentine', 'Arménie', 'Australie', 'Autriche',
-  'Azerbaïdjan', 'Bahamas', 'Bahreïn', 'Bangladesh', 'Barbade', 'Belgique', 'Belize', 'Bénin',
-  'Bhoutan', 'Biélorussie', 'Birmanie', 'Bolivie', 'Bosnie-Herzégovine', 'Botswana', 'Brésil',
-  'Brunei', 'Bulgarie', 'Burkina Faso', 'Burundi', 'Cambodge', 'Cameroun', 'Canada', 'Cap-Vert',
-  'Centrafrique', 'Chili', 'Chine', 'Chypre', 'Colombie', 'Comores', 'Congo', 'Corée du Nord',
-  'Corée du Sud', 'Costa Rica', 'Côte d\'Ivoire', 'Croatie', 'Cuba', 'Danemark', 'Djibouti',
-  'Dominique', 'Égypte', 'Émirats Arabes Unis', 'Équateur', 'Érythrée', 'Espagne', 'Estonie',
-  'Eswatini', 'États-Unis', 'Éthiopie', 'Fidji', 'Finlande', 'France', 'Gabon', 'Gambie',
-  'Géorgie', 'Ghana', 'Grèce', 'Grenade', 'Guatemala', 'Guinée', 'Guinée-Bissau',
-  'Guinée Équatoriale', 'Guyana', 'Haïti', 'Honduras', 'Hongrie', 'Inde', 'Indonésie', 'Irak',
-  'Iran', 'Irlande', 'Islande', 'Israël', 'Italie', 'Jamaïque', 'Japon', 'Jordanie',
-  'Kazakhstan', 'Kenya', 'Kirghizistan', 'Kiribati', 'Koweït', 'Laos', 'Lesotho', 'Lettonie',
-  'Liban', 'Liberia', 'Libye', 'Liechtenstein', 'Lituanie', 'Luxembourg', 'Macédoine du Nord',
-  'Madagascar', 'Malaisie', 'Malawi', 'Maldives', 'Mali', 'Malte', 'Maroc', 'Marshall',
-  'Maurice', 'Mauritanie', 'Mexique', 'Micronésie', 'Moldavie', 'Monaco', 'Mongolie',
-  'Monténégro', 'Mozambique', 'Namibie', 'Nauru', 'Népal', 'Nicaragua', 'Niger', 'Nigeria',
-  'Norvège', 'Nouvelle-Zélande', 'Oman', 'Ouganda', 'Ouzbékistan', 'Pakistan', 'Palaos',
-  'Palestine', 'Panama', 'Papouasie-Nouvelle-Guinée', 'Paraguay', 'Pays-Bas', 'Pérou',
-  'Philippines', 'Pologne', 'Portugal', 'Qatar', 'République Démocratique du Congo',
-  'République Dominicaine', 'République Tchèque', 'Roumanie', 'Royaume-Uni', 'Russie', 'Rwanda',
-  'Saint-Christophe-et-Niévès', 'Sainte-Lucie', 'Saint-Marin', 'Saint-Vincent-et-les-Grenadines',
-  'Salomon', 'Salvador', 'Samoa', 'São Tomé-et-Príncipe', 'Sénégal', 'Serbie', 'Seychelles',
-  'Sierra Leone', 'Singapour', 'Slovaquie', 'Slovénie', 'Somalie', 'Soudan', 'Soudan du Sud',
-  'Sri Lanka', 'Suède', 'Suisse', 'Suriname', 'Syrie', 'Tadjikistan', 'Tanzanie', 'Tchad',
-  'Thaïlande', 'Timor oriental', 'Togo', 'Tonga', 'Trinité-et-Tobago', 'Tunisie', 'Turkménistan',
-  'Turquie', 'Tuvalu', 'Ukraine', 'Uruguay', 'Vanuatu', 'Vatican', 'Venezuela', 'Vietnam',
-  'Yémen', 'Zambie', 'Zimbabwe'
-]
-
-
-onMounted(() => {
-  if (typeof window !== 'undefined' && (window as any).bootstrap) {
-    modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
-  }
-})
-
-const openModal = (user?: any) => {
-  if (user) {
-    editingUser.value = user
-    form.firstName = user.firstName
-    form.lastName = user.lastName
-    form.email = user.email
-    form.role = user.role
-    form.phone = user.phone || ''
-    form.country = user.country
-    form.city = user.city
-  } else {
-    editingUser.value = null
-    form.firstName = ''
-    form.lastName = ''
-    form.email = ''
-    form.role = 'client'
-    form.phone = ''
-    form.country = 'Côte d\'Ivoire'
-    form.city = 'Abidjan'
-  }
-  modalInstance?.show()
-}
-
-const saveUser = () => {
-  if (editingUser.value) {
-    const idx = users.value.findIndex(u => u.id === editingUser.value.id)
-    if (idx !== -1) {
-      users.value[idx] = { ...users.value[idx], ...form }
-    }
-  } else {
-    users.value.push({
-      id: `usr_${Date.now()}`,
-      createdAt: new Date().toLocaleDateString(),
-      ...form
-    } as any)
-  }
-  modalInstance?.hide()
-}
+const submitting = ref(false)
+const previewAvatar = ref<string | null>(null)
+const selectedFile = ref<File | null>(null)
 
 const filters = reactive({
   search: '',
@@ -306,35 +262,204 @@ const filters = reactive({
   status: ''
 })
 
-const filteredUsers = computed(() => {
-  let list = [...users.value]
-
-  if (filters.search) {
-    const search = filters.search.toLowerCase()
-    list = list.filter(u => 
-      u.firstName.toLowerCase().includes(search) ||
-      u.lastName.toLowerCase().includes(search) ||
-      u.email.toLowerCase().includes(search) ||
-      u.phone?.includes(search)
-    )
-  }
-
-  if (filters.role) {
-    list = list.filter(u => u.role === filters.role)
-  }
-
-  return list
+const form = reactive({
+  firstname: '',
+  lastname: '',
+  email: '',
+  phone: '',
+  password: '',
+  password_confirmation: '',
+  role_uuid: '',
+  status: 1,
+  sex: 'M',
+  country: '',
+  city: ''
 })
 
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  return filteredUsers.value.slice(start, start + perPage.value)
-})
+// Methods
+const fetchUsers = async (page?: number, limit?: number) => {
+  await usersStore.fetchUsers({
+    page: page ?? usersStore.currentPage,
+    limit: limit ?? usersStore.perPage,
+    search: filters.search,
+    role: filters.role,
+    status: filters.status
+  })
+}
+
+let debounceTimer: any = null
+const debouncedFetch = () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => fetchUsers(1), 500)
+}
 
 const resetFilters = () => {
   filters.search = ''
   filters.role = ''
   filters.status = ''
-  currentPage.value = 1
+  fetchUsers(1)
 }
+
+const openModal = (user?: any) => {
+  previewAvatar.value = null
+  selectedFile.value = null
+  
+  if (user) {
+    editingUser.value = user
+    Object.assign(form, {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      phone: user.phone || '',
+      role_uuid: user.role?.uuid,
+      status: user.status,
+      sex: user.sex || 'M',
+      country: user.country || '',
+      city: user.city || '',
+      password: '',
+      password_confirmation: ''
+    })
+  } else {
+    editingUser.value = null
+    resetForm()
+  }
+  modalInstance?.show()
+}
+
+const resetForm = () => {
+  Object.assign(form, {
+    firstname: '',
+    lastname: '',
+    email: '',
+    phone: '',
+    password: '',
+    password_confirmation: '',
+    role_uuid: rolesStore.roles[0]?.role.uuid || '',
+    status: 1,
+    sex: 'M',
+    country: '',
+    city: ''
+  })
+}
+
+const onFileChange = (e: any) => {
+  const file = e.target.files[0]
+  if (file) {
+    selectedFile.value = file
+    previewAvatar.value = URL.createObjectURL(file)
+  }
+}
+
+const handleSave = async () => {
+  // Vérification mot de passe côté client
+  if (form.password || !editingUser.value) {
+    if (form.password !== form.password_confirmation) {
+      error('Les mots de passe ne correspondent pas')
+      return
+    }
+    if (form.password && form.password.length < 8) {
+      error('Le mot de passe doit contenir au moins 8 caractères')
+      return
+    }
+  }
+
+  if (!form.role_uuid) {
+    error('Veuillez sélectionner un rôle')
+    return
+  }
+
+  submitting.value = true
+  try {
+    const payload: any = { ...form }
+    if (selectedFile.value) {
+      payload.picture = selectedFile.value
+    }
+
+    if (editingUser.value) {
+      if (!payload.password) {
+        delete payload.password
+        delete payload.password_confirmation
+      }
+      await usersStore.updateUser(editingUser.value.uuid, payload)
+      success('Utilisateur mis à jour avec succès')
+    } else {
+      await usersStore.createUser(payload)
+      success('Utilisateur créé avec succès')
+    }
+    modalInstance?.hide()
+    await fetchUsers(usersStore.currentPage)
+  } catch (err: any) {
+    error(err.message || 'Une erreur est survenue')
+  } finally {
+    submitting.value = false
+  }
+}
+
+const handleDelete = async (user: any) => {
+  if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstname} ${user.lastname} ?`)) {
+    try {
+      await usersStore.deleteUser(user.uuid)
+      success('Utilisateur supprimé')
+    } catch (err: any) {
+      error(err.message)
+    }
+  }
+}
+
+// Helpers
+const getUserAvatar = (user: any) => {
+  if (user?.picture_url) {
+    return /^https?:\/\//i.test(user.picture_url)
+      ? user.picture_url
+      : `${config.public.apiBase.replace('/api', '')}${user.picture_url}`
+  }
+  if (user?.picture) return `${config.public.apiBase.replace('/api', '')}/storage/${user.picture}`
+  return `https://ui-avatars.com/api/?name=${user?.firstname || 'U'}+${user?.lastname || 'U'}&background=random&color=fff`
+}
+
+const getRoleBadgeClass = (code?: string) => {
+  switch (code?.toLowerCase()) {
+    case 'admin': return 'bg-primary-subtle text-primary'
+    case 'agent': return 'bg-info-subtle text-info'
+    case 'client': return 'bg-secondary-subtle text-secondary'
+    default: return 'bg-light text-dark'
+  }
+}
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+}
+
+// Lifecycle
+onMounted(async () => {
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
+  }
+  
+  await Promise.all([
+    rolesStore.fetchRoles(),
+    fetchUsers(1)
+  ])
+})
+
+onUnmounted(() => {
+  if (previewAvatar.value) URL.revokeObjectURL(previewAvatar.value)
+})
 </script>
+
+<style scoped>
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+</style>

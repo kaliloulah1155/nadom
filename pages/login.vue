@@ -167,11 +167,6 @@
                       </button>
                     </form>
 
-                    <!-- Demo Account -->
-                    <div class="mt-4 p-3 bg-light rounded">
-                      <p class="small text-muted mb-1"><strong>{{ locale === 'fr' ? 'Compte demo :' : 'Demo account:' }}</strong></p>
-                      <div class="small text-muted">admin@example.com / admin123</div>
-                    </div>
                   </div>
 
                   <!-- Back to Home -->
@@ -278,16 +273,28 @@ const validateForm = () => {
 }
 
 const handleAdminLogin = async () => {
-  if (!validateForm()) return
+  console.log('[DEBUG] handleAdminLogin started')
+  if (!validateForm()) {
+    console.log('[DEBUG] Validation failed')
+    return
+  }
 
   loading.value = true
   error.value = ''
 
-  try {
-    const user = await authStore.login(form.email, form.password)
+  console.log('[DEBUG] Attempting login for:', form.email)
 
-    if (user.role !== 'admin') {
-      error.value = locale.value === 'fr' ? 'Acces reserve aux administrateurs' : 'Admin access only'
+  try {
+    const user = await authStore.login({ email: form.email, password: form.password })
+
+    // Debugging backoffice access
+    console.log('[Login] User Data:', user)
+    console.log('[Login] Store CurrentUser Role:', authStore.currentUser?.role)
+    console.log('[Login] Has Backoffice Access:', authStore.hasBackofficeAccess)
+
+    // Determine if user has backoffice access (admin or agent)
+    if (!authStore.hasBackofficeAccess) {
+      error.value = locale.value === 'fr' ? 'Accès réservé au personnel autorisé' : 'Authorized personnel only'
       await authStore.logout()
       return
     }

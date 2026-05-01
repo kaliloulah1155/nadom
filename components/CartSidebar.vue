@@ -20,7 +20,7 @@
             <img :src="item.product.image || 'https://placehold.co/80?text=No+Img'" class="rounded border" width="60" height="60" style="object-fit: cover;" />
             <div class="flex-grow-1">
               <h6 class="mb-1 small fw-bold">{{ item.product[`name_${locale}` as keyof typeof item.product] || item.product.name_fr }}</h6>
-              <p class="mb-2 small text-primary fw-bold">{{ item.product.price.toLocaleString() }} FCFA</p>
+              <p class="mb-2 small text-primary fw-bold">{{ formatCurrency(item.product.price, (item.product as any).currency || 'XOF') }}</p>
               <div class="d-flex align-items-center justify-content-between">
                 <div class="btn-group btn-group-sm">
                   <button class="btn btn-outline-secondary py-0 px-2" @click="cartStore.updateQuantity(item.product.id, item.quantity - 1)">-</button>

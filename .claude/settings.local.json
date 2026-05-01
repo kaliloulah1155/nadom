@@ -3,6 +3,10 @@
     "allow": [
       "Bash(npm install:*)",
       "WebFetch(domain:listinghub-shreethemes.netlify.app)"
+    ],
+    "additionalDirectories": [
+      "c:\\laragon\\www\\NADOM\\backend\\app\\Data\\PersonalShoppingRequest",
+      "c:\\laragon\\www\\NADOM\\backend\\app\\Http\\Controllers\\API"
     ]
   }
 }

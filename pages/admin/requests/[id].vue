@@ -19,7 +19,7 @@
           <NuxtLink to="/admin/requests" class="btn btn-link p-0 mb-2">
             <i class="bi bi-arrow-left me-1"></i>Retour
           </NuxtLink>
-          <h4 class="mb-0">Demande #{{ request.id.slice(-6) }}</h4>
+          <h4 class="mb-0">Demande #{{ String(request.id ?? '').slice(-6) }}</h4>
         </div>
         <div class="d-flex gap-2">
           <select
@@ -66,9 +66,9 @@
                           <span>{{ item.name_fr }}</span>
                         </div>
                       </td>
-                      <td>{{ formatCurrency(item.price) }}</td>
+                      <td>{{ formatCurrency(item.price, requestCurrency) }}</td>
                       <td>{{ item.quantity }}</td>
-                      <td class="text-end fw-bold">{{ formatCurrency(item.price * item.quantity) }}</td>
+                      <td class="text-end fw-bold">{{ formatCurrency(item.price * item.quantity, requestCurrency) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -103,7 +103,7 @@
                 <div class="col-md-8">
                   <h5>{{ request.title }}</h5>
                   <span class="badge bg-secondary mb-3">{{ request.category }}</span>
-                  <p class="text-muted">{{ request.description }}</p>
+                  <div class="text-muted request-description" v-html="request.description"></div>
                   <div class="row g-2">
                     <div class="col-6">
                       <small class="text-muted d-block">Quantite</small>
@@ -111,7 +111,7 @@
                     </div>
                     <div class="col-6">
                       <small class="text-muted d-block">Budget estime</small>
-                      <strong>{{ formatCurrency(request.budgetEstimated) }}</strong>
+                      <strong>{{ formatCurrency(request.budgetEstimated, requestCurrency) }}</strong>
                     </div>
                   </div>
                 </div>
@@ -122,14 +122,33 @@
           <!-- Quotation -->
           <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Devis</h5>
+              <h5 class="mb-0">
+                Devis
+                <small class="text-muted fs-6 ms-2">— Devise : <strong>{{ requestCurrency }}</strong></small>
+              </h5>
               <div class="d-flex gap-2">
                 <button
-                  v-if="!showQuotationForm && !request.quotedPrice && request.status !== 'cancelled'"
+                  v-if="!showQuotationForm && !request.quotedPrice && canEditQuotation"
                   class="btn btn-sm btn-primary"
-                  @click="showQuotationForm = true"
+                  @click="openQuotationForm()"
                 >
                   <i class="bi bi-plus me-1"></i>Creer devis
+                </button>
+                <button
+                  v-if="!showQuotationForm && request.quotedPrice && canEditQuotation"
+                  class="btn btn-sm btn-outline-primary"
+                  @click="openQuotationForm()"
+                >
+                  <i class="bi bi-pencil me-1"></i>Modifier devis
+                </button>
+                <button
+                  v-if="request.quotedPrice"
+                  class="btn btn-sm btn-outline-secondary"
+                  :disabled="downloadingPdf"
+                  @click="downloadQuotationPdf"
+                >
+                  <span v-if="downloadingPdf" class="spinner-border spinner-border-sm me-1"></span>
+                  <i v-else class="bi bi-file-earmark-pdf me-1"></i>PDF Devis
                 </button>
                 <button
                   v-if="request.status === 'confirmed' || request.status === 'preparing'"
@@ -149,32 +168,32 @@
             </div>
             <div class="card-body">
               <!-- Existing Quotation -->
-              <div v-if="request.quotedPrice && request.quotedDetails">
+              <div v-if="request.quotedPrice && request.quotedDetails && !showQuotationForm">
                 <table class="table table-sm">
                   <tbody>
                     <tr>
                       <td>Cout produit</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
                     </tr>
                     <tr>
                       <td>Commission (5%)</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
                     </tr>
                     <tr>
                       <td>Inspection</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
                     </tr>
                     <tr>
                       <td>Emballage</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
                     </tr>
                     <tr>
                       <td>Expedition</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost) }}</td>
+                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
                     </tr>
                     <tr class="fw-bold border-top">
                       <td>TOTAL</td>
-                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice) }}</td>
+                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -184,26 +203,26 @@
               <form v-else-if="showQuotationForm" @submit.prevent="submitQuotation">
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="form-label">Cout produit (FCFA)</label>
-                    <input v-model.number="quotation.productCost" type="number" class="form-control" required />
+                    <label class="form-label">Cout produit ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.productCost" type="number" min="0" step="any" class="form-control" required />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Inspection (FCFA)</label>
-                    <input v-model.number="quotation.inspectionFee" type="number" class="form-control" required />
+                    <label class="form-label">Inspection ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.inspectionFee" type="number" min="0" step="any" class="form-control" required />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Emballage (FCFA)</label>
-                    <input v-model.number="quotation.packagingFee" type="number" class="form-control" required />
+                    <label class="form-label">Emballage ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.packagingFee" type="number" min="0" step="any" class="form-control" required />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Expedition (FCFA)</label>
-                    <input v-model.number="quotation.shippingCost" type="number" class="form-control" required />
+                    <label class="form-label">Expedition ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.shippingCost" type="number" min="0" step="any" class="form-control" required />
                   </div>
                 </div>
 
                 <div class="alert alert-info mt-3">
-                  <strong>Total estime :</strong> {{ formatCurrency(quotationTotal) }}
-                  <small class="d-block">(Commission 5% incluse)</small>
+                  <strong>Total estime :</strong> {{ formatCurrency(quotationTotal, requestCurrency) }}
+                  <small class="d-block">(Commission 5% incluse · devise client : {{ requestCurrency }})</small>
                 </div>
 
                 <div class="d-flex gap-2">
@@ -246,15 +265,37 @@
             <div class="card-body">
               <h6 class="mb-3">Informations</h6>
               <div class="mb-2">
-                <small class="text-muted d-block">Client ID</small>
-                <code>{{ request.userId }}</code>
-              </div>
-              <div v-if="request.contactNumber" class="mb-2">
-                <small class="text-muted d-block">Contact Client</small>
-                <div class="d-flex align-items-center">
-                  <i class="bi bi-whatsapp text-success me-2"></i>
-                  <strong>{{ request.contactNumber }}</strong>
+                <small class="text-muted d-block">Client</small>
+                <div class="fw-medium">
+                  {{ clientFullName || 'Client anonyme' }}
                 </div>
+                <small class="text-muted">
+                  {{ (request as any).user?.email || (request as any).contactEmail || '' }}
+                </small>
+              </div>
+              <div v-if="clientPhone" class="mb-2">
+                <small class="text-muted d-block">Contact Client</small>
+                <div class="d-flex align-items-center justify-content-between">
+                  <a
+                    :href="`tel:${clientPhone}`"
+                    class="text-decoration-none"
+                  >
+                    <i class="bi bi-telephone text-primary me-2"></i>
+                    <strong>{{ clientPhone }}</strong>
+                  </a>
+                  <a
+                    :href="whatsappLinkForClient"
+                    target="_blank"
+                    class="btn btn-sm btn-success"
+                    title="Ouvrir WhatsApp avec le client"
+                  >
+                    <i class="bi bi-whatsapp"></i>
+                  </a>
+                </div>
+              </div>
+              <div v-else class="mb-2">
+                <small class="text-muted d-block">Contact Client</small>
+                <span class="text-muted small fst-italic">Aucun numéro fourni</span>
               </div>
               <div class="mb-2">
                 <small class="text-muted d-block">Creee le</small>
@@ -334,6 +375,8 @@ import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalS
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
+import { useWhatsApp } from '~/composables/useWhatsApp'
+import { getToken } from '~/composables/useApi'
 
 definePageMeta({
   layout: 'admin'
@@ -345,11 +388,13 @@ const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
 const { formatCurrency, formatDate, formatRequestStatus } = useFormatters()
 const { success, error: notifyError } = useNotification()
+const { contactClientForRequest, generateLink } = useWhatsApp()
 
 const loading = ref(true)
 const showQuotationForm = ref(false)
 const showShipmentModal = ref(false)
 const creatingShipment = ref(false)
+const downloadingPdf = ref(false)
 
 const quotation = reactive({
   productCost: 0,
@@ -371,6 +416,33 @@ onMounted(async () => {
 })
 
 const request = computed(() => psStore.getRequestById(requestId))
+
+const requestCurrency = computed(() => {
+  const c = (request.value as any)?.currency
+  return (c || 'XOF').toString().toUpperCase()
+})
+
+const EDITABLE_QUOTATION_STATUSES: RequestStatus[] = ['pending', 'searching', 'negotiating']
+const canEditQuotation = computed(() => {
+  const status = request.value?.status as RequestStatus | undefined
+  return !!status && EDITABLE_QUOTATION_STATUSES.includes(status)
+})
+
+const openQuotationForm = () => {
+  const d = request.value?.quotedDetails
+  if (d) {
+    quotation.productCost = Number(d.productCost) || 0
+    quotation.inspectionFee = Number(d.inspectionFee) || 0
+    quotation.packagingFee = Number(d.packagingFee) || 0
+    quotation.shippingCost = Number(d.shippingCost) || 0
+  } else {
+    quotation.productCost = 0
+    quotation.inspectionFee = 5000
+    quotation.packagingFee = 3000
+    quotation.shippingCost = 0
+  }
+  showQuotationForm.value = true
+}
 
 const quotationTotal = computed(() => {
   const subtotal = quotation.productCost + quotation.inspectionFee + quotation.packagingFee + quotation.shippingCost
@@ -424,6 +496,7 @@ const createShipment = async () => {
 
 const submitQuotation = async () => {
   const serviceFee = quotation.productCost * 0.05
+  const isUpdate = !!request.value?.quotedPrice
 
   const quotedDetails = {
     productCost: quotation.productCost,
@@ -437,15 +510,66 @@ const submitQuotation = async () => {
   try {
     await psStore.addQuotation(requestId, quotationTotal.value, quotedDetails)
     showQuotationForm.value = false
-    success('Devis cree')
+    success(isUpdate ? 'Devis modifié' : 'Devis créé')
   } catch (err) {
     notifyError('Erreur')
   }
 }
 
+const clientFullName = computed(() => {
+  const r = request.value as any
+  if (!r) return ''
+  const u = r.user
+  if (u) {
+    const name = [u.firstname, u.lastname].filter(Boolean).join(' ').trim()
+    if (name) return name
+  }
+  return r.contactFullname || ''
+})
+
+const clientPhone = computed(() => {
+  const r: any = request.value
+  if (!r) return ''
+  return r.user?.phone || r.contactNumber || r.contact_number || ''
+})
+
+const whatsappLinkForClient = computed(() => {
+  if (!request.value) return '#'
+  if (!clientPhone.value) return '#'
+  const message = `Bonjour, NADOM Support 👋
+
+Concernant votre demande Personal Shopping :
+📦 Produit : ${request.value.title}
+🔖 Référence : ${request.value.id}
+
+Pourrions-nous échanger pour finaliser votre commande ?`
+  return generateLink(clientPhone.value, message)
+})
+
 const openWhatsApp = () => {
-  if (request.value) {
-    window.open(`https://wa.me/?text=Bonjour, concernant votre demande ${request.value.id}`, '_blank')
+  if (!request.value) return
+  contactClientForRequest(clientPhone.value, request.value.title, request.value.id)
+}
+
+const downloadQuotationPdf = async () => {
+  if (!request.value) return
+  downloadingPdf.value = true
+  try {
+    const config = useRuntimeConfig()
+    const token = getToken()
+    const url = `${config.public.apiBase}/personal-shopping-requests/${request.value.id}/pdf`
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/pdf' } })
+    if (!res.ok) throw new Error('Erreur PDF')
+    const blob = await res.blob()
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `devis-${request.value.id}.pdf`
+    link.click()
+    URL.revokeObjectURL(link.href)
+  } catch {
+    notifyError('Impossible de générer le PDF')
+  } finally {
+    downloadingPdf.value = false
   }
 }
 
@@ -461,3 +585,17 @@ const deleteRequest = async () => {
   }
 }
 </script>
+<style scoped>
+.request-description :deep(img),
+.request-description img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: block;
+}
+
+.request-description {
+  line-height: 1.6;
+}
+</style>

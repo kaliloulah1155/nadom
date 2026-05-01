@@ -15,11 +15,11 @@
     </div>
 
     <!-- Navigation -->
-    <nav v-if="totalPages > 1">
+    <nav aria-label="Page navigation example">
       <ul class="pagination justify-content-center mb-0">
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
           <button class="page-link" @click="$emit('update:currentPage', currentPage - 1)">
-            <i class="bi bi-chevron-left"></i>
+            <i class="fa-solid fa-arrow-left"></i>
           </button>
         </li>
         
@@ -36,12 +36,12 @@
           >
             {{ page }}
           </button>
-          <span v-else class="page-link border-0 bg-transparent">...</span>
+          <span v-else class="page-link border-0 bg-transparent px-2">...</span>
         </li>
-
+  
         <li class="page-item" :class="{ disabled: currentPage === totalPages }">
           <button class="page-link" @click="$emit('update:currentPage', currentPage + 1)">
-            <i class="bi bi-chevron-right"></i>
+            <i class="fa-solid fa-arrow-right"></i>
           </button>
         </li>
       </ul>

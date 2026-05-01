@@ -37,27 +37,27 @@
                 <span class="badge bg-primary fs-6">{{ formatCurrency(visa.cost) }}</span>
               </div>
 
-              <h5 class="card-title fw-bold mb-2">{{ visa.name || visa.type }}</h5>
-              <p class="text-muted small mb-3">{{ visa.description }}</p>
+              <h5 class="card-title fw-bold mb-2">{{ visa[`name_${locale}`] || visa.name_fr || visa.type }}</h5>
+              <p class="text-muted small mb-3">{{ visa[`description_${locale}`] || visa.description_fr }}</p>
 
               <!-- Info Grid -->
               <div class="row g-2 mb-3">
                 <div class="col-6">
                   <div class="info-box">
                     <small class="text-muted d-block">{{ t('visa.duration') }}</small>
-                    <strong>{{ visa.duration }}</strong>
+                    <strong>{{ visa[`duration_${locale}`] || visa.duration_fr }}</strong>
                   </div>
                 </div>
                 <div class="col-6">
                   <div class="info-box">
                     <small class="text-muted d-block">{{ t('visa.validity') }}</small>
-                    <strong>{{ visa.validity }}</strong>
+                    <strong>{{ visa[`validity_${locale}`] || visa.validity_fr }}</strong>
                   </div>
                 </div>
                 <div class="col-12">
                   <div class="info-box">
                     <small class="text-muted d-block">{{ t('visa.processingTime') }}</small>
-                    <strong>{{ visa.processingTime }}</strong>
+                    <strong>{{ visa[`processing_time_${locale}`] || visa.processing_time_fr }}</strong>
                   </div>
                 </div>
               </div>
@@ -65,19 +65,19 @@
               <!-- Requirements -->
               <h6 class="fw-medium mb-2">{{ t('visa.requiredDocs') }}</h6>
               <ul class="list-unstyled mb-3">
-                <li v-for="(req, index) in visa.requirements?.slice(0, 4)" :key="index" class="mb-1">
+                <li v-for="(req, index) in (visa[`requirements_${locale}`] || visa.requirements_fr || []).slice(0, 4)" :key="index" class="mb-1">
                   <i class="bi bi-check-circle-fill text-success me-2"></i>
                   <small>{{ req }}</small>
                 </li>
-                <li v-if="visa.requirements?.length > 4">
-                  <small class="text-muted">+ {{ visa.requirements.length - 4 }} {{ t('visa.otherDocs') }}</small>
+                <li v-if="(visa[`requirements_${locale}`] || visa.requirements_fr || []).length > 4">
+                  <small class="text-muted">+ {{ (visa[`requirements_${locale}`] || visa.requirements_fr).length - 4 }} {{ t('visa.otherDocs') }}</small>
                 </li>
               </ul>
 
               <!-- PDF Link -->
-              <div v-if="visa.pdfUrl" class="mb-3">
+              <div v-if="visa.pdf_url || visa.pdfUrl" class="mb-3">
                 <a
-                  :href="visa.pdfUrl"
+                  :href="resolvePdf(visa.pdf_url || visa.pdfUrl)"
                   target="_blank"
                   class="btn btn-outline-danger btn-sm w-100"
                 >
@@ -195,8 +195,15 @@ definePageMeta({
 const { t, locale } = useI18n()
 const visasStore = useVisasStore()
 const { formatCurrency } = useFormatters()
+const config = useRuntimeConfig()
 
 const loading = ref(false)
+
+const resolvePdf = (url: string | null) => {
+  if (!url) return '#'
+  if (/^https?:\/\//i.test(url)) return url
+  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(url).replace(/^\/+/, '')
+}
 
 onMounted(async () => {
   loading.value = true

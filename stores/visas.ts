@@ -1,54 +1,63 @@
 import { defineStore } from 'pinia'
-import { FAKE_VISAS } from '~/utils/data/fakeData'
+import { useApi } from '~/composables/useApi'
 
 export interface Visa {
-  id: string
-  name_fr: string
-  name_en: string
+  id: number
   type: string
-  duration_fr: string
-  duration_en: string
-  validity_fr: string
-  validity_en: string
-  processingTime_fr: string
-  processingTime_en: string
-  cost: number
-  requirements_fr: string[]
-  requirements_en: string[]
-  description_fr: string
-  description_en: string
-  pdfUrl?: string
-  active?: boolean
+  name_fr: string | null
+  name_en: string | null
+  duration_fr: string | null
+  duration_en: string | null
+  validity_fr: string | null
+  validity_en: string | null
+  processing_time_fr: string | null
+  processing_time_en: string | null
+  cost: number | null
+  requirements_fr: string[] | null
+  requirements_en: string[] | null
+  description_fr: string | null
+  description_en: string | null
+  pdf_url: string | null
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface VisaApplication {
-  id: string
-  userId: string
-  visaType: string
+  id: number
+  visa_type_id: number
+  user_id: number
   status: 'pending' | 'processing' | 'approved' | 'rejected'
-  applicantInfo: {
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    nationality: string
-    passportNumber: string
-    passportExpiry: string
-  }
-  travelDates: {
-    departure: string
-    return?: string
-  }
+  applicant_firstname: string
+  applicant_lastname: string
+  applicant_email: string
+  applicant_phone: string
+  applicant_nationality: string
+  passport_number: string
+  passport_expiry: string
+  departure_date: string
+  return_date: string | null
   documents: string[]
-  notes?: string
-  totalCost: number
-  createdAt: string
-  updatedAt: string
+  notes: string | null
+  total_cost: number
+  created_at?: string
+  updated_at?: string
 }
+
+interface Meta {
+  total: number
+  currentPage: number
+  perPage: number
+  lastPage: number
+}
+
+const newMeta = (perPage = 15): Meta => ({ total: 0, currentPage: 1, perPage, lastPage: 1 })
 
 interface VisasState {
   visaTypes: Visa[]
+  visaTypesMeta: Meta
   applications: VisaApplication[]
+  applicationsMeta: Meta
   loading: boolean
   error: string | null
 }
@@ -56,161 +65,137 @@ interface VisasState {
 export const useVisasStore = defineStore('visas', {
   state: (): VisasState => ({
     visaTypes: [],
+    visaTypesMeta: newMeta(6),
     applications: [],
+    applicationsMeta: newMeta(15),
     loading: false,
     error: null
   }),
 
   getters: {
-    getVisaByType: (state) => (type: string) => {
-      return state.visaTypes.find(v => v.type === type)
-    },
-
-    getVisaById: (state) => (id: string) => {
-      return state.visaTypes.find(v => v.id === id)
-    },
-
-    getApplicationsByUser: (state) => (userId: string) => {
-      return state.applications.filter(a => a.userId === userId)
-    },
-
-    getApplicationsByStatus: (state) => (status: VisaApplication['status']) => {
-      return state.applications.filter(a => a.status === status)
-    },
-
-    getPendingApplications: (state) => {
-      return state.applications.filter(a => a.status === 'pending' || a.status === 'processing')
-    }
+    getVisaByType: (state) => (type: string) => state.visaTypes.find(v => v.type === type),
+    getVisaById: (state) => (id: number) => state.visaTypes.find(v => v.id === id),
+    getApplicationsByUser: (state) => (userId: number) => state.applications.filter(a => a.user_id === userId),
+    getApplicationsByStatus: (state) => (status: VisaApplication['status']) => state.applications.filter(a => a.status === status),
+    getPendingApplications: (state) => state.applications.filter(a => a.status === 'pending' || a.status === 'processing')
   },
 
   actions: {
-    async fetchVisaTypes() {
+    async fetchVisaTypes(params: { page?: number; limit?: number } = {}) {
       this.loading = true
       this.error = null
-
       try {
-        await new Promise(resolve => setTimeout(resolve, 300))
-
-        // Read from localStorage (admin-configured data)
-        if (typeof window !== 'undefined') {
-          const saved = localStorage.getItem('visas')
-          if (saved) {
-            const adminVisas = JSON.parse(saved)
-            this.visaTypes = adminVisas.map((v: any) => ({
-              id: v.id,
-              name_fr: v.name_fr || v.name || '',
-              name_en: v.name_en || v.name || '',
-              type: v.type || v.name || '',
-              duration_fr: v.duration_fr || v.duration || '',
-              duration_en: v.duration_en || v.duration || '',
-              validity_fr: v.validity_fr || v.validity || '',
-              validity_en: v.validity_en || v.validity || '',
-              processingTime_fr: v.processingTime_fr || v.processingTime || '',
-              processingTime_en: v.processingTime_en || v.processingTime || '',
-              cost: v.price || v.cost || 0,
-              requirements_fr: v.requirements_fr || v.requiredDocs || v.requirements || [],
-              requirements_en: v.requirements_en || v.requiredDocs || v.requirements || [],
-              description_fr: v.description_fr || v.description || '',
-              description_en: v.description_en || v.description || '',
-              pdfUrl: v.pdfUrl,
-              active: v.active !== false
-            }))
+        const api = useApi()
+        const res = await api.get<Visa[]>('/visa-types/all')
+        if (res.success) {
+          const all = res.data || []
+          const hasPaging = params.page !== undefined || params.limit !== undefined
+          if (hasPaging) {
+            const page = params.page ?? this.visaTypesMeta.currentPage
+            const limit = params.limit ?? this.visaTypesMeta.perPage
+            const total = all.length
+            const lastPage = Math.max(1, Math.ceil(total / limit))
+            const safePage = Math.min(Math.max(1, page), lastPage)
+            const start = (safePage - 1) * limit
+            this.visaTypes = all.slice(start, start + limit)
+            this.visaTypesMeta.total = total
+            this.visaTypesMeta.currentPage = safePage
+            this.visaTypesMeta.perPage = limit
+            this.visaTypesMeta.lastPage = lastPage
           } else {
-            this.visaTypes = FAKE_VISAS.map((v: any) => ({
-              id: v.id,
-              name_fr: v.name || '',
-              name_en: v.name || '',
-              type: v.type || v.name || '',
-              duration_fr: v.duration || '',
-              duration_en: v.duration || '',
-              validity_fr: v.validity || '',
-              validity_en: v.validity || '',
-              processingTime_fr: v.processingTime || '',
-              processingTime_en: v.processingTime || '',
-              cost: v.price || v.cost || 0,
-              requirements_fr: v.requiredDocs || v.requirements || [],
-              requirements_en: v.requiredDocs || v.requirements || [],
-              description_fr: v.description || '',
-              description_en: v.description || '',
-              pdfUrl: v.pdfUrl,
-              active: v.active !== false
-            }))
+            this.visaTypes = all
+            this.visaTypesMeta.total = all.length
+            this.visaTypesMeta.currentPage = 1
+            this.visaTypesMeta.lastPage = 1
           }
         } else {
-          this.visaTypes = []
+          this.error = res.message
         }
-      } catch (err) {
-        this.error = 'Erreur lors du chargement des types de visa'
+      } catch (err: any) {
+        this.error = err.message || 'Erreur lors du chargement des types de visa'
       } finally {
         this.loading = false
       }
     },
 
-    async fetchApplications() {
-      if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('visaApplications')
-        this.applications = saved ? JSON.parse(saved) : []
+    async fetchApplications(params: { page?: number; limit?: number } = {}) {
+      try {
+        const api = useApi()
+        const res = await api.get<VisaApplication[]>('/visa-applications')
+        if (res.success) {
+          const all = res.data || []
+          const page = params.page ?? this.applicationsMeta.currentPage
+          const limit = params.limit ?? this.applicationsMeta.perPage
+          const total = all.length
+          const lastPage = Math.max(1, Math.ceil(total / limit))
+          const safePage = Math.min(Math.max(1, page), lastPage)
+          const start = (safePage - 1) * limit
+          this.applications = all.slice(start, start + limit)
+          this.applicationsMeta.total = total
+          this.applicationsMeta.currentPage = safePage
+          this.applicationsMeta.perPage = limit
+          this.applicationsMeta.lastPage = lastPage
+        }
+      } catch (err: any) {
+        this.error = err.message
       }
     },
 
     async createApplication(applicationData: Partial<VisaApplication>) {
       this.loading = true
-
       try {
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        const visa = this.visaTypes.find(v => v.type === applicationData.visaType)
-        if (!visa) throw new Error('Type de visa non trouvé')
-
-        const newApplication: VisaApplication = {
-          id: `visa_app_${Date.now()}`,
-          userId: applicationData.userId || '',
-          visaType: applicationData.visaType || '',
-          status: 'pending',
-          applicantInfo: applicationData.applicantInfo || {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            nationality: '',
-            passportNumber: '',
-            passportExpiry: ''
-          },
-          travelDates: applicationData.travelDates || {
-            departure: ''
-          },
-          documents: applicationData.documents || [],
-          notes: applicationData.notes,
-          totalCost: visa.cost,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+        const api = useApi()
+        const res = await api.post<VisaApplication>('/visa-applications', applicationData)
+        if (res.success && res.data) {
+          this.applications.unshift(res.data)
+          this.applicationsMeta.total++
+          return res.data
         }
-
-        this.applications.unshift(newApplication)
-        this.saveApplicationsToLocalStorage()
-
-        return newApplication
+        throw new Error(res.message)
       } finally {
         this.loading = false
       }
     },
 
-    async updateApplicationStatus(id: string, status: VisaApplication['status'], notes?: string) {
-      const application = this.applications.find(a => a.id === id)
-      if (application) {
-        application.status = status
-        if (notes) application.notes = notes
-        application.updatedAt = new Date().toISOString()
-        this.saveApplicationsToLocalStorage()
-        return application
+    async updateApplicationStatus(id: number, status: VisaApplication['status'], notes?: string) {
+      const api = useApi()
+      const res = await api.put<VisaApplication>(`/visa-applications/${id}/status`, { status, notes })
+      if (res.success && res.data) {
+        const idx = this.applications.findIndex(a => a.id === id)
+        if (idx !== -1) this.applications[idx] = res.data
+        return res.data
       }
       return null
     },
 
-    saveApplicationsToLocalStorage() {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('visaApplications', JSON.stringify(this.applications))
+    async createVisaType(visaData: Partial<Visa>) {
+      const api = useApi()
+      const res = await api.post<Visa>('/visa-types', visaData)
+      if (res.success && res.data) {
+        await this.fetchVisaTypes({ page: this.visaTypesMeta.currentPage, limit: this.visaTypesMeta.perPage })
+        return res.data
       }
+      throw new Error(res.message)
+    },
+
+    async updateVisaType(id: number, visaData: Partial<Visa>) {
+      const api = useApi()
+      const res = await api.put<Visa>(`/visa-types/${id}`, visaData)
+      if (res.success && res.data) {
+        await this.fetchVisaTypes({ page: this.visaTypesMeta.currentPage, limit: this.visaTypesMeta.perPage })
+        return res.data
+      }
+      throw new Error(res.message)
+    },
+
+    async deleteVisaType(id: number) {
+      const api = useApi()
+      const res = await api.delete(`/visa-types/${id}`)
+      if (res.success) {
+        await this.fetchVisaTypes({ page: this.visaTypesMeta.currentPage, limit: this.visaTypesMeta.perPage })
+        return true
+      }
+      throw new Error(res.message)
     }
   }
 })

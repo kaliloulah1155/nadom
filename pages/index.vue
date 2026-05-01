@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- Marquee -->
+    <Marquee v-if="marqueeText" :text="marqueeText" />
+
     <!-- Hero Section -->
     <section class="hero-section position-relative overflow-hidden">
       <div class="hero-bg"></div>
@@ -64,10 +67,10 @@
                 <div class="service-icon mb-3">
                   <i :class="service.icon" class="fs-1 text-primary"></i>
                 </div>
-                <h5 class="card-title">{{ service[`name_${locale}`] || service.name_fr }}</h5>
-                <p class="card-text text-muted">{{ service[`description_${locale}`] || service.description_fr }}</p>
+                <h5 class="card-title">{{ service.name }}</h5>
+                <p class="card-text text-muted">{{ service.description }}</p>
                 <ul class="list-unstyled mb-0">
-                  <li v-for="(feature, idx) in (service[`features_${locale}`] || service.features_fr || []).slice(0, 3)" :key="idx" class="mb-1">
+                  <li v-for="(feature, idx) in service.features" :key="idx" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
                     <small>{{ feature }}</small>
                   </li>
@@ -108,12 +111,12 @@
         </div>
 
         <div class="row g-3">
-          <div v-for="category in categories" :key="category.id" class="col-6 col-md-4 col-lg-3">
-            <NuxtLink :to="`/personal-shopping?category=${category.id}`" class="text-decoration-none">
+          <div v-for="category in categories" :key="category.uuid" class="col-6 col-md-4 col-lg-3">
+            <NuxtLink :to="`/personal-shopping?category=${category.slug}`" class="text-decoration-none">
               <div class="card h-100 border-0 shadow-sm text-center hover-card">
                 <div class="card-body py-4">
-                  <i :class="category.icon" class="fs-2 mb-2" :style="{ color: category.color }"></i>
-                  <h6 class="mb-0">{{ category[`name_${locale}`] || category.name_fr }}</h6>
+                  <i :class="categoryIcon(category)" class="fs-2 mb-2 text-primary"></i>
+                  <h6 class="mb-0">{{ category.label }}</h6>
                 </div>
               </div>
             </NuxtLink>
@@ -164,11 +167,11 @@
         <div class="row g-4">
           <div v-for="post in recentPosts" :key="post.id" class="col-md-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm">
-              <img :src="post.image" class="card-img-top" :alt="post.title_fr" style="height: 160px; object-fit: cover;" />
+              <img :src="resolveImage(post.image)" class="card-img-top" :alt="post.title_fr || ''" style="height: 160px; object-fit: cover;" />
               <div class="card-body">
-                <span class="badge bg-primary-subtle text-primary mb-2">{{ post.category }}</span>
+                <span v-if="post.category" class="badge bg-primary-subtle text-primary mb-2">{{ post.category }}</span>
                 <h6 class="card-title">{{ post[`title_${locale}`] || post.title_fr }}</h6>
-                <p class="card-text small text-muted">{{ truncate(post[`excerpt_${locale}`] || post.excerpt_fr, 80) }}</p>
+                <p class="card-text small text-muted">{{ truncate(post[`excerpt_${locale}`] || post.excerpt_fr || '', 80) }}</p>
               </div>
               <div class="card-footer bg-transparent border-0">
                 <NuxtLink :to="`/resources/blog/${post.slug}`" class="btn btn-sm btn-link p-0">
@@ -203,21 +206,52 @@
 </template>
 
 <script setup lang="ts">
-import { FAKE_SERVICES, FAKE_CATEGORIES } from '~/utils/data/fakeData'
 import { useBlogStore } from '~/stores/blog'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { useGlobalSettingsStore } from '~/stores/globalSettings'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t, tm, rt, locale } = useI18n()
 const blogStore = useBlogStore()
+const psStore = usePersonalShoppingStore()
+const settingsStore = useGlobalSettingsStore()
 const { truncate } = useFormatters()
+const config = useRuntimeConfig()
 
-// Data
-const services = FAKE_SERVICES
-const categories = FAKE_CATEGORIES
+const marqueeText = computed(() => settingsStore.getValue('home_marquee', ''))
+
+const SERVICE_KEYS = [
+  { id: 'personal-shopping', icon: 'bi-bag-check', key: 'personalShopping' },
+  { id: 'shipping', icon: 'bi-box-seam', key: 'shipping' },
+  { id: 'visa', icon: 'bi-passport', key: 'visa' },
+  { id: 'guide', icon: 'bi-person-badge', key: 'guide' }
+]
+const services = computed(() => SERVICE_KEYS.map(s => {
+  const featuresRaw = tm(`services.${s.key}.features`) as any
+  const features = Array.isArray(featuresRaw) ? featuresRaw.slice(0, 3).map((f: any) => rt(f)) : []
+  return {
+    id: s.id,
+    icon: s.icon,
+    name: t(`services.${s.key}.title`),
+    description: t(`services.${s.key}.description`),
+    features
+  }
+}))
+
+const categories = computed(() => psStore.categories.filter((c: any) => (c.slug || '').startsWith('POD-') || c.parent_id === null))
+
+const ICONS = ['bi-phone', 'bi-bag', 'bi-house', 'bi-heart', 'bi-bicycle', 'bi-gift', 'bi-car-front', 'bi-gear', 'bi-cup-hot', 'bi-lamp', 'bi-hospital', 'bi-scissors']
+const categoryIcon = (cat: any) => cat.icon || ICONS[(Number(cat.id) || 0) % ICONS.length] || 'bi-box'
+
+const resolveImage = (img: string | null) => {
+  if (!img) return 'https://placehold.co/400x200?text=NADOM'
+  if (/^https?:\/\//i.test(img)) return img
+  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+}
 
 const steps = computed(() => [
   { title: t('home.steps.step1'), description: t('home.steps.step1Desc') },
@@ -227,8 +261,12 @@ const steps = computed(() => [
   { title: t('home.steps.step5'), description: t('home.steps.step5Desc') }
 ])
 
-// Load blog posts
-await blogStore.fetchPosts()
+await Promise.all([
+  blogStore.fetchPosts({ page: 1, limit: 4, is_published: true }),
+  psStore.fetchCategories({ page: 1, limit: 12 }),
+  settingsStore.fetchAll(),
+])
+
 const recentPosts = computed(() => blogStore.getRecentPosts(4))
 </script>
 

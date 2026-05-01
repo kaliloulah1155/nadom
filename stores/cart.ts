@@ -1,85 +1,167 @@
 import { defineStore } from 'pinia'
-import type { Product } from './personalShopping'
+import { useApi, getToken } from '~/composables/useApi'
+
+export interface CartProduct {
+    id: string | number
+    name_fr?: string | null
+    name_en?: string | null
+    description_fr?: string | null
+    description_en?: string | null
+    price: number
+    image?: string | null
+    is_active?: boolean
+    stock_status?: 'in_stock' | 'out_of_stock' | 'on_demand'
+    [key: string]: any
+}
 
 export interface CartItem {
-    product: Product
+    id?: string
+    product: CartProduct
     quantity: number
 }
 
 interface CartState {
     items: CartItem[]
     isOpen: boolean
+    loading: boolean
+    error: string | null
 }
+
+const LOCAL_KEY = 'nadom_cart'
 
 export const useCartStore = defineStore('cart', {
     state: (): CartState => ({
         items: [],
-        isOpen: false
+        isOpen: false,
+        loading: false,
+        error: null
     }),
 
     getters: {
-        totalItems: (state) => state.items.reduce((total, item) => total + item.quantity, 0),
-        totalPrice: (state) => state.items.reduce((total, item) => total + (item.product.price * item.quantity), 0),
+        totalItems: (state) => state.items.reduce((t, i) => t + i.quantity, 0),
+        totalPrice: (state) => state.items.reduce((t, i) => t + (i.product.price * i.quantity), 0),
         isEmpty: (state) => state.items.length === 0
     },
 
     actions: {
-        addItem(product: Product, quantity = 1) {
-            const existing = this.items.find(item => item.product.id === product.id)
-            if (existing) {
-                existing.quantity += quantity
-            } else {
-                this.items.push({ product, quantity })
+        async fetchCart() {
+            if (!getToken()) {
+                this.loadFromLocalStorage()
+                return
             }
-            this.saveToLocalStorage()
-        },
-
-        removeItem(productId: string) {
-            this.items = this.items.filter(item => item.product.id !== productId)
-            this.saveToLocalStorage()
-        },
-
-        updateQuantity(productId: string, quantity: number) {
-            const item = this.items.find(i => i.product.id === productId)
-            if (item) {
-                item.quantity = quantity
-                if (item.quantity <= 0) {
-                    this.removeItem(productId)
+            this.loading = true
+            try {
+                const api = useApi()
+                const res = await api.get<any[]>('/cart')
+                if (res.success) {
+                    this.items = (res.data || []).map((item: any) => ({
+                        id: item.id,
+                        product: item.product,
+                        quantity: item.quantity
+                    }))
                 }
+            } catch (err: any) {
+                this.error = err.message
+            } finally {
+                this.loading = false
             }
+        },
+
+        async addItem(product: CartProduct | any, quantity = 1) {
+            const safeProduct: CartProduct = {
+                id: product.id || product.productId || product.product_id || String(Date.now()),
+                name_fr: product.name_fr || product.title || '',
+                name_en: product.name_en || product.title || '',
+                price: Number(product.price) || 0,
+                image: product.image || null
+            }
+
+            if (!getToken()) {
+                const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
+                if (existing) existing.quantity += quantity
+                else this.items.push({ product: safeProduct, quantity })
+                this.saveToLocalStorage()
+                return
+            }
+
+            const api = useApi()
+            try {
+                const res = await api.post<any>('/cart/items', {
+                    product_id: safeProduct.id,
+                    quantity
+                })
+                if (res.success && res.data) {
+                    const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
+                    if (existing) {
+                        existing.quantity = res.data.quantity
+                        existing.id = res.data.id
+                    } else {
+                        this.items.push({ id: res.data.id, product: safeProduct, quantity: res.data.quantity })
+                    }
+                }
+            } catch (e) {
+                // fallback local storage
+                const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
+                if (existing) existing.quantity += quantity
+                else this.items.push({ product: safeProduct, quantity })
+                this.saveToLocalStorage()
+            }
+        },
+
+        async removeItem(productId: string) {
+            const item = this.items.find(i => i.product.id === productId)
+            if (!item) return
+
+            if (getToken() && item.id) {
+                const api = useApi()
+                await api.delete(`/cart/items/${item.id}`)
+            }
+            this.items = this.items.filter(i => i.product.id !== productId)
             this.saveToLocalStorage()
         },
 
-        clearCart() {
+        async updateQuantity(productId: string, quantity: number) {
+            if (quantity <= 0) return this.removeItem(productId)
+
+            const item = this.items.find(i => i.product.id === productId)
+            if (!item) return
+
+            if (getToken() && item.id) {
+                const api = useApi()
+                const res = await api.put<any>(`/cart/items/${item.id}`, { quantity })
+                if (res.success) item.quantity = quantity
+            } else {
+                item.quantity = quantity
+                this.saveToLocalStorage()
+            }
+        },
+
+        async clearCart() {
+            if (getToken()) {
+                const api = useApi()
+                await api.delete('/cart')
+            }
             this.items = []
             this.saveToLocalStorage()
         },
 
         saveToLocalStorage() {
             if (typeof window !== 'undefined') {
-                localStorage.setItem('nadom_cart', JSON.stringify(this.items))
+                localStorage.setItem(LOCAL_KEY, JSON.stringify(this.items))
             }
         },
 
         loadFromLocalStorage() {
             if (typeof window !== 'undefined') {
-                const saved = localStorage.getItem('nadom_cart')
+                const saved = localStorage.getItem(LOCAL_KEY)
                 if (saved) {
-                    this.items = JSON.parse(saved)
+                    try { this.items = JSON.parse(saved) } catch { /* ignore */ }
                 }
             }
         },
 
-        toggleCart() {
-            this.isOpen = !this.isOpen
-        },
-
-        openCart() {
-            this.isOpen = true
-        },
-
-        closeCart() {
-            this.isOpen = false
-        }
+        toggleCart() { this.isOpen = !this.isOpen },
+        openCart() { this.isOpen = true },
+        closeCart() { this.isOpen = false }
     }
 })

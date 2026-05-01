@@ -3,6 +3,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
 
+  // App SPA: tout l'etat (auth, panier, settings) vit dans localStorage/Pinia,
+  // donc le SSR ne peut pas produire le meme HTML que le client et provoque
+  // des "Hydration completed but contains mismatches". Mode SPA = un seul rendu.
+  ssr: false,
+
   modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
 
   i18n: {
@@ -21,9 +26,16 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      // Valeur locale par défaut. Nuxt override automatiquement via la variable
+      // d'environnement NUXT_PUBLIC_API_BASE (sans toucher ce fichier).
+      // - Local  : défini dans .env.local  → http://localhost:8000/api
+      // - Vercel : défini dans le dashboard → https://gateway.nadom.co/api
+      apiBase: "http://localhost:8000/api",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",
-      siteName: "NADOM"
+      siteName: "NADOM",
+      pusherKey: "a01268b9f632bda2891d",
+      pusherCluster: "ap2"
     }
   },
   css: [
@@ -79,18 +91,14 @@ export default defineNuxtConfig({
         {
           rel: 'stylesheet',
           href: 'https://unpkg.com/vue-multiselect/dist/vue-multiselect.min.css',
-        },
-        {
-          rel: 'stylesheet',
-          href: 'https://cdn.quilljs.com/1.3.6/quill.snow.css',
         }
       ],
 
       script: [
-        { src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', tagPosition: 'bodyClose' },
+        // Bootstrap est charge via plugins/bootstrap.client.ts (paquet npm),
+        // pas via CDN, pour eviter la race onMounted vs script-load.
         { src: 'https://cdn.jsdelivr.net/npm/apexcharts' },
         { src: 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js' },
-        { src: 'https://cdn.quilljs.com/1.3.6/quill.min.js' },
       ],
 
     },

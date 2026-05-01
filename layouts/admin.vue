@@ -12,7 +12,7 @@
       <nav class="sidebar-nav">
         <ul class="nav flex-column">
           <!-- Dashboard -->
-          <li class="nav-item">
+          <li v-can="['view', 'dashboard']" class="nav-item">
             <NuxtLink to="/admin/dashboard" class="nav-link" :class="{ 'active': isActive('/admin/dashboard') }">
               <i class="bi bi-speedometer2"></i>
               <span v-if="!sidebarCollapsed">Tableau de bord</span>
@@ -20,7 +20,7 @@
           </li>
 
           <!-- Demandes -->
-          <li class="nav-item">
+          <li v-can="['list', 'personal-shopping-requests']" class="nav-item">
             <NuxtLink to="/admin/requests" class="nav-link" :class="{ 'active': isActive('/admin/requests') }">
               <i class="bi bi-bag-check"></i>
               <span v-if="!sidebarCollapsed">Demandes</span>
@@ -31,7 +31,7 @@
           </li>
 
           <!-- Expeditions -->
-          <li class="nav-item">
+          <li v-can="['list', 'shipments']" class="nav-item">
             <NuxtLink to="/admin/shipments" class="nav-link" :class="{ 'active': isActive('/admin/shipments') }">
               <i class="bi bi-box-seam"></i>
               <span v-if="!sidebarCollapsed">Expeditions</span>
@@ -39,17 +39,34 @@
           </li>
 
           <!-- Utilisateurs -->
-          <li class="nav-item">
-            <NuxtLink to="/admin/users" class="nav-link" :class="{ 'active': isActive('/admin/users') }">
-              <i class="bi bi-people"></i>
-              <span v-if="!sidebarCollapsed">Utilisateurs</span>
-            </NuxtLink>
+          <li v-can="['list', 'users']" class="nav-item">
+            <div class="nav-link d-flex align-items-center justify-content-between" @click="toggleUsersMenu" :class="{ 'active': isActive('/admin/users') }" style="cursor: pointer;">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-people"></i>
+                <span v-if="!sidebarCollapsed">Utilisateurs</span>
+              </div>
+              <i v-if="!sidebarCollapsed" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="usersMenuOpen && !sidebarCollapsed" class="nav flex-column ms-4 small-nav">
+              <li class="nav-item">
+                <NuxtLink to="/admin/users" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users' }">
+                  <i class="bi bi-list-ul"></i>
+                  <span>Liste</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'roles']" class="nav-item">
+                <NuxtLink to="/admin/users/roles" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users/roles' }">
+                  <i class="bi bi-shield-lock"></i>
+                  <span>Rôles & Profils</span>
+                </NuxtLink>
+              </li>
+            </ul>
           </li>
 
           <li class="nav-divider"></li>
 
           <!-- Guides -->
-          <li class="nav-item">
+          <li v-can="['list', 'guides']" class="nav-item">
             <NuxtLink to="/admin/guides" class="nav-link" :class="{ 'active': isActive('/admin/guides') }">
               <i class="bi bi-person-badge"></i>
               <span v-if="!sidebarCollapsed">Guides</span>
@@ -57,7 +74,7 @@
           </li>
 
           <!-- Visas -->
-          <li class="nav-item">
+          <li v-can="['list', 'visa-applications']" class="nav-item">
             <NuxtLink to="/admin/visas" class="nav-link" :class="{ 'active': isActive('/admin/visas') }">
               <i class="bi bi-passport"></i>
               <span v-if="!sidebarCollapsed">Visas</span>
@@ -67,7 +84,7 @@
           <li class="nav-divider"></li>
 
           <!-- Tarifs -->
-          <li class="nav-item">
+          <li v-can="['list', 'visa-types']" class="nav-item">
             <NuxtLink to="/admin/pricing" class="nav-link" :class="{ 'active': isActive('/admin/pricing') }">
               <i class="bi bi-currency-exchange"></i>
               <span v-if="!sidebarCollapsed">Tarifs</span>
@@ -75,7 +92,7 @@
           </li>
 
           <!-- Blog -->
-          <li class="nav-item">
+          <li v-can="['list', 'blog-posts']" class="nav-item">
             <NuxtLink to="/admin/blog" class="nav-link" :class="{ 'active': isActive('/admin/blog') }">
               <i class="bi bi-journal-text"></i>
               <span v-if="!sidebarCollapsed">Blog</span>
@@ -83,7 +100,7 @@
           </li>
 
           <!-- FAQ -->
-          <li class="nav-item">
+          <li v-can="['list', 'faq']" class="nav-item">
             <NuxtLink to="/admin/faq" class="nav-link" :class="{ 'active': isActive('/admin/faq') }">
               <i class="bi bi-question-circle"></i>
               <span v-if="!sidebarCollapsed">FAQ</span>
@@ -101,10 +118,18 @@
           </li>
 
           <!-- Rapports -->
-          <li class="nav-item">
+          <li v-can="['list', 'reports']" class="nav-item">
             <NuxtLink to="/admin/reports" class="nav-link" :class="{ 'active': isActive('/admin/reports') }">
               <i class="bi bi-bar-chart"></i>
               <span v-if="!sidebarCollapsed">Rapports</span>
+            </NuxtLink>
+          </li>
+
+          <!-- Paramètres -->
+          <li v-can="['list', 'global-settings']" class="nav-item">
+            <NuxtLink to="/admin/settings" class="nav-link" :class="{ 'active': isActive('/admin/settings') }">
+              <i class="bi bi-gear"></i>
+              <span v-if="!sidebarCollapsed">Paramètres</span>
             </NuxtLink>
           </li>
 
@@ -120,7 +145,7 @@
               <i v-if="!sidebarCollapsed" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
             <ul v-if="psMenuOpen && !sidebarCollapsed" class="nav flex-column ms-4 small-nav">
-              <li class="nav-item">
+              <li v-can="['list', 'categories']" class="nav-item">
                 <NuxtLink to="/admin/categories" class="nav-link py-1" :class="{ 'active': isActive('/admin/categories') }">
                   <i class="bi bi-tags"></i>
                   <span>Catégories</span>
@@ -160,19 +185,56 @@
         <div class="d-flex align-items-center gap-3">
           <!-- Notifications -->
           <div class="dropdown">
-            <button class="btn btn-link position-relative" data-bs-toggle="dropdown">
+            <button class="btn btn-link position-relative bell-btn" data-bs-toggle="dropdown" @click="onBellOpen">
               <i class="bi bi-bell fs-5"></i>
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                3
+              <span
+                v-if="notifStore.unread > 0"
+                class="notif-badge"
+              >
+                {{ notifStore.unread > 9 ? '9+' : notifStore.unread }}
               </span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><h6 class="dropdown-header">Notifications</h6></li>
-              <li><a class="dropdown-item" href="#">Nouvelle demande #1234</a></li>
-              <li><a class="dropdown-item" href="#">Colis arrive en douane</a></li>
-              <li><a class="dropdown-item" href="#">Nouveau message client</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-center" href="#">Voir toutes</a></li>
+            <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
+              <li class="d-flex justify-content-between align-items-center px-3 py-2">
+                <h6 class="mb-0">Notifications</h6>
+                <button
+                  v-if="notifStore.unread > 0"
+                  class="btn btn-sm btn-link p-0 small"
+                  @click.stop="notifStore.markAllRead()"
+                >
+                  Tout marquer lu
+                </button>
+              </li>
+              <li><hr class="dropdown-divider my-0"></li>
+              <li v-if="notifStore.items.length === 0" class="text-center text-muted small py-3">
+                Aucune notification
+              </li>
+              <li v-for="n in notifStore.items.slice(0, 8)" :key="n.id">
+                <a
+                  class="dropdown-item d-flex flex-column py-2"
+                  :class="{ 'fw-medium': !n.is_read }"
+                  :href="n.link || '#'"
+                  @click.prevent="onNotifClick(n)"
+                >
+                  <div class="d-flex align-items-start">
+                    <span
+                      v-if="!n.is_read"
+                      class="badge rounded-pill bg-primary me-2 mt-1"
+                      style="width:8px; height:8px; padding:0;"
+                    ></span>
+                    <div class="flex-grow-1">
+                      <div class="small">{{ n.title }}</div>
+                      <div class="text-muted" style="font-size: 0.75rem;">
+                        {{ formatRelativeTime(n.created_at) }}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li v-if="notifStore.items.length > 0"><hr class="dropdown-divider"></li>
+              <li v-if="notifStore.items.length > 0">
+                <NuxtLink class="dropdown-item text-center small" to="/admin/notifications">Voir toutes</NuxtLink>
+              </li>
             </ul>
           </div>
 
@@ -228,6 +290,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Loading overlay (kept rendered alongside slot so NuxtPage always mounts) -->
+    <div
+      v-if="loading"
+      class="admin-loading position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-light"
+      style="z-index: 2000;"
+    >
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted">Verification de l'acces...</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -235,18 +311,45 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { useNotificationsStore } from '~/stores/notifications'
 import { useNotification } from '~/composables/useNotification'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
+const notifStore = useNotificationsStore()
 const { notifications, removeNotification } = useNotification()
 const config = useRuntimeConfig()
+
+const formatRelativeTime = (iso: string) => {
+  if (!iso) return ''
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000
+  if (diff < 60) return 'à l\'instant'
+  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`
+  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`
+  return `il y a ${Math.floor(diff / 86400)} j`
+}
+
+const onBellOpen = () => {
+  if (notifStore.items.length === 0) notifStore.fetch(1, 20)
+}
+
+const onNotifClick = (n: any) => {
+  if (!n.is_read && !String(n.id).startsWith('live-')) notifStore.markRead(n.id)
+  if (n.link) router.push(n.link)
+}
+
+// Methods
+const isActive = (path: string) => {
+  return route.path.startsWith(path)
+}
 
 // State
 const sidebarCollapsed = ref(false)
 const psMenuOpen = ref(false)
+const usersMenuOpen = ref(isActive('/admin/users'))
+const loading = ref(true)
 
 // Computed
 const currentUser = computed(() => authStore.currentUser)
@@ -259,21 +362,19 @@ const pageTitle = computed(() => {
     '/admin/requests': 'Gestion des demandes',
     '/admin/shipments': 'Gestion des expeditions',
     '/admin/users': 'Gestion des utilisateurs',
+    '/admin/users/roles': 'Gestion des Profils',
     '/admin/guides': 'Gestion des guides',
     '/admin/visas': 'Gestion des visas',
     '/admin/pricing': 'Gestion des tarifs',
     '/admin/blog': 'Gestion du blog',
     '/admin/faq': 'Gestion des FAQ',
     '/admin/support': 'Support client',
-    '/admin/reports': 'Rapports'
+    '/admin/reports': 'Rapports',
+    '/admin/notifications': 'Notifications'
   }
   return titles[route.path] || 'Administration'
 })
 
-// Methods
-const isActive = (path: string) => {
-  return route.path.startsWith(path)
-}
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -284,18 +385,50 @@ const togglePSMenu = () => {
   psMenuOpen.value = !psMenuOpen.value
 }
 
+const toggleUsersMenu = () => {
+  usersMenuOpen.value = !usersMenuOpen.value
+}
+
 // Lifecycle & Guards
 onMounted(async () => {
-  authStore.initializeAuth()
+  try {
+    await authStore.initializeAuth()
 
-  // Check if user is admin
-  if (!authStore.isAdmin) {
-    router.push('/')
-    return
+    // Check if user has backoffice access (admin or agent)
+    if (!authStore.hasBackofficeAccess) {
+      router.push('/')
+      return
+    }
+
+    // Load data
+    await psStore.fetchRequests()
+    await notifStore.fetch(1, 20)
+
+    // Pusher: ping de connexion + bind realtime
+    notifStore.unbindRealtime()
+    notifStore.bindRealtime()
+
+    const { $echo } = useNuxtApp() as any
+    const pusher: any = $echo?.connector?.pusher
+    const { success: notifSuccess, warning: notifWarning } = useNotification()
+    if (pusher?.connection) {
+      const showPing = (state: string, ok: boolean) => {
+        if (ok) notifSuccess(`Pusher connecte (${state})`, 2500)
+        else notifWarning(`Pusher: ${state}`, 4000)
+      }
+      if (pusher.connection.state === 'connected') {
+        showPing('connected', true)
+      } else {
+        pusher.connection.bind('connected', () => showPing('connected', true))
+        pusher.connection.bind('failed', () => showPing('failed', false))
+        pusher.connection.bind('unavailable', () => showPing('unavailable', false))
+      }
+    } else {
+      notifWarning('Pusher non initialise (verifier la cle dans nuxt.config.ts)', 5000)
+    }
+  } finally {
+    loading.value = false
   }
-
-  // Load data
-  await psStore.fetchRequests()
 })
 </script>
 
@@ -393,6 +526,8 @@ onMounted(async () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .admin-sidebar.collapsed + .admin-main {
@@ -419,10 +554,55 @@ onMounted(async () => {
 .admin-content {
   padding: 1.5rem;
   flex: 1;
+  min-width: 0;
+}
+
+.admin-content .table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .toast-container {
   z-index: 9999;
+}
+
+/* Notification Bell Badge */
+.bell-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.bell-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bell-btn i {
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #dc3545;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  line-height: 1;
 }
 
 @media (max-width: 991px) {
