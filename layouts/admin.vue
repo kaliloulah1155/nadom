@@ -1,10 +1,10 @@
 <template>
   <div class="admin-wrapper d-flex">
     <!-- Sidebar -->
-    <aside class="admin-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+    <aside class="admin-sidebar" :class="{ 'collapsed': !isMobile && sidebarCollapsed, 'mobile-open': isMobile && mobileOpen }">
       <div class="sidebar-header  d-flex justify-content-center">
         <NuxtLink to="/" class="sidebar-logo">
-          <img v-if="!sidebarCollapsed" :src="config.public.logo" alt="NADOM" class="img-fluid" />
+          <img v-if="showSidebarText" :src="config.public.logo" alt="NADOM" class="img-fluid" />
           <img v-else :src="config.public.logo" alt="NADOM" class="img-fluid logo-small" />
         </NuxtLink>
       </div>
@@ -15,7 +15,7 @@
           <li v-can="['view', 'dashboard']" class="nav-item">
             <NuxtLink to="/admin/dashboard" class="nav-link" :class="{ 'active': isActive('/admin/dashboard') }">
               <i class="bi bi-speedometer2"></i>
-              <span v-if="!sidebarCollapsed">Tableau de bord</span>
+              <span v-if="showSidebarText">Tableau de bord</span>
             </NuxtLink>
           </li>
 
@@ -23,8 +23,8 @@
           <li v-can="['list', 'personal-shopping-requests']" class="nav-item">
             <NuxtLink to="/admin/requests" class="nav-link" :class="{ 'active': isActive('/admin/requests') }">
               <i class="bi bi-bag-check"></i>
-              <span v-if="!sidebarCollapsed">Demandes</span>
-              <span v-if="!sidebarCollapsed && pendingRequestsCount > 0" class="badge bg-danger ms-auto">
+              <span v-if="showSidebarText">Demandes</span>
+              <span v-if="showSidebarText && pendingRequestsCount > 0" class="badge bg-danger ms-auto">
                 {{ pendingRequestsCount }}
               </span>
             </NuxtLink>
@@ -34,7 +34,7 @@
           <li v-can="['list', 'shipments']" class="nav-item">
             <NuxtLink to="/admin/shipments" class="nav-link" :class="{ 'active': isActive('/admin/shipments') }">
               <i class="bi bi-box-seam"></i>
-              <span v-if="!sidebarCollapsed">Expeditions</span>
+              <span v-if="showSidebarText">Expeditions</span>
             </NuxtLink>
           </li>
 
@@ -43,11 +43,11 @@
             <div class="nav-link d-flex align-items-center justify-content-between" @click="toggleUsersMenu" :class="{ 'active': isActive('/admin/users') }" style="cursor: pointer;">
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-people"></i>
-                <span v-if="!sidebarCollapsed">Utilisateurs</span>
+                <span v-if="showSidebarText">Utilisateurs</span>
               </div>
-              <i v-if="!sidebarCollapsed" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+              <i v-if="showSidebarText" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
-            <ul v-if="usersMenuOpen && !sidebarCollapsed" class="nav flex-column ms-4 small-nav">
+            <ul v-if="usersMenuOpen && showSidebarText" class="nav flex-column ms-4 small-nav">
               <li class="nav-item">
                 <NuxtLink to="/admin/users" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users' }">
                   <i class="bi bi-list-ul"></i>
@@ -69,7 +69,7 @@
           <li v-can="['list', 'guides']" class="nav-item">
             <NuxtLink to="/admin/guides" class="nav-link" :class="{ 'active': isActive('/admin/guides') }">
               <i class="bi bi-person-badge"></i>
-              <span v-if="!sidebarCollapsed">Guides</span>
+              <span v-if="showSidebarText">Guides</span>
             </NuxtLink>
           </li>
 
@@ -77,7 +77,7 @@
           <li v-can="['list', 'visa-applications']" class="nav-item">
             <NuxtLink to="/admin/visas" class="nav-link" :class="{ 'active': isActive('/admin/visas') }">
               <i class="bi bi-passport"></i>
-              <span v-if="!sidebarCollapsed">Visas</span>
+              <span v-if="showSidebarText">Visas</span>
             </NuxtLink>
           </li>
 
@@ -87,7 +87,7 @@
           <li v-can="['list', 'visa-types']" class="nav-item">
             <NuxtLink to="/admin/pricing" class="nav-link" :class="{ 'active': isActive('/admin/pricing') }">
               <i class="bi bi-currency-exchange"></i>
-              <span v-if="!sidebarCollapsed">Tarifs</span>
+              <span v-if="showSidebarText">Tarifs</span>
             </NuxtLink>
           </li>
 
@@ -95,7 +95,7 @@
           <li v-can="['list', 'blog-posts']" class="nav-item">
             <NuxtLink to="/admin/blog" class="nav-link" :class="{ 'active': isActive('/admin/blog') }">
               <i class="bi bi-journal-text"></i>
-              <span v-if="!sidebarCollapsed">Blog</span>
+              <span v-if="showSidebarText">Blog</span>
             </NuxtLink>
           </li>
 
@@ -103,7 +103,7 @@
           <li v-can="['list', 'faq']" class="nav-item">
             <NuxtLink to="/admin/faq" class="nav-link" :class="{ 'active': isActive('/admin/faq') }">
               <i class="bi bi-question-circle"></i>
-              <span v-if="!sidebarCollapsed">FAQ</span>
+              <span v-if="showSidebarText">FAQ</span>
             </NuxtLink>
           </li>
 
@@ -113,7 +113,7 @@
           <li class="nav-item">
             <NuxtLink to="/admin/support" class="nav-link" :class="{ 'active': isActive('/admin/support') }">
               <i class="bi bi-headset"></i>
-              <span v-if="!sidebarCollapsed">Support</span>
+              <span v-if="showSidebarText">Support</span>
             </NuxtLink>
           </li>
 
@@ -121,7 +121,7 @@
           <li v-can="['list', 'reports']" class="nav-item">
             <NuxtLink to="/admin/reports" class="nav-link" :class="{ 'active': isActive('/admin/reports') }">
               <i class="bi bi-bar-chart"></i>
-              <span v-if="!sidebarCollapsed">Rapports</span>
+              <span v-if="showSidebarText">Rapports</span>
             </NuxtLink>
           </li>
 
@@ -129,7 +129,7 @@
           <li v-can="['list', 'global-settings']" class="nav-item">
             <NuxtLink to="/admin/settings" class="nav-link" :class="{ 'active': isActive('/admin/settings') }">
               <i class="bi bi-gear"></i>
-              <span v-if="!sidebarCollapsed">Paramètres</span>
+              <span v-if="showSidebarText">Paramètres</span>
             </NuxtLink>
           </li>
 
@@ -140,11 +140,11 @@
             <div class="nav-link d-flex align-items-center justify-content-between" @click="togglePSMenu" :class="{ 'active': isActive('/admin/personal-shopping') }" style="cursor: pointer;">
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-cart4"></i>
-                <span v-if="!sidebarCollapsed">Personal Shopping</span>
+                <span v-if="showSidebarText">Personal Shopping</span>
               </div>
-              <i v-if="!sidebarCollapsed" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+              <i v-if="showSidebarText" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
-            <ul v-if="psMenuOpen && !sidebarCollapsed" class="nav flex-column ms-4 small-nav">
+            <ul v-if="psMenuOpen && showSidebarText" class="nav flex-column ms-4 small-nav">
               <li v-can="['list', 'categories']" class="nav-item">
                 <NuxtLink to="/admin/categories" class="nav-link py-1" :class="{ 'active': isActive('/admin/categories') }">
                   <i class="bi bi-tags"></i>
@@ -166,17 +166,20 @@
       <div class="sidebar-footer">
         <NuxtLink to="/" class="nav-link">
           <i class="bi bi-house"></i>
-          <span v-if="!sidebarCollapsed">Retour au site</span>
+          <span v-if="showSidebarText">Retour au site</span>
         </NuxtLink>
       </div>
     </aside>
+
+    <!-- Mobile overlay (ferme le sidebar en cliquant hors) -->
+    <div v-if="isMobile && mobileOpen" class="sidebar-overlay" @click="mobileOpen = false"></div>
 
     <!-- Main Content -->
     <div class="admin-main flex-grow-1">
       <!-- Top Header -->
       <header class="admin-header">
         <div class="d-flex align-items-center">
-          <button class="btn btn-link sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
+          <button class="btn btn-link sidebar-toggle" @click="toggleSidebar">
             <i class="bi bi-list fs-4"></i>
           </button>
           <h5 class="mb-0 ms-3">{{ pageTitle }}</h5>
@@ -347,9 +350,21 @@ const isActive = (path: string) => {
 
 // State
 const sidebarCollapsed = ref(false)
+const mobileOpen = ref(false)
+const isMobile = ref(false)
 const psMenuOpen = ref(false)
 const usersMenuOpen = ref(isActive('/admin/users'))
 const loading = ref(true)
+
+const showSidebarText = computed(() => isMobile.value ? mobileOpen.value : !sidebarCollapsed.value)
+
+const toggleSidebar = () => {
+  if (isMobile.value) {
+    mobileOpen.value = !mobileOpen.value
+  } else {
+    sidebarCollapsed.value = !sidebarCollapsed.value
+  }
+}
 
 // Computed
 const currentUser = computed(() => authStore.currentUser)
@@ -391,6 +406,12 @@ const toggleUsersMenu = () => {
 
 // Lifecycle & Guards
 onMounted(async () => {
+  isMobile.value = window.innerWidth < 992
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 992
+    if (!isMobile.value) mobileOpen.value = false
+  })
+
   try {
     await authStore.initializeAuth()
 
@@ -608,15 +629,28 @@ onMounted(async () => {
 @media (max-width: 991px) {
   .admin-sidebar {
     transform: translateX(-100%);
+    width: 260px !important;
   }
 
-  .admin-sidebar.collapsed {
+  .admin-sidebar.mobile-open {
     transform: translateX(0);
-    width: 260px;
+  }
+
+  /* Sur mobile le mode "collapsed" desktop n'a pas d'effet */
+  .admin-sidebar.collapsed {
+    width: 260px !important;
   }
 
   .admin-main {
-    margin-left: 0;
+    margin-left: 0 !important;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    cursor: pointer;
   }
 }
 </style>
