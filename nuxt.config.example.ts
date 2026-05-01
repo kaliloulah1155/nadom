@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       // Production API Link
-      apiBase: "http://vmi2610497.contaboserver.net:8111/api",
+      apiBase: "https://gateway.nadom.co/api",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",
       siteName: "NADOM",

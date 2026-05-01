@@ -26,8 +26,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      // Default = backend Laravel local. Override via NUXT_PUBLIC_API_BASE
-      // (ex. en prod : NUXT_PUBLIC_API_BASE=http://vmi2610497.contaboserver.net:8111/api)
+      // Valeur locale par défaut. Nuxt override automatiquement via la variable
+      // d'environnement NUXT_PUBLIC_API_BASE (sans toucher ce fichier).
+      // - Local  : défini dans .env.local  → http://localhost:8000/api
+      // - Vercel : défini dans le dashboard → https://gateway.nadom.co/api
       apiBase: "http://localhost:8000/api",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",
