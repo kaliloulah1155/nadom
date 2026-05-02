@@ -188,15 +188,14 @@
         <div class="d-flex align-items-center gap-3">
           <!-- Notifications -->
           <div class="dropdown">
-            <button class="btn btn-link position-relative bell-btn" data-bs-toggle="dropdown" @click="onBellOpen">
-              <i class="bi bi-bell fs-5"></i>
-              <span
-                v-if="notifStore.unread > 0"
-                class="notif-badge"
-              >
+            <div class="position-relative d-inline-flex">
+              <button class="btn btn-link bell-btn" data-bs-toggle="dropdown" @click="onBellOpen">
+                <i class="bi bi-bell fs-5"></i>
+              </button>
+              <span v-if="notifStore.unread > 0" class="notif-badge">
                 {{ notifStore.unread > 9 ? '9+' : notifStore.unread }}
               </span>
-            </button>
+            </div>
             <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
               <li class="d-flex justify-content-between align-items-center px-3 py-2">
                 <h6 class="mb-0">Notifications</h6>
@@ -209,10 +208,10 @@
                 </button>
               </li>
               <li><hr class="dropdown-divider my-0"></li>
-              <li v-if="notifStore.items.length === 0" class="text-center text-muted small py-3">
-                Aucune notification
+              <li v-if="notifStore.items.filter(n => !n.is_read).length === 0" class="text-center text-muted small py-3">
+                Aucune notification non lue
               </li>
-              <li v-for="n in notifStore.items.slice(0, 8)" :key="n.id">
+              <li v-for="n in notifStore.items.filter(n => !n.is_read).slice(0, 8)" :key="n.id">
                 <a
                   class="dropdown-item d-flex flex-column py-2"
                   :class="{ 'fw-medium': !n.is_read }"
@@ -234,8 +233,8 @@
                   </div>
                 </a>
               </li>
-              <li v-if="notifStore.items.length > 0"><hr class="dropdown-divider"></li>
-              <li v-if="notifStore.items.length > 0">
+              <li><hr class="dropdown-divider"></li>
+              <li>
                 <NuxtLink class="dropdown-item text-center small" to="/admin/notifications">Voir toutes</NuxtLink>
               </li>
             </ul>
@@ -609,21 +608,24 @@ onMounted(async () => {
 
 .notif-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 2px;
+  right: 2px;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 4px;
   background: #dc3545;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 11px;
   font-weight: 700;
-  border-radius: 10px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #fff;
   line-height: 1;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 @media (max-width: 991px) {

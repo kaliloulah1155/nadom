@@ -43,7 +43,7 @@
         <div v-else class="row g-4">
           <div
             v-for="(mode, idx) in shippingModes"
-            :key="mode.uuid || mode.id"
+            :key="mode.uuid"
             class="col-md-4"
           >
             <div class="card h-100 border-0 shadow-sm" :class="{ 'border-primary': isFeatured(idx) }">
@@ -53,9 +53,9 @@
               <div class="card-body p-4 text-center">
                 <div
                   class="shipping-icon mx-auto mb-3"
-                  :class="iconBgClass(mode.code)"
+                  :class="iconBgClass(mode.code ?? '')"
                 >
-                  <i :class="mode.icon || defaultIcon(mode.code)"></i>
+                  <i :class="mode.icon || defaultIcon(mode.code ?? '')"></i>
                 </div>
                 <h5>{{ mode.label }}</h5>
                 <div
@@ -197,7 +197,7 @@ const countryName = (c: any) => (locale.value === 'en' ? c.name_en : c.name_fr) 
 
 const shippingModes = computed(() => {
   return (psStore.categories || [])
-    .filter((c: any) => c.slug === 'MEX' && (c.status === '1' || c.status === 1))
+    .filter((c: any) => (c.slug || '').toUpperCase() === 'MEX' && (c.status === '1' || c.status === 1))
     .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
 })
 

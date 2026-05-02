@@ -134,6 +134,18 @@ function toNum(v: any): number {
   return Number.isFinite(n) ? n : 0
 }
 
+function normalizeItem(item: any): RequestItem {
+  const prod = item.product ?? {}
+  return {
+    productId: item.productId ?? item.product_id ?? prod.id,
+    name_fr:   item.name_fr  ?? prod.name_fr  ?? item.name ?? '',
+    name_en:   item.name_en  ?? prod.name_en  ?? item.name ?? '',
+    price:     toNum(item.price ?? prod.price),
+    quantity:  item.quantity ?? 1,
+    image:     item.image    ?? prod.image    ?? '',
+  }
+}
+
 function normalizeRequest(r: any) {
   if (!r || typeof r !== 'object') return r
   const rawDetails = r.quoted_details ?? r.quotedDetails
@@ -157,6 +169,7 @@ function normalizeRequest(r: any) {
           totalPrice: toNum(rawDetails.total_price ?? rawDetails.totalPrice),
         }
       : undefined,
+    items: Array.isArray(r.items) ? r.items.map(normalizeItem) : (r.items ?? []),
     trackingNumber: r.trackingNumber ?? r.tracking_number,
     shipmentId: r.shipmentId ?? r.shipment_id,
     whatsappMessages: r.whatsappMessages ?? r.whatsapp_messages ?? 0,

@@ -1,6 +1,6 @@
 import type { FetchOptions } from 'ofetch'
 
-export interface ApiResponse<T = any> {
+interface ApiResponse<T = any> {
   success: boolean
   status?: string
   message: string

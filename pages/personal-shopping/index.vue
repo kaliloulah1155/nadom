@@ -286,12 +286,13 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
 
 const categories = computed(() =>
   (psStore.categories || [])
-    .filter((c: any) => c.slug === 'POD')
+    .filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
     .map((c: any, i: number) => ({
-      id: c.uuid || c.id,
+      id: c.id,       // integer id → correspond à product.category_id
+      uuid: c.uuid,
       name_fr: c.label || c.name_fr || c.name || '',
       name_en: c.label || c.name_en || c.name || '',
-      icon: ICONS[i % ICONS.length],
+      icon: c.icon || ICONS[i % ICONS.length],
       color: COLORS[i % COLORS.length],
     })),
 )

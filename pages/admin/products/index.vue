@@ -163,14 +163,13 @@
                 <div class="col-md-6">
                   <label class="form-label">Catégorie *</label>
                   <select v-model="form.category_id" class="form-select" required>
-                    <option value="">Sélectionnez une catégorie</option>
+                    <option value="">
+                      {{ loadingCategories ? 'Chargement...' : 'Sélectionnez une catégorie' }}
+                    </option>
                     <option v-for="cat in productCategories" :key="cat.uuid" :value="cat.uuid">
                       {{ cat.label }}
                     </option>
                   </select>
-                  <small v-if="productCategories.length === 0" class="text-warning">
-                    Aucune catégorie POD configurée. Créez-en dans /admin/categories.
-                  </small>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Prix *</label>
@@ -212,10 +211,10 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary" :disabled="isUploading">
-                <span v-if="isUploading" class="spinner-border spinner-border-sm me-2"></span>
-                Enregistrer
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving || isUploading">Annuler</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving || isUploading">
+                <span v-if="saving || isUploading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Enregistrement...' : isUploading ? 'Upload...' : 'Enregistrer' }}
               </button>
             </div>
           </form>
@@ -240,16 +239,18 @@ const { success, error } = useNotification()
 const { formatCurrency } = useFormatters()
 
 const products = computed(() => psStore.products)
-// Filtre catégories produits = slug POD uniquement
+// Filtre catégories produits = slug POD (insensible à la casse)
 const productCategories = computed(() =>
-  (psStore.categories || []).filter((c: any) => c.slug === 'POD')
+  (psStore.categories || []).filter((c: any) =>
+    (c.slug || '').toString().toUpperCase() === 'POD'
+  )
 )
-// Devises = catégories slug DVS (avec fallback FCFA)
+// Devises = catégories slug DVS (insensible à la casse, avec fallback FCFA)
 const currencies = computed(() => {
   const list = (psStore.categories || [])
     .filter((c: any) => {
-      const s = (c.slug || '').toString()
-      return s === 'DVS' || s.startsWith('DVS-')
+      const s = (c.slug || '').toString().toUpperCase()
+      return s === 'DVS' || s.startsWith('DVS-') || s.startsWith('DVS_')
     })
     .map((c: any) => ({
       uuid: c.uuid,
@@ -266,6 +267,8 @@ const categoryFilter = ref('')
 const editingProduct = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
 const isUploading = ref(false)
+const saving = ref(false)
+const loadingCategories = ref(false)
 let modalInstance: any = null
 
 const form = reactive({
@@ -297,8 +300,7 @@ const debouncedFetch = () => {
 }
 
 onMounted(async () => {
-  // On charge un nombre suffisant de catégories pour récupérer POD + DVS
-  await psStore.fetchCategories({ page: 1, limit: 200 })
+  await psStore.fetchCategories()
   await fetchProducts(1)
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
@@ -314,7 +316,16 @@ const getCategoryName = (id: string | null | number) => {
   return cat ? cat.label : 'Inconnue'
 }
 
-const handleImageUpload = (event: any) => {
+const resolveCategoryUuid = (categoryId: any): string => {
+  if (!categoryId) return ''
+  const idStr = String(categoryId)
+  const cat = (psStore.categories || []).find((c: any) =>
+    String(c.uuid) === idStr || String(c.id) === idStr
+  )
+  return cat?.uuid || ''
+}
+
+const handleImageUpload = async (event: any) => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -324,23 +335,36 @@ const handleImageUpload = (event: any) => {
   }
 
   isUploading.value = true
-  const reader = new FileReader()
-  reader.onload = (e: any) => {
-    form.image = e.target.result
+  try {
+    const api = useApi()
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('folder', 'products')
+    const res = await api.post<{ url: string; path: string }>('/upload/image', formData)
+    if (res.success && res.data?.url) {
+      form.image = res.data.url
+    } else {
+      error(res.message || 'Erreur lors de l\'upload')
+    }
+  } catch (err: any) {
+    error('Erreur lors de l\'upload de l\'image')
+  } finally {
     isUploading.value = false
   }
-  reader.onerror = () => {
-    error('Erreur lors de la lecture du fichier')
-    isUploading.value = false
-  }
-  reader.readAsDataURL(file)
 }
 
-const openModal = (prod?: any) => {
+const openModal = async (prod?: any) => {
+  // Recharge les catégories si elles ne sont pas encore disponibles
+  if (productCategories.value.length === 0 && !loadingCategories.value) {
+    loadingCategories.value = true
+    await psStore.fetchCategories()
+    loadingCategories.value = false
+  }
+
   if (prod) {
     editingProduct.value = prod
     Object.assign(form, {
-      category_id: prod.category_id || '',
+      category_id: resolveCategoryUuid(prod.category_id),
       name_fr: prod.name_fr || '',
       name_en: prod.name_en || '',
       description_fr: prod.description_fr || '',
@@ -370,6 +394,7 @@ const openModal = (prod?: any) => {
 }
 
 const saveProduct = async () => {
+  saving.value = true
   try {
     if (editingProduct.value) {
       await psStore.updateProduct(editingProduct.value.id, { ...form })
@@ -382,6 +407,8 @@ const saveProduct = async () => {
     await fetchProducts(psStore.productsMeta.currentPage)
   } catch (err) {
     error('Erreur lors de l\'enregistrement')
+  } finally {
+    saving.value = false
   }
 }
 

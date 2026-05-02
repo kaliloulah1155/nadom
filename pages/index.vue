@@ -242,7 +242,9 @@ const services = computed(() => SERVICE_KEYS.map(s => {
   }
 }))
 
-const categories = computed(() => psStore.categories.filter((c: any) => (c.slug || '').startsWith('POD-') || c.parent_id === null))
+const categories = computed(() =>
+  psStore.categories.filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
+)
 
 const ICONS = ['bi-phone', 'bi-bag', 'bi-house', 'bi-heart', 'bi-bicycle', 'bi-gift', 'bi-car-front', 'bi-gear', 'bi-cup-hot', 'bi-lamp', 'bi-hospital', 'bi-scissors']
 const categoryIcon = (cat: any) => cat.icon || ICONS[(Number(cat.id) || 0) % ICONS.length] || 'bi-box'
@@ -263,7 +265,7 @@ const steps = computed(() => [
 
 await Promise.all([
   blogStore.fetchPosts({ page: 1, limit: 4, is_published: true }),
-  psStore.fetchCategories({ page: 1, limit: 12 }),
+  psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' }),
   settingsStore.fetchAll(),
 ])
 

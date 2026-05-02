@@ -199,8 +199,11 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">Annuler</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
             </div>
           </form>
         </div>
@@ -227,6 +230,7 @@ const categories = computed(() => psStore.categories)
 const editingCategory = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
 const modalOpen = ref(false)
+const saving = ref(false)
 let modalInstance: any = null
 
 const parentOptions = computed(() => {
@@ -363,6 +367,7 @@ const saveCategory = async () => {
     parent_uuid: form.parent_uuid
   }
 
+  saving.value = true
   try {
     if (editingCategory.value) {
       await psStore.updateCategory(editingCategory.value.uuid, data)
@@ -374,6 +379,8 @@ const saveCategory = async () => {
     modalInstance?.hide()
   } catch (err: any) {
     error(err.message)
+  } finally {
+    saving.value = false
   }
 }
 

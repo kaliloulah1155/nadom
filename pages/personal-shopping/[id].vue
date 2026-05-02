@@ -32,6 +32,50 @@
         <div class="row g-4">
           <!-- Main Content -->
           <div class="col-lg-8">
+            <!-- Ordered Items (cart-based requests) -->
+            <div v-if="request.items && request.items.length > 0" class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-bag-check me-2 text-primary"></i>Articles commandés</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Produit</th>
+                        <th>Prix unit.</th>
+                        <th>Qté</th>
+                        <th class="text-end">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in request.items" :key="item.productId">
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <img
+                              :src="item.image || 'https://placehold.co/40?text=?'"
+                              class="rounded me-2" width="40" height="40"
+                              style="object-fit: cover;"
+                            />
+                            <span>{{ item.name_fr || item.name_en || 'Produit' }}</span>
+                          </div>
+                        </td>
+                        <td>{{ formatCurrency(item.price, requestCurrency) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td class="text-end fw-bold">{{ formatCurrency(item.price * item.quantity, requestCurrency) }}</td>
+                      </tr>
+                    </tbody>
+                    <tfoot class="table-light">
+                      <tr>
+                        <td colspan="3" class="fw-bold">Total estimé</td>
+                        <td class="text-end fw-bold text-primary">{{ formatCurrency(request.budgetEstimated, requestCurrency) }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+
             <!-- Images -->
             <div class="card border-0 shadow-sm mb-4">
               <div class="card-body p-4">
@@ -265,9 +309,11 @@ const selectedImage = ref<string | null>(null)
 
 const requestId = route.params.id as string
 
-// Load request
+// Load request — skip API call if already in store (e.g., just submitted from cart)
 onMounted(async () => {
-  await psStore.fetchRequests()
+  if (!psStore.getRequestById(requestId)) {
+    await psStore.fetchRequests()
+  }
   loading.value = false
 })
 

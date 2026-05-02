@@ -46,15 +46,16 @@
                           'border-primary bg-primary-subtle': form.shippingMode === mode.mode,
                           'border': form.shippingMode !== mode.mode
                         }"
-                        @click="form.shippingMode = mode.mode"
+                        @click="form.shippingMode = (mode.mode || (mode as any).code) as ShippingMode"
                       >
                         <div class="card-body text-center py-3">
                           <i
-                            :class="[getModeIcon(mode.mode), 'fs-3 mb-2', { 'text-primary': form.shippingMode === mode.mode }]"
+                            :class="[(mode as any).icon || getModeIcon(mode.mode), 'fs-3 mb-2', { 'text-primary': form.shippingMode === mode.mode }]"
                           ></i>
-                          <h6 class="mb-1">{{ getModeLabel(mode.mode) }}</h6>
-                          <small class="text-muted d-block">{{ mode.duration }}</small>
-                          <strong class="text-primary">{{ formatCurrency(mode.costPerKg) }}/kg</strong>
+                          <h6 class="mb-1">{{ (mode as any).label || getModeLabel(mode.mode) }}</h6>
+                          <small v-if="mode.duration" class="text-muted d-block">{{ mode.duration }}</small>
+                          <strong v-if="mode.costPerKg > 0" class="text-primary">{{ formatCurrency(mode.costPerKg) }}/kg</strong>
+                          <small v-else class="text-muted d-block">{{ t('calculator.selectCountry') }}</small>
                         </div>
                       </div>
                     </div>
@@ -156,6 +157,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useShippingStore, type ShippingMode } from '~/stores/shipping'
 import { useCountriesStore } from '~/stores/countries'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -165,6 +167,7 @@ definePageMeta({
 const { t, locale } = useI18n()
 const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()
+const psStore = usePersonalShoppingStore()
 const { formatCurrency } = useFormatters()
 
 const form = reactive({
@@ -180,11 +183,12 @@ const result = ref<{
   total: number
 } | null>(null)
 
-// Load destinations + countries
+// Load destinations + countries + shipping modes (MEX categories)
 onMounted(async () => {
   await Promise.all([
     shippingStore.fetchDestinations(),
-    countriesStore.fetchAll()
+    countriesStore.fetchAll(),
+    psStore.fetchCategories(),
   ])
 })
 
@@ -205,9 +209,25 @@ const destinationOptions = computed(() => {
   return [...fromShipping, ...fromCountries]
 })
 
+// Modes MEX depuis les catégories (toujours disponibles)
+const mexModes = computed(() =>
+  (psStore.categories || [])
+    .filter((c: any) => (c.slug || '').toUpperCase() === 'MEX' && (c.status === '1' || c.status === 1))
+    .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+)
+
 const availableModes = computed(() => {
-  if (!form.destination) return []
-  return shippingStore.getShippingModes(form.destination)
+  // Si une destination est sélectionnée et a des modes avec tarif, on les utilise
+  const destModes = form.destination ? shippingStore.getShippingModes(form.destination) : []
+  if (destModes.length > 0) return destModes
+  // Sinon, afficher les modes MEX globaux (sans tarif)
+  return mexModes.value.map((c: any) => ({
+    mode: (c.code || c.slug || '') as ShippingMode,
+    duration: c.description ? '' : '',
+    costPerKg: 0,
+    label: c.label,
+    icon: c.icon,
+  }))
 })
 
 const canCalculate = computed(() => {
@@ -219,22 +239,28 @@ const onDestinationChange = () => {
   result.value = null
 }
 
-const getModeIcon = (mode: ShippingMode) => {
-  const icons: Record<ShippingMode, string> = {
+const getModeIcon = (mode: string) => {
+  // Chercher d'abord dans les catégories MEX
+  const cat = mexModes.value.find((c: any) => c.code === mode || c.slug === mode)
+  if (cat?.icon) return cat.icon
+  const icons: Record<string, string> = {
     'air_express': 'bi bi-lightning-charge',
     'air_normal': 'bi bi-airplane',
     'sea': 'bi bi-water'
   }
-  return icons[mode]
+  return icons[mode] || 'bi bi-truck'
 }
 
-const getModeLabel = (mode: ShippingMode) => {
-  const labels: Record<ShippingMode, Record<string, string>> = {
+const getModeLabel = (mode: string) => {
+  // Chercher d'abord le label dans les catégories MEX
+  const cat = mexModes.value.find((c: any) => c.code === mode || c.slug === mode)
+  if (cat?.label) return cat.label
+  const labels: Record<string, Record<string, string>> = {
     'air_express': { fr: 'Aerien Express', en: 'Express Air' },
     'air_normal': { fr: 'Aerien Standard', en: 'Standard Air' },
     'sea': { fr: 'Maritime', en: 'Sea' }
   }
-  return labels[mode][locale.value] || labels[mode]['fr']
+  return labels[mode]?.[locale.value] || labels[mode]?.['fr'] || mode
 }
 
 const calculateCost = () => {

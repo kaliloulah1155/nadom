@@ -45,19 +45,29 @@
               <div class="service-icon bg-primary-subtle text-primary me-3">
                 <i class="bi bi-tag fs-4"></i>
               </div>
-              <h5 class="card-title mb-0">{{ service.key.replace('SERVICE_', '') }}</h5>
+              <div>
+                <h5 class="card-title mb-0">{{ service.key.replace('SERVICE_', '').replace(/_/g, ' ') }}</h5>
+                <small class="text-muted">{{ service.slug }}</small>
+              </div>
             </div>
-            <p class="text-muted small mb-3">{{ service.description }}</p>
-            <h4 class="text-primary">{{ service.value }} FCAF</h4>
+            <p v-if="service.description" class="text-muted small mb-3" v-html="service.description"></p>
+            <h4 class="text-primary mb-0">
+              {{ formatCurrency(parseServiceValue(service.value).amount, parseServiceValue(service.value).currency) }}
+            </h4>
           </div>
           <div class="card-footer bg-transparent border-0 pt-0">
-            <div class="d-flex">
-              <button class="btn btn-outline-primary btn-sm me-2" @click="openModal(service)">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-outline-danger btn-sm" @click="deleteService(service.id)">
-                <i class="bi bi-trash"></i>
-              </button>
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="badge" :class="service.status === 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                {{ service.status === 1 ? 'Actif' : 'Inactif' }}
+              </span>
+              <div class="d-flex">
+                <button class="btn btn-outline-primary btn-sm me-2" @click="openModal(service)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" @click="deleteService(service.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -93,10 +103,21 @@
                   <input v-model="form.key" type="text" class="form-control" required :disabled="!!editingService" />
                   <small class="text-muted">Identifiant (ex: PERSONAL_SHOPPING)</small>
                 </div>
-                <div class="col-12">
-                  <label class="form-label">Prix (FCFA) *</label>
-                  <input v-model.number="form.value" type="number" class="form-control" required />
+
+                <!-- Prix + Devise -->
+                <div class="col-8">
+                  <label class="form-label">Prix *</label>
+                  <input v-model.number="form.value" type="number" class="form-control" required min="0" step="any" />
                 </div>
+                <div class="col-4">
+                  <label class="form-label">Devise *</label>
+                  <select v-model="form.currency" class="form-select" required>
+                    <option v-for="cur in currencies" :key="cur.uuid || cur.code" :value="cur.code">
+                      {{ cur.label || cur.code }}
+                    </option>
+                  </select>
+                </div>
+
                 <div class="col-12">
                   <label class="form-label">Slug *</label>
                   <input v-model="form.slug" type="text" class="form-control" required />
@@ -109,16 +130,17 @@
                 <div class="col-12">
                   <div class="form-check">
                     <input v-model="form.status" type="checkbox" class="form-check-input" id="serviceStatus" />
-                    <label class="form-check-label" for="serviceStatus">
-                      Service actif
-                    </label>
+                    <label class="form-check-label" for="serviceStatus">Service actif</label>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
             </div>
           </form>
         </div>
@@ -130,24 +152,54 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePricingStore } from '~/stores/pricing'
+import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotification } from '~/composables/useNotification'
+import { useFormatters } from '~/composables/useFormatters'
 
-definePageMeta({
-  layout: 'admin'
-})
+definePageMeta({ layout: 'admin' })
 
 const pricingStore = usePricingStore()
+const psStore = usePersonalShoppingStore()
 const { success, error } = useNotification()
+const { formatCurrency } = useFormatters()
 
 const services = computed(() => pricingStore.services)
+
+// Devises = catégories slug DVS (même pattern que admin/products)
+const currencies = computed(() => {
+  const list = (psStore.categories || [])
+    .filter((c: any) => {
+      const s = (c.slug || '').toString().toUpperCase()
+      return s === 'DVS' || s.startsWith('DVS-') || s.startsWith('DVS_')
+    })
+    .map((c: any) => ({
+      uuid: c.uuid,
+      code: (c.code || c.label || '').toString().toUpperCase(),
+      label: c.label || c.code || '',
+    }))
+    .filter((c: any) => c.code)
+  return list.length > 0 ? list : [{ uuid: 'xof', code: 'XOF', label: 'FCFA (XOF)' }]
+})
+
+const parseServiceValue = (raw: string): { amount: number; currency: string } => {
+  try {
+    const p = JSON.parse(raw)
+    if (p && typeof p === 'object' && 'amount' in p) {
+      return { amount: Number(p.amount) || 0, currency: String(p.currency || 'XOF') }
+    }
+  } catch {}
+  return { amount: parseFloat(raw) || 0, currency: 'XOF' }
+}
 
 const editingService = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
+const saving = ref(false)
 
 const form = reactive({
   key: '',
   value: 0,
+  currency: 'XOF',
   slug: '',
   description: '',
   status: true
@@ -161,7 +213,10 @@ const fetchServices = async (page?: number, limit?: number) => {
 }
 
 onMounted(async () => {
-  await fetchServices(1)
+  await Promise.all([
+    fetchServices(1),
+    psStore.fetchCategories()
+  ])
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
@@ -170,15 +225,18 @@ onMounted(async () => {
 const openModal = (service?: any) => {
   if (service) {
     editingService.value = service
-    form.key = service.key.replace('SERVICE_', '')
-    form.value = parseFloat(service.value) || 0
-    form.slug = service.slug.replace('service_', '')
+    form.key = service.key.replace(/^SERVICE_/i, '')
+    const parsed = parseServiceValue(service.value)
+    form.value = parsed.amount
+    form.currency = parsed.currency
+    form.slug = service.slug.replace(/^service_/, '')
     form.description = service.description || ''
     form.status = service.status === 1
   } else {
     editingService.value = null
     form.key = ''
     form.value = 0
+    form.currency = currencies.value[0]?.code || 'XOF'
     form.slug = ''
     form.description = ''
     form.status = true
@@ -187,9 +245,10 @@ const openModal = (service?: any) => {
 }
 
 const saveService = async () => {
+  saving.value = true
   const data = {
     kkey: form.key.toUpperCase(),
-    vvalue: String(form.value),
+    vvalue: JSON.stringify({ amount: form.value, currency: form.currency }),
     slug: 'service_' + form.slug.toLowerCase(),
     description: form.description || null,
     status: form.status ? 1 : 0
@@ -207,6 +266,8 @@ const saveService = async () => {
     await fetchServices(pricingStore.servicesMeta.currentPage)
   } catch (err: any) {
     error(err.message)
+  } finally {
+    saving.value = false
   }
 }
 
@@ -227,6 +288,6 @@ const deleteService = async (id: number) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 </style>
