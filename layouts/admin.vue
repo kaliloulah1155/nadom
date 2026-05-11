@@ -210,14 +210,12 @@
         <div class="d-flex align-items-center gap-3">
           <!-- Notifications -->
           <div class="dropdown">
-            <div class="position-relative d-inline-flex">
-              <button class="btn btn-link bell-btn" data-bs-toggle="dropdown" @click="onBellOpen">
-                <i class="bi bi-bell fs-5"></i>
-              </button>
+            <button class="btn btn-link bell-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" @click="onBellOpen">
+              <i class="bi bi-bell fs-5"></i>
               <span v-if="notifStore.unread > 0" class="notif-badge">
                 {{ notifStore.unread > 9 ? '9+' : notifStore.unread }}
               </span>
-            </div>
+            </button>
             <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
               <li class="d-flex justify-content-between align-items-center px-3 py-2">
                 <h6 class="mb-0">Notifications</h6>

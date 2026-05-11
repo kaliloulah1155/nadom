@@ -164,7 +164,7 @@
                     </div>
                     <div>
                       <h6 class="mb-0">{{ formatServiceName(service.key) }}</h6>
-                      <small class="text-muted">{{ service.description || '—' }}</small>
+                      <small class="text-muted">{{ stripHtml(service.description) || '—' }}</small>
                     </div>
                   </div>
                   <span class="fw-bold text-primary">{{ formatServiceValue(service.value) }}</span>
@@ -259,11 +259,49 @@ const formatServiceName = (key: string) => {
   return key.replace(/^SERVICE_/, '').replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
 }
 
+/** Décode la valeur stockée : soit un nombre brut, soit un JSON {amount, currency}. */
+const parseServicePayload = (raw: any): { amount: number; currency: string } => {
+  if (typeof raw === 'number') return { amount: raw, currency: 'XOF' }
+  if (typeof raw === 'string') {
+    const s = raw.trim()
+    if (s.startsWith('{')) {
+      try {
+        const p = JSON.parse(s)
+        if (p && typeof p === 'object' && 'amount' in p) {
+          return {
+            amount: Number(p.amount) || 0,
+            currency: String(p.currency || 'XOF').toUpperCase(),
+          }
+        }
+      } catch {}
+    }
+    const n = parseFloat(s)
+    if (Number.isFinite(n)) return { amount: n, currency: 'XOF' }
+  }
+  return { amount: 0, currency: 'XOF' }
+}
+
 const formatServiceValue = (value: string | number) => {
-  const n = Number(value)
-  if (!Number.isFinite(n) || n === 0) return t('personalShopping.pricing.free') || 'Gratuit'
-  if (n > 0 && n <= 100) return n + '%'
-  return formatCurrency(n)
+  const { amount, currency } = parseServicePayload(value)
+  if (!Number.isFinite(amount) || amount === 0) return t('personalShopping.pricing.free') || 'Gratuit'
+  // Si la valeur est entre 0 et 100 ET stockée en XOF (donc pas une vraie devise spécifique),
+  // on l'interprète comme un pourcentage — heuristique alignée avec l'admin.
+  if (currency === 'XOF' && amount > 0 && amount <= 100) return amount + '%'
+  return formatCurrency(amount, currency)
+}
+
+/** Retire les balises HTML pour un affichage condensé dans la carte tarifs. */
+const stripHtml = (html: string | null | undefined): string => {
+  if (!html) return ''
+  return html
+    .replace(/<\/(p|br|li|h[1-6]|div)>/gi, ' ')  // remplace les blocks par un espace
+    .replace(/<[^>]+>/g, '')                       // supprime toutes les balises
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 const SERVICE_ICONS: Record<string, string> = {
