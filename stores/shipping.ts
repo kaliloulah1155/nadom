@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
+import { usePublicApi } from '~/composables/usePublicApi'
 import { usePersonalShoppingStore } from './personalShopping'
 
 export type ShippingMode = 'air_normal' | 'air_express' | 'sea'
@@ -41,12 +42,25 @@ export interface ShippingModeInfo {
   costPerKg: number
 }
 
+export interface ShippingCalculateResult {
+  destination?: Record<string, unknown> | null
+  mode: string
+  duration?: string | null
+  cost_per_kg: number
+  weight: number
+  cost: number
+  /** ISO 4217 — renvoyé par l’API selon la destination */
+  currency_code?: string
+}
+
 export interface Destination {
-  id: number
+  id: string
   country: string | null
   continent: string | null
   city: string | null
   flag: string | null
+  /** ISO 4217 — défini en back-office par destination */
+  currency_code?: string | null
   is_active: boolean
   shipping_modes: ShippingModeInfo[]
   created_at?: string
@@ -67,6 +81,7 @@ interface ShippingState {
   shipmentsMeta: Meta
   destinations: Destination[]
   loading: boolean
+  loadingDestinations: boolean
   error: string | null
 }
 
@@ -96,6 +111,7 @@ export const useShippingStore = defineStore('shipping', {
     shipmentsMeta: newMeta(15),
     destinations: [],
     loading: false,
+    loadingDestinations: false,
     error: null
   }),
 
@@ -109,6 +125,10 @@ export const useShippingStore = defineStore('shipping', {
       ['picked_up', 'in_transit', 'in_customs', 'out_for_delivery'].includes(s.status)
     ),
     getDestinationByCountry: (state) => (country: string) => state.destinations.find(d => d.country === country),
+    getShippingModesByDestinationId: (state) => (destinationId: string) => {
+      const dest = state.destinations.find(d => String(d.id) === String(destinationId))
+      return ((dest as any)?.shipping_modes || (dest as any)?.shippingModes || []) as ShippingModeInfo[]
+    },
     totalShipments: (state) => state.shipmentsMeta.total,
     getShippingModeLabel: () => (mode: ShippingMode) => {
       const labels: Record<ShippingMode, string> = {
@@ -179,6 +199,7 @@ export const useShippingStore = defineStore('shipping', {
     },
 
     async fetchDestinations() {
+      this.loadingDestinations = true
       try {
         const api = useApi()
         const res = await api.get<Destination[]>('/destinations/all')
@@ -191,14 +212,42 @@ export const useShippingStore = defineStore('shipping', {
               costPerKg: Number(m.cost_per_kg ?? m.costPerKg) || 0,
               cost_per_kg: Number(m.cost_per_kg ?? m.costPerKg) || 0
             }))
-            return { ...d, shippingModes: modes, shipping_modes: modes }
+            return {
+              ...d,
+              currency_code: d.currency_code != null && d.currency_code !== '' ? String(d.currency_code).toUpperCase() : null,
+              shippingModes: modes,
+              shipping_modes: modes,
+            }
           })
           this.destinations = list
         }
       } catch (err: any) {
         this.error = err.message
+      } finally {
+        this.loadingDestinations = false
       }
       return this.destinations
+    },
+
+    /**
+     * Tarif expedition aligne sur POST /api/shipping/calculate (source de verite backend).
+     */
+    async calculateShippingQuote(payload: {
+      destination_id: string
+      mode: ShippingMode
+      weight: number
+      declared_value?: number | null
+    }) {
+      const api = usePublicApi()
+      const body: Record<string, unknown> = {
+        destination_id: payload.destination_id,
+        mode: payload.mode,
+        weight: payload.weight,
+      }
+      if (payload.declared_value != null && payload.declared_value !== undefined) {
+        body.declared_value = payload.declared_value
+      }
+      return api.post<ShippingCalculateResult>('/shipping/calculate', body)
     },
 
     calculateShippingCost(destination: string, weight: number, mode: ShippingMode): number {

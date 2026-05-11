@@ -1,5 +1,5 @@
 <template>
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="cartSidebar" ref="cartRef">
+  <div class="offcanvas offcanvas-end cart-sidebar-wide" tabindex="-1" id="cartSidebar" ref="cartRef">
     <div class="offcanvas-header border-bottom">
       <h5 class="offcanvas-title fw-bold">
         <i class="bi bi-cart3 me-2"></i>Mon Panier
@@ -10,12 +10,23 @@
 
     <div class="offcanvas-body">
       <!-- Panier vide -->
-      <div v-if="cartStore.isEmpty" class="text-center py-5">
+      <div v-if="cartStore.isEmpty" class="text-center py-5 px-3">
         <i class="bi bi-cart-x fs-1 text-muted mb-3 d-block"></i>
-        <h6>Votre panier est vide</h6>
-        <button class="btn btn-outline-primary btn-sm mt-3" @click="cartStore.closeCart">
-          Continuer mes achats
-        </button>
+        <h6 class="mb-2">Votre panier est vide</h6>
+        <p class="text-muted small mb-4">
+          Parcourez notre catalogue Personal Shopping pour ajouter des produits, ou faites une demande sur mesure pour un article spécifique.
+        </p>
+        <div class="d-grid gap-2">
+          <NuxtLink to="/personal-shopping" class="btn btn-primary btn-sm" @click="cartStore.closeCart">
+            <i class="bi bi-bag-heart me-2"></i>Découvrir les produits
+          </NuxtLink>
+          <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm" @click="cartStore.closeCart">
+            <i class="bi bi-plus-circle me-2"></i>Demande sur mesure
+          </NuxtLink>
+          <button class="btn btn-link btn-sm text-muted" @click="cartStore.closeCart">
+            Fermer
+          </button>
+        </div>
       </div>
 
       <!-- Liste des articles -->
@@ -93,10 +104,23 @@
         </div>
       </div>
 
+      <!-- Devise -->
+      <div class="mb-2">
+        <label class="form-label small fw-bold mb-1 d-flex align-items-center gap-2">
+          Devise
+          <span v-if="psStore.loading && currencies.length === 0" class="spinner-border spinner-border-sm text-primary" style="width: .75rem; height: .75rem;" role="status" aria-hidden="true"></span>
+        </label>
+        <select v-model="selectedCurrency" class="form-select form-select-sm">
+          <option v-for="cur in currencies" :key="cur.id" :value="cur.code">
+            {{ cur.label }}{{ cur.code !== cur.label ? ` (${cur.code})` : '' }}
+          </option>
+        </select>
+      </div>
+
       <!-- Total -->
       <div class="d-flex justify-content-between mb-3 border-top pt-2">
         <span class="fw-bold">Total estimé</span>
-        <span class="fw-bold text-primary fs-6">{{ formatCurrency(cartStore.totalPrice, 'XOF') }}</span>
+        <span class="fw-bold text-primary fs-6">{{ formatCurrency(cartStore.totalPrice, selectedCurrency) }}</span>
       </div>
 
       <!-- Actions -->
@@ -121,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useCartStore } from '~/stores/cart'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useAuthStore } from '~/stores/auth'
@@ -137,6 +161,48 @@ const { success, error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
 const config = useRuntimeConfig()
 
+/** Devise dominante du panier (premier produit avec une devise renseignée, sinon XOF). */
+const cartCurrency = computed(() => {
+  for (const item of cartStore.items) {
+    const c = (item.product as any).currency
+    if (c) return String(c).toUpperCase()
+  }
+  return 'XOF'
+})
+
+/** Liste des devises disponibles — alignée sur le formulaire /personal-shopping/new
+ *  (catégories préfixées DVS dans la table categories). */
+const currencies = computed(() => {
+  const fromStore = (psStore.categories || [])
+    .filter((c: any) => {
+      const slug = (c.slug || '').toString()
+      return slug === 'DVS' || slug.startsWith('DVS-')
+    })
+    .map((c: any) => ({
+      id: c.uuid || c.id,
+      code: (c.code || c.label || '').toString().toUpperCase(),
+      label: c.label || c.code || '',
+    }))
+    .filter((c: any) => c.code)
+  return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA (FCFA)' }]
+})
+
+/** Devise sélectionnée par l'utilisateur — pré-remplie depuis les produits, modifiable. */
+const selectedCurrency = ref<string>('XOF')
+
+/** Initialise / met à jour la devise quand les produits ou la liste arrive. */
+watch([cartCurrency, currencies], ([detected, list]) => {
+  if (!list.length) return
+  const codes = list.map(c => c.code)
+  if (selectedCurrency.value && codes.includes(selectedCurrency.value)) return
+  // Priorité : devise détectée sur les produits si présente dans la liste.
+  if (codes.includes(detected)) {
+    selectedCurrency.value = detected
+  } else {
+    selectedCurrency.value = codes[0]
+  }
+}, { immediate: true })
+
 const contactName   = ref('')
 const contactNumber = ref('')
 const contactEmail  = ref('')
@@ -146,13 +212,18 @@ let cartOffcanvas: any = null
 
 const errors = ref({ name: '', phone: '', email: '' })
 
-onMounted(() => {
+onMounted(async () => {
   // Pré-remplir avec les infos du compte connecté
   const u: any = authStore.currentUser
   if (u) {
     contactName.value   = [u.firstname, u.lastname].filter(Boolean).join(' ').trim()
     contactEmail.value  = u.email || ''
     contactNumber.value = u.phone || ''
+  }
+
+  // Charger les devises (catégories DVS) si pas déjà en mémoire
+  if (!psStore.categories || psStore.categories.length === 0) {
+    await psStore.fetchCategories()
   }
 
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
@@ -200,7 +271,7 @@ const checkout = async () => {
       contactFullname: contactName.value,
       contactEmail:    contactEmail.value,
       budgetEstimated: cartStore.totalPrice,
-      currency:        'XOF',
+      currency:        selectedCurrency.value,
       quantity:        cartStore.totalItems,
       items,
     } as any)
@@ -231,9 +302,9 @@ const contactWhatsApp = () => {
 
   cartStore.items.forEach(item => {
     const name = item.product[`name_${locale.value}` as keyof typeof item.product] || item.product.name_fr
-    message += `- ${name} (x${item.quantity}) — ${item.product.price.toLocaleString()} FCFA\n`
+    message += `- ${name} (x${item.quantity}) — ${formatCurrency(item.product.price, selectedCurrency.value)}\n`
   })
-  message += `\n*Total : ${cartStore.totalPrice.toLocaleString()} FCFA*`
+  message += `\n*Total : ${formatCurrency(cartStore.totalPrice, selectedCurrency.value)}*`
   if (contactNumber.value) message += `\nContact : ${contactNumber.value}`
 
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank')
@@ -244,4 +315,19 @@ const contactWhatsApp = () => {
 .cart-item img { flex-shrink: 0; }
 .x-small { font-size: 0.75rem; }
 .min-w-0 { min-width: 0; }
+
+/* Largeur du panier — plus généreux que le 400px par défaut de Bootstrap */
+.cart-sidebar-wide {
+  --bs-offcanvas-width: 560px;
+}
+@media (max-width: 575.98px) {
+  .cart-sidebar-wide {
+    --bs-offcanvas-width: 100vw;
+  }
+}
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .cart-sidebar-wide {
+    --bs-offcanvas-width: 480px;
+  }
+}
 </style>

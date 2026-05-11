@@ -24,6 +24,7 @@ interface CartState {
     items: CartItem[]
     isOpen: boolean
     loading: boolean
+    adding: boolean
     error: string | null
 }
 
@@ -34,6 +35,7 @@ export const useCartStore = defineStore('cart', {
         items: [],
         isOpen: false,
         loading: false,
+        adding: false,
         error: null
     }),
 
@@ -73,38 +75,44 @@ export const useCartStore = defineStore('cart', {
                 name_fr: product.name_fr || product.title || '',
                 name_en: product.name_en || product.title || '',
                 price: Number(product.price) || 0,
-                image: product.image || null
+                image: product.image || null,
+                currency: product.currency || null,
             }
 
-            if (!getToken()) {
-                const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
-                if (existing) existing.quantity += quantity
-                else this.items.push({ product: safeProduct, quantity })
-                this.saveToLocalStorage()
-                return
+            // Étape 1 (synchrone) : pousser immédiatement dans le panier local pour que l'UI réagisse.
+            // L'utilisateur voit le produit dès le clic, indépendamment de la latence API.
+            const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
+            if (existing) {
+                existing.quantity += quantity
+            } else {
+                this.items.push({ product: safeProduct, quantity })
             }
+            this.saveToLocalStorage()
 
-            const api = useApi()
+            // Étape 2 : si invité, on s'arrête là.
+            if (!getToken()) return
+
+            // Étape 3 : si connecté, on synchronise avec l'API en arrière-plan.
+            this.adding = true
             try {
+                const api = useApi()
                 const res = await api.post<any>('/cart/items', {
                     product_id: safeProduct.id,
                     quantity
                 })
                 if (res.success && res.data) {
-                    const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
-                    if (existing) {
-                        existing.quantity = res.data.quantity
-                        existing.id = res.data.id
-                    } else {
-                        this.items.push({ id: res.data.id, product: safeProduct, quantity: res.data.quantity })
+                    // Mettre à jour l'ID serveur et la quantité (l'API peut avoir mergé des doublons).
+                    const local = this.items.find(i => String(i.product.id) === String(safeProduct.id))
+                    if (local) {
+                        local.quantity = res.data.quantity ?? local.quantity
+                        local.id = res.data.id
                     }
                 }
-            } catch (e) {
-                // fallback local storage
-                const existing = this.items.find(i => String(i.product.id) === String(safeProduct.id))
-                if (existing) existing.quantity += quantity
-                else this.items.push({ product: safeProduct, quantity })
-                this.saveToLocalStorage()
+                // Si !success, on garde l'item local — l'utilisateur n'est pas pénalisé par un échec API.
+            } catch (_) {
+                // L'item est déjà dans le panier local → rien à faire.
+            } finally {
+                this.adding = false
             }
         },
 

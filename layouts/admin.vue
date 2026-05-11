@@ -38,6 +38,20 @@
             </NuxtLink>
           </li>
 
+          <li v-can="['list', 'destinations']" class="nav-item">
+            <NuxtLink to="/admin/destinations" class="nav-link" :class="{ 'active': isActive('/admin/destinations') }">
+              <i class="bi bi-geo-alt"></i>
+              <span v-if="showSidebarText">Destinations fret</span>
+            </NuxtLink>
+          </li>
+
+          <li v-can="['list', 'shipping-modes']" class="nav-item">
+            <NuxtLink to="/admin/shipping/modes" class="nav-link" :class="{ 'active': isActive('/admin/shipping/modes') }">
+              <i class="bi bi-truck"></i>
+              <span v-if="showSidebarText">Tarifs au kg</span>
+            </NuxtLink>
+          </li>
+
           <!-- Utilisateurs -->
           <li v-can="['list', 'users']" class="nav-item">
             <div class="nav-link d-flex align-items-center justify-content-between" @click="toggleUsersMenu" :class="{ 'active': isActive('/admin/users') }" style="cursor: pointer;">
@@ -122,6 +136,14 @@
             <NuxtLink to="/admin/reports" class="nav-link" :class="{ 'active': isActive('/admin/reports') }">
               <i class="bi bi-bar-chart"></i>
               <span v-if="showSidebarText">Rapports</span>
+            </NuxtLink>
+          </li>
+
+          <!-- Journal d'activité -->
+          <li v-can="['list', 'activity-logs']" class="nav-item">
+            <NuxtLink to="/admin/activity-logs" class="nav-link" :class="{ 'active': isActive('/admin/activity-logs') }">
+              <i class="bi bi-journal-check"></i>
+              <span v-if="showSidebarText">Journal d’activité</span>
             </NuxtLink>
           </li>
 
@@ -375,6 +397,8 @@ const pageTitle = computed(() => {
     '/admin/dashboard': 'Tableau de bord',
     '/admin/requests': 'Gestion des demandes',
     '/admin/shipments': 'Gestion des expeditions',
+    '/admin/destinations': 'Destinations fret (calculateur)',
+    '/admin/shipping/modes': 'Tarifs au kg (calculateur)',
     '/admin/users': 'Gestion des utilisateurs',
     '/admin/users/roles': 'Gestion des Profils',
     '/admin/guides': 'Gestion des guides',
@@ -383,6 +407,7 @@ const pageTitle = computed(() => {
     '/admin/blog': 'Gestion du blog',
     '/admin/faq': 'Gestion des FAQ',
     '/admin/support': 'Support client',
+    '/admin/activity-logs': 'Journal d’activité',
     '/admin/reports': 'Rapports',
     '/admin/notifications': 'Notifications'
   }

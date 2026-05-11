@@ -3,13 +3,13 @@
     <!-- Per Page Selector -->
     <div class="d-flex align-items-center gap-2">
       <span class="text-muted small">Afficher</span>
-      <select 
-        :value="limit" 
-        class="form-select input-md" 
+      <select
+        :value="limit"
+        class="form-select input-md"
         style="width: 80px;"
         @change="$emit('update:limit', Number(($event.target as HTMLSelectElement).value))"
       >
-        <option v-for="opt in limitOptions" :key="opt" :value="opt">{{ opt }}</option>
+        <option v-for="opt in effectiveLimitOptions" :key="opt" :value="opt">{{ opt }}</option>
       </select>
       <span class="text-muted small">par page</span>
     </div>
@@ -67,6 +67,19 @@ const props = defineProps<{
 const emit = defineEmits(['update:currentPage', 'update:limit'])
 
 const limitOptions = props.limitOptions || [5, 10, 20, 50]
+
+/**
+ * Garantit que la valeur courante de `limit` est toujours présente dans la liste affichée :
+ * sinon le <select> n'a aucune option qui correspond et apparaît visuellement vide.
+ */
+const effectiveLimitOptions = computed(() => {
+  const opts = [...limitOptions]
+  if (props.limit && !opts.includes(props.limit)) {
+    opts.push(props.limit)
+    opts.sort((a, b) => a - b)
+  }
+  return opts
+})
 
 const totalPages = computed(() => Math.ceil(props.totalItems / props.limit))
 const startItem = computed(() => props.totalItems === 0 ? 0 : (props.currentPage - 1) * props.limit + 1)

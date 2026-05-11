@@ -30,16 +30,23 @@ export interface KpiValue {
   trend: 'up' | 'down' | 'stable'
 }
 
+export interface RevenueKpi extends KpiValue {
+  /** ISO 4217 — devise dans laquelle le volume d'affaires est exprimé. */
+  currency_code?: string
+}
+
 export interface OverviewStats {
-  revenue: KpiValue
+  revenue: RevenueKpi
   requests_handled: KpiValue
   new_clients: KpiValue
   satisfaction: { rate: number; scale: number; label: string }
+  country_filter?: string | null
 }
 
 export interface MonthlyEvolution {
   labels: string[]
   data: number[]
+  currency_code?: string
 }
 
 export interface TopDestination {
@@ -156,14 +163,20 @@ export const useReportsStore = defineStore('reports', {
       throw new Error(res.message)
     },
 
-    async fetchStats(months = 12) {
+    async fetchStats(months = 12, country: string | null = null) {
       this.statsLoading = true
       this.error = null
       try {
         const api = useApi()
+        const overviewQuery: Record<string, string | number> = {}
+        if (country) overviewQuery.country = country
+
+        const monthlyQuery: Record<string, string | number> = { months }
+        if (country) monthlyQuery.country = country
+
         const [overview, monthly, destinations] = await Promise.all([
-          api.get<OverviewStats>('/admin/stats/overview'),
-          api.get<MonthlyEvolution>('/admin/stats/monthly-evolution', { query: { months } }),
+          api.get<OverviewStats>('/admin/stats/overview', { query: overviewQuery }),
+          api.get<MonthlyEvolution>('/admin/stats/monthly-evolution', { query: monthlyQuery }),
           api.get<{ destinations: TopDestination[] }>('/admin/stats/top-destinations'),
         ])
 

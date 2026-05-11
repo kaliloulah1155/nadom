@@ -327,9 +327,12 @@ const getCategoryName = (id: string) => {
 }
 
 const addToCart = (product: any) => {
+  // L'ajout est synchrone côté UI (cf. cart.ts) — l'item apparaît immédiatement
+  // dans le panier. La synchro API (si l'utilisateur est connecté) se fait
+  // en tâche de fond sans bloquer l'affichage.
+  cartStore.openCart()
   cartStore.addItem(product)
   success(locale.value === 'fr' ? 'Produit ajouté au panier' : 'Product added to cart')
-  cartStore.openCart()
 }
 
 const toggleCart = () => {

@@ -320,6 +320,14 @@
                 <a href="#" class="btn btn-success" @click.prevent="openWhatsApp">
                   <i class="bi bi-whatsapp me-2"></i>Contacter client
                 </a>
+                <small v-if="isConfirmed && quotationPdfUrl" class="text-success d-flex align-items-center gap-1">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                  Le lien du devis PDF sera joint au message.
+                </small>
+                <small v-else-if="!isConfirmed && quotationPdfUrl" class="text-muted d-flex align-items-center gap-1">
+                  <i class="bi bi-info-circle"></i>
+                  Confirmez la demande pour envoyer automatiquement le devis au client.
+                </small>
                 <button class="btn btn-outline-danger" @click="deleteRequest">
                   <i class="bi bi-trash me-2"></i>Supprimer
                 </button>
@@ -388,7 +396,7 @@ const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
 const { formatCurrency, formatDate, formatRequestStatus } = useFormatters()
 const { success, error: notifyError } = useNotification()
-const { contactClientForRequest, generateLink } = useWhatsApp()
+const { contactClientForRequest, generateLink, buildClientRequestMessage } = useWhatsApp()
 
 const loading = ref(true)
 const showQuotationForm = ref(false)
@@ -533,22 +541,43 @@ const clientPhone = computed(() => {
   return r.user?.phone || r.contactNumber || r.contact_number || ''
 })
 
+/** URL publique du PDF de devis — accessible sans authentification (route publique). */
+const quotationPdfUrl = computed(() => {
+  if (!request.value?.quotedPrice) return null
+  const config = useRuntimeConfig()
+  const base = String(config.public.apiBase || '').replace(/\/$/, '')
+  return `${base}/personal-shopping-requests/${request.value.id}/pdf`
+})
+
+const isConfirmed = computed(() => request.value?.status === 'confirmed')
+
+const whatsappOptions = computed(() => ({
+  quotationUrl: isConfirmed.value ? quotationPdfUrl.value : null,
+  totalLabel: request.value?.quotedPrice
+    ? formatCurrency(request.value.quotedPrice, requestCurrency.value)
+    : null,
+  confirmed: isConfirmed.value,
+}))
+
 const whatsappLinkForClient = computed(() => {
   if (!request.value) return '#'
   if (!clientPhone.value) return '#'
-  const message = `Bonjour, NADOM Support 👋
-
-Concernant votre demande Personal Shopping :
-📦 Produit : ${request.value.title}
-🔖 Référence : ${request.value.id}
-
-Pourrions-nous échanger pour finaliser votre commande ?`
+  const message = buildClientRequestMessage(
+    request.value.title,
+    request.value.id,
+    whatsappOptions.value,
+  )
   return generateLink(clientPhone.value, message)
 })
 
 const openWhatsApp = () => {
   if (!request.value) return
-  contactClientForRequest(clientPhone.value, request.value.title, request.value.id)
+  contactClientForRequest(
+    clientPhone.value,
+    request.value.title,
+    request.value.id,
+    whatsappOptions.value,
+  )
 }
 
 const downloadQuotationPdf = async () => {

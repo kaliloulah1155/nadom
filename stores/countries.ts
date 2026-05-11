@@ -19,9 +19,10 @@ export interface Country {
   name_fr?: string
   name_en?: string
   phone_code?: string
-  currency?: string
-  continent?: string
-  flag_emoji?: string
+  /** ISO 4217 (colonne DB `currency_code`) */
+  currency_code?: string | null
+  continent?: string | null
+  flag_emoji?: string | null
   sort_order?: number
   status?: number
   cities?: City[]
@@ -60,7 +61,20 @@ export const useCountriesStore = defineStore('countries', {
       state.countries.find(c => c.code?.toLowerCase() === code.toLowerCase()),
 
     getByLabel: (state) => (label: string) =>
-      state.countries.find(c => c.label?.toLowerCase() === label.toLowerCase())
+      state.countries.find(c => c.label?.toLowerCase() === label.toLowerCase()),
+
+    /** Code ISO alpha-2 pour un libellé affiché sur une destination (name_fr / name_en / label). */
+    iso3166FromCountryField: (state) => (displayName: string | null | undefined) => {
+      const n = (displayName || '').trim().toLowerCase()
+      if (!n) return ''
+      const hit = state.countries.find(
+        c =>
+          (c.name_fr && c.name_fr.toLowerCase() === n) ||
+          (c.name_en && c.name_en.toLowerCase() === n) ||
+          (c.label && c.label.toLowerCase() === n)
+      )
+      return (hit?.code || '').trim()
+    },
   },
 
   actions: {

@@ -95,7 +95,14 @@
           >
             <div class="card h-100 border-0 shadow-sm text-center">
               <div class="card-body py-3">
-                <span class="fs-2">{{ country.flag_emoji || '🌍' }}</span>
+                <div class="d-flex justify-content-center mb-2">
+                  <CountryFlag
+                    :iso="country.code"
+                    :emoji="country.flag_emoji"
+                    :label="countryName(country)"
+                    size="2rem"
+                  />
+                </div>
                 <h6 class="mb-0 mt-2">{{ countryName(country) }}</h6>
                 <small class="text-muted">
                   {{ country.code }} · {{ country.currency || '—' }}

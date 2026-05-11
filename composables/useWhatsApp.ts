@@ -41,16 +41,45 @@ Merci de me contacter pour plus d'informations.`
     clientPhone: string | undefined | null,
     requestTitle: string,
     requestId: string,
+    options: { quotationUrl?: string | null; totalLabel?: string | null; confirmed?: boolean } = {},
   ) => {
     if (!clientPhone) return contactForRequest(requestTitle, requestId)
-    const message = `Bonjour, NADOM Support 👋
-
-Concernant votre demande Personal Shopping :
-📦 Produit : ${requestTitle}
-🔖 Référence : ${requestId}
-
-Pourrions-nous échanger pour finaliser votre commande ?`
+    const message = buildClientRequestMessage(requestTitle, requestId, options)
     return openChat(clientPhone, message)
+  }
+
+  /** Construit le texte WhatsApp envoyé au client pour une demande (avec ou sans devis confirmé). */
+  const buildClientRequestMessage = (
+    requestTitle: string,
+    requestId: string,
+    options: { quotationUrl?: string | null; totalLabel?: string | null; confirmed?: boolean } = {},
+  ): string => {
+    const lines: string[] = ['Bonjour, NADOM Support 👋', '']
+
+    if (options.confirmed) {
+      lines.push('Bonne nouvelle : votre demande Personal Shopping a été confirmée. ✅', '')
+      lines.push(`📦 Produit : ${requestTitle}`)
+      lines.push(`🔖 Référence : ${requestId}`)
+      if (options.totalLabel) {
+        lines.push(`💰 Total à régler : ${options.totalLabel}`)
+      }
+      if (options.quotationUrl) {
+        lines.push('', '📄 Devis détaillé (PDF) :')
+        lines.push(options.quotationUrl)
+      }
+      lines.push('', 'Nous restons disponibles pour toute question avant le règlement.')
+    } else {
+      lines.push('Concernant votre demande Personal Shopping :')
+      lines.push(`📦 Produit : ${requestTitle}`)
+      lines.push(`🔖 Référence : ${requestId}`)
+      if (options.quotationUrl) {
+        lines.push('', '📄 Votre devis :')
+        lines.push(options.quotationUrl)
+      }
+      lines.push('', 'Pourrions-nous échanger pour finaliser votre commande ?')
+    }
+
+    return lines.join('\n')
   }
 
   // Message pour suivi de colis
@@ -103,6 +132,7 @@ Merci de me donner plus de détails sur les démarches.`
     openChat,
     contactForRequest,
     contactClientForRequest,
+    buildClientRequestMessage,
     contactForTracking,
     contactForGuide,
     contactForVisa,

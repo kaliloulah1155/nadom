@@ -191,21 +191,33 @@
               </tr>
             </thead>
             <tbody>
+              <tr v-if="destinations.length === 0">
+                <td colspan="4" class="text-center text-muted py-4">
+                  {{ t('pricing.noDestinations') }}
+                </td>
+              </tr>
               <tr v-for="dest in destinations" :key="dest.id">
                 <td>
-                  <span class="me-2">{{ dest.flag }}</span>
-                  {{ dest.country }}
+                  <span class="d-inline-flex align-items-center gap-2">
+                    <CountryFlag
+                      :iso="countriesStore.iso3166FromCountryField(dest.country)"
+                      :emoji="dest.flag"
+                      :label="dest.country"
+                      size="1.35rem"
+                    />
+                    <span>{{ dest.country }}</span>
+                  </span>
                 </td>
                 <td class="text-center">
-                  <strong v-if="getCost(dest, 'air_express')">{{ formatCurrency(getCost(dest, 'air_express')) }}</strong>
+                  <strong v-if="getCost(dest, 'air_express')">{{ formatCurrency(getCost(dest, 'air_express'), destCurrency(dest)) }}</strong>
                   <span v-else class="text-muted">-</span>/kg
                 </td>
                 <td class="text-center">
-                  <strong v-if="getCost(dest, 'air_normal')">{{ formatCurrency(getCost(dest, 'air_normal')) }}</strong>
+                  <strong v-if="getCost(dest, 'air_normal')">{{ formatCurrency(getCost(dest, 'air_normal'), destCurrency(dest)) }}</strong>
                   <span v-else class="text-muted">-</span>/kg
                 </td>
                 <td class="text-center">
-                  <strong v-if="getCost(dest, 'sea')">{{ formatCurrency(getCost(dest, 'sea')) }}</strong>
+                  <strong v-if="getCost(dest, 'sea')">{{ formatCurrency(getCost(dest, 'sea'), destCurrency(dest)) }}</strong>
                   <span v-else class="text-muted">-</span>/kg
                 </td>
               </tr>
@@ -291,6 +303,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useCountriesStore } from '~/stores/countries'
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 
@@ -301,6 +315,7 @@ definePageMeta({
 const { t } = useI18n()
 const { formatCurrency } = useFormatters()
 const shippingStore = useShippingStore()
+const countriesStore = useCountriesStore()
 
 const destinations = computed(() => shippingStore.destinations)
 
@@ -312,7 +327,13 @@ const getCost = (dest: any, mode: string): number => {
   return Number(v) || 0
 }
 
-await shippingStore.fetchDestinations()
+/** Devise propre à la destination — alignée sur la logique du calculateur. */
+const destCurrency = (dest: any): string => {
+  const raw = dest?.currency_code
+  return raw && String(raw).trim() ? String(raw).toUpperCase() : 'XOF'
+}
+
+await Promise.all([shippingStore.fetchDestinations(), countriesStore.fetchAll()])
 </script>
 
 <style scoped>

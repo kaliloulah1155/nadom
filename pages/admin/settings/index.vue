@@ -136,7 +136,9 @@
                     class="form-control"
                     placeholder="home_marquee"
                     required
+                    :disabled="marqueeSlugLocked"
                   />
+                  <small v-if="marqueeSlugLocked" class="text-muted">Slug non modifiable (référence du marquee sur l’accueil)</small>
                 </div>
                 <div class="col-12">
                   <label class="form-label">Valeur (vvalue) *</label>
@@ -193,6 +195,13 @@ const { success, error: notifyError } = useNotification()
 const items = computed(() => settingsStore.items)
 const activeCount = computed(() => items.value.filter(i => Number(i.status) === 1).length)
 const marqueeText = computed(() => settingsStore.getValue('home_marquee', ''))
+
+/** Slug technique fixe pour le marquee — aligné sur la page d’accueil (`getValue('home_marquee')`). */
+const marqueeSlugLocked = computed(() => {
+  if (form.slug === 'home_marquee') return true
+  if (editing.value && form.kkey === 'HOME_MARQUEE') return true
+  return false
+})
 
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null

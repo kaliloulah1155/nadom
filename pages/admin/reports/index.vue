@@ -1,12 +1,12 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+      <div class="flex-grow-1" style="min-width: 0;">
         <h4 class="mb-1">Rapports & Statistiques</h4>
         <p class="text-muted mb-0">Analyse des performances et activités</p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
         <button class="btn btn-outline-primary" :disabled="reportsStore.exporting" @click="onExport('pdf')">
           <span v-if="reportsStore.exporting && exportingFormat === 'pdf'" class="spinner-border spinner-border-sm me-2"></span>
           <i v-else class="bi bi-download me-2"></i>Exporter PDF
@@ -15,6 +15,37 @@
           <span v-if="reportsStore.exporting && exportingFormat === 'excel'" class="spinner-border spinner-border-sm me-2"></span>
           <i v-else class="bi bi-file-earmark-excel me-2"></i>Exporter Excel
         </button>
+      </div>
+    </div>
+
+    <!-- Country filter -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label small text-muted mb-1 d-flex align-items-center gap-2">
+              Pays de livraison
+              <span v-if="shippingStore.loadingDestinations" class="spinner-border spinner-border-sm text-primary" style="width: .8rem; height: .8rem;" role="status" aria-hidden="true"></span>
+            </label>
+            <select
+              v-model="countryFilter"
+              class="form-select form-select-sm"
+              :disabled="shippingStore.loadingDestinations || reportsStore.statsLoading"
+              @change="onCountryChange"
+            >
+              <option value="">{{ shippingStore.loadingDestinations ? 'Chargement…' : '🌍 Toutes destinations' }}</option>
+              <option v-for="dest in countryOptions" :key="dest.id" :value="dest.country">
+                {{ (dest.flag ? `${dest.flag} ` : '') }}{{ dest.country }}{{ dest.currency_code ? ` — ${dest.currency_code}` : '' }}
+              </option>
+            </select>
+            <small v-if="countryFilter" class="text-muted">
+              Volume d’affaires des expéditions livrées vers <strong>{{ countryFilter }}</strong>, exprimé en {{ revenueCurrency }}.
+            </small>
+            <small v-else class="text-muted">
+              Filtre désactivé — total mondial agrégé en FCFA (les montants multi-devises sont sommés bruts).
+            </small>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -117,24 +148,41 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, nextTick } from 'vue'
+import { onMounted, ref, computed, watch, nextTick } from 'vue'
 import { useReportsStore } from '~/stores/reports'
+import { useShippingStore } from '~/stores/shipping'
 import { useNotification } from '~/composables/useNotification'
+import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const reportsStore = useReportsStore()
+const shippingStore = useShippingStore()
 const { error: notifyError } = useNotification()
+const { formatCurrency } = useFormatters()
 
 const months = ref(12)
+const countryFilter = ref<string>('')
 const exportingFormat = ref<'pdf' | 'excel' | null>(null)
 let chartInstance: any = null
 
+/** Liste des destinations actives, triées alphabétiquement par pays. */
+const countryOptions = computed(() => {
+  return [...shippingStore.destinations]
+    .filter(d => d.country)
+    .sort((a, b) => (a.country || '').localeCompare(b.country || ''))
+})
+
+/** Devise utilisée pour afficher le volume d'affaires (renvoyée par l'API selon le filtre). */
+const revenueCurrency = computed(() => {
+  return (reportsStore.overview?.revenue?.currency_code || 'XOF').toUpperCase()
+})
+
 const formatRevenue = (val?: number) => {
-  if (val == null) return '0 FCFA'
-  return new Intl.NumberFormat('fr-FR').format(Math.round(val)) + ' FCFA'
+  if (val == null) return formatCurrency(0, revenueCurrency.value)
+  return formatCurrency(val, revenueCurrency.value)
 }
 
 const formatPercent = (val?: number) => {
@@ -163,8 +211,10 @@ const renderChart = async () => {
   const labels = reportsStore.monthly?.labels || []
   const data = reportsStore.monthly?.data || []
 
+  const seriesName = `Volume d'affaires (${revenueCurrency.value})`
+
   const options = {
-    series: [{ name: "Volume d'affaires (FCFA)", data }],
+    series: [{ name: seriesName, data }],
     chart: { height: 350, type: 'area', toolbar: { show: false } },
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', colors: ['#c71f37'] },
@@ -179,11 +229,11 @@ const renderChart = async () => {
       },
     },
     xaxis: { categories: labels },
-    tooltip: { y: { formatter: (v: number) => new Intl.NumberFormat('fr-FR').format(v) + ' FCFA' } },
+    tooltip: { y: { formatter: (v: number) => formatCurrency(v, revenueCurrency.value) } },
   }
 
   if (chartInstance) {
-    chartInstance.updateOptions({ series: [{ name: "Volume d'affaires (FCFA)", data }], xaxis: { categories: labels } })
+    chartInstance.updateOptions({ series: [{ name: seriesName, data }], xaxis: { categories: labels } })
   } else {
     chartInstance = new (window as any).ApexCharts(el, options)
     chartInstance.render()
@@ -191,7 +241,12 @@ const renderChart = async () => {
 }
 
 const onMonthsChange = async () => {
-  await reportsStore.fetchStats(months.value)
+  await reportsStore.fetchStats(months.value, countryFilter.value || null)
+  renderChart()
+}
+
+const onCountryChange = async () => {
+  await reportsStore.fetchStats(months.value, countryFilter.value || null)
   renderChart()
 }
 
@@ -209,7 +264,10 @@ const onExport = async (format: 'pdf' | 'excel') => {
 watch(() => reportsStore.monthly, () => renderChart(), { deep: true })
 
 onMounted(async () => {
-  await reportsStore.fetchStats(months.value)
+  await Promise.all([
+    reportsStore.fetchStats(months.value, countryFilter.value || null),
+    shippingStore.fetchDestinations(),
+  ])
   renderChart()
 })
 </script>

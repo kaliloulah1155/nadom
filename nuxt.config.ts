@@ -1,4 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+/** Dev : polling optionnel si erreurs EPERM sur la surveillance des fichiers (variable CHOKIDAR_USEPOLLING, cf. doc Chokidar). */
+const devWatchUsePolling = process.env.CHOKIDAR_USEPOLLING === 'true'
+const devWatchInterval = Number(process.env.CHOKIDAR_INTERVAL) || 1000
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -7,6 +12,30 @@ export default defineNuxtConfig({
   // donc le SSR ne peut pas produire le meme HTML que le client et provoque
   // des "Hydration completed but contains mismatches". Mode SPA = un seul rendu.
   ssr: false,
+
+  // Sans SSR, pas besoin du manifest experimental ; sinon Vite peut tenter de
+  // résoudre `#app-manifest` sur le bundle client → erreur "Failed to resolve import".
+  experimental: {
+    appManifest: false,
+  },
+
+  vite: {
+    server: {
+      watch: {
+        usePolling: devWatchUsePolling,
+        interval: devWatchInterval,
+      },
+    },
+  },
+
+  /** Watchers Nuxt (chokidar), même bascule que Vite ci‑dessus. */
+  watchers: {
+    chokidar: {
+      usePolling: devWatchUsePolling,
+      interval: devWatchInterval,
+      ignorePermissionErrors: true,
+    },
+  },
 
   modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
 
@@ -40,6 +69,7 @@ export default defineNuxtConfig({
   },
   css: [
     '~/assets/scss/style.scss',
+    'flag-icons/css/flag-icons.min.css',
   ],
 
   app: {

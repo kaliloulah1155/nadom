@@ -8,7 +8,8 @@ export const useFormatters = () => {
     const n = Number(amount)
     const safe = Number.isFinite(n) ? n : 0
     const code = (currency || 'XOF').toString().toUpperCase()
-    if (code === 'XOF' || code === 'FCFA') {
+    // CFA : ISO distinct (XOF UEMOA, XAF CEMAC) — affichage habituel « FCFA » côté FR.
+    if (code === 'XOF' || code === 'XAF' || code === 'FCFA') {
       return new Intl.NumberFormat(locale, {
         style: 'decimal',
         minimumFractionDigits: 0,
