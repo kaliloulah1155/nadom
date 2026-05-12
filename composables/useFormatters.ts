@@ -167,6 +167,30 @@ export const useFormatters = () => {
     return statusMap[status] || { label: status, color: '#6b7280', icon: 'bi-question-circle' }
   }
 
+  /**
+   * Vignette liste : les demandes « panier » ont l’image sur les articles (produit), pas sur request.images.
+   */
+  const requestThumbnailUrl = (
+    request: { images?: string[] | null; items?: Array<{ image?: string | null }> | null },
+    placeholderPx: number = 40
+  ): string => {
+    const items = request.items
+    if (Array.isArray(items)) {
+      for (const it of items) {
+        const u = (it?.image && String(it.image).trim()) || ''
+        if (u) return u
+      }
+    }
+    const imgs = request.images
+    if (Array.isArray(imgs)) {
+      for (const u of imgs) {
+        const s = typeof u === 'string' ? u.trim() : ''
+        if (s) return s
+      }
+    }
+    return `https://via.placeholder.com/${placeholderPx}?text=%3F`
+  }
+
   return {
     formatCurrency,
     formatNumber,
@@ -179,6 +203,7 @@ export const useFormatters = () => {
     capitalize,
     slugify,
     formatRequestStatus,
-    formatShipmentStatus
+    formatShipmentStatus,
+    requestThumbnailUrl,
   }
 }

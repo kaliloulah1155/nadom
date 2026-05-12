@@ -1,139 +1,382 @@
 <template>
-    <div>
-        <ClientOnly>
-            <NavbarDark />
-        </ClientOnly>
+  <div>
+    <ClientOnly>
+      <NavbarDark />
+    </ClientOnly>
 
-        <section class="bg-cover position-relative" :style="{ backgroundImage: `url(${bg})` }" data-overlay="6">
-            <div class="container">
-                <div class="row align-items-center justify-content-center">
-                    <div class="col-xl-7 col-lg-9 col-md-12">
-                        <div class="fpc-capstion text-center my-4">
-                            <div class="fpc-captions">
-                                <h1 class="xl-heading text-light">Contact Us</h1>
-                                <p class="text-lg text-light">Cicero famously orated against his political opponent Lucius Sergius Catilina.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row justify-content-between g-4 mt-lg-5 mt-4">
-                    <div class="col-xl-4 col-lg-4 col-md-6">
-                        <div class="card p-4 rounded-4 bg-transparents border-0 text-center h-100">
-                            <div class="crds-icons d-inline-flex mx-auto mb-3 text-light fs-2"><i class="fa-solid fa-briefcase"></i></div>
-                            <div class="crds-desc">
-                                <h5 class="text-light">Drop a Mail</h5>
-                                <p class="fs-6 text-md lh-2 text-light opacity-75 mb-0">ShreeThemes@gmail.com<br>ShreeThemes@gmail.com</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-4 col-md-6">
-                        <div class="card p-4 rounded-4 bg-transparents border-0 text-center h-100">
-                            <div class="crds-icons d-inline-flex mx-auto mb-3 text-light fs-2"><i class="fa-solid fa-headset"></i></div>
-                            <div class="crds-desc">
-                                <h5 class="text-light">Call Us</h5>
-                                <p class="fs-6 text-md lh-2 text-light opacity-75 mb-0">(0522) 2563568<br>+91 256 6548 457</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-4 col-md-6">
-                        <div class="card p-4 rounded-4 bg-transparents border-0 text-center h-100">
-                            <div class="crds-icons d-inline-flex mx-auto mb-3 text-light fs-2"><i class="fa-solid fa-globe"></i></div>
-                            <div class="crds-desc">
-                                <h5 class="text-light">Connect with Social</h5>
-                                <p class="text-md text-light opacity-75 lh-2">Let's Connect with Us via social media</p>
-                                <ul class="list-inline mb-0">
-                                    <li v-for="(item, index) in socialData" :key="index" class="list-inline-item">
-                                        <NuxtLink class="square--40 circle bg-transparents text-light" to="#"><i :class="item"></i></NuxtLink> 
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <section class="bg-cover position-relative" :style="heroStyle" data-overlay="6">
+      <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-xl-7 col-lg-9 col-md-12">
+            <div class="fpc-capstion text-center my-4">
+              <div class="fpc-captions">
+                <h1 class="xl-heading text-light">{{ heroTitle }}</h1>
+                <p class="text-lg text-light">{{ heroSubtitle }}</p>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <section>
-            <div class="container">
-                <div class="row align-items-center justify-content-between g-4">
-                    <div class="col-xl-7 col-lg-7 col-md-12">
-                        <div class="contactForm pe-xl-5 pe-lg-4">
-                            <form>
-                                <div class="row align-items-center">
-                                    <div class="col-xl-12 col-lg-12 col-md-12">
-                                        <div class="touch-block d-flex flex-column mb-4">
-                                            <h2>Drop Us a Line</h2>
-                                            <p>Get in touch via form below and we will reply as soos as we can. </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="form-group form-border">
-                                            <label class="form-label">Your Name</label>
-                                            <input type="text" class="form-control bg-light">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="form-group form-border">
-                                            <label class="form-label">eMail ID</label>
-                                            <input type="email" class="form-control bg-light">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="form-group form-border">
-                                            <label class="form-label">Phone No.</label>
-                                            <input type="text" class="form-control bg-light">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="form-group form-border">
-                                            <label class="form-label">Subject</label>
-                                            <input type="text" class="form-control bg-light">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-12 col-lg-12 col-md-12">
-                                        <div class="form-group form-border">
-                                            <label class="form-label">Your Query</label>
-                                            <textarea class="form-control ht-120 bg-light"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-12 col-lg-12 col-md-12">
-                                        <div class="form-group form-border">
-                                            <button type="button" class="btn fw-medium btn-primary">Send Message<i class="fa-solid fa-paper-plane ms-2"></i></button>
-                                        </div>
-                                    </div>
-
-                                    <div class="">
-                                        <div class="">
-                                            <div class="alert alert-success" role="alert">Message Sent Successfully To RealScout. You Will Get Response Soon.</div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-xl-5 col-lg-5 col-md-12">
-                        <iframe class="full-width ht-100 grayscale rounded" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.00425878428698!3d40.74076684379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c1654f3%3A0xc80f9cfce5383d5d!2sGoogle!5e0!3m2!1sen!2sin!4v1586000412513!5m2!1sen!2sin" height="500" style="border:0;" aria-hidden="false" tabindex="0"></iframe>
-                    </div>
-                </div>
+        <div class="row justify-content-between g-4 mt-lg-5 mt-4">
+          <div
+            v-for="(card, idx) in displayCards"
+            :key="'crd-' + idx"
+            class="col-xl-4 col-lg-4 col-md-6"
+          >
+            <div class="card p-4 rounded-4 bg-transparents border-0 text-center h-100">
+              <div class="crds-icons d-inline-flex mx-auto mb-3 text-light fs-2">
+                <i :class="card.icon"></i>
+              </div>
+              <div class="crds-desc">
+                <h5 class="text-light">{{ card.title }}</h5>
+                <p class="fs-6 text-md lh-2 text-light opacity-75 mb-0 whitespace-pre">{{ card.body }}</p>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <FooterTop/>
-        <FooterOne/>
-        <BackToTop/>
-    </div>
+    <section>
+      <div class="container">
+        <div class="row align-items-center justify-content-between g-4">
+          <div class="col-xl-7 col-lg-7 col-md-12">
+            <div class="contactForm pe-xl-5 pe-lg-4">
+              <form @submit.prevent="submitForm">
+                <div class="row align-items-center">
+                  <div class="col-xl-12 col-lg-12 col-md-12">
+                    <div class="touch-block d-flex flex-column mb-4">
+                      <h2>{{ formTitle }}</h2>
+                      <p>{{ formIntro }}</p>
+                      <p class="small text-muted mb-0">
+                        {{
+                          locale.startsWith('fr')
+                            ? 'Merci de respecter les longueurs indiquées pour chaque champ.'
+                            : 'Please respect the maximum length shown for each field.'
+                        }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6 col-lg-6 col-md-6">
+                    <div class="form-group form-border">
+                      <label class="form-label">{{ labels.name }}</label>
+                      <input
+                        type="text"
+                        class="form-control bg-light"
+                        autocomplete="name"
+                        :value="form.name"
+                        :maxlength="LIMITS.name"
+                        :class="{ 'is-invalid': blur.name && fieldErrors.name }"
+                        required
+                        @blur="blur.name = true"
+                        @input="onInput('name', ($event.target as HTMLInputElement).value)"
+                      />
+                      <div v-if="blur.name && fieldErrors.name" class="invalid-feedback d-block">{{ fieldErrors.name }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6 col-lg-6 col-md-6">
+                    <div class="form-group form-border">
+                      <label class="form-label">{{ labels.email }}</label>
+                      <input
+                        type="email"
+                        inputmode="email"
+                        class="form-control bg-light"
+                        autocomplete="email"
+                        :value="form.email"
+                        :maxlength="LIMITS.email"
+                        :class="{ 'is-invalid': blur.email && fieldErrors.email }"
+                        required
+                        @blur="blur.email = true"
+                        @input="onInput('email', ($event.target as HTMLInputElement).value)"
+                      />
+                      <div v-if="blur.email && fieldErrors.email" class="invalid-feedback d-block">{{ fieldErrors.email }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6 col-lg-6 col-md-6">
+                    <div class="form-group form-border">
+                      <label class="form-label">{{ labels.phone }}</label>
+                      <input
+                        type="tel"
+                        class="form-control bg-light"
+                        autocomplete="tel"
+                        :value="form.phone"
+                        :maxlength="LIMITS.phone"
+                        @input="onInput('phone', ($event.target as HTMLInputElement).value)"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6 col-lg-6 col-md-6">
+                    <div class="form-group form-border">
+                      <label class="form-label">{{ labels.subject }}</label>
+                      <input
+                        type="text"
+                        class="form-control bg-light"
+                        :value="form.subject"
+                        :maxlength="LIMITS.subject"
+                        :class="{ 'is-invalid': blur.subject && fieldErrors.subject }"
+                        required
+                        @blur="blur.subject = true"
+                        @input="onInput('subject', ($event.target as HTMLInputElement).value)"
+                      />
+                      <div v-if="blur.subject && fieldErrors.subject" class="invalid-feedback d-block">{{ fieldErrors.subject }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-12 col-lg-12 col-md-12">
+                    <div class="form-group form-border">
+                      <label class="form-label">{{ labels.message }} ({{ form.message.length }} / {{ LIMITS.message }})</label>
+                      <textarea
+                        class="form-control ht-120 bg-light"
+                        rows="6"
+                        :value="form.message"
+                        :maxlength="LIMITS.message"
+                        :class="{ 'is-invalid': blur.message && fieldErrors.message }"
+                        required
+                        @blur="blur.message = true"
+                        @input="onInput('message', ($event.target as HTMLTextAreaElement).value)"
+                      ></textarea>
+                      <div v-if="blur.message && fieldErrors.message" class="invalid-feedback d-block">{{ fieldErrors.message }}</div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-12 col-lg-12 col-md-12">
+                    <div class="form-group form-border">
+                      <button
+                        type="submit"
+                        class="btn fw-medium btn-primary d-inline-flex align-items-center gap-2"
+                        :disabled="sending"
+                      >
+                        <span v-if="sending" class="spinner-border spinner-border-sm"></span>
+                        {{ labels.submit }}
+                        <i v-if="!sending" class="fa-solid fa-paper-plane"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-xl-5 col-lg-5 col-md-12">
+            <iframe
+              v-if="mapUrl"
+              class="full-width ht-100 grayscale rounded"
+              :src="mapUrl"
+              height="500"
+              style="border:0;"
+              aria-hidden="false"
+              tabindex="0"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <FooterTop />
+    <FooterOne />
+    <BackToTop />
+  </div>
 </template>
 
-<script setup>
-    import bg from '@/assets/img/title-banner.jpg'
-    import { ref } from 'vue';
-    const socialData = ref(['fa-brands fa-facebook-f', 'fa-brands fa-instagram', 'fa-brands fa-twitter', 'fa-brands fa-dribbble'])
+<script setup lang="ts">
+import fallbackBg from '@/assets/img/title-banner.jpg'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useSiteStaticPagesStore } from '~/stores/siteStaticPages'
+import { resolveStorageAssetUrl } from '~/composables/useStorageAssetUrl'
+import { usePublicApi } from '~/composables/usePublicApi'
+import { useNotification } from '~/composables/useNotification'
+import { CONTACT_FORM_LIMITS, sanitizePlainText } from '~/composables/usePublicContactFormConstraints'
+
+const LIMITS = CONTACT_FORM_LIMITS
+
+const { locale } = useI18n()
+const { success, error } = useNotification()
+
+const sending = ref(false)
+const attempted = ref(false)
+
+const form = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  subject: '',
+  message: ''
+})
+
+const blur = reactive({
+  name: false,
+  email: false,
+  subject: false,
+  message: false
+})
+
+function isFrLang(): boolean {
+  return String(locale.value || '').startsWith('fr')
+}
+
+function onInput(key: keyof typeof form, raw: string) {
+  const limitsByKey = {
+    name: LIMITS.name,
+    email: LIMITS.email,
+    phone: LIMITS.phone,
+    subject: LIMITS.subject,
+    message: LIMITS.message
+  } satisfies Record<keyof typeof form, number>
+  const max = limitsByKey[key]
+  let v = sanitizePlainText(raw, max)
+  if (key === 'email') {
+    v = v.toLowerCase()
+  }
+  form[key] = v
+}
+
+function resetForm(): void {
+  form.name = ''
+  form.email = ''
+  form.phone = ''
+  form.subject = ''
+  form.message = ''
+  blur.name = false
+  blur.email = false
+  blur.subject = false
+  blur.message = false
+  attempted.value = false
+}
+
+const simpleEmailOk = (e: string) => /^[^\s@]{1,200}@[^\s@]{1,200}\.[^\s@]{2,}$/.test(e)
+
+const fieldErrors = computed(() => {
+  const fr = isFrLang()
+  const err: { name?: string; email?: string; subject?: string; message?: string } = {}
+
+  const nameOk = sanitizePlainText(form.name, LIMITS.name)
+  if ((blur.name || attempted.value) && nameOk.length < 2) {
+    err.name = fr ? 'Indiquez au moins 2 caractères.' : 'At least 2 characters are required.'
+  }
+
+  const em = sanitizePlainText(form.email, LIMITS.email).toLowerCase()
+  if ((blur.email || attempted.value) && em.length === 0) {
+    err.email = fr ? 'Une adresse e-mail est requise.' : 'An email address is required.'
+  } else if ((blur.email || attempted.value) && em.length > 0 && !simpleEmailOk(em)) {
+    err.email = fr ? 'Adresse e-mail invalide.' : 'Invalid email address.'
+  }
+
+  const subj = sanitizePlainText(form.subject, LIMITS.subject)
+  if ((blur.subject || attempted.value) && subj.length < 2) {
+    err.subject = fr ? 'Ajoutez un sujet court.' : 'Please enter a short subject.'
+  }
+
+  const msg = sanitizePlainText(form.message, LIMITS.message)
+  if ((blur.message || attempted.value) && msg.length < 10) {
+    err.message =
+      fr ? 'Merci de détailler votre demande (10 caractères minimum).' : 'Please add more detail (minimum 10 characters).'
+  }
+
+  return err
+})
+
+const labels = computed(() =>
+  isFrLang()
+    ? {
+        name: 'Votre nom',
+        email: 'E-mail',
+        phone: 'Téléphone',
+        subject: 'Sujet',
+        message: 'Votre message',
+        submit: 'Envoyer'
+      }
+    : {
+        name: 'Your name',
+        email: 'Email',
+        phone: 'Phone',
+        subject: 'Subject',
+        message: 'Your message',
+        submit: 'Send message'
+      }
+)
+
+const pages = useSiteStaticPagesStore()
+
+onMounted(() => {
+  pages.fetchPublic().catch(() => {})
+})
+
+const payload = computed(() => pages.contactPayload as Record<string, any>)
+
+function loc(obj?: { fr?: string | null; en?: string | null }): string {
+  if (!obj) return ''
+  const useFr = String(locale.value || '').startsWith('fr')
+  return String(useFr ? (obj.fr ?? obj.en) : (obj.en ?? obj.fr) ?? '').trim()
+}
+
+const heroTitle = computed(() => loc(payload.value.hero?.title) || (locale.value.startsWith('fr') ? 'Contact' : 'Contact Us'))
+const heroSubtitle = computed(() => loc(payload.value.hero?.subtitle))
+
+const heroStyle = computed(() => {
+  const path = payload.value.hero?.background_path
+  const u = path ? resolveStorageAssetUrl(String(path)) : ''
+  const url = u || fallbackBg
+  return { backgroundImage: `url(${url})` }
+})
+
+const displayCards = computed(() => {
+  const raw = Array.isArray(payload.value.cards) ? payload.value.cards : []
+  return raw.map((c: any) => ({
+    icon: String(c?.icon || 'fa-solid fa-circle'),
+    title: loc(c?.title),
+    body: loc(c?.body)
+  }))
+})
+
+const formTitle = computed(() => loc(payload.value.form_block?.title) || 'Drop Us a Line')
+const formIntro = computed(() => loc(payload.value.form_block?.intro))
+
+const mapUrl = computed(() => String(payload.value.map_embed_url || '').trim())
+
+async function submitForm() {
+  attempted.value = true
+  blur.name = true
+  blur.email = true
+  blur.subject = true
+  blur.message = true
+
+  const errs = fieldErrors.value
+  if (errs.name || errs.email || errs.subject || errs.message) {
+    error(isFrLang() ? 'Veuillez corriger le formulaire.' : 'Please fix the form errors.')
+    return
+  }
+
+  const body = {
+    name: sanitizePlainText(form.name, LIMITS.name),
+    email: sanitizePlainText(form.email, LIMITS.email).toLowerCase(),
+    phone: sanitizePlainText(form.phone, LIMITS.phone) || null,
+    subject: sanitizePlainText(form.subject, LIMITS.subject),
+    message: sanitizePlainText(form.message, LIMITS.message)
+  }
+
+  sending.value = true
+  try {
+    const api = usePublicApi()
+    const res = await api.post<{ message?: string }>('/contact/lead', body)
+    if (!res.success) {
+      throw new Error(res.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))
+    }
+    success(String(res.message || (isFrLang() ? 'Message envoyé.' : 'Message sent.')))
+    resetForm()
+  } catch (e: any) {
+    error(e?.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))
+  } finally {
+    sending.value = false
+  }
+}
 </script>
+
+
+<style scoped>
+.whitespace-pre {
+  white-space: pre-line;
+}
+</style>

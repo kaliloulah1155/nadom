@@ -85,10 +85,11 @@
               <div class="row">
                 <div class="col-md-4">
                   <img
-                    :src="request.images[0] || 'https://via.placeholder.com/200'"
+                    :src="requestThumbnailUrl(request, 200)"
                     class="img-fluid rounded"
+                    alt=""
                   />
-                  <div v-if="request.images.length > 1" class="d-flex gap-2 mt-2">
+                  <div v-if="(request.images?.length ?? 0) > 1" class="d-flex gap-2 mt-2">
                     <img
                       v-for="(img, i) in request.images.slice(1, 4)"
                       :key="i"
@@ -97,6 +98,7 @@
                       width="50"
                       height="50"
                       style="object-fit: cover;"
+                      alt=""
                     />
                   </div>
                 </div>
@@ -394,7 +396,7 @@ const route = useRoute()
 const router = useRouter()
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatCurrency, formatDate, formatRequestStatus } = useFormatters()
+const { formatCurrency, formatDate, formatRequestStatus, requestThumbnailUrl } = useFormatters()
 const { success, error: notifyError } = useNotification()
 const { contactClientForRequest, generateLink, buildClientRequestMessage } = useWhatsApp()
 
@@ -549,15 +551,51 @@ const quotationPdfUrl = computed(() => {
   return `${base}/personal-shopping-requests/${request.value.id}/pdf`
 })
 
-const isConfirmed = computed(() => request.value?.status === 'confirmed')
+/** Numero de suivi : colonne demande ou colis lie */
+const requestTrackingNumber = computed(() => {
+  const r = request.value as any
+  if (!r) return null
+  return (
+    r.trackingNumber ||
+    r.tracking_number ||
+    r.shipment?.tracking_number ||
+    r.shipment?.trackingNumber ||
+    null
+  )
+})
 
-const whatsappOptions = computed(() => ({
-  quotationUrl: isConfirmed.value ? quotationPdfUrl.value : null,
-  totalLabel: request.value?.quotedPrice
-    ? formatCurrency(request.value.quotedPrice, requestCurrency.value)
-    : null,
-  confirmed: isConfirmed.value,
-}))
+/** Lien public vers la page suivi du site (meme origine que l'admin). */
+const clientTrackingPageUrl = computed(() => {
+  const tn = requestTrackingNumber.value
+  if (!tn) return null
+  if (typeof window === 'undefined' || !window.location?.origin) return null
+  return `${window.location.origin}/import-export/tracking?tracking=${encodeURIComponent(String(tn))}`
+})
+
+const isConfirmed = computed(() => {
+  const st = request.value?.status
+  return ['confirmed', 'preparing', 'shipped', 'delivered'].includes(st || '')
+})
+
+const whatsappOptions = computed(() => {
+  const r = request.value
+  if (!r) {
+    return {
+      quotationUrl: null as string | null,
+      totalLabel: null as string | null,
+      confirmed: false,
+      trackingNumber: null as string | null,
+      trackingPageUrl: null as string | null,
+    }
+  }
+  return {
+    quotationUrl: r.quotedPrice ? quotationPdfUrl.value : null,
+    totalLabel: r.quotedPrice ? formatCurrency(r.quotedPrice, requestCurrency.value) : null,
+    confirmed: isConfirmed.value,
+    trackingNumber: requestTrackingNumber.value,
+    trackingPageUrl: clientTrackingPageUrl.value,
+  }
+})
 
 const whatsappLinkForClient = computed(() => {
   if (!request.value) return '#'

@@ -60,7 +60,10 @@
           <p class="text-muted">{{ t('home.servicesSubtitle') }}</p>
         </div>
 
-        <div class="row g-4">
+        <p v-if="servicesEmptyFromApi" class="text-center text-muted mb-0">
+          Aucun service publié pour le moment.
+        </p>
+        <div v-else class="row g-4">
           <div v-for="service in services" :key="service.id" class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm hover-card">
               <div class="card-body p-4">
@@ -68,11 +71,11 @@
                   <i :class="service.icon" class="fs-1 text-primary"></i>
                 </div>
                 <h5 class="card-title">{{ service.name }}</h5>
-                <p class="card-text text-muted">{{ service.description }}</p>
+                <div class="card-text text-muted service-desc mb-3" v-html="service.descriptionHtml"></div>
                 <ul class="list-unstyled mb-0">
-                  <li v-for="(feature, idx) in service.features" :key="idx" class="mb-1">
+                  <li v-for="(featureHtml, idx) in service.featureBlocks" :key="idx" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    <small>{{ feature }}</small>
+                    <small class="service-feature-line d-inline-block" v-html="featureHtml"></small>
                   </li>
                 </ul>
               </div>
@@ -209,6 +212,7 @@
 import { useBlogStore } from '~/stores/blog'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useGlobalSettingsStore } from '~/stores/globalSettings'
+import { useHomeServicesStore } from '~/stores/homeServices'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
@@ -219,10 +223,23 @@ const { t, tm, rt, locale } = useI18n()
 const blogStore = useBlogStore()
 const psStore = usePersonalShoppingStore()
 const settingsStore = useGlobalSettingsStore()
+const homeServicesStore = useHomeServicesStore()
 const { truncate } = useFormatters()
 const config = useRuntimeConfig()
 
 const marqueeText = computed(() => settingsStore.getValue('home_marquee', ''))
+
+const escapePlain = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const plainToHtmlParagraph = (s: string) => (s ? `<p>${escapePlain(s)}</p>` : '')
+
+function stripInnerText(html: string) {
+  return String(html || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
 
 const SERVICE_KEYS = [
   { id: 'personal-shopping', icon: 'bi-bag-check', key: 'personalShopping' },
@@ -230,17 +247,50 @@ const SERVICE_KEYS = [
   { id: 'visa', icon: 'bi-passport', key: 'visa' },
   { id: 'guide', icon: 'bi-person-badge', key: 'guide' }
 ]
-const services = computed(() => SERVICE_KEYS.map(s => {
-  const featuresRaw = tm(`services.${s.key}.features`) as any
-  const features = Array.isArray(featuresRaw) ? featuresRaw.slice(0, 3).map((f: any) => rt(f)) : []
-  return {
-    id: s.id,
-    icon: s.icon,
-    name: t(`services.${s.key}.title`),
-    description: t(`services.${s.key}.description`),
-    features
+
+const servicesFromApi = computed(() => {
+  const rows = homeServicesStore.publicItems
+  const fr = locale.value === 'fr'
+  return rows.map(row => {
+    const title = fr ? row.title_fr : (row.title_en || row.title_fr)
+    const desc = fr ? row.description_fr : (row.description_en || row.description_fr)
+    const feats = fr ? row.features_fr : (row.features_en || row.features_fr)
+    const rawList = Array.isArray(feats) ? feats.filter((x): x is string => typeof x === 'string') : []
+    const featureBlocks = rawList.map(f => f || '').filter(f => stripInnerText(f))
+    return {
+      id: row.slug || row.id,
+      icon: row.icon || 'bi-grid',
+      name: title || '',
+      descriptionHtml: desc || '',
+      featureBlocks
+    }
+  })
+})
+
+const servicesEmptyFromApi = computed(
+  () =>
+    homeServicesStore.publicFetched &&
+    !homeServicesStore.publicFetchFailed &&
+    homeServicesStore.publicItems.length === 0
+)
+
+const services = computed(() => {
+  if (homeServicesStore.publicFetched && !homeServicesStore.publicFetchFailed) {
+    return servicesFromApi.value
   }
-}))
+
+  return SERVICE_KEYS.map(s => {
+    const featuresRaw = tm(`services.${s.key}.features`) as any
+    const plainFeatures = Array.isArray(featuresRaw) ? featuresRaw.slice(0, 3).map((f: any) => rt(f)) : []
+    return {
+      id: s.id,
+      icon: s.icon,
+      name: t(`services.${s.key}.title`),
+      descriptionHtml: plainToHtmlParagraph(t(`services.${s.key}.description`)),
+      featureBlocks: plainFeatures.map((p: string) => plainToHtmlParagraph(p))
+    }
+  })
+})
 
 const categories = computed(() =>
   psStore.categories.filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
@@ -267,6 +317,7 @@ await Promise.all([
   blogStore.fetchPosts({ page: 1, limit: 4, is_published: true }),
   psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' }),
   settingsStore.fetchAll(),
+  homeServicesStore.fetchPublic(),
 ])
 
 const recentPosts = computed(() => blogStore.getRecentPosts(4))
@@ -299,6 +350,16 @@ const recentPosts = computed(() => blogStore.getRecentPosts(4))
 .hover-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.service-desc :deep(p:last-child),
+.service-feature-line :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.service-desc :deep(p),
+.service-feature-line :deep(p) {
+  margin-bottom: 0.35rem;
 }
 
 .service-icon {

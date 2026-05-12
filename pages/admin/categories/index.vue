@@ -25,6 +25,7 @@
               <option value="TVS">TVS · Types de visa</option>
               <option value="BLG">BLG · Blog</option>
               <option value="FAQ">FAQ · Questions</option>
+              <option value="GDC">GDC · Guides & documentation</option>
             </select>
           </div>
           <div class="col-md-3">
@@ -259,6 +260,7 @@ const KNOWN_SLUGS: SlugOption[] = [
   { value: 'TVS', label: 'TVS · Types de visa' },
   { value: 'BLG', label: 'BLG · Blog' },
   { value: 'FAQ', label: 'FAQ · Questions' },
+  { value: 'GDC', label: 'GDC · Guides & documentation' },
 ]
 
 const slugOptions = computed<SlugOption[]>(() => {

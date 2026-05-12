@@ -1,3 +1,14 @@
+/** Options pour le message WhatsApp envoye par l'admin vers le client. */
+export interface ClientWhatsAppOptions {
+  quotationUrl?: string | null
+  totalLabel?: string | null
+  /** Demande confirmee / expediee — formulation adaptee */
+  confirmed?: boolean
+  trackingNumber?: string | null
+  /** URL publique page suivi (ex. site/import-export/tracking?tracking=...) */
+  trackingPageUrl?: string | null
+}
+
 export const useWhatsApp = () => {
   // Numéro WhatsApp par défaut (à configurer)
   const defaultNumber = useRuntimeConfig().public.whatsapp;
@@ -41,43 +52,56 @@ Merci de me contacter pour plus d'informations.`
     clientPhone: string | undefined | null,
     requestTitle: string,
     requestId: string,
-    options: { quotationUrl?: string | null; totalLabel?: string | null; confirmed?: boolean } = {},
+    options: ClientWhatsAppOptions = {},
   ) => {
     if (!clientPhone) return contactForRequest(requestTitle, requestId)
     const message = buildClientRequestMessage(requestTitle, requestId, options)
     return openChat(clientPhone, message)
   }
 
-  /** Construit le texte WhatsApp envoyé au client pour une demande (avec ou sans devis confirmé). */
+  /** Message admin → client : sans emoji (compatibilite encodage), avec PDF et suivi si disponibles. */
   const buildClientRequestMessage = (
     requestTitle: string,
     requestId: string,
-    options: { quotationUrl?: string | null; totalLabel?: string | null; confirmed?: boolean } = {},
+    options: ClientWhatsAppOptions = {},
   ): string => {
-    const lines: string[] = ['Bonjour, NADOM Support 👋', '']
+    const lines: string[] = []
 
-    if (options.confirmed) {
-      lines.push('Bonne nouvelle : votre demande Personal Shopping a été confirmée. ✅', '')
-      lines.push(`📦 Produit : ${requestTitle}`)
-      lines.push(`🔖 Référence : ${requestId}`)
-      if (options.totalLabel) {
-        lines.push(`💰 Total à régler : ${options.totalLabel}`)
-      }
-      if (options.quotationUrl) {
-        lines.push('', '📄 Devis détaillé (PDF) :')
-        lines.push(options.quotationUrl)
-      }
-      lines.push('', 'Nous restons disponibles pour toute question avant le règlement.')
-    } else {
-      lines.push('Concernant votre demande Personal Shopping :')
-      lines.push(`📦 Produit : ${requestTitle}`)
-      lines.push(`🔖 Référence : ${requestId}`)
-      if (options.quotationUrl) {
-        lines.push('', '📄 Votre devis :')
-        lines.push(options.quotationUrl)
-      }
-      lines.push('', 'Pourrions-nous échanger pour finaliser votre commande ?')
+    lines.push('Bonjour,')
+    lines.push('')
+    lines.push('Nous vous contactons depuis NADOM concernant votre demande Personal Shopping.')
+    lines.push('')
+    lines.push(`Produit / demande : ${requestTitle}`)
+    lines.push(`Reference : ${requestId}`)
+
+    if (options.totalLabel) {
+      lines.push(`Montant du devis : ${options.totalLabel}`)
     }
+
+    if (options.quotationUrl) {
+      lines.push('')
+      lines.push('Telechargement du devis (PDF) :')
+      lines.push(String(options.quotationUrl))
+    }
+
+    const tn = options.trackingNumber?.trim()
+    const tp = options.trackingPageUrl?.trim()
+    if (tp || tn) {
+      lines.push('')
+      lines.push('Suivi de colis :')
+      if (tp) lines.push(tp)
+      if (tn) lines.push(`Numero de suivi : ${tn}`)
+    }
+
+    lines.push('')
+    if (options.confirmed) {
+      lines.push('Pour toute question sur le reglement ou la livraison, repondez a ce message.')
+    } else {
+      lines.push('Pourrions-nous echanger pour finaliser votre commande ?')
+    }
+    lines.push('')
+    lines.push('Cordialement,')
+    lines.push('Equipe NADOM')
 
     return lines.join('\n')
   }

@@ -132,6 +132,9 @@
                     </div>
                     <div class="col-12">
                       <label class="form-label">Contenu (FR)</label>
+                      <p class="small text-muted mb-2">
+                        Collez une URL YouTube (page vidéo ou partager) ou utilisez le bouton « vidéo » de l'éditeur : la lecture s'affiche sur le site.
+                      </p>
                       <WysiwygEditor v-model="form.content_fr" height="200px" />
                     </div>
                   </div>
@@ -148,6 +151,9 @@
                     </div>
                     <div class="col-12">
                       <label class="form-label">Content (EN)</label>
+                      <p class="small text-muted mb-2">
+                        Paste a YouTube URL or use the editor video button; playback is embedded on the public article.
+                      </p>
                       <WysiwygEditor v-model="form.content_en" height="200px" />
                     </div>
                   </div>

@@ -24,6 +24,13 @@
             </div>
           </div>
           <div class="col-md-3">
+            <select v-model="filterKind" class="form-select" @change="fetchGuides(1)">
+              <option value="">Tous les types</option>
+              <option value="tour">Accompagnateurs</option>
+              <option value="documentation">Documentation</option>
+            </select>
+          </div>
+          <div class="col-md-3">
             <select v-model="filters.available" class="form-select" @change="fetchGuides(1)">
               <option :value="undefined">Tous</option>
               <option :value="true">Disponibles</option>
@@ -41,6 +48,7 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
+                <th>Type</th>
                 <th>Guide</th>
                 <th>Langues</th>
                 <th>villes</th>
@@ -52,11 +60,16 @@
             </thead>
             <tbody>
               <tr v-if="guides.length === 0">
-                <td colspan="7" class="text-center py-4 text-muted">
+                <td colspan="8" class="text-center py-4 text-muted">
                   Aucun guide configuré
                 </td>
               </tr>
               <tr v-for="guide in guides" :key="guide.id">
+                <td>
+                  <span class="badge" :class="guide.kind === 'documentation' ? 'bg-info text-dark' : 'bg-secondary'">
+                    {{ guide.kind === 'documentation' ? 'Documentation' : 'Accompagnateur' }}
+                  </span>
+                </td>
                 <td>
                   <div class="d-flex align-items-center">
                     <img :src="guide.avatar || 'https://placehold.co/50x50?text=G'" class="rounded-circle me-3" width="45" height="45" style="object-fit: cover;" />
@@ -124,46 +137,71 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label">Langues</label>
-                  <input v-model="form.languagesInput" type="text" class="form-control" placeholder="Francais, English, Chinois (séparés par virgules)" />
-                  <small class="text-muted">Entrez les langues séparées par des virgules</small>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Villes</label>
-                  <input v-model="form.citiesInput" type="text" class="form-control" placeholder="Abidjan,广州, Shenzhen" />
-                  <small class="text-muted">Entrez les villes séparées par des virgules</small>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label">Spécialisations (FR)</label>
-                  <input v-model="form.specializations_frInput" type="text" class="form-control" placeholder="Achats, Sourcing, Contrôle qualité" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Spécialisations (EN)</label>
-                  <input v-model="form.specializations_enInput" type="text" class="form-control" placeholder="Sourcing, Quality control, Procurement" />
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">Années d'expérience</label>
-                  <input v-model.number="form.experience" type="number" class="form-control" min="0" />
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Devise</label>
-                  <select v-model="form.currency" class="form-select">
-                    <option value="XOF">FCFA (XOF)</option>
-                    <option value="USD">Dollar (USD)</option>
-                    <option value="EUR">Euro (EUR)</option>
-                    <option value="CNY">Yuan (CNY)</option>
+                  <label class="form-label">Type</label>
+                  <select v-model="form.kind" class="form-select">
+                    <option value="tour">Accompagnateur (visites)</option>
+                    <option value="documentation">Documentation / fichiers</option>
                   </select>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label">Prix par jour ({{ form.currency }})</label>
-                  <input v-model.number="form.price_per_day" type="number" class="form-control" min="0" />
+                <div v-if="form.kind === 'documentation'" class="col-md-6">
+                  <label class="form-label">Catégorie GDC *</label>
+                  <select v-model.number="form.category_id" class="form-select">
+                    <option :value="0">— Choisir —</option>
+                    <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ c.label }}</option>
+                  </select>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label">Prix par heure ({{ form.currency }})</label>
-                  <input v-model.number="form.price_per_hour" type="number" class="form-control" min="0" />
+                <div v-if="form.kind === 'documentation'" class="col-12">
+                  <label class="form-label">URL du document (PDF ou lien)</label>
+                  <input v-model="form.document_url" type="url" class="form-control" placeholder="https://..." />
                 </div>
+                <div v-if="form.kind === 'documentation'" class="col-md-6">
+                  <label class="form-label">Langues (affichage carte)</label>
+                  <input v-model="form.languagesInput" type="text" class="form-control" placeholder="FR, EN" />
+                </div>
+
+                <template v-if="form.kind === 'tour'">
+                  <div class="col-md-6">
+                    <label class="form-label">Langues</label>
+                    <input v-model="form.languagesInput" type="text" class="form-control" placeholder="Francais, English, Chinois (séparés par virgules)" />
+                    <small class="text-muted">Entrez les langues séparées par des virgules</small>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Villes</label>
+                    <input v-model="form.citiesInput" type="text" class="form-control" placeholder="Abidjan,广州, Shenzhen" />
+                    <small class="text-muted">Entrez les villes séparées par des virgules</small>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Spécialisations (FR)</label>
+                    <input v-model="form.specializations_frInput" type="text" class="form-control" placeholder="Achats, Sourcing, Contrôle qualité" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Spécialisations (EN)</label>
+                    <input v-model="form.specializations_enInput" type="text" class="form-control" placeholder="Sourcing, Quality control, Procurement" />
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Années d'expérience</label>
+                    <input v-model.number="form.experience" type="number" class="form-control" min="0" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Devise</label>
+                    <select v-model="form.currency" class="form-select">
+                      <option value="XOF">FCFA (XOF)</option>
+                      <option value="USD">Dollar (USD)</option>
+                      <option value="EUR">Euro (EUR)</option>
+                      <option value="CNY">Yuan (CNY)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Prix par jour ({{ form.currency }})</label>
+                    <input v-model.number="form.price_per_day" type="number" class="form-control" min="0" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Prix par heure ({{ form.currency }})</label>
+                    <input v-model.number="form.price_per_hour" type="number" class="form-control" min="0" />
+                  </div>
+                </template>
 
                 <div class="col-12">
                   <label class="form-label">Avatar URL</label>
@@ -209,6 +247,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useGuidesStore } from '~/stores/guides'
 import { useNotification } from '~/composables/useNotification'
+import { useApi } from '~/composables/useApi'
 
 definePageMeta({
   layout: 'admin'
@@ -216,6 +255,7 @@ definePageMeta({
 
 const guidesStore = useGuidesStore()
 const { success, error } = useNotification()
+const api = useApi()
 
 const guides = computed(() => guidesStore.guides)
 
@@ -224,11 +264,17 @@ const filters = reactive({
   available: undefined as boolean | undefined
 })
 
+const filterKind = ref('')
+const gdcCategories = ref<any[]>([])
+
 const editingGuide = ref<any>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
 const form = reactive({
+  kind: 'tour' as 'tour' | 'documentation',
+  category_id: 0,
+  document_url: '',
   name: '',
   languagesInput: '',
   specializations_frInput: '',
@@ -244,11 +290,21 @@ const form = reactive({
   available: true
 })
 
+const loadGdcCategories = async () => {
+  const res = await api.get<any[]>(`/category/slug/GDC`)
+  if (res.success && Array.isArray(res.data)) {
+    gdcCategories.value = [...res.data].sort(
+      (a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0)
+    )
+  }
+}
+
 const fetchGuides = async (page?: number, limit?: number) => {
   await guidesStore.fetchGuides({
     page: page ?? guidesStore.guidesMeta.currentPage,
     limit: limit ?? guidesStore.guidesMeta.perPage,
-    available: filters.available
+    available: filters.available,
+    kind: filterKind.value || undefined
   })
 }
 
@@ -259,6 +315,7 @@ const debouncedFetch = () => {
 }
 
 onMounted(async () => {
+  await loadGdcCategories()
   await fetchGuides(1)
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
@@ -268,6 +325,9 @@ onMounted(async () => {
 const openModal = (guide?: any) => {
   if (guide) {
     editingGuide.value = guide
+    form.kind = guide.kind === 'documentation' ? 'documentation' : 'tour'
+    form.category_id = guide.category_id || 0
+    form.document_url = guide.document_url || ''
     form.name = guide.name || ''
     form.languagesInput = guide.languages?.join(', ') || ''
     form.specializations_frInput = guide.specializations_fr?.join(', ') || ''
@@ -283,6 +343,9 @@ const openModal = (guide?: any) => {
     form.available = guide.available ?? true
   } else {
     editingGuide.value = null
+    form.kind = 'tour'
+    form.category_id = 0
+    form.document_url = ''
     form.name = ''
     form.languagesInput = ''
     form.specializations_frInput = ''
@@ -305,7 +368,15 @@ const parseArrayInput = (input: string): string[] => {
 }
 
 const saveGuide = async () => {
-  const data = {
+  if (form.kind === 'documentation' && (!form.category_id || form.category_id === 0)) {
+    error('Choisissez une catégorie GDC pour une fiche documentation.')
+    return
+  }
+
+  const data: Record<string, any> = {
+    kind: form.kind,
+    category_id: form.kind === 'documentation' ? form.category_id : null,
+    document_url: form.kind === 'documentation' ? form.document_url || null : null,
     name: form.name,
     languages: parseArrayInput(form.languagesInput),
     specializations_fr: parseArrayInput(form.specializations_frInput),
@@ -336,7 +407,7 @@ const saveGuide = async () => {
   }
 }
 
-const deleteGuide = async (id: number) => {
+const deleteGuide = async (id: string) => {
   if (confirm('Supprimer ce guide ?')) {
     await guidesStore.deleteGuide(id)
     success('Guide supprimé')

@@ -34,6 +34,15 @@
       </div>
       <div class="d-flex gap-2">
         <button
+          class="btn btn-outline-dark btn-md"
+          :disabled="downloadingLabel"
+          title="Étiquette colis (100×50 mm environ), QR vers le suivi"
+          @click="downloadShipmentLabel"
+        >
+          <span v-if="downloadingLabel" class="spinner-border spinner-border-sm me-1"></span>
+          <i v-else class="bi bi-upc-scan me-1"></i>Étiquette colis
+        </button>
+        <button
           class="btn btn-outline-secondary btn-md"
           :disabled="downloadingPdf"
           @click="downloadShipmentPdf"
@@ -332,6 +341,7 @@ const loading = ref(true)
 const showUpdateModal = ref(false)
 const updating = ref(false)
 const downloadingPdf = ref(false)
+const downloadingLabel = ref(false)
 
 const editingDelivery = ref(false)
 const deliveryDateInput = ref('')
@@ -515,6 +525,29 @@ const openUpdateModal = () => {
 onMounted(async () => {
   await fetchShipment()
 })
+
+const downloadShipmentLabel = async () => {
+  const s = shipment.value as any
+  if (!s) return
+  downloadingLabel.value = true
+  try {
+    const config = useRuntimeConfig()
+    const token = getToken()
+    const url = `${config.public.apiBase}/shipments/${s.id}/label`
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/pdf' } })
+    if (!res.ok) throw new Error('Erreur étiquette')
+    const blob = await res.blob()
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `etiquette-${s.tracking_number}.pdf`
+    link.click()
+    URL.revokeObjectURL(link.href)
+  } catch {
+    error("Impossible de générer l'étiquette")
+  } finally {
+    downloadingLabel.value = false
+  }
+}
 
 const downloadShipmentPdf = async () => {
   const s = shipment.value as any

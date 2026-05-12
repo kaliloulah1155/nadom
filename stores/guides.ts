@@ -2,8 +2,12 @@ import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
 
 export interface Guide {
-  id: number
+  id: string
   name: string
+  kind?: 'tour' | 'documentation'
+  category_id?: number | null
+  category?: { id: number; label: string | null; code: string | null; slug: string | null; icon: string | null }
+  document_url?: string | null
   languages: string[]
   specializations_fr: string[]
   specializations_en: string[]
@@ -14,6 +18,7 @@ export interface Guide {
   avatar: string | null
   price_per_day: number | null
   price_per_hour: number | null
+  currency?: string | null
   description_fr: string | null
   description_en: string | null
   available: boolean
@@ -22,8 +27,9 @@ export interface Guide {
 }
 
 export interface GuideBooking {
-  id: number
-  guide_id: number
+  id: string
+  guide_id: string
+  documentation_category_id?: number | null
   user_id: number
   start_date: string
   end_date: string
@@ -120,12 +126,21 @@ export const useGuidesStore = defineStore('guides', {
       city?: string
       language?: string
       available?: boolean
+      kind?: string
+      category_id?: number
     } = {}) {
       this.loading = true
       this.error = null
       try {
         const api = useApi()
-        const hasPaging = params.page !== undefined || params.limit !== undefined || params.city || params.language || params.available !== undefined
+        const hasPaging =
+          params.page !== undefined ||
+          params.limit !== undefined ||
+          params.city ||
+          params.language ||
+          params.available !== undefined ||
+          params.kind ||
+          params.category_id !== undefined
         if (hasPaging) {
           const page = params.page ?? this.guidesMeta.currentPage
           const limit = params.limit ?? this.guidesMeta.perPage
@@ -133,6 +148,8 @@ export const useGuidesStore = defineStore('guides', {
           if (params.city) body.city = params.city
           if (params.language) body.language = params.language
           if (params.available !== undefined) body.available = params.available
+          if (params.kind) body.kind = params.kind
+          if (params.category_id !== undefined) body.category_id = params.category_id
           const res = await api.post<any>('/guides/all', body, { query: { page, limit } })
           if (res.success) {
             applyPaginator(res, this.guides, this.guidesMeta)
@@ -210,7 +227,7 @@ export const useGuidesStore = defineStore('guides', {
       throw new Error(res.message)
     },
 
-    async updateGuide(id: number, guideData: Partial<Guide>) {
+    async updateGuide(id: string, guideData: Partial<Guide>) {
       const api = useApi()
       const res = await api.put<Guide>(`/guides/${id}`, guideData)
       if (res.success && res.data) {
@@ -221,7 +238,7 @@ export const useGuidesStore = defineStore('guides', {
       throw new Error(res.message)
     },
 
-    async deleteGuide(id: number) {
+    async deleteGuide(id: string) {
       const api = useApi()
       const res = await api.delete(`/guides/${id}`)
       if (res.success) {

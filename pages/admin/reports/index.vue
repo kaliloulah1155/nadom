@@ -39,7 +39,7 @@
               </option>
             </select>
             <small v-if="countryFilter" class="text-muted">
-              Volume d’affaires des expéditions livrées vers <strong>{{ countryFilter }}</strong>, exprimé en {{ revenueCurrency }}.
+              Volume d'affaires des expéditions livrées vers <strong>{{ countryFilter }}</strong>, exprimé en {{ revenueCurrency }}.
             </small>
             <small v-else class="text-muted">
               Filtre désactivé — total mondial agrégé en FCFA (les montants multi-devises sont sommés bruts).

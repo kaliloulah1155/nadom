@@ -2,9 +2,9 @@
   <div>
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
       <div class="flex-grow-1" style="min-width: 0;">
-        <h4 class="mb-1">Journal d’activité</h4>
+        <h4 class="mb-1">Journal d'activité</h4>
         <p class="text-muted mb-0">
-          Historique de toutes les actions menées dans le back-office : qui a fait quoi, depuis quelle adresse IP et avec quel navigateur. Utile pour la sécurité et l’audit.
+          Historique de toutes les actions menées dans le back-office : qui a fait quoi, depuis quelle adresse IP et avec quel navigateur. Utile pour la sécurité et l'audit.
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
@@ -27,7 +27,7 @@
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Type d’entité</label>
+            <label class="form-label small text-muted mb-1">Type d'entité</label>
             <input
               v-model="filters.entity_type"
               type="text"
@@ -42,7 +42,7 @@
             <input v-model="filters.from" type="date" class="form-control form-control-sm" :disabled="store.loading" @change="reload(1)" />
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Jusqu’à</label>
+            <label class="form-label small text-muted mb-1">Jusqu'à</label>
             <input v-model="filters.to" type="date" class="form-control form-control-sm" :disabled="store.loading" @change="reload(1)" />
           </div>
           <div class="col-md-2">
@@ -127,7 +127,7 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Détail de l’activité</h5>
+            <h5 class="modal-title">Détail de l'activité</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
           </div>
           <div v-if="selected" class="modal-body">

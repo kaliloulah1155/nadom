@@ -114,11 +114,12 @@
                       <td>
                         <div class="d-flex align-items-center">
                           <img
-                            :src="request.images[0] || 'https://via.placeholder.com/40'"
+                            :src="requestThumbnailUrl(request, 40)"
                             class="rounded me-2"
                             width="40"
                             height="40"
                             style="object-fit: cover;"
+                            alt=""
                           />
                           <span class="fw-medium">{{ truncate(request.title, 30) }}</span>
                         </div>
@@ -223,7 +224,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate } = useFormatters()
+const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl } = useFormatters()
 
 // Auth check
 onMounted(async () => {

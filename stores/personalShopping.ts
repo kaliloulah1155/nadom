@@ -135,14 +135,19 @@ function toNum(v: any): number {
 }
 
 function normalizeItem(item: any): RequestItem {
-  const prod = item.product ?? {}
+  const prod = item.product ?? item.Product ?? {}
+  const fromProd =
+    (typeof prod.image === 'string' && prod.image.trim()) ||
+    (typeof prod.image_url === 'string' && prod.image_url.trim()) ||
+    (Array.isArray(prod.images) && typeof prod.images[0] === 'string' ? prod.images[0].trim() : '')
+  const fromItem = typeof item.image === 'string' ? item.image.trim() : ''
   return {
     productId: item.productId ?? item.product_id ?? prod.id,
-    name_fr:   item.name_fr  ?? prod.name_fr  ?? item.name ?? '',
-    name_en:   item.name_en  ?? prod.name_en  ?? item.name ?? '',
-    price:     toNum(item.price ?? prod.price),
-    quantity:  item.quantity ?? 1,
-    image:     item.image    ?? prod.image    ?? '',
+    name_fr: item.name_fr ?? prod.name_fr ?? item.name ?? '',
+    name_en: item.name_en ?? prod.name_en ?? item.name ?? '',
+    price: toNum(item.price ?? prod.price),
+    quantity: item.quantity ?? 1,
+    image: fromItem || fromProd || '',
   }
 }
 
@@ -154,7 +159,6 @@ function normalizeRequest(r: any) {
     contactNumber: r.contactNumber ?? r.contact_number,
     contactFullname: r.contactFullname ?? r.contact_fullname,
     contactEmail: r.contactEmail ?? r.contact_email,
-    // budget_estimated arrive en string ("10200.00") via le cast decimal:2 Laravel
     budgetEstimated: toNum(r.budget_estimated ?? r.budgetEstimated),
     quotedPrice: r.quoted_price != null || r.quotedPrice != null
       ? toNum(r.quoted_price ?? r.quotedPrice)
@@ -170,6 +174,8 @@ function normalizeRequest(r: any) {
         }
       : undefined,
     items: Array.isArray(r.items) ? r.items.map(normalizeItem) : (r.items ?? []),
+    /** Laravel peut renvoyer null ; éviter TypeError sur `images[0]` dans les vues */
+    images: Array.isArray(r.images) ? r.images : [],
     trackingNumber: r.trackingNumber ?? r.tracking_number,
     shipmentId: r.shipmentId ?? r.shipment_id,
     whatsappMessages: r.whatsappMessages ?? r.whatsapp_messages ?? 0,

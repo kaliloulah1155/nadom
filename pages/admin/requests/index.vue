@@ -87,11 +87,12 @@
                 <td>
                   <div class="d-flex align-items-center">
                     <img
-                      :src="(request.items && request.items[0]?.image) || request.images?.[0] || 'https://via.placeholder.com/40'"
+                      :src="requestThumbnailUrl(request, 40)"
                       class="rounded me-2"
                       width="40"
                       height="40"
                       style="object-fit: cover;"
+                      alt=""
                     />
                     <div>
                       <div class="fw-medium">
@@ -244,7 +245,7 @@ definePageMeta({
 
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatCurrency, formatDateShort, truncate } = useFormatters()
+const { formatCurrency, formatDateShort, truncate, requestThumbnailUrl } = useFormatters()
 const { success, error } = useNotification()
 
 const categories = computed(() => psStore.categories)

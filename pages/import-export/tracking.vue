@@ -268,7 +268,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 
@@ -304,14 +304,17 @@ const timelineEvents = computed(() => {
   })
 })
 
-// Check for query param
-onMounted(async () => {
-  const tracking = route.query.tracking as string
-  if (tracking) {
-    trackingNumber.value = tracking
+watch(
+  () => route.query.tracking,
+  async (q) => {
+    const raw = typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
+    const v = raw ? String(raw).trim() : ''
+    if (!v) return
+    trackingNumber.value = v
     await searchTracking()
-  }
-})
+  },
+  { immediate: true }
+)
 
 const searchTracking = async () => {
   if (!trackingNumber.value.trim()) return

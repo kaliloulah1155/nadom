@@ -61,7 +61,7 @@
                   {{ post[`excerpt_${locale}`] || post.excerpt_fr }}
                 </p>
 
-                <div v-html="post[`content_${locale}`] || post.content_fr || ''"></div>
+                <div v-html="enrichedBody"></div>
               </article>
 
               <!-- Tags -->
@@ -124,9 +124,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useBlogStore } from '~/stores/blog'
 import { useFormatters } from '~/composables/useFormatters'
+import { enrichBlogBodyHtml } from '~/composables/useBlogBodyHtml'
 
 definePageMeta({
   layout: 'default'
@@ -140,6 +141,13 @@ const config = useRuntimeConfig()
 
 const loading = ref(true)
 const post = ref<any>(null)
+
+const enrichedBody = computed(() => {
+  const p = post.value
+  if (!p) return ''
+  const raw = p[`content_${locale.value}`] || p.content_fr || ''
+  return enrichBlogBodyHtml(String(raw))
+})
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/1200x600?text=NADOM'
@@ -231,5 +239,42 @@ onMounted(async () => {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
+}
+
+.blog-content :deep(.blog-video-wrapper) {
+  display: block;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 1.5rem 0;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #0f172a;
+}
+
+.blog-content :deep(.blog-video-wrapper .blog-video-iframe) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0.5rem;
+}
+
+/* Vidéo insérée via l'éditeur (Quill) ou iframe YouTube directe */
+.blog-content :deep(iframe.ql-video),
+.blog-content :deep(iframe[src*="youtube.com"]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 180px;
+  max-height: 480px;
+  border: 0;
+  border-radius: 0.5rem;
+  display: block;
+  margin: 1.5rem auto;
 }
 </style>

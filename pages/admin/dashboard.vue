@@ -107,10 +107,11 @@
                     <td class="ps-3">
                       <div class="d-flex align-items-center gap-2">
                         <img
-                          :src="request.images?.[0] || 'https://via.placeholder.com/38'"
+                          :src="requestThumbnailUrl(request, 38)"
                           class="rounded flex-shrink-0"
                           width="38" height="38"
                           style="object-fit: cover;"
+                          alt=""
                         />
                         <div>
                           <div class="fw-medium small">{{ truncate(request.title, 26) }}</div>
@@ -265,7 +266,7 @@ definePageMeta({
 
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatCurrency, formatDateShort, formatRequestStatus, formatShipmentStatus, truncate } = useFormatters()
+const { formatCurrency, formatDateShort, formatRequestStatus, formatShipmentStatus, truncate, requestThumbnailUrl } = useFormatters()
 
 onMounted(async () => {
   await Promise.all([psStore.fetchRequests(), shippingStore.fetchShipments()])

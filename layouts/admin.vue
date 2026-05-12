@@ -11,7 +11,7 @@
 
       <nav class="sidebar-nav">
         <ul class="nav flex-column">
-          <!-- Dashboard -->
+          <!-- Vue d'ensemble -->
           <li v-can="['view', 'dashboard']" class="nav-item">
             <NuxtLink to="/admin/dashboard" class="nav-link" :class="{ 'active': isActive('/admin/dashboard') }">
               <i class="bi bi-speedometer2"></i>
@@ -19,154 +19,64 @@
             </NuxtLink>
           </li>
 
-          <!-- Demandes -->
-          <li v-can="['list', 'personal-shopping-requests']" class="nav-item">
-            <NuxtLink to="/admin/requests" class="nav-link" :class="{ 'active': isActive('/admin/requests') }">
-              <i class="bi bi-bag-check"></i>
-              <span v-if="showSidebarText">Demandes</span>
-              <span v-if="showSidebarText && pendingRequestsCount > 0" class="badge bg-danger ms-auto">
-                {{ pendingRequestsCount }}
-              </span>
-            </NuxtLink>
-          </li>
-
-          <!-- Expeditions -->
-          <li v-can="['list', 'shipments']" class="nav-item">
-            <NuxtLink to="/admin/shipments" class="nav-link" :class="{ 'active': isActive('/admin/shipments') }">
-              <i class="bi bi-box-seam"></i>
-              <span v-if="showSidebarText">Expeditions</span>
-            </NuxtLink>
-          </li>
-
-          <li v-can="['list', 'destinations']" class="nav-item">
-            <NuxtLink to="/admin/destinations" class="nav-link" :class="{ 'active': isActive('/admin/destinations') }">
-              <i class="bi bi-geo-alt"></i>
-              <span v-if="showSidebarText">Destinations fret</span>
-            </NuxtLink>
-          </li>
-
-          <li v-can="['list', 'shipping-modes']" class="nav-item">
-            <NuxtLink to="/admin/shipping/modes" class="nav-link" :class="{ 'active': isActive('/admin/shipping/modes') }">
-              <i class="bi bi-truck"></i>
-              <span v-if="showSidebarText">Tarifs au kg</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Utilisateurs -->
-          <li v-can="['list', 'users']" class="nav-item">
-            <div class="nav-link d-flex align-items-center justify-content-between" @click="toggleUsersMenu" :class="{ 'active': isActive('/admin/users') }" style="cursor: pointer;">
+          <!-- Fret & logistique -->
+          <li class="nav-item">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="toggleFretMenu"
+              :class="{ 'active': isFretSectionActive }"
+              style="cursor: pointer;"
+            >
               <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-people"></i>
-                <span v-if="showSidebarText">Utilisateurs</span>
+                <i class="bi bi-box-seam"></i>
+                <span v-if="showSidebarText">Fret &amp; logistique</span>
               </div>
-              <i v-if="showSidebarText" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+              <i v-if="showSidebarText" class="bi" :class="fretMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
-            <ul v-if="usersMenuOpen && showSidebarText" class="nav flex-column ms-4 small-nav">
-              <li class="nav-item">
-                <NuxtLink to="/admin/users" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users' }">
-                  <i class="bi bi-list-ul"></i>
-                  <span>Liste</span>
+            <ul v-if="fretMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
+              <li v-can="['list', 'personal-shopping-requests']" class="nav-item">
+                <NuxtLink to="/admin/requests" class="nav-link py-1" :class="{ 'active': isActive('/admin/requests') }">
+                  <i class="bi bi-bag-check"></i>
+                  <span>Demandes</span>
+                  <span v-if="pendingRequestsCount > 0" class="badge bg-danger ms-auto">{{ pendingRequestsCount }}</span>
                 </NuxtLink>
               </li>
-              <li v-can="['list', 'roles']" class="nav-item">
-                <NuxtLink to="/admin/users/roles" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users/roles' }">
-                  <i class="bi bi-shield-lock"></i>
-                  <span>Rôles & Profils</span>
+              <li v-can="['list', 'shipments']" class="nav-item">
+                <NuxtLink to="/admin/shipments" class="nav-link py-1" :class="{ 'active': isActive('/admin/shipments') }">
+                  <i class="bi bi-truck"></i>
+                  <span>Expéditions</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'destinations']" class="nav-item">
+                <NuxtLink to="/admin/destinations" class="nav-link py-1" :class="{ 'active': isActive('/admin/destinations') }">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>Destinations fret</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'shipping-modes']" class="nav-item">
+                <NuxtLink to="/admin/shipping/modes" class="nav-link py-1" :class="{ 'active': isActive('/admin/shipping/modes') }">
+                  <i class="bi bi-speedometer"></i>
+                  <span>Tarifs au kg</span>
                 </NuxtLink>
               </li>
             </ul>
           </li>
 
-          <li class="nav-divider"></li>
-
-          <!-- Guides -->
-          <li v-can="['list', 'guides']" class="nav-item">
-            <NuxtLink to="/admin/guides" class="nav-link" :class="{ 'active': isActive('/admin/guides') }">
-              <i class="bi bi-person-badge"></i>
-              <span v-if="showSidebarText">Guides</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Visas -->
-          <li v-can="['list', 'visa-applications']" class="nav-item">
-            <NuxtLink to="/admin/visas" class="nav-link" :class="{ 'active': isActive('/admin/visas') }">
-              <i class="bi bi-passport"></i>
-              <span v-if="showSidebarText">Visas</span>
-            </NuxtLink>
-          </li>
-
-          <li class="nav-divider"></li>
-
-          <!-- Tarifs -->
-          <li v-can="['list', 'visa-types']" class="nav-item">
-            <NuxtLink to="/admin/pricing" class="nav-link" :class="{ 'active': isActive('/admin/pricing') }">
-              <i class="bi bi-currency-exchange"></i>
-              <span v-if="showSidebarText">Tarifs</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Blog -->
-          <li v-can="['list', 'blog-posts']" class="nav-item">
-            <NuxtLink to="/admin/blog" class="nav-link" :class="{ 'active': isActive('/admin/blog') }">
-              <i class="bi bi-journal-text"></i>
-              <span v-if="showSidebarText">Blog</span>
-            </NuxtLink>
-          </li>
-
-          <!-- FAQ -->
-          <li v-can="['list', 'faq']" class="nav-item">
-            <NuxtLink to="/admin/faq" class="nav-link" :class="{ 'active': isActive('/admin/faq') }">
-              <i class="bi bi-question-circle"></i>
-              <span v-if="showSidebarText">FAQ</span>
-            </NuxtLink>
-          </li>
-
-          <li class="nav-divider"></li>
-
-          <!-- Support -->
+          <!-- Catalogue boutique -->
           <li class="nav-item">
-            <NuxtLink to="/admin/support" class="nav-link" :class="{ 'active': isActive('/admin/support') }">
-              <i class="bi bi-headset"></i>
-              <span v-if="showSidebarText">Support</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Rapports -->
-          <li v-can="['list', 'reports']" class="nav-item">
-            <NuxtLink to="/admin/reports" class="nav-link" :class="{ 'active': isActive('/admin/reports') }">
-              <i class="bi bi-bar-chart"></i>
-              <span v-if="showSidebarText">Rapports</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Journal d'activité -->
-          <li v-can="['list', 'activity-logs']" class="nav-item">
-            <NuxtLink to="/admin/activity-logs" class="nav-link" :class="{ 'active': isActive('/admin/activity-logs') }">
-              <i class="bi bi-journal-check"></i>
-              <span v-if="showSidebarText">Journal d’activité</span>
-            </NuxtLink>
-          </li>
-
-          <!-- Paramètres -->
-          <li v-can="['list', 'global-settings']" class="nav-item">
-            <NuxtLink to="/admin/settings" class="nav-link" :class="{ 'active': isActive('/admin/settings') }">
-              <i class="bi bi-gear"></i>
-              <span v-if="showSidebarText">Paramètres</span>
-            </NuxtLink>
-          </li>
-
-          <li class="nav-divider"></li>
-
-          <!-- Personal Shopping Admin -->
-          <li class="nav-item">
-            <div class="nav-link d-flex align-items-center justify-content-between" @click="togglePSMenu" :class="{ 'active': isActive('/admin/personal-shopping') }" style="cursor: pointer;">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="togglePSMenu"
+              :class="{ 'active': isCatalogSectionActive }"
+              style="cursor: pointer;"
+            >
               <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-cart4"></i>
-                <span v-if="showSidebarText">Personal Shopping</span>
+                <i class="bi bi-shop"></i>
+                <span v-if="showSidebarText">Catalogue boutique</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
-            <ul v-if="psMenuOpen && showSidebarText" class="nav flex-column ms-4 small-nav">
+            <ul v-if="psMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
               <li v-can="['list', 'categories']" class="nav-item">
                 <NuxtLink to="/admin/categories" class="nav-link py-1" :class="{ 'active': isActive('/admin/categories') }">
                   <i class="bi bi-tags"></i>
@@ -177,6 +87,186 @@
                 <NuxtLink to="/admin/products" class="nav-link py-1" :class="{ 'active': isActive('/admin/products') }">
                   <i class="bi bi-grid-3x3-gap"></i>
                   <span>Produits</span>
+                </NuxtLink>
+              </li>
+              <li class="nav-item">
+                <NuxtLink to="/admin/personal-shopping" class="nav-link py-1" :class="{ 'active': isActive('/admin/personal-shopping') }">
+                  <i class="bi bi-cart4"></i>
+                  <span>Personal Shopping</span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Voyages & services -->
+          <li class="nav-item">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="toggleVoyagesMenu"
+              :class="{ 'active': isVoyagesSectionActive }"
+              style="cursor: pointer;"
+            >
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-airplane"></i>
+                <span v-if="showSidebarText">Voyages &amp; services</span>
+              </div>
+              <i v-if="showSidebarText" class="bi" :class="voyagesMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="voyagesMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
+              <li v-can="['list', 'guides']" class="nav-item">
+                <NuxtLink to="/admin/guides" class="nav-link py-1" :class="{ 'active': isActive('/admin/guides') }">
+                  <i class="bi bi-person-badge"></i>
+                  <span>Guides</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'guide-accompaniment-services']" class="nav-item">
+                <NuxtLink to="/admin/guide-accompaniment-services" class="nav-link py-1" :class="{ 'active': isActive('/admin/guide-accompaniment-services') }">
+                  <i class="bi bi-briefcase"></i>
+                  <span>Accompagnement</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'visa-applications']" class="nav-item">
+                <NuxtLink to="/admin/visas" class="nav-link py-1" :class="{ 'active': isActive('/admin/visas') }">
+                  <i class="bi bi-passport"></i>
+                  <span>Visas</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'visa-types']" class="nav-item">
+                <NuxtLink to="/admin/pricing" class="nav-link py-1" :class="{ 'active': isActive('/admin/pricing') }">
+                  <i class="bi bi-currency-exchange"></i>
+                  <span>Grilles &amp; tarifs</span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Contenu du site -->
+          <li class="nav-item">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="toggleContenuMenu"
+              :class="{ 'active': isContenuSectionActive }"
+              style="cursor: pointer;"
+            >
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-file-earmark-text"></i>
+                <span v-if="showSidebarText">Contenu du site</span>
+              </div>
+              <i v-if="showSidebarText" class="bi" :class="contenuMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="contenuMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
+              <li v-can="['list', 'blog-posts']" class="nav-item">
+                <NuxtLink to="/admin/blog" class="nav-link py-1" :class="{ 'active': isActive('/admin/blog') }">
+                  <i class="bi bi-journal-text"></i>
+                  <span>Blog</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'faq']" class="nav-item">
+                <NuxtLink to="/admin/faq" class="nav-link py-1" :class="{ 'active': isActive('/admin/faq') }">
+                  <i class="bi bi-question-circle"></i>
+                  <span>FAQ</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'home-services']" class="nav-item">
+                <NuxtLink to="/admin/home-services" class="nav-link py-1" :class="{ 'active': isActive('/admin/home-services') }">
+                  <i class="bi bi-grid"></i>
+                  <span>Bloc accueil</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'site-static-pages']" class="nav-item">
+                <NuxtLink to="/admin/site-pages" class="nav-link py-1" :class="{ 'active': isActive('/admin/site-pages') }">
+                  <i class="bi bi-file-earmark-richtext"></i>
+                  <span>À propos &amp; Contact</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'site-footer']" class="nav-item">
+                <NuxtLink to="/admin/footer" class="nav-link py-1" :class="{ 'active': isActive('/admin/footer') }">
+                  <i class="bi bi-layout-text-window-reverse"></i>
+                  <span>Pied de page</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'contact-leads']" class="nav-item">
+                <NuxtLink to="/admin/contact-leads" class="nav-link py-1" :class="{ 'active': isActive('/admin/contact-leads') }">
+                  <i class="bi bi-mailbox"></i>
+                  <span>Demandes contact</span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Support & système -->
+          <li class="nav-item">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="toggleSupportMenu"
+              :class="{ 'active': isSupportSectionActive }"
+              style="cursor: pointer;"
+            >
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-headset"></i>
+                <span v-if="showSidebarText">Support &amp; système</span>
+              </div>
+              <i v-if="showSidebarText" class="bi" :class="supportMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="supportMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
+              <li class="nav-item">
+                <NuxtLink to="/admin/support" class="nav-link py-1" :class="{ 'active': isActive('/admin/support') }">
+                  <i class="bi bi-chat-dots"></i>
+                  <span>Support</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'reports']" class="nav-item">
+                <NuxtLink to="/admin/reports" class="nav-link py-1" :class="{ 'active': isActive('/admin/reports') }">
+                  <i class="bi bi-bar-chart"></i>
+                  <span>Rapports</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'global-settings']" class="nav-item">
+                <NuxtLink to="/admin/settings" class="nav-link py-1" :class="{ 'active': isActive('/admin/settings') }">
+                  <i class="bi bi-gear"></i>
+                  <span>Paramètres</span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Équipe & accès -->
+          <li class="nav-item">
+            <div
+              class="nav-link d-flex align-items-center justify-content-between"
+              @click="toggleUsersMenu"
+              :class="{ 'active': isUsersSectionActive }"
+              style="cursor: pointer;"
+            >
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-people"></i>
+                <span v-if="showSidebarText">Équipe &amp; accès</span>
+              </div>
+              <i v-if="showSidebarText" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
+            </div>
+            <ul v-if="usersMenuOpen && showSidebarText" class="nav flex-column ms-3 small-nav">
+              <li v-can="['list', 'users']" class="nav-item">
+                <NuxtLink to="/admin/users" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users' }">
+                  <i class="bi bi-list-ul"></i>
+                  <span>Utilisateurs</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'countries']" class="nav-item">
+                <NuxtLink to="/admin/countries" class="nav-link py-1" :class="{ 'active': isActive('/admin/countries') }">
+                  <i class="bi bi-globe"></i>
+                  <span>Pays</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'roles']" class="nav-item">
+                <NuxtLink to="/admin/users/roles" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users/roles' }">
+                  <i class="bi bi-shield-lock"></i>
+                  <span>Rôles &amp; profils</span>
+                </NuxtLink>
+              </li>
+              <li v-can="['list', 'activity-logs']" class="nav-item">
+                <NuxtLink to="/admin/activity-logs" class="nav-link py-1" :class="{ 'active': isActive('/admin/activity-logs') }">
+                  <i class="bi bi-journal-check"></i>
+                  <span>Journal d'activité</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -330,7 +420,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotificationsStore } from '~/stores/notifications'
@@ -367,12 +457,63 @@ const isActive = (path: string) => {
   return route.path.startsWith(path)
 }
 
+const isUsersSectionActive = computed(
+  () =>
+    route.path.startsWith('/admin/users') ||
+    route.path.startsWith('/admin/activity-logs') ||
+    route.path.startsWith('/admin/countries')
+)
+
+const isCatalogSectionActive = computed(
+  () =>
+    isActive('/admin/personal-shopping') ||
+    isActive('/admin/categories') ||
+    isActive('/admin/products')
+)
+
+const isFretSectionActive = computed(
+  () =>
+    isActive('/admin/requests') ||
+    isActive('/admin/shipments') ||
+    isActive('/admin/destinations') ||
+    isActive('/admin/shipping/modes')
+)
+
+const isVoyagesSectionActive = computed(
+  () =>
+    isActive('/admin/guides') ||
+    isActive('/admin/guide-accompaniment-services') ||
+    isActive('/admin/visas') ||
+    isActive('/admin/pricing')
+)
+
+const isContenuSectionActive = computed(
+  () =>
+    isActive('/admin/blog') ||
+    isActive('/admin/faq') ||
+    isActive('/admin/home-services') ||
+    isActive('/admin/site-pages') ||
+    isActive('/admin/footer') ||
+    isActive('/admin/contact-leads')
+)
+
+const isSupportSectionActive = computed(
+  () =>
+    isActive('/admin/support') ||
+    isActive('/admin/reports') ||
+    isActive('/admin/settings')
+)
+
 // State
 const sidebarCollapsed = ref(false)
 const mobileOpen = ref(false)
 const isMobile = ref(false)
+const fretMenuOpen = ref(isFretSectionActive.value)
 const psMenuOpen = ref(false)
-const usersMenuOpen = ref(isActive('/admin/users'))
+const voyagesMenuOpen = ref(isVoyagesSectionActive.value)
+const contenuMenuOpen = ref(isContenuSectionActive.value)
+const supportMenuOpen = ref(isSupportSectionActive.value)
+const usersMenuOpen = ref(isUsersSectionActive.value)
 const loading = ref(true)
 
 const showSidebarText = computed(() => isMobile.value ? mobileOpen.value : !sidebarCollapsed.value)
@@ -400,14 +541,23 @@ const pageTitle = computed(() => {
     '/admin/users': 'Gestion des utilisateurs',
     '/admin/users/roles': 'Gestion des Profils',
     '/admin/guides': 'Gestion des guides',
+    '/admin/guide-accompaniment-services': "Services d'accompagnement (Guides)",
     '/admin/visas': 'Gestion des visas',
     '/admin/pricing': 'Gestion des tarifs',
     '/admin/blog': 'Gestion du blog',
     '/admin/faq': 'Gestion des FAQ',
+    '/admin/home-services': 'Services (accueil)',
+    '/admin/site-pages': 'Pages À propos & Contact',
+    '/admin/footer': 'Pied de page (site)',
     '/admin/support': 'Support client',
-    '/admin/activity-logs': 'Journal d’activité',
+    '/admin/activity-logs': "Journal d'activité",
+    '/admin/countries': 'Pays (référentiel)',
     '/admin/reports': 'Rapports',
-    '/admin/notifications': 'Notifications'
+    '/admin/notifications': 'Notifications',
+    '/admin/settings': 'Paramètres',
+    '/admin/categories': 'Catégories',
+    '/admin/products': 'Produits',
+    '/admin/personal-shopping': 'Personal Shopping'
   }
   return titles[route.path] || 'Administration'
 })
@@ -418,13 +568,37 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-const togglePSMenu = () => {
-  psMenuOpen.value = !psMenuOpen.value
-}
+const toggleFretMenu = () => { fretMenuOpen.value = !fretMenuOpen.value }
+const togglePSMenu = () => { psMenuOpen.value = !psMenuOpen.value }
+const toggleVoyagesMenu = () => { voyagesMenuOpen.value = !voyagesMenuOpen.value }
+const toggleContenuMenu = () => { contenuMenuOpen.value = !contenuMenuOpen.value }
+const toggleSupportMenu = () => { supportMenuOpen.value = !supportMenuOpen.value }
+const toggleUsersMenu = () => { usersMenuOpen.value = !usersMenuOpen.value }
 
-const toggleUsersMenu = () => {
-  usersMenuOpen.value = !usersMenuOpen.value
-}
+watch(
+  () => route.path,
+  (path) => {
+    if (path.startsWith('/admin/requests') || path.startsWith('/admin/shipments') || path.startsWith('/admin/destinations') || path.startsWith('/admin/shipping')) {
+      fretMenuOpen.value = true
+    }
+    if (path.startsWith('/admin/categories') || path.startsWith('/admin/products') || path.startsWith('/admin/personal-shopping')) {
+      psMenuOpen.value = true
+    }
+    if (path.startsWith('/admin/guides') || path.startsWith('/admin/guide-accompaniment') || path.startsWith('/admin/visas') || path.startsWith('/admin/pricing')) {
+      voyagesMenuOpen.value = true
+    }
+    if (path.startsWith('/admin/blog') || path.startsWith('/admin/faq') || path.startsWith('/admin/home-services') || path.startsWith('/admin/site-pages') || path.startsWith('/admin/footer') || path.startsWith('/admin/contact-leads')) {
+      contenuMenuOpen.value = true
+    }
+    if (path.startsWith('/admin/support') || path.startsWith('/admin/reports') || path.startsWith('/admin/settings')) {
+      supportMenuOpen.value = true
+    }
+    if (path.startsWith('/admin/users') || path.startsWith('/admin/activity-logs') || path.startsWith('/admin/countries')) {
+      usersMenuOpen.value = true
+    }
+  },
+  { immediate: true }
+)
 
 // Lifecycle & Guards
 onMounted(async () => {
@@ -516,6 +690,30 @@ onMounted(async () => {
   flex: 1;
   overflow-y: auto;
   padding: 1rem 0;
+}
+
+.sidebar-nav-heading {
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 1rem 1rem 0.35rem;
+  margin-bottom: 0;
+  pointer-events: none;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav .small-nav .nav-link {
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.sidebar-nav .small-nav .nav-link i {
+  font-size: 1rem;
+  width: 22px;
 }
 
 .sidebar-nav .nav-link {

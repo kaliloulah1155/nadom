@@ -354,7 +354,7 @@ const getModeLabel = (mode: string) => {
   return labels[mode]?.[locale.value] || labels[mode]?.fr || mode
 }
 
-/** Lit le tarif au kg même si l’API renvoie snake_case sans normalisation côté liste. */
+/** Lit le tarif au kg même si l'API renvoie snake_case sans normalisation côté liste. */
 function modeCostPerKg(mode: { mode?: string; costPerKg?: number; cost_per_kg?: number }) {
   const v = mode.costPerKg ?? mode.cost_per_kg
   return Number(v) || 0

@@ -119,4 +119,10 @@ onBeforeUnmount(() => {
 .wysiwyg-editor .ql-toolbar.ql-snow .ql-formats {
   margin-right: 12px;
 }
+
+/* Au-dessus du backdrop/modal Bootstrap (Quill dropdowns & tooltips) */
+.wysiwyg-editor .ql-toolbar .ql-picker-options,
+.wysiwyg-editor .ql-tooltip {
+  z-index: 2000;
+}
 </style>

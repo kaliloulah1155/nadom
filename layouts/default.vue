@@ -207,11 +207,17 @@
               <NuxtLink to="/" class="footerLogo mb-3 d-inline-block">
                 <img :src="config.public.logo" class="img-fluid" :alt="config.public.siteName" />
               </NuxtLink>
-              <p class="text-white opacity-75 mb-4">
-                {{ t('footer.aboutText') }}
-              </p>
+              <p v-if="footerAboutHtml" class="text-white opacity-75 mb-4 footer-about" v-html="footerAboutHtml" />
+              <p v-else class="text-white opacity-75 mb-4">{{ t('footer.aboutText') }}</p>
               <div class="footerSocialwrap">
-                <ul class="footersocial d-flex gap-2">
+                <ul v-if="footerSocialLinks.length > 0" class="footersocial d-flex gap-2 flex-wrap">
+                  <li v-for="s in footerSocialLinks" :key="s.id">
+                    <a :href="s.url" target="_blank" rel="noopener noreferrer" class="social-link text-white" :title="s.label">
+                      <i :class="s.icon_class"></i>
+                    </a>
+                  </li>
+                </ul>
+                <ul v-else class="footersocial d-flex gap-2">
                   <li><a href="#" class="social-link text-white"><i class="bi bi-facebook"></i></a></li>
                   <li><a href="#" class="social-link text-white"><i class="bi bi-instagram"></i></a></li>
                   <li><a href="#" class="social-link text-white"><i class="bi bi-whatsapp"></i></a></li>
@@ -251,7 +257,19 @@
           <div class="col-lg-4 col-md-6">
             <div class="footer-widget">
               <h4 class="widget-title text-white">{{ t('footer.contact') }}</h4>
-              <div class="contactInfowrap">
+              <div v-if="footerContactBlocks.length > 0" class="contactInfowrap">
+                <div
+                  v-for="c in footerContactBlocks"
+                  :key="c.id"
+                  class="singleinfo d-flex align-items-start mb-3"
+                >
+                  <div class="icons me-3"><i class="text-primary" :class="contactIconClass(c.kind)"></i></div>
+                  <div class="caps">
+                    <p class="text-white opacity-75 mb-0" style="white-space: pre-line">{{ contactBody(c) }}</p>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="contactInfowrap">
                 <div class="singleinfo d-flex align-items-start mb-3">
                   <div class="icons me-3"><i class="bi bi-geo-alt-fill text-primary"></i></div>
                   <div class="caps">
@@ -347,12 +365,14 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useCartStore } from '~/stores/cart'
+import { useSiteFooterStore } from '~/stores/siteFooter'
 import { useNotification } from '~/composables/useNotification'
 
 const route = useRoute()
 const config = useRuntimeConfig()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
+const siteFooterStore = useSiteFooterStore()
 const { notifications, removeNotification } = useNotification()
 const { locale, setLocale, t } = useI18n()
 
@@ -368,6 +388,39 @@ const orderCount = ref(0)
 const currentLocale = computed(() => locale.value)
 const currentFlag = computed(() => (locale.value === 'fr' ? 'fi-fr' : 'fi-gb'))
 const currentLang = computed(() => (locale.value === 'fr' ? 'FR' : 'EN'))
+
+const footerSocialLinks = computed(() =>
+  (siteFooterStore.activeSocials || []).map(s => ({
+    ...s,
+    icon_class: s.icon_class?.trim() || 'bi bi-link-45deg',
+    label: s.label || s.platform_code
+  }))
+)
+
+const footerContactBlocks = computed(() => siteFooterStore.activeContacts || [])
+
+const footerAboutHtml = computed(() => {
+  if (!siteFooterStore.publicLoaded || siteFooterStore.publicFailed) {
+    return ''
+  }
+  const s = siteFooterStore.footerSettings
+  if (!s) return ''
+  const fr = locale.value === 'fr'
+  const raw = fr ? (s.about_fr || s.about_en) : (s.about_en || s.about_fr)
+  const html = String(raw || '').trim()
+  return html || ''
+})
+
+function contactIconClass(kind: string) {
+  if (kind === 'address') return 'bi bi-geo-alt-fill'
+  if (kind === 'phone') return 'bi bi-telephone-fill'
+  return 'bi bi-envelope-fill'
+}
+
+function contactBody(entry: { body_fr?: string | null; body_en?: string | null }) {
+  const fr = locale.value === 'fr'
+  return fr ? entry.body_fr || entry.body_en || '' : entry.body_en || entry.body_fr || ''
+}
 
 const switchLanguage = (lang: 'fr' | 'en') => {
   setLocale(lang)
@@ -424,6 +477,7 @@ const handleClickOutside = (event: MouseEvent) => {
 // Lifecycle
 onMounted(() => {
   authStore.initializeAuth()
+  siteFooterStore.fetchPublic()
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('resize', handleResize)
   document.addEventListener('click', handleClickOutside)

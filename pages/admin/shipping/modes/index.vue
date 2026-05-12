@@ -4,7 +4,7 @@
       <div class="flex-grow-1" style="min-width: 0;">
         <h4 class="mb-1">Tarifs au kilo</h4>
         <p class="text-muted mb-0">
-          Fixez le prix au kilo pour chaque destination, selon que la marchandise voyage par <strong>avion express</strong>, <strong>avion standard</strong> ou par <strong>bateau</strong>. Ce sont ces tarifs qui s’affichent à vos clients dans le calculateur.
+          Fixez le prix au kilo pour chaque destination, selon que la marchandise voyage par <strong>avion express</strong>, <strong>avion standard</strong> ou par <strong>bateau</strong>. Ce sont ces tarifs qui s'affichent à vos clients dans le calculateur.
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
@@ -134,7 +134,7 @@
                   <option value="air_normal">Avion standard</option>
                   <option value="sea">Bateau</option>
                 </select>
-                <small v-if="editing" class="text-muted">Le mode d’expédition ne peut pas être modifié.</small>
+                <small v-if="editing" class="text-muted">Le mode d'expédition ne peut pas être modifié.</small>
               </div>
               <div class="mb-3">
                 <label class="form-label">Délai indicatif</label>

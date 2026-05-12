@@ -74,8 +74,8 @@
     <section class="py-5 bg-light">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="fw-bold">{{ t('importExport.destinations') }}</h2>
-          <p class="text-muted">{{ t('importExport.destinationsSubtitle') }}</p>
+          <h2 class="fw-bold">{{ destSectionHeading || t('importExport.destinations') }}</h2>
+          <p class="text-muted">{{ destSectionSubtitle || t('importExport.destinationsSubtitle') }}</p>
         </div>
 
         <div v-if="countriesStore.loading && destinationCountries.length === 0" class="text-center py-4">
@@ -176,6 +176,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useShippingStore } from '~/stores/shipping'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useCountriesStore } from '~/stores/countries'
+import { usePublicApi } from '~/composables/usePublicApi'
 
 definePageMeta({
   layout: 'default'
@@ -185,10 +186,22 @@ const { t, locale } = useI18n()
 const shippingStore = useShippingStore()
 const psStore = usePersonalShoppingStore()
 const countriesStore = useCountriesStore()
+const publicApi = usePublicApi()
 const loadingModes = ref(true)
+
+/** Textes éditables depuis l'admin (global_settings, slugs import_export_dest_*) */
+const destSettingsBySlug = ref<Record<string, string>>({})
 
 onMounted(async () => {
   try {
+    const gs = await publicApi.get<Array<{ slug?: string; vvalue?: string }>>('/global-settings/all')
+    if (gs.success && Array.isArray(gs.data)) {
+      const map: Record<string, string> = {}
+      for (const row of gs.data) {
+        if (row.slug) map[row.slug] = (row.vvalue as string) || ''
+      }
+      destSettingsBySlug.value = map
+    }
     await Promise.all([
       shippingStore.fetchDestinations(),
       psStore.fetchCategories(),
@@ -199,7 +212,25 @@ onMounted(async () => {
   }
 })
 
-const destinationCountries = computed(() => countriesStore.activeCountries)
+const destSectionHeading = computed(() => {
+  const slug = locale.value === 'en' ? 'import_export_dest_heading_en' : 'import_export_dest_heading_fr'
+  return destSettingsBySlug.value[slug]?.trim() || ''
+})
+
+const destSectionSubtitle = computed(() => {
+  const slug = locale.value === 'en' ? 'import_export_dest_subtitle_en' : 'import_export_dest_subtitle_fr'
+  return destSettingsBySlug.value[slug]?.trim() || ''
+})
+
+/** Aligné sur le titre « livrer en Afrique » : uniquement les pays dont le continent est Afrique. */
+const isAfricaContinent = (continent: string | null | undefined) => {
+  const c = (continent || '').trim().toLowerCase()
+  return c === 'afrique' || c === 'africa'
+}
+
+const destinationCountries = computed(() =>
+  countriesStore.activeCountries.filter((c) => isAfricaContinent(c.continent))
+)
 const countryName = (c: any) => (locale.value === 'en' ? c.name_en : c.name_fr) || c.label || c.code
 
 const shippingModes = computed(() => {
