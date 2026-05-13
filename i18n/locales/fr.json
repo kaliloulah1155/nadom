@@ -379,6 +379,8 @@
     "bookingDaily": "A la journee",
     "bookingHourly": "A l'heure",
     "bookingHours": "Nombre d'heures",
+    "bookingPeopleCount": "Nombre de personnes à accompagner",
+    "bookingPeopleCountHint": "Nombre de personnes à guider (groupe / délégation), sans compter le guide.",
     "bookingNotes": "Notes ou besoins particuliers",
     "bookingSubmit": "Envoyer la demande",
     "bookingSuccess": "Demande enregistree. Nous vous recontactons rapidement.",

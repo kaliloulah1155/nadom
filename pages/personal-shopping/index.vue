@@ -231,18 +231,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useCartStore } from '~/stores/cart'
 import { usePricingStore } from '~/stores/pricing'
 import { useNotification } from '~/composables/useNotification'
 import { useFormatters } from '~/composables/useFormatters'
+import { POD_CATEGORY_COLORS, resolvePodCategoryIcon } from '~/composables/usePodCategoryDisplay'
 
 definePageMeta({
   layout: 'default'
 })
 
 const { t, locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const psStore = usePersonalShoppingStore()
 const cartStore = useCartStore()
 const pricingStore = usePricingStore()
@@ -319,35 +322,67 @@ const serviceIcon = (slug: string) => {
   return SERVICE_ICONS[key] || 'bi bi-tag'
 }
 
-const ICONS = ['bi bi-phone', 'bi bi-bag', 'bi bi-house', 'bi bi-heart', 'bi bi-bicycle', 'bi bi-gift', 'bi bi-car-front', 'bi bi-gear', 'bi bi-cup-hot', 'bi bi-lamp', 'bi bi-hospital', 'bi bi-scissors']
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#22c55e', '#6366f1', '#f97316', '#14b8a6', '#a855f7']
-
 const categories = computed(() =>
-  (psStore.categories || [])
+  [...(psStore.categories || [])]
     .filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
+    .sort((a: any, b: any) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0))
     .map((c: any, i: number) => ({
-      id: c.id,       // integer id → correspond à product.category_id
+      id: String(c.id),
       uuid: c.uuid,
+      code: (c.code && String(c.code).trim()) || '',
       name_fr: c.label || c.name_fr || c.name || '',
       name_en: c.label || c.name_en || c.name || '',
-      icon: c.icon || ICONS[i % ICONS.length],
-      color: COLORS[i % COLORS.length],
+      icon: resolvePodCategoryIcon(c),
+      color: POD_CATEGORY_COLORS[i % POD_CATEGORY_COLORS.length],
     })),
 )
+
 const selectedCategory = ref<string | null>(null)
 
-onMounted(async () => {
-  await Promise.all([
-    psStore.fetchCategories(),
-    psStore.fetchProducts(),
-    pricingStore.fetchServices({ page: 1, limit: 50, status: 1 }),
-  ])
-  cartStore.loadFromLocalStorage()
+function categoryUrlToken(cat: { code?: string; id: string }) {
+  return cat.code || cat.id
+}
 
-  if (typeof window !== 'undefined' && (window as any).bootstrap) {
-    zoomModal = new (window as any).bootstrap.Modal(zoomModalRef.value)
+function syncCategoryUrl() {
+  const sel = selectedCategory.value
+  let token = 'POD'
+  if (sel) {
+    const cat = categories.value.find(c => c.id === sel)
+    if (cat) token = categoryUrlToken(cat)
   }
-})
+  if (String(route.query.category || '') === token) return
+  router.replace({ path: '/personal-shopping', query: { category: token } })
+}
+
+function applyCategoryQuery() {
+  const raw = route.query.category
+  const q =
+    typeof raw === 'string'
+      ? raw.trim()
+      : Array.isArray(raw)
+        ? String(raw[0] || '').trim()
+        : ''
+  if (!q || q.toUpperCase() === 'POD') {
+    selectedCategory.value = null
+    return
+  }
+  if (/^\d+$/.test(q)) {
+    const sid = String(parseInt(q, 10))
+    if (categories.value.some(c => c.id === sid)) {
+      selectedCategory.value = sid
+      return
+    }
+  }
+  const found = categories.value.find(c => (c.code || '').toLowerCase() === q.toLowerCase())
+  selectedCategory.value = found ? found.id : null
+}
+
+watch(categories, () => applyCategoryQuery())
+
+watch(
+  () => route.query.category,
+  () => applyCategoryQuery(),
+)
 
 const filteredProducts = computed(() => {
   if (!selectedCategory.value) return []
@@ -355,11 +390,28 @@ const filteredProducts = computed(() => {
 })
 
 const selectCategory = (id: string) => {
-  selectedCategory.value = selectedCategory.value === id ? null : id
+  const sid = String(id)
+  selectedCategory.value = selectedCategory.value === sid ? null : sid
+  syncCategoryUrl()
 }
 
+onMounted(async () => {
+  await Promise.all([
+    psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' }),
+    psStore.fetchProducts(),
+    pricingStore.fetchServices({ page: 1, limit: 50, status: 1 }),
+  ])
+  applyCategoryQuery()
+  cartStore.loadFromLocalStorage()
+
+  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+    zoomModal = new (window as any).bootstrap.Modal(zoomModalRef.value)
+  }
+})
+
 const getCategoryName = (id: string) => {
-  const cat = categories.value.find(c => c.id === id)
+  const sid = String(id)
+  const cat = categories.value.find(c => c.id === sid)
   if (!cat) return ''
   return (cat as any)[`name_${locale.value}`] || (cat as any).name_fr || ''
 }

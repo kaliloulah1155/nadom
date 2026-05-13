@@ -378,6 +378,8 @@
     "bookingDaily": "Daily",
     "bookingHourly": "Hourly",
     "bookingHours": "Number of hours",
+    "bookingPeopleCount": "Number of people to accompany",
+    "bookingPeopleCountHint": "How many people need guiding (group / delegation), not including the guide.",
     "bookingNotes": "Notes or special requirements",
     "bookingSubmit": "Submit request",
     "bookingSuccess": "Request submitted. We will get back to you shortly.",

@@ -39,7 +39,11 @@ export interface GuideBooking {
   total_price: number
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   notes?: string
+  people_count?: number
   created_at?: string
+  guide?: { id: string; name?: string | null; currency?: string | null }
+  user?: { id: number; email?: string | null; firstname?: string | null; lastname?: string | null }
+  documentation_category?: { id: number; label?: string | null; slug?: string | null } | null
 }
 
 interface Meta {
@@ -174,18 +178,26 @@ export const useGuidesStore = defineStore('guides', {
       }
     },
 
-    async fetchBookings() {
+    async fetchBookings(params: { page?: number; limit?: number; status?: string; guide_id?: string } = {}) {
+      this.loading = true
+      this.error = null
       try {
         const api = useApi()
-        const res = await api.get<GuideBooking[]>('/guide-bookings')
+        const page = params.page ?? this.bookingsMeta.currentPage
+        const limit = params.limit ?? this.bookingsMeta.perPage
+        const body: Record<string, unknown> = { page, limit }
+        if (params.status) body.status = params.status
+        if (params.guide_id) body.guide_id = params.guide_id
+        const res = await api.post<any>('/guide-bookings/all', body, { query: { page, limit } })
         if (res.success) {
-          this.bookings = res.data || []
-          this.bookingsMeta.total = this.bookings.length
-          this.bookingsMeta.lastPage = 1
-          this.bookingsMeta.currentPage = 1
+          applyPaginator(res, this.bookings, this.bookingsMeta)
+        } else {
+          this.error = res.message
         }
       } catch (err: any) {
-        this.error = err.message
+        this.error = err.message || 'Erreur lors du chargement des réservations'
+      } finally {
+        this.loading = false
       }
     },
 
@@ -210,10 +222,23 @@ export const useGuidesStore = defineStore('guides', {
       const res = await api.put<GuideBooking>(`/guide-bookings/${id}/status`, { status })
       if (res.success && res.data) {
         const idx = this.bookings.findIndex(b => b.id === id)
-        if (idx !== -1) this.bookings[idx] = res.data
+        if (idx !== -1) {
+          this.bookings[idx] = { ...this.bookings[idx], ...res.data }
+        }
         return res.data
       }
       return null
+    },
+
+    async deleteBooking(id: string) {
+      const api = useApi()
+      const res = await api.delete(`/guide-bookings/${id}`)
+      if (res.success) {
+        this.bookings = this.bookings.filter(b => b.id !== id)
+        this.bookingsMeta.total = Math.max(0, this.bookingsMeta.total - 1)
+        return true
+      }
+      throw new Error(res.message || 'Suppression impossible')
     },
 
     async createGuide(guideData: Partial<Guide>) {
@@ -261,7 +286,7 @@ export const useGuidesStore = defineStore('guides', {
         if (filters.language && !guide.languages?.includes(filters.language)) return false
         if (filters.specialization && !(guide.specializations_fr?.includes(filters.specialization) || guide.specializations_en?.includes(filters.specialization))) return false
         if (filters.minRating && guide.rating < filters.minRating) return false
-        if (filters.maxPrice && guide.pricePerDay > filters.maxPrice) return false
+        if (filters.maxPrice && (guide.price_per_day ?? 0) > filters.maxPrice) return false
         return true
       })
     }

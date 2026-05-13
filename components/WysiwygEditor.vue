@@ -17,37 +17,31 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-const editorRef = ref<HTMLElement | null>(null)
+const editorRef   = ref<HTMLElement | null>(null)
 let quill: Quill | null = null
-let suppressEmit = false
+let suppressEmit  = false
+let _modalEl: Element | null = null
+let _shownHandler: (() => void) | null = null
 
-onMounted(async () => {
-  await nextTick()
-  if (!editorRef.value) {
-    console.warn('[WysiwygEditor] editorRef is null, cannot init Quill')
-    return
-  }
+const initQuill = () => {
+  if (!editorRef.value || quill) return
 
   quill = new Quill(editorRef.value, {
     theme: 'snow',
     placeholder: props.placeholder || 'Saisissez votre texte...',
     modules: {
       toolbar: [
-        [{ header: [1, 2, 3, 4, 5, 6, false] }],
-        [{ font: [] }, { size: ['small', false, 'large', 'huge'] }],
+        [{ header: [1, 2, 3, false] }],
         ['bold', 'italic', 'underline', 'strike'],
         [{ color: [] }, { background: [] }],
-        [{ script: 'sub' }, { script: 'super' }],
         [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-        [{ align: [] }, { direction: 'rtl' }],
-        ['blockquote', 'code-block'],
-        ['link', 'image', 'video'],
+        [{ align: [] }],
+        ['blockquote', 'link'],
         ['clean'],
       ],
     },
   })
 
-  // Contenu initial
   if (props.modelValue) {
     suppressEmit = true
     quill.clipboard.dangerouslyPasteHTML(props.modelValue)
@@ -59,6 +53,28 @@ onMounted(async () => {
     const html = quill.root.innerHTML
     emit('update:modelValue', html === '<p><br></p>' ? '' : html)
   })
+}
+
+onMounted(async () => {
+  await nextTick()
+  if (!editorRef.value) return
+
+  // Si l'éditeur est dans un modal Bootstrap encore fermé (display:none),
+  // on diffère l'init au moment où le modal est pleinement visible.
+  const modal = editorRef.value.closest('.modal')
+  const isHidden = (editorRef.value as HTMLElement).offsetParent === null
+
+  if (modal && isHidden) {
+    _modalEl = modal
+    _shownHandler = () => {
+      nextTick().then(initQuill)
+      _modalEl?.removeEventListener('shown.bs.modal', _shownHandler!)
+      _shownHandler = null
+    }
+    modal.addEventListener('shown.bs.modal', _shownHandler)
+  } else {
+    initQuill()
+  }
 })
 
 watch(
@@ -73,6 +89,10 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  if (_modalEl && _shownHandler) {
+    _modalEl.removeEventListener('shown.bs.modal', _shownHandler)
+    _shownHandler = null
+  }
   if (quill) {
     quill.off('text-change')
     quill = null
@@ -86,7 +106,8 @@ onBeforeUnmount(() => {
   border-top-right-radius: 8px;
   border-color: #e2e8f0;
   background-color: #f8fafc;
-  padding: 8px;
+  padding: 6px 8px;
+  flex-wrap: wrap;
 }
 
 .wysiwyg-editor .ql-container.ql-snow {
@@ -94,20 +115,21 @@ onBeforeUnmount(() => {
   border-bottom-right-radius: 8px;
   border-color: #e2e8f0;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   background-color: #fff;
 }
 
 .wysiwyg-editor .ql-editor {
-  min-height: 150px;
+  min-height: 120px;
   line-height: 1.6;
+  cursor: text;
 }
 
 .wysiwyg-editor .ql-editor img {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 10px 0;
+  margin: 8px 0;
   display: block;
 }
 
@@ -117,12 +139,17 @@ onBeforeUnmount(() => {
 }
 
 .wysiwyg-editor .ql-toolbar.ql-snow .ql-formats {
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
-/* Au-dessus du backdrop/modal Bootstrap (Quill dropdowns & tooltips) */
+/* Dropdowns & tooltips Quill au-dessus du backdrop Bootstrap */
 .wysiwyg-editor .ql-toolbar .ql-picker-options,
 .wysiwyg-editor .ql-tooltip {
-  z-index: 2000;
+  z-index: 2050;
+}
+
+/* Empêche que le scroll du container bloque les clics sur l'éditeur */
+.wysiwyg-editor {
+  position: relative;
 }
 </style>

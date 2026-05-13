@@ -163,16 +163,18 @@ export const useReportsStore = defineStore('reports', {
       throw new Error(res.message)
     },
 
-    async fetchStats(months = 12, country: string | null = null) {
+    async fetchStats(months = 12, country: string | null = null, year?: number) {
       this.statsLoading = true
       this.error = null
       try {
         const api = useApi()
         const overviewQuery: Record<string, string | number> = {}
         if (country) overviewQuery.country = country
+        if (year)    overviewQuery.year    = year
 
         const monthlyQuery: Record<string, string | number> = { months }
         if (country) monthlyQuery.country = country
+        if (year)    monthlyQuery.year    = year
 
         const [overview, monthly, destinations] = await Promise.all([
           api.get<OverviewStats>('/admin/stats/overview', { query: overviewQuery }),

@@ -223,10 +223,60 @@
           </div>
           <form @submit.prevent="saveTicket">
             <div class="modal-body">
-              <div v-if="!editingTicket" class="row g-3 mb-2">
+              <!-- ── Bloc client / expédition / contacts (unifié création + édition) ── -->
+              <div class="row g-3 mb-3 pb-3 border-bottom">
+
+                <!-- Client -->
                 <div class="col-12">
-                  <label class="form-label">Expédition concernée</label>
+                  <label class="form-label">Client concerné *</label>
+                  <!-- Édition : lecture seule -->
+                  <div v-if="editingTicket" class="form-control bg-light d-flex align-items-center gap-2" style="min-height:38px;">
+                    <i class="bi bi-person-circle text-muted"></i>
+                    <span>
+                      {{ editingTicket.user
+                          ? ([editingTicket.user.firstname, editingTicket.user.lastname].filter(Boolean).join(' ') || editingTicket.user.email)
+                          : `Client #${editingTicket.user_id}` }}
+                    </span>
+                  </div>
+                  <!-- Création sans expédition : sélection manuelle -->
                   <select
+                    v-else-if="!form.shipment_id"
+                    v-model.number="form.user_id"
+                    class="form-select"
+                    required
+                  >
+                    <option :value="0" disabled>Choisir un client…</option>
+                    <option v-for="u in clientUsers" :key="u.id" :value="u.id">
+                      {{ [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email }} — {{ u.email }}
+                    </option>
+                  </select>
+                  <!-- Création avec expédition : client déduit automatiquement -->
+                  <div v-else class="form-control bg-light text-muted" style="min-height:38px;">
+                    <i class="bi bi-link-45deg me-1"></i>Rattaché automatiquement à l'expédition
+                  </div>
+                </div>
+
+                <!-- Expédition -->
+                <div class="col-12">
+                  <label class="form-label d-flex align-items-center gap-2">
+                    Expédition concernée
+                    <span v-if="shipmentsLoading || shipmentsPickerLoading" class="spinner-border spinner-border-sm text-primary" style="width:.75rem;height:.75rem;"></span>
+                  </label>
+                  <!-- Édition : expéditions du client du ticket -->
+                  <select
+                    v-if="editingTicket"
+                    v-model="form.shipment_id"
+                    class="form-select"
+                    :disabled="shipmentsLoading"
+                  >
+                    <option value="">— Aucune —</option>
+                    <option v-for="s in clientShipments" :key="s.id" :value="String(s.id)">
+                      {{ s.tracking_number || s.id }} · {{ s.destination_city || '?' }} · {{ shipmentStatusLabel(s.status) }}
+                    </option>
+                  </select>
+                  <!-- Création : toutes les expéditions -->
+                  <select
+                    v-else
                     v-model="form.shipment_id"
                     class="form-select"
                     :disabled="shipmentsPickerLoading"
@@ -237,53 +287,27 @@
                       {{ formatShipmentPickerLabel(s) }}
                     </option>
                   </select>
-                  <small class="text-muted d-block">
-                    Sélectionnez d'abord une expédition pour rattacher automatiquement le client et les coordonnées (e-mail / téléphone).
+                  <small v-if="!editingTicket" class="text-muted d-block">
+                    Sélectionnez d'abord une expédition pour rattacher automatiquement le client.
                   </small>
                 </div>
-                <div class="col-12">
-                  <label class="form-label">Client concerné *</label>
-                  <select
-                    v-model.number="form.user_id"
-                    class="form-select"
-                    :required="!form.shipment_id"
-                    :disabled="!!form.shipment_id"
-                  >
-                    <option :value="0" disabled>Choisir un client…</option>
-                    <option v-for="u in clientUsers" :key="u.id" :value="u.id">
-                      {{ u.firstname }} {{ u.lastname }} — {{ u.email }}
-                    </option>
-                  </select>
-                  <small class="text-muted">Sans expédition, choisissez le compte client manuellement. Avec une expédition, ce champ est rempli automatiquement.</small>
-                </div>
+
+                <!-- Contacts -->
                 <div class="col-md-6">
-                  <label class="form-label">Contact e-mail (prioritaire)</label>
-                  <input v-model="form.contact_email" type="email" class="form-control" placeholder="ex@domaine.com" autocomplete="off">
+                  <label class="form-label">Contact e-mail</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                    <input v-model="form.contact_email" type="email" class="form-control" placeholder="ex@domaine.com" autocomplete="off">
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Contact téléphone</label>
-                  <input v-model="form.contact_phone" type="text" class="form-control" placeholder="+225…" maxlength="40" autocomplete="off">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-telephone text-muted"></i></span>
+                    <input v-model="form.contact_phone" type="text" class="form-control" placeholder="+225…" maxlength="40" autocomplete="off">
+                  </div>
                 </div>
-              </div>
 
-              <div v-else class="row g-3 mb-3 pb-3 border-bottom">
-                <div class="col-md-6">
-                  <label class="form-label">Expédition</label>
-                  <select v-model="form.shipment_id" class="form-select" :disabled="!editingTicket?.user_id || shipmentsLoading">
-                    <option value="">— Aucune —</option>
-                    <option v-for="s in clientShipments" :key="s.id" :value="s.id">
-                      {{ s.tracking_number || s.id }} · {{ s.destination_city || '?' }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">E-mail contact</label>
-                  <input v-model="form.contact_email" type="email" class="form-control">
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">Téléphone contact</label>
-                  <input v-model="form.contact_phone" type="text" class="form-control" maxlength="40">
-                </div>
               </div>
 
               <div class="row g-3">
@@ -577,6 +601,16 @@ function onNewTicketShipmentChange() {
     if (u) {
       form.contact_email = u.email ?? ''
       form.contact_phone = u.phone ?? ''
+      // Garantit que l'option existe dans la liste même si le rôle n'est pas "client"
+      if (!clientUsers.value.find((c) => c.id === uid)) {
+        clientUsers.value.push({
+          id: uid,
+          firstname: u.firstname ?? '',
+          lastname: u.lastname ?? '',
+          email: u.email ?? '',
+          phone: u.phone ?? '',
+        })
+      }
     }
   }
 }
@@ -623,7 +657,7 @@ const openModal = async (ticket?: any) => {
   if (ticket) {
     editingTicket.value = ticket
     form.user_id = ticket.user_id
-    form.shipment_id = ticket.shipment_id || ''
+    form.shipment_id = ticket.shipment_id ? String(ticket.shipment_id) : ''
     form.contact_email = ticket.contact_email || ''
     form.contact_phone = ticket.contact_phone || ''
     form.subject = ticket.subject
@@ -665,8 +699,8 @@ const saveTicket = async () => {
       })
       success('Ticket modifié')
     } else {
-      if (!form.user_id) {
-        error('Choisissez un client.')
+      if (!form.user_id && !form.shipment_id) {
+        error('Choisissez un client ou une expédition.')
         return
       }
       await ticketsStore.createTicket({

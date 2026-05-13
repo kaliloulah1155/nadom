@@ -114,12 +114,17 @@
         </div>
 
         <div class="row g-3">
-          <div v-for="category in categories" :key="category.uuid" class="col-6 col-md-4 col-lg-3">
-            <NuxtLink :to="`/personal-shopping?category=${category.slug}`" class="text-decoration-none">
+          <div v-for="cat in homePodCategories" :key="cat.uuid" class="col-6 col-md-4 col-lg-3">
+            <NuxtLink :to="`/personal-shopping?category=${cat.linkToken}`" class="text-decoration-none">
               <div class="card h-100 border-0 shadow-sm text-center hover-card">
                 <div class="card-body py-4">
-                  <i :class="categoryIcon(category)" class="fs-2 mb-2 text-primary"></i>
-                  <h6 class="mb-0">{{ category.label }}</h6>
+                  <div
+                    class="home-pod-cat-icon mx-auto mb-3"
+                    :style="{ background: cat.color + '20', color: cat.color }"
+                  >
+                    <i :class="cat.iconClass"></i>
+                  </div>
+                  <h6 class="mb-0 text-body">{{ cat.label }}</h6>
                 </div>
               </div>
             </NuxtLink>
@@ -214,6 +219,7 @@ import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useGlobalSettingsStore } from '~/stores/globalSettings'
 import { useHomeServicesStore } from '~/stores/homeServices'
 import { useFormatters } from '~/composables/useFormatters'
+import { POD_CATEGORY_COLORS, resolvePodCategoryIcon } from '~/composables/usePodCategoryDisplay'
 
 definePageMeta({
   layout: 'default'
@@ -292,12 +298,22 @@ const services = computed(() => {
   })
 })
 
-const categories = computed(() =>
-  psStore.categories.filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
-)
-
-const ICONS = ['bi-phone', 'bi-bag', 'bi-house', 'bi-heart', 'bi-bicycle', 'bi-gift', 'bi-car-front', 'bi-gear', 'bi-cup-hot', 'bi-lamp', 'bi-hospital', 'bi-scissors']
-const categoryIcon = (cat: any) => cat.icon || ICONS[(Number(cat.id) || 0) % ICONS.length] || 'bi-box'
+const homePodCategories = computed(() => {
+  const rows = [...psStore.categories.filter((c: any) => (c.slug || '').toUpperCase() === 'POD')].sort(
+    (a: any, b: any) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0),
+  )
+  return rows.map((c: any, i: number) => {
+    const code = (c.code && String(c.code).trim()) || ''
+    const linkToken = encodeURIComponent(code || String(c.id))
+    return {
+      uuid: c.uuid,
+      label: c.label || '',
+      linkToken,
+      iconClass: resolvePodCategoryIcon(c),
+      color: POD_CATEGORY_COLORS[i % POD_CATEGORY_COLORS.length],
+    }
+  })
+})
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/400x200?text=NADOM'
@@ -341,6 +357,16 @@ const recentPosts = computed(() => blogStore.getRecentPosts(4))
 
 .min-vh-75 {
   min-height: 75vh;
+}
+
+.home-pod-cat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
 }
 
 .hover-card {

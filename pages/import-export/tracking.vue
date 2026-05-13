@@ -188,9 +188,9 @@
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div class="d-flex gap-2 mt-4 pt-4 border-top">
-                <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-success flex-fill">
+              <!-- Actions (pas d’étiquette/QR : réservé au back-office / usage interne) -->
+              <div class="d-flex gap-2 mt-4 pt-4 border-top flex-wrap">
+                <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success flex-fill">
                   <i class="bi bi-whatsapp me-2"></i>Contacter le support
                 </a>
                 <button class="btn btn-outline-secondary" @click="resetSearch">
@@ -200,8 +200,42 @@
             </div>
           </div>
 
+          <!-- Personal Shopping only (pas encore d'expedition liee au meme numero) -->
+          <div v-else-if="psPublicOnly" class="card border-0 shadow">
+            <div class="card-header bg-transparent py-3">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <span class="badge bg-secondary mb-2">Personal Shopping</span>
+                  <h5 class="mb-1">{{ psPublicOnly.tracking_number }}</h5>
+                  <div class="fw-medium">{{ psPublicOnly.title }}</div>
+                  <small v-if="psPublicOnly.category" class="text-muted">{{ psPublicOnly.category }}</small>
+                </div>
+                <span class="badge fs-6" :class="getRequestStatusClass(psPublicOnly.status)">
+                  {{ getRequestStatusLabel(psPublicOnly.status) }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-3">
+                {{
+                  locale === 'fr'
+                    ? "Votre demande est enregistrée. Des qu'une expedition est créée, le détail du colis pourra aussi être suivi ici."
+                    : 'Your request is registered. Once a shipment is created, parcel tracking will appear here too.'
+                }}
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success btn-sm">
+                  <i class="bi bi-whatsapp me-1"></i>{{ t('common.contactUs') }}
+                </a>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @click="resetSearch">
+                  {{ locale === 'fr' ? 'Nouvelle recherche' : 'New search' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- No Result -->
-          <div v-else-if="searched && !shipment && !loading" class="card border-0 shadow">
+          <div v-else-if="searched && !shipment && !psPublicOnly && !loading" class="card border-0 shadow">
             <div class="card-body text-center py-5">
               <i class="bi bi-box-seam display-1 text-muted"></i>
               <h4 class="mt-3">{{ locale === 'fr' ? 'Colis non trouve' : 'Package not found' }}</h4>
@@ -211,14 +245,14 @@
               <p class="text-muted small">
                 {{ locale === 'fr' ? 'Verifiez le numero de suivi ou contactez notre support.' : 'Check the tracking number or contact our support.' }}
               </p>
-              <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-success">
+              <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success">
                 <i class="bi bi-whatsapp me-2"></i>{{ t('common.contactUs') }}
               </a>
             </div>
           </div>
 
           <!-- Help Section -->
-          <div v-if="!shipment" class="mt-5">
+          <div v-if="!shipment && !psPublicOnly" class="mt-5">
             <div class="row g-4">
               <div class="col-md-4">
                 <div class="text-center">
@@ -278,21 +312,25 @@ definePageMeta({
 
 const { t, locale } = useI18n()
 const route = useRoute()
+const router = useRouter()
+const runtimeCfg = useRuntimeConfig()
+const pub = usePublicApi()
 const shippingStore = useShippingStore()
 const { formatShipmentStatus, formatDateShort, formatCurrency } = useFormatters()
 
 const trackingNumber = ref('')
 const shipment = ref<any>(null)
+const psPublicOnly = ref<any>(null)
 const zoomedImage = ref<string | null>(null)
 
 const openZoom = (image: string) => {
   zoomedImage.value = image
 }
+
 const loading = ref(false)
 const error = ref('')
 const searched = ref(false)
 
-// Linked request comes eager-loaded from the public track endpoint
 const linkedRequest = computed(() => shipment.value?.request || null)
 
 const timelineEvents = computed(() => {
@@ -304,28 +342,41 @@ const timelineEvents = computed(() => {
   })
 })
 
-watch(
-  () => route.query.tracking,
-  async (q) => {
-    const raw = typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
-    const v = raw ? String(raw).trim() : ''
-    if (!v) return
-    trackingNumber.value = v
-    await searchTracking()
-  },
-  { immediate: true }
-)
+function syncTrackingQuery(code: string) {
+  const cur = typeof route.query.tracking === 'string' ? route.query.tracking : ''
+  if (cur === code) return
+  router.replace({ path: '/import-export/tracking', query: { tracking: code } })
+}
 
-const searchTracking = async () => {
-  if (!trackingNumber.value.trim()) return
+async function searchTracking() {
+  const code = trackingNumber.value.trim()
+  if (!code) return
 
   loading.value = true
   error.value = ''
   searched.value = true
+  shipment.value = null
+  psPublicOnly.value = null
 
   try {
-    const result = await shippingStore.trackShipment(trackingNumber.value.trim())
-    shipment.value = result || null
+    const shipRes = await pub.get<any>(`/shipments/track/${encodeURIComponent(code)}`)
+    if (shipRes.success && shipRes.data) {
+      shipment.value = shipRes.data
+      syncTrackingQuery(code)
+      return
+    }
+
+    const psRes = await pub.get<any>(`/personal-shopping-requests/track/${encodeURIComponent(code)}`)
+    if (psRes.success && psRes.data) {
+      const d = psRes.data
+      if (d.shipment) {
+        shipment.value = d.shipment
+      } else {
+        psPublicOnly.value = d
+      }
+      syncTrackingQuery(code)
+      return
+    }
   } catch (err) {
     error.value = (err as Error).message || 'Erreur lors de la recherche'
   } finally {
@@ -333,12 +384,38 @@ const searchTracking = async () => {
   }
 }
 
-const resetSearch = () => {
+function resetSearch() {
   trackingNumber.value = ''
   shipment.value = null
+  psPublicOnly.value = null
   error.value = ''
   searched.value = false
+  router.replace({ path: '/import-export/tracking' })
 }
+
+watch(
+  () => route.query.tracking,
+  async (q) => {
+    const raw = typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
+    const v = raw ? String(raw).trim() : ''
+    if (!v) {
+      if (searched.value && (shipment.value || psPublicOnly.value || trackingNumber.value)) {
+        trackingNumber.value = ''
+        shipment.value = null
+        psPublicOnly.value = null
+        error.value = ''
+        searched.value = false
+      }
+      return
+    }
+    if (trackingNumber.value === v && (shipment.value || psPublicOnly.value)) {
+      return
+    }
+    trackingNumber.value = v
+    await searchTracking()
+  },
+  { immediate: true }
+)
 
 const getRequestStatusLabel = (status: string) => {
   const labels: Record<string, string> = {

@@ -1,145 +1,210 @@
 <template>
   <div class="offcanvas offcanvas-end cart-sidebar-wide" tabindex="-1" id="cartSidebar" ref="cartRef">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="offcanvas-title fw-bold">
-        <i class="bi bi-cart3 me-2"></i>Mon Panier
-        <span v-if="cartStore.totalItems > 0" class="badge bg-primary ms-1">{{ cartStore.totalItems }}</span>
-      </h5>
+
+    <!-- ===== HEADER ===== -->
+    <div class="offcanvas-header cart-header border-bottom px-4 py-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="cart-header-icon">🛒</span>
+        <div>
+          <h5 class="mb-0 fw-bold lh-1">
+            Mon Panier
+            <span v-if="cartStore.totalItems > 0" class="badge bg-primary ms-1" style="font-size:.65rem;vertical-align:middle;">{{ cartStore.totalItems }}</span>
+          </h5>
+          <span class="text-muted" style="font-size:0.78rem;">
+            {{ cartStore.totalItems > 0 ? `${cartStore.totalItems} article${cartStore.totalItems > 1 ? 's' : ''}` : 'Vide' }}
+          </span>
+        </div>
+      </div>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" @click="cartStore.closeCart"></button>
     </div>
 
-    <div class="offcanvas-body">
-      <!-- Panier vide -->
-      <div v-if="cartStore.isEmpty" class="text-center py-5 px-3">
-        <i class="bi bi-cart-x fs-1 text-muted mb-3 d-block"></i>
-        <h6 class="mb-2">Votre panier est vide</h6>
-        <p class="text-muted small mb-4">
-          Parcourez notre catalogue Personal Shopping pour ajouter des produits, ou faites une demande sur mesure pour un article spécifique.
-        </p>
-        <div class="d-grid gap-2">
-          <NuxtLink to="/personal-shopping" class="btn btn-primary btn-sm" @click="cartStore.closeCart">
-            <i class="bi bi-bag-heart me-2"></i>Découvrir les produits
-          </NuxtLink>
-          <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm" @click="cartStore.closeCart">
-            <i class="bi bi-plus-circle me-2"></i>Demande sur mesure
-          </NuxtLink>
-          <button class="btn btn-link btn-sm text-muted" @click="cartStore.closeCart">
-            Fermer
-          </button>
-        </div>
-      </div>
+    <!-- ===== BODY ===== -->
+    <div class="offcanvas-body cart-offcanvas-body p-0">
 
-      <!-- Liste des articles -->
-      <div v-else>
-        <div v-for="item in cartStore.items" :key="item.product.id" class="cart-item border-bottom py-3">
-          <div class="d-flex gap-3">
-            <img
-              :src="item.product.image || 'https://placehold.co/80?text=No+Img'"
-              class="rounded border"
-              width="60" height="60"
-              style="object-fit: cover; flex-shrink: 0;"
-            />
-            <div class="flex-grow-1 min-w-0">
-              <h6 class="mb-1 small fw-bold text-truncate">
-                {{ item.product[`name_${locale}` as keyof typeof item.product] || item.product.name_fr }}
-              </h6>
-              <p class="mb-2 small text-primary fw-bold">
-                {{ formatCurrency(item.product.price, (item.product as any).currency || 'XOF') }}
-              </p>
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="btn-group btn-group-sm">
-                  <button class="btn btn-outline-secondary py-0 px-2" @click="cartStore.updateQuantity(String(item.product.id), item.quantity - 1)">-</button>
-                  <span class="btn btn-outline-secondary disabled py-0 px-3">{{ item.quantity }}</span>
-                  <button class="btn btn-outline-secondary py-0 px-2" @click="cartStore.updateQuantity(String(item.product.id), item.quantity + 1)">+</button>
+      <!-- Scroll zone : liste des articles -->
+      <div class="cart-offcanvas-scroll">
+
+        <!-- Panier vide -->
+        <div v-if="cartStore.isEmpty" class="cart-empty text-center px-4 py-5">
+          <div class="cart-empty-icon mb-3">
+            <i class="bi bi-bag-x"></i>
+          </div>
+          <h6 class="fw-bold mb-1">Votre panier est vide</h6>
+          <p class="text-muted small mb-4">
+            Parcourez notre catalogue ou faites une demande sur mesure.
+          </p>
+          <div class="d-grid gap-2 mx-auto" style="max-width:260px;">
+            <NuxtLink to="/personal-shopping" class="btn btn-primary" @click="cartStore.closeCart">
+              <i class="bi bi-bag-heart me-2"></i>Voir les produits
+            </NuxtLink>
+            <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary" @click="cartStore.closeCart">
+              <i class="bi bi-plus-circle me-2"></i>Demande sur mesure
+            </NuxtLink>
+          </div>
+        </div>
+
+        <!-- Liste des articles -->
+        <ul v-else class="cart-items-list list-unstyled mb-0 px-3 pt-3">
+          <li
+            v-for="item in cartStore.items"
+            :key="`${item.product.id}-${item.quantity}`"
+            class="cart-item-card mb-3"
+          >
+            <div class="d-flex gap-3">
+              <img
+                :src="item.product.image || 'https://placehold.co/80?text=?'"
+                class="cart-item-img rounded-3"
+                width="72" height="72"
+                loading="lazy"
+              />
+              <div class="flex-grow-1 min-w-0 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start gap-1">
+                  <h6 class="mb-0 fw-semibold text-truncate small" style="max-width:180px;">
+                    {{ item.product[`name_${locale}` as keyof typeof item.product] || item.product.name_fr }}
+                  </h6>
+                  <button
+                    class="btn-remove-item"
+                    @click="cartStore.removeItem(String(item.product.id))"
+                    title="Supprimer"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
                 </div>
-                <button class="btn btn-link text-danger p-0" @click="cartStore.removeItem(String(item.product.id))">
-                  <i class="bi bi-trash"></i>
-                </button>
+                <div class="d-flex align-items-center justify-content-between mt-2">
+                  <!-- Contrôle quantité -->
+                  <div class="qty-control">
+                    <button
+                      class="qty-btn"
+                      :disabled="item.quantity <= 1"
+                      @click="cartStore.updateQuantity(String(item.product.id), item.quantity - 1)"
+                    >
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <span class="qty-value">{{ item.quantity }}</span>
+                    <button
+                      class="qty-btn"
+                      @click="cartStore.updateQuantity(String(item.product.id), item.quantity + 1)"
+                    >
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                  <!-- Sous-total ligne -->
+                  <span class="item-subtotal fw-bold text-primary">
+                    {{ formatCurrency(item.product.price * item.quantity, (item.product as any).currency || selectedCurrency) }}
+                  </span>
+                </div>
+                <span class="text-muted mt-1" style="font-size:0.72rem;">
+                  {{ formatCurrency(item.product.price, (item.product as any).currency || selectedCurrency) }} / unité
+                </span>
               </div>
             </div>
+          </li>
+        </ul>
+
+      </div>
+      <!-- fin scroll zone -->
+
+      <!-- ===== SECTION CHECKOUT (fixed bottom) ===== -->
+      <div v-if="!cartStore.isEmpty" class="cart-checkout-section">
+
+        <!-- Devise + Total -->
+        <div class="checkout-summary px-4 pt-3 pb-2">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <label class="form-label small fw-semibold mb-0 text-muted">Devise</label>
+            <select v-model="selectedCurrency" class="form-select form-select-sm w-auto">
+              <option v-for="cur in currencies" :key="cur.id" :value="cur.code">
+                {{ cur.label }}{{ cur.code !== cur.label ? ` (${cur.code})` : '' }}
+              </option>
+            </select>
+          </div>
+          <div class="total-row d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Total estimé</span>
+            <span class="total-amount fw-bold text-primary fs-5">
+              {{ formatCurrency(cartStore.totalPrice, selectedCurrency) }}
+            </span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Footer de finalisation -->
-    <div v-if="!cartStore.isEmpty" class="offcanvas-footer border-top p-3 bg-light">
-      <!-- Formulaire de contact -->
-      <div class="mb-3">
-        <div class="mb-2">
-          <label class="form-label small fw-bold mb-1">Nom complet *</label>
-          <input
-            v-model="contactName"
-            type="text"
-            class="form-control form-control-sm"
-            :class="{ 'is-invalid': errors.name }"
-            placeholder="Prénom Nom"
-          />
-          <div v-if="errors.name" class="invalid-feedback">{{ errors.name }}</div>
+        <!-- Formulaire de contact (accordéon) -->
+        <div class="contact-form-section px-4 pb-2">
+          <button
+            class="contact-toggle w-100 d-flex justify-content-between align-items-center"
+            type="button"
+            @click="showContactForm = !showContactForm"
+          >
+            <span class="d-flex align-items-center gap-2 small fw-semibold">
+              <i class="bi bi-person-lines-fill text-primary"></i>
+              Informations de contact
+              <i v-if="isContactFilled" class="bi bi-check-circle-fill text-success" style="font-size:.85rem;"></i>
+            </span>
+            <i :class="showContactForm ? 'bi bi-chevron-up' : 'bi bi-chevron-down'" class="text-muted small"></i>
+          </button>
+
+          <Transition name="slide-down">
+            <div v-if="showContactForm" class="contact-form-body mt-2">
+              <div class="mb-2">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white"><i class="bi bi-person text-muted"></i></span>
+                  <input
+                    v-model="contactName"
+                    type="text"
+                    class="form-control"
+                    :class="{ 'is-invalid': errors.name }"
+                    placeholder="Nom complet *"
+                  />
+                </div>
+                <div v-if="errors.name" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.name }}</div>
+              </div>
+              <div class="mb-2">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white"><i class="bi bi-whatsapp text-success"></i></span>
+                  <input
+                    v-model="contactNumber"
+                    type="tel"
+                    class="form-control"
+                    :class="{ 'is-invalid': errors.phone }"
+                    placeholder="WhatsApp * (+225 07 XX XX)"
+                  />
+                </div>
+                <div v-if="errors.phone" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.phone }}</div>
+              </div>
+              <div class="mb-1">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                  <input
+                    v-model="contactEmail"
+                    type="email"
+                    class="form-control"
+                    :class="{ 'is-invalid': errors.email }"
+                    placeholder="Email * (optionnel)"
+                  />
+                </div>
+                <div v-if="errors.email" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.email }}</div>
+              </div>
+            </div>
+          </Transition>
         </div>
-        <div class="mb-2">
-          <label class="form-label small fw-bold mb-1">WhatsApp *</label>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text"><i class="bi bi-whatsapp text-success"></i></span>
-            <input
-              v-model="contactNumber"
-              type="tel"
-              class="form-control"
-              :class="{ 'is-invalid': errors.phone }"
-              placeholder="+225 07 XX XX XX"
-            />
-          </div>
-          <div v-if="errors.phone" class="invalid-feedback d-block">{{ errors.phone }}</div>
+
+        <!-- Actions -->
+        <div class="cart-actions px-4 pb-3 d-grid gap-2">
+          <button class="btn btn-primary btn-checkout" :disabled="submitting" @click="checkout">
+            <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
+            <i v-else class="bi bi-bag-check me-2"></i>
+            {{ submitting ? 'Envoi en cours…' : 'Valider ma demande' }}
+          </button>
+          <button class="btn btn-success btn-whatsapp" @click="contactWhatsApp">
+            <i class="bi bi-whatsapp me-2"></i>Commander via WhatsApp
+          </button>
+          <button class="btn-vider" :disabled="submitting" @click="cartStore.clearCart">
+            <i class="bi bi-trash3 me-1"></i>Vider le panier
+          </button>
         </div>
-        <div class="mb-2">
-          <label class="form-label small fw-bold mb-1">Email *</label>
-          <input
-            v-model="contactEmail"
-            type="email"
-            class="form-control form-control-sm"
-            :class="{ 'is-invalid': errors.email }"
-            placeholder="email@exemple.com"
-          />
-          <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
-        </div>
+
+        <p class="text-center text-muted pb-2 mb-0" style="font-size:0.7rem;">
+          Frais de service &amp; livraison calculés après validation.
+        </p>
       </div>
 
-      <!-- Devise -->
-      <div class="mb-2">
-        <label class="form-label small fw-bold mb-1 d-flex align-items-center gap-2">
-          Devise
-          <span v-if="psStore.loading && currencies.length === 0" class="spinner-border spinner-border-sm text-primary" style="width: .75rem; height: .75rem;" role="status" aria-hidden="true"></span>
-        </label>
-        <select v-model="selectedCurrency" class="form-select form-select-sm">
-          <option v-for="cur in currencies" :key="cur.id" :value="cur.code">
-            {{ cur.label }}{{ cur.code !== cur.label ? ` (${cur.code})` : '' }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Total -->
-      <div class="d-flex justify-content-between mb-3 border-top pt-2">
-        <span class="fw-bold">Total estimé</span>
-        <span class="fw-bold text-primary fs-6">{{ formatCurrency(cartStore.totalPrice, selectedCurrency) }}</span>
-      </div>
-
-      <!-- Actions -->
-      <div class="d-grid gap-2">
-        <button class="btn btn-primary" :disabled="submitting" @click="checkout">
-          <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
-          <i v-else class="bi bi-check-circle me-2"></i>
-          {{ submitting ? 'Envoi en cours...' : 'Valider ma demande' }}
-        </button>
-        <button class="btn btn-success" @click="contactWhatsApp">
-          <i class="bi bi-whatsapp me-2"></i>Commander via WhatsApp
-        </button>
-        <button class="btn btn-outline-danger btn-sm" :disabled="submitting" @click="cartStore.clearCart">
-          Vider le panier
-        </button>
-      </div>
-      <p class="text-muted x-small mt-2 mb-0 text-center">
-        * Frais de service et d'expédition calculés après validation.
-      </p>
     </div>
   </div>
 </template>
@@ -161,7 +226,15 @@ const { success, error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
 const config = useRuntimeConfig()
 
-/** Devise dominante du panier (premier produit avec une devise renseignée, sinon XOF). */
+const showContactForm = ref(false)
+
+const isContactFilled = computed(() =>
+  contactName.value.trim().length >= 2 &&
+  /^[\+]?[0-9\s\-]{8,20}$/.test(contactNumber.value) &&
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.value)
+)
+
+/** Devise dominante du panier (premier produit avec devise renseignée, sinon XOF). */
 const cartCurrency = computed(() => {
   for (const item of cartStore.items) {
     const c = (item.product as any).currency
@@ -170,8 +243,7 @@ const cartCurrency = computed(() => {
   return 'XOF'
 })
 
-/** Liste des devises disponibles — alignée sur le formulaire /personal-shopping/new
- *  (catégories préfixées DVS dans la table categories). */
+/** Liste des devises disponibles (catégories slug DVS). */
 const currencies = computed(() => {
   const fromStore = (psStore.categories || [])
     .filter((c: any) => {
@@ -187,20 +259,13 @@ const currencies = computed(() => {
   return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA (FCFA)' }]
 })
 
-/** Devise sélectionnée par l'utilisateur — pré-remplie depuis les produits, modifiable. */
 const selectedCurrency = ref<string>('XOF')
 
-/** Initialise / met à jour la devise quand les produits ou la liste arrive. */
 watch([cartCurrency, currencies], ([detected, list]) => {
   if (!list.length) return
   const codes = list.map(c => c.code)
   if (selectedCurrency.value && codes.includes(selectedCurrency.value)) return
-  // Priorité : devise détectée sur les produits si présente dans la liste.
-  if (codes.includes(detected)) {
-    selectedCurrency.value = detected
-  } else {
-    selectedCurrency.value = codes[0]
-  }
+  selectedCurrency.value = codes.includes(detected) ? detected : codes[0]
 }, { immediate: true })
 
 const contactName   = ref('')
@@ -213,16 +278,18 @@ let cartOffcanvas: any = null
 const errors = ref({ name: '', phone: '', email: '' })
 
 onMounted(async () => {
-  // Pré-remplir avec les infos du compte connecté
   const u: any = authStore.currentUser
   if (u) {
     contactName.value   = [u.firstname, u.lastname].filter(Boolean).join(' ').trim()
     contactEmail.value  = u.email || ''
     contactNumber.value = u.phone || ''
+    if (contactName.value || contactEmail.value || contactNumber.value) {
+      showContactForm.value = true
+    }
   }
 
-  // Charger les devises (catégories DVS) si pas déjà en mémoire
-  if (!psStore.categories || psStore.categories.length === 0) {
+  const hasDvs = (psStore.categories || []).some((c: any) => String(c.slug || '').toUpperCase() === 'DVS')
+  if (!psStore.categories?.length || !hasDvs) {
     await psStore.fetchCategories()
   }
 
@@ -239,11 +306,12 @@ watch(() => cartStore.isOpen, (val) => {
 const validate = () => {
   errors.value = { name: '', phone: '', email: '' }
   if (!contactName.value.trim() || contactName.value.trim().length < 2)
-    errors.value.name = 'Nom complet requis'
+    errors.value.name = 'Nom complet requis (min. 2 caractères)'
   if (!contactNumber.value || !/^[\+]?[0-9\s\-]{8,20}$/.test(contactNumber.value))
-    errors.value.phone = 'Numéro invalide'
+    errors.value.phone = 'Numéro invalide (ex: +225 07 XX XX XX)'
   if (!contactEmail.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.value))
-    errors.value.email = 'Email invalide'
+    errors.value.email = 'Adresse email invalide'
+  if (!isContactFilled.value) showContactForm.value = true
   return !errors.value.name && !errors.value.phone && !errors.value.email
 }
 
@@ -312,22 +380,187 @@ const contactWhatsApp = () => {
 </script>
 
 <style scoped>
-.cart-item img { flex-shrink: 0; }
-.x-small { font-size: 0.75rem; }
+/* ---- Utilitaires ---- */
 .min-w-0 { min-width: 0; }
 
-/* Largeur du panier — plus généreux que le 400px par défaut de Bootstrap */
-.cart-sidebar-wide {
-  --bs-offcanvas-width: 560px;
+/* ---- Largeur sidebar ---- */
+.cart-sidebar-wide { --bs-offcanvas-width: 420px; }
+@media (max-width: 575.98px) { .cart-sidebar-wide { --bs-offcanvas-width: 100vw; } }
+@media (min-width: 576px) and (max-width: 991.98px) { .cart-sidebar-wide { --bs-offcanvas-width: 380px; } }
+
+/* ---- Structure globale ---- */
+#cartSidebar.cart-sidebar-wide {
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-@media (max-width: 575.98px) {
-  .cart-sidebar-wide {
-    --bs-offcanvas-width: 100vw;
-  }
+#cartSidebar.cart-sidebar-wide > .offcanvas-header { flex-shrink: 0; }
+#cartSidebar.cart-sidebar-wide .cart-offcanvas-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
 }
-@media (min-width: 576px) and (max-width: 991.98px) {
-  .cart-sidebar-wide {
-    --bs-offcanvas-width: 480px;
-  }
+.cart-offcanvas-scroll {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* ---- Header ---- */
+.cart-header { background: #fff; }
+.cart-header-icon { font-size: 1.5rem; line-height: 1; }
+
+/* ---- Panier vide ---- */
+.cart-empty-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: #f1f0fe;
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: #6366f1;
+}
+
+/* ---- Items ---- */
+.cart-items-list { padding-bottom: 0.5rem; }
+.cart-item-card {
+  background: #fff;
+  border: 1px solid #f1f1f1;
+  border-radius: 14px;
+  padding: 12px;
+  transition: box-shadow .15s;
+}
+.cart-item-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+.cart-item-img {
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #f0f0f0;
+}
+
+/* ---- Bouton supprimer ---- */
+.btn-remove-item {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  color: #9ca3af;
+  font-size: .8rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.btn-remove-item:hover { color: #ef4444; background: #fef2f2; }
+
+/* ---- Contrôle quantité ---- */
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  background: #f4f4f5;
+  border-radius: 99px;
+  padding: 2px;
+  gap: 0;
+}
+.qty-btn {
+  width: 28px; height: 28px;
+  border: none;
+  background: #fff;
+  border-radius: 50%;
+  font-size: .85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: background .15s;
+}
+.qty-btn:hover:not(:disabled) { background: #ede9fe; color: #4f46e5; }
+.qty-btn:disabled { opacity: .4; cursor: default; box-shadow: none; }
+.qty-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #111;
+}
+.item-subtotal { font-size: .88rem; }
+
+/* ---- Checkout section ---- */
+.cart-checkout-section {
+  border-top: 2px solid #f1f0fe;
+  background: #fafafa;
+  min-height: 0;
+  max-height: min(55vh, 26rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/* ---- Résumé total ---- */
+.checkout-summary {
+  background: #fff;
+  border-bottom: 1px solid #f1f1f1;
+}
+.total-row { padding: 6px 0 2px; }
+.total-amount { letter-spacing: -.5px; }
+
+/* ---- Formulaire contact ---- */
+.contact-toggle {
+  background: none;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: #374151;
+  transition: background .15s;
+}
+.contact-toggle:hover { background: #f4f4f5; }
+.contact-form-body .input-group-text {
+  border-right: none;
+}
+.contact-form-body .form-control {
+  border-left: none;
+  font-size: .85rem;
+}
+.contact-form-body .form-control:focus { border-color: #d1d5db; box-shadow: none; }
+
+/* ---- Actions ---- */
+.btn-checkout {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: .6rem 1rem;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border: none;
+}
+.btn-checkout:hover:not(:disabled) { opacity: .9; }
+.btn-whatsapp {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: .6rem 1rem;
+  background: #25d366;
+  border: none;
+}
+.btn-whatsapp:hover { background: #1dba58; }
+.btn-vider {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: .78rem;
+  cursor: pointer;
+  padding: 4px;
+  text-align: center;
+  transition: color .15s;
+}
+.btn-vider:hover:not(:disabled) { color: #ef4444; }
+
+/* ---- Transition accordéon ---- */
+.slide-down-enter-active,
+.slide-down-leave-active { transition: all .2s ease; overflow: hidden; }
+.slide-down-enter-from,
+.slide-down-leave-to { max-height: 0; opacity: 0; }
+.slide-down-enter-to,
+.slide-down-leave-from { max-height: 300px; opacity: 1; }
 </style>

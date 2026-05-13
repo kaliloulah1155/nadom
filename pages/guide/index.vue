@@ -196,7 +196,7 @@
                 </div>
               </div>
               <div class="card-footer bg-transparent border-0 p-4 pt-0">
-                <div class="d-grid gap-2">
+                <div class="d-grid">
                   <button
                     type="button"
                     class="btn btn-primary w-100"
@@ -205,13 +205,6 @@
                   >
                     <i class="bi bi-calendar-check me-2"></i>{{ t('guide.book') }}
                   </button>
-                  <a
-                    :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`"
-                    target="_blank"
-                    class="btn btn-outline-secondary btn-sm w-100"
-                  >
-                    <i class="bi bi-whatsapp me-2"></i>{{ t('guide.bookWhatsapp') }}
-                  </a>
                 </div>
               </div>
             </div>
@@ -268,6 +261,11 @@
                   <div v-if="bookingForm.service_type === 'hourly'" class="col-md-6">
                     <label class="form-label">{{ t('guide.bookingHours') }}</label>
                     <input v-model.number="bookingForm.hours" type="number" min="1" max="24" class="form-control" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">{{ t('guide.bookingPeopleCount') }}</label>
+                    <input v-model.number="bookingForm.people_count" type="number" min="1" max="100" class="form-control" required />
+                    <small class="text-muted">{{ t('guide.bookingPeopleCountHint') }}</small>
                   </div>
                   <div class="col-12">
                     <label class="form-label">{{ t('guide.bookingNotes') }}</label>
@@ -359,6 +357,7 @@ const bookingForm = reactive({
   start_date: '',
   end_date: '',
   hours: 4,
+  people_count: 1,
   notes: ''
 })
 
@@ -379,6 +378,7 @@ function resetBookingForm() {
   bookingForm.start_date = start
   bookingForm.end_date = isoAddDays(start, 1)
   bookingForm.hours = 4
+  bookingForm.people_count = 1
   bookingForm.notes = ''
 }
 
@@ -408,6 +408,7 @@ async function submitBooking() {
       guide_id: String(bookingGuide.value.id),
       start_date: bookingForm.start_date,
       service_type: bookingForm.service_type,
+      people_count: Math.min(100, Math.max(1, Math.floor(Number(bookingForm.people_count)) || 1)),
       notes: bookingForm.notes?.trim() || undefined
     }
     if (bookingForm.documentation_category_id > 0) {

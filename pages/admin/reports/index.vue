@@ -18,33 +18,86 @@
       </div>
     </div>
 
-    <!-- Country filter -->
+    <!-- Filtres -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body py-3">
         <div class="row g-2 align-items-end">
-          <div class="col-md-6">
-            <label class="form-label small text-muted mb-1 d-flex align-items-center gap-2">
-              Pays de livraison
-              <span v-if="shippingStore.loadingDestinations" class="spinner-border spinner-border-sm text-primary" style="width: .8rem; height: .8rem;" role="status" aria-hidden="true"></span>
+
+          <!-- Pays -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold mb-1 d-flex align-items-center gap-2">
+              <i class="bi bi-geo-alt text-primary"></i> Pays de livraison
+              <span v-if="shippingStore.loadingDestinations" class="spinner-border spinner-border-sm text-primary" style="width:.75rem;height:.75rem;" role="status"></span>
             </label>
             <select
               v-model="countryFilter"
               class="form-select form-select-sm"
               :disabled="shippingStore.loadingDestinations || reportsStore.statsLoading"
-              @change="onCountryChange"
             >
               <option value="">{{ shippingStore.loadingDestinations ? 'Chargement…' : '🌍 Toutes destinations' }}</option>
               <option v-for="dest in countryOptions" :key="dest.id" :value="dest.country">
-                {{ (dest.flag ? `${dest.flag} ` : '') }}{{ dest.country }}{{ dest.currency_code ? ` — ${dest.currency_code}` : '' }}
+                {{ dest.flag ? `${dest.flag} ` : '' }}{{ dest.country }}{{ dest.currency_code ? ` — ${dest.currency_code}` : '' }}
               </option>
             </select>
-            <small v-if="countryFilter" class="text-muted">
-              Volume d'affaires des expéditions livrées vers <strong>{{ countryFilter }}</strong>, exprimé en {{ revenueCurrency }}.
-            </small>
-            <small v-else class="text-muted">
-              Filtre désactivé — total mondial agrégé en FCFA (les montants multi-devises sont sommés bruts).
-            </small>
           </div>
+
+          <!-- Année -->
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold mb-1">
+              <i class="bi bi-calendar3 text-primary"></i> Année
+            </label>
+            <select v-model.number="yearFilter" class="form-select form-select-sm" :disabled="reportsStore.statsLoading">
+              <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+
+          <!-- Période -->
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold mb-1">
+              <i class="bi bi-calendar-range text-primary"></i> Période
+            </label>
+            <select v-model.number="months" class="form-select form-select-sm" :disabled="reportsStore.statsLoading">
+              <option :value="12">12 derniers mois</option>
+              <option :value="6">6 derniers mois</option>
+              <option :value="3">3 derniers mois</option>
+              <option :value="1">Ce mois-ci</option>
+            </select>
+          </div>
+
+          <!-- Bouton Appliquer -->
+          <div class="col-md-3 d-flex align-items-end gap-2">
+            <button
+              class="btn btn-primary btn-sm w-100"
+              :disabled="reportsStore.statsLoading"
+              @click="applyFilters"
+            >
+              <span v-if="reportsStore.statsLoading" class="spinner-border spinner-border-sm me-1"></span>
+              <i v-else class="bi bi-funnel me-1"></i>
+              {{ reportsStore.statsLoading ? 'Chargement…' : 'Appliquer' }}
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              title="Réinitialiser"
+              :disabled="reportsStore.statsLoading"
+              @click="resetFilters"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Résumé du filtre actif -->
+        <div class="mt-2">
+          <small v-if="countryFilter" class="text-primary">
+            <i class="bi bi-info-circle me-1"></i>
+            Filtré sur <strong>{{ countryFilter }}</strong> · {{ months }} mois · {{ yearFilter }}
+            — exprimé en {{ revenueCurrency }}.
+          </small>
+          <small v-else class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Toutes destinations · {{ months }} derniers mois · {{ yearFilter }} — agrégé en FCFA.
+          </small>
         </div>
       </div>
     </div>
@@ -104,7 +157,7 @@
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Évolution mensuelle</h5>
-            <select v-model.number="months" class="form-select form-select-sm" style="width: 150px;" @change="onMonthsChange">
+            <select v-model.number="months" class="form-select form-select-sm" style="width: 150px;" @change="applyFilters">
               <option :value="12">Derniers 12 mois</option>
               <option :value="6">Derniers 6 mois</option>
               <option :value="3">Derniers 3 mois</option>
@@ -114,7 +167,7 @@
             <div v-if="reportsStore.statsLoading && !reportsStore.monthly" class="text-center py-5">
               <div class="spinner-border text-primary"></div>
             </div>
-            <div v-else id="chart"></div>
+            <div v-else ref="chartEl"></div>
           </div>
         </div>
       </div>
@@ -148,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from 'vue'
 import { useReportsStore } from '~/stores/reports'
 import { useShippingStore } from '~/stores/shipping'
 import { useNotification } from '~/composables/useNotification'
@@ -163,9 +216,14 @@ const shippingStore = useShippingStore()
 const { error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
 
-const months = ref(12)
+const _currentYear  = typeof window !== 'undefined' ? new Date().getFullYear() : 2026
+const yearOptions   = [_currentYear, _currentYear - 1, _currentYear - 2, _currentYear - 3]
+
+const months        = ref(12)
 const countryFilter = ref<string>('')
+const yearFilter    = ref<number>(_currentYear)
 const exportingFormat = ref<'pdf' | 'excel' | null>(null)
+const chartEl       = ref<HTMLElement | null>(null)
 let chartInstance: any = null
 
 /** Liste des destinations actives, triées alphabétiquement par pays. */
@@ -205,15 +263,21 @@ const trendIcon = (trend?: string) => {
 const renderChart = async () => {
   await nextTick()
   if (typeof window === 'undefined' || !(window as any).ApexCharts) return
-  const el = document.querySelector('#chart')
-  if (!el) return
+  if (!chartEl.value) return
 
-  const labels = reportsStore.monthly?.labels || []
-  const data = reportsStore.monthly?.data || []
-
+  const labels     = reportsStore.monthly?.labels || []
+  const data       = reportsStore.monthly?.data   || []
   const seriesName = `Volume d'affaires (${revenueCurrency.value})`
 
-  const options = {
+  if (chartInstance) {
+    chartInstance.updateOptions({
+      series: [{ name: seriesName, data }],
+      xaxis:  { categories: labels },
+    })
+    return
+  }
+
+  chartInstance = new (window as any).ApexCharts(chartEl.value, {
     series: [{ name: seriesName, data }],
     chart: { height: 350, type: 'area', toolbar: { show: false } },
     dataLabels: { enabled: false },
@@ -228,26 +292,29 @@ const renderChart = async () => {
         ],
       },
     },
-    xaxis: { categories: labels },
+    xaxis:   { categories: labels },
     tooltip: { y: { formatter: (v: number) => formatCurrency(v, revenueCurrency.value) } },
-  }
+  })
+  chartInstance.render()
+}
 
+onBeforeUnmount(() => {
   if (chartInstance) {
-    chartInstance.updateOptions({ series: [{ name: seriesName, data }], xaxis: { categories: labels } })
-  } else {
-    chartInstance = new (window as any).ApexCharts(el, options)
-    chartInstance.render()
+    chartInstance.destroy()
+    chartInstance = null
   }
-}
+})
 
-const onMonthsChange = async () => {
-  await reportsStore.fetchStats(months.value, countryFilter.value || null)
+const applyFilters = async () => {
+  await reportsStore.fetchStats(months.value, countryFilter.value || null, yearFilter.value)
   renderChart()
 }
 
-const onCountryChange = async () => {
-  await reportsStore.fetchStats(months.value, countryFilter.value || null)
-  renderChart()
+const resetFilters = async () => {
+  countryFilter.value = ''
+  months.value        = 12
+  yearFilter.value    = new Date().getFullYear()
+  await applyFilters()
 }
 
 const onExport = async (format: 'pdf' | 'excel') => {

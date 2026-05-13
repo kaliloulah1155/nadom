@@ -125,6 +125,12 @@
                   <span>Accompagnement</span>
                 </NuxtLink>
               </li>
+              <li v-can="['list', 'guide-bookings']" class="nav-item">
+                <NuxtLink to="/admin/guide-bookings" class="nav-link py-1" :class="{ 'active': isActive('/admin/guide-bookings') }">
+                  <i class="bi bi-calendar-check"></i>
+                  <span>Réservations guides</span>
+                </NuxtLink>
+              </li>
               <li v-can="['list', 'visa-applications']" class="nav-item">
                 <NuxtLink to="/admin/visas" class="nav-link py-1" :class="{ 'active': isActive('/admin/visas') }">
                   <i class="bi bi-passport"></i>
@@ -483,6 +489,7 @@ const isVoyagesSectionActive = computed(
   () =>
     isActive('/admin/guides') ||
     isActive('/admin/guide-accompaniment-services') ||
+    isActive('/admin/guide-bookings') ||
     isActive('/admin/visas') ||
     isActive('/admin/pricing')
 )
@@ -542,6 +549,7 @@ const pageTitle = computed(() => {
     '/admin/users/roles': 'Gestion des Profils',
     '/admin/guides': 'Gestion des guides',
     '/admin/guide-accompaniment-services': "Services d'accompagnement (Guides)",
+    '/admin/guide-bookings': 'Réservations guides',
     '/admin/visas': 'Gestion des visas',
     '/admin/pricing': 'Gestion des tarifs',
     '/admin/blog': 'Gestion du blog',
@@ -568,32 +576,49 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-const toggleFretMenu = () => { fretMenuOpen.value = !fretMenuOpen.value }
-const togglePSMenu = () => { psMenuOpen.value = !psMenuOpen.value }
-const toggleVoyagesMenu = () => { voyagesMenuOpen.value = !voyagesMenuOpen.value }
-const toggleContenuMenu = () => { contenuMenuOpen.value = !contenuMenuOpen.value }
-const toggleSupportMenu = () => { supportMenuOpen.value = !supportMenuOpen.value }
-const toggleUsersMenu = () => { usersMenuOpen.value = !usersMenuOpen.value }
+/** Ferme tous les menus puis ouvre celui demandé (accordéon).
+ *  Si on reclique sur le menu déjà ouvert, il se referme. */
+type MenuKey = 'fret' | 'ps' | 'voyages' | 'contenu' | 'support' | 'users'
+
+const menuState: Record<MenuKey, ReturnType<typeof ref<boolean>>> = {
+  fret:    fretMenuOpen,
+  ps:      psMenuOpen,
+  voyages: voyagesMenuOpen,
+  contenu: contenuMenuOpen,
+  support: supportMenuOpen,
+  users:   usersMenuOpen,
+}
+
+function openMenu(key: MenuKey) {
+  const wasOpen = menuState[key].value
+  Object.values(menuState).forEach(m => { m.value = false })
+  menuState[key].value = !wasOpen
+}
+
+const toggleFretMenu    = () => openMenu('fret')
+const togglePSMenu      = () => openMenu('ps')
+const toggleVoyagesMenu = () => openMenu('voyages')
+const toggleContenuMenu = () => openMenu('contenu')
+const toggleSupportMenu = () => openMenu('support')
+const toggleUsersMenu   = () => openMenu('users')
 
 watch(
   () => route.path,
   (path) => {
+    // Ferme tout puis ouvre uniquement la section courante
+    Object.values(menuState).forEach(m => { m.value = false })
+
     if (path.startsWith('/admin/requests') || path.startsWith('/admin/shipments') || path.startsWith('/admin/destinations') || path.startsWith('/admin/shipping')) {
       fretMenuOpen.value = true
-    }
-    if (path.startsWith('/admin/categories') || path.startsWith('/admin/products') || path.startsWith('/admin/personal-shopping')) {
+    } else if (path.startsWith('/admin/categories') || path.startsWith('/admin/products') || path.startsWith('/admin/personal-shopping')) {
       psMenuOpen.value = true
-    }
-    if (path.startsWith('/admin/guides') || path.startsWith('/admin/guide-accompaniment') || path.startsWith('/admin/visas') || path.startsWith('/admin/pricing')) {
+    } else if (path.startsWith('/admin/guides') || path.startsWith('/admin/guide-accompaniment') || path.startsWith('/admin/guide-bookings') || path.startsWith('/admin/visas') || path.startsWith('/admin/pricing')) {
       voyagesMenuOpen.value = true
-    }
-    if (path.startsWith('/admin/blog') || path.startsWith('/admin/faq') || path.startsWith('/admin/home-services') || path.startsWith('/admin/site-pages') || path.startsWith('/admin/footer') || path.startsWith('/admin/contact-leads')) {
+    } else if (path.startsWith('/admin/blog') || path.startsWith('/admin/faq') || path.startsWith('/admin/home-services') || path.startsWith('/admin/site-pages') || path.startsWith('/admin/footer') || path.startsWith('/admin/contact-leads')) {
       contenuMenuOpen.value = true
-    }
-    if (path.startsWith('/admin/support') || path.startsWith('/admin/reports') || path.startsWith('/admin/settings')) {
+    } else if (path.startsWith('/admin/support') || path.startsWith('/admin/reports') || path.startsWith('/admin/settings')) {
       supportMenuOpen.value = true
-    }
-    if (path.startsWith('/admin/users') || path.startsWith('/admin/activity-logs') || path.startsWith('/admin/countries')) {
+    } else if (path.startsWith('/admin/users') || path.startsWith('/admin/activity-logs') || path.startsWith('/admin/countries')) {
       usersMenuOpen.value = true
     }
   },

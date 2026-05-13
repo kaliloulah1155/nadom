@@ -213,7 +213,10 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
     getCompletedRequests: (state) => state.requests.filter(r => r.status === 'delivered'),
     totalRequests: (state) => state.requestsMeta.total,
     totalRevenue: (state) => state.requests.reduce((t, r) => t + (r.quotedPrice || 0), 0),
-    getProductsByCategory: (state) => (categoryId: string) => state.products.filter((p: any) => (p.category_id ?? p.categoryId) === categoryId),
+    getProductsByCategory: (state) => (categoryId: string | number | null | undefined) => {
+      const id = categoryId === null || categoryId === undefined ? '' : String(categoryId)
+      return state.products.filter((p: any) => String(p.category_id ?? p.categoryId ?? '') === id)
+    },
     getProductById: (state) => (id: string | number) => state.products.find((p: any) => String(p.id) === String(id))
   },
 
