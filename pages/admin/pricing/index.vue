@@ -21,17 +21,17 @@
     <!-- Loading -->
     <div v-if="pricingStore.loading && services.length === 0" class="text-center py-5">
       <div class="spinner-border text-primary"></div>
-      <p class="text-muted mt-3 mb-0">Chargement des services...</p>
+      <p class="text-muted mt-3 mb-0">{{ t('admin.pricing.loadingServices') }}</p>
     </div>
 
     <!-- Empty state -->
     <div v-else-if="!pricingStore.loading && services.length === 0 && !pricingStore.error" class="card border-0 shadow-sm">
       <div class="card-body text-center py-5">
         <i class="bi bi-tag fs-1 text-muted d-block mb-3"></i>
-        <h5 class="mb-2">Aucun service configuré</h5>
+        <h5 class="mb-2">{{ t('admin.pricing.noServices') }}</h5>
         <p class="text-muted mb-4">Commencez par créer votre premier service pour définir les tarifs affichés aux clients.</p>
         <button class="btn btn-primary" @click="openModal()">
-          <i class="bi bi-plus-lg me-2"></i>Créer un service
+          <i class="bi bi-plus-lg me-2"></i>{{ t('admin.pricing.createService') }}
         </button>
       </div>
     </div>
@@ -136,7 +136,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                 {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
@@ -150,6 +150,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePricingStore } from '~/stores/pricing'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
@@ -162,6 +164,7 @@ const pricingStore = usePricingStore()
 const psStore = usePersonalShoppingStore()
 const { success, error } = useNotification()
 const { formatCurrency } = useFormatters()
+const { categoryLabel } = useCategoryLabel()
 
 const services = computed(() => pricingStore.services)
 
@@ -175,7 +178,7 @@ const currencies = computed(() => {
     .map((c: any) => ({
       uuid: c.uuid,
       code: (c.code || c.label || '').toString().toUpperCase(),
-      label: c.label || c.code || '',
+      label: categoryLabel(c),
     }))
     .filter((c: any) => c.code)
   return list.length > 0 ? list : [{ uuid: 'xof', code: 'XOF', label: 'FCFA (XOF)' }]
@@ -272,7 +275,7 @@ const saveService = async () => {
 }
 
 const deleteService = async (id: number) => {
-  if (confirm('Supprimer ce service ?')) {
+  if (confirm(t('admin.confirm.deleteProduct'))) {
     await pricingStore.deleteService(id)
     success('Service supprimé')
     await fetchServices(pricingStore.servicesMeta.currentPage)

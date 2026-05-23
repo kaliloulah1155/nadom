@@ -2,17 +2,17 @@
   <div>
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
       <div class="flex-grow-1" style="min-width: 0;">
-        <h4 class="mb-1">Tarifs au kilo</h4>
+        <h4 class="mb-1">{{ t('admin.shippingModes.title') }}</h4>
         <p class="text-muted mb-0">
-          Fixez le prix au kilo pour chaque destination, selon que la marchandise voyage par <strong>avion express</strong>, <strong>avion standard</strong> ou par <strong>bateau</strong>. Ce sont ces tarifs qui s'affichent à vos clients dans le calculateur.
+          {{ t('admin.shippingModes.subtitle') }}
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
         <NuxtLink to="/admin/destinations" class="btn btn-outline-secondary btn-sm">
-          <i class="bi bi-geo-alt me-1"></i>Destinations
+          <i class="bi bi-geo-alt me-1"></i>{{ t('admin.shippingModes.linkDestinations') }}
         </NuxtLink>
         <button v-can="['create', 'shipping-modes']" type="button" class="btn btn-primary" @click="openModal()">
-          <i class="bi bi-plus-lg me-2"></i>Nouveau tarif
+          <i class="bi bi-plus-lg me-2"></i>{{ t('admin.shippingModes.newRate') }}
         </button>
       </div>
     </div>
@@ -22,23 +22,23 @@
         <div class="row g-2 align-items-end">
           <div class="col-md-5">
             <label class="form-label small text-muted mb-1 d-flex align-items-center gap-2">
-              Filtrer par pays
+              {{ t('admin.shippingModes.filterByCountry') }}
               <span v-if="countriesStore.loading" class="spinner-border spinner-border-sm text-primary" style="width: .8rem; height: .8rem;" role="status" aria-hidden="true"></span>
             </label>
             <select v-model="filterCountryUuid" class="form-select form-select-sm" :disabled="countriesStore.loading" @change="reload(1)">
-              <option value="">{{ countriesStore.loading ? 'Chargement des pays…' : '— Tous —' }}</option>
+              <option value="">{{ countriesStore.loading ? t('admin.shippingModes.loadingCountriesEllipsis') : t('admin.common.allNeutral') }}</option>
               <option v-for="opt in destinationChoices" :key="opt.id" :value="opt.id">
                 {{ opt.flag ? `${opt.flag} ` : '' }}{{ opt.country }}
               </option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Mode</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.shipments.mode') }}</label>
             <select v-model="filterMode" class="form-select form-select-sm" @change="reload(1)">
-              <option value="">— Tous —</option>
-              <option value="air_express">Avion express</option>
-              <option value="air_normal">Avion standard</option>
-              <option value="sea">Bateau</option>
+              <option value="">{{ t('admin.common.allNeutral') }}</option>
+              <option value="air_express">{{ t('admin.shippingModes.airExpress') }}</option>
+              <option value="air_normal">{{ t('admin.shippingModes.airStandard') }}</option>
+              <option value="sea">{{ t('admin.shippingModes.boat') }}</option>
             </select>
           </div>
         </div>
@@ -53,17 +53,17 @@
         <table class="table table-hover mb-0 align-middle">
           <thead class="table-light">
             <tr>
-              <th>Destination</th>
-              <th>Mode</th>
-              <th>Délai indicatif</th>
-              <th>Tarif / kg</th>
+              <th>{{ t('admin.shippingModes.destinationCol') }}</th>
+              <th>{{ t('admin.shipments.mode') }}</th>
+              <th>{{ t('admin.shippingModes.indicativeDelay') }}</th>
+              <th>{{ t('admin.shippingModes.ratePerKg') }}</th>
               <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="cfg.modes.length === 0">
               <td colspan="5" class="text-center py-5 text-muted">
-                Aucun tarif pour le moment. Commencez par créer une destination, puis ajoutez vos prix au kilo (avion express, avion standard, bateau).
+                {{ t('admin.shippingModes.noRatesHint') }}
               </td>
             </tr>
             <tr v-for="m in cfg.modes" :key="m.id">
@@ -108,48 +108,48 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier' : 'Nouveau' }} tarif</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            <h5 class="modal-title">{{ editing ? t('admin.shippingModes.modalEdit') : t('admin.shippingModes.modalNew') }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" :aria-label="t('admin.common.close')"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body">
               <div class="mb-3">
                 <label class="form-label d-flex align-items-center gap-2">
-                  Pays de destination *
+                  {{ t('admin.shippingModes.destinationCountryLabel') }}
                   <span v-if="countriesStore.loading" class="spinner-border spinner-border-sm text-primary" style="width: .85rem; height: .85rem;" role="status" aria-hidden="true"></span>
                 </label>
                 <select v-model="form.country_uuid" class="form-select" required :disabled="Boolean(editing) || countriesStore.loading">
-                  <option value="" disabled>{{ countriesStore.loading ? 'Chargement des pays…' : 'Choisir un pays' }}</option>
+                  <option value="" disabled>{{ countriesStore.loading ? t('admin.shippingModes.loadingCountriesEllipsis') : t('admin.shippingModes.chooseCountry') }}</option>
                   <option v-for="opt in destinationChoices" :key="opt.id" :value="opt.id">
                     {{ opt.flag ? `${opt.flag} ` : '' }}{{ opt.country }}
                   </option>
                 </select>
-                <small v-if="editing" class="text-muted">Pour changer de pays, supprimez ce tarif et recréez-en un nouveau.</small>
+                <small v-if="editing" class="text-muted">{{ t('admin.shippingModes.cannotChangeCountryHint') }}</small>
               </div>
               <div class="mb-3">
-                <label class="form-label">Mode *</label>
+                <label class="form-label">{{ t('admin.shipments.mode') }} *</label>
                 <select v-model="form.mode" class="form-select" required :disabled="Boolean(editing)">
-                  <option value="" disabled>Choisir un mode</option>
-                  <option value="air_express">Avion express</option>
-                  <option value="air_normal">Avion standard</option>
-                  <option value="sea">Bateau</option>
+                  <option value="" disabled>{{ t('admin.shippingModes.chooseMode') }}</option>
+                  <option value="air_express">{{ t('admin.shippingModes.airExpress') }}</option>
+                  <option value="air_normal">{{ t('admin.shippingModes.airStandard') }}</option>
+                  <option value="sea">{{ t('admin.shippingModes.boat') }}</option>
                 </select>
-                <small v-if="editing" class="text-muted">Le mode d'expédition ne peut pas être modifié.</small>
+                <small v-if="editing" class="text-muted">{{ t('admin.shippingModes.cannotChangeModeHint') }}</small>
               </div>
               <div class="mb-3">
-                <label class="form-label">Délai indicatif</label>
-                <input v-model="form.duration" type="text" class="form-control" placeholder="Ex: 5–7 jours" />
+                <label class="form-label">{{ t('admin.shippingModes.indicativeDelay') }}</label>
+                <input v-model="form.duration" type="text" class="form-control" :placeholder="t('admin.shippingModes.delayExample')" />
               </div>
               <div class="mb-0">
-                <label class="form-label">Coût par kg *</label>
+                <label class="form-label">{{ t('admin.shippingModes.costPerKg') }} *</label>
                 <input v-model.number="form.cost_per_kg" type="number" class="form-control" min="0" step="0.01" required />
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -160,6 +160,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useCountriesStore } from '~/stores/countries'
 import { useShippingConfigStore, type AdminDestinationRow, type AdminShippingModeRow } from '~/stores/shippingConfig'
@@ -334,7 +336,7 @@ const save = async () => {
         duration: form.duration.trim() || null,
         cost_per_kg: form.cost_per_kg,
       })
-      success('Tarif mis à jour')
+      success(t('admin.shippingModes.updated'))
     } else {
       if (!form.country_uuid) throw new Error('Choisissez un pays.')
       const destinationId = await findOrCreateDestinationForCountry(form.country_uuid)
@@ -344,25 +346,25 @@ const save = async () => {
         duration: form.duration.trim() || null,
         cost_per_kg: form.cost_per_kg,
       })
-      success('Tarif créé')
+      success(t('admin.shippingModes.created'))
     }
     modalInstance?.hide()
     await reload(1)
   } catch (e: any) {
-    notifyError(e.message || 'Erreur')
+    notifyError(e.message || t('admin.messages.genericError'))
   } finally {
     saving.value = false
   }
 }
 
 const onDelete = async (m: AdminShippingModeRow) => {
-  if (!confirm('Supprimer ce tarif ?')) return
+  if (!confirm(t('admin.confirm.deleteRate'))) return
   try {
     await cfg.deleteMode(m.id)
-    success('Tarif supprimé')
+    success(t('admin.shippingModes.deleted'))
     await reload()
   } catch (e: any) {
-    notifyError(e.message || 'Erreur')
+    notifyError(e.message || t('admin.messages.genericError'))
   }
 }
 

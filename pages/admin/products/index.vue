@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des produits</h4>
-        <p class="text-muted mb-0">{{ psStore.productsMeta.total }} produits configurés</p>
+        <h4 class="mb-1">{{ t('admin.products.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.products.totalCount', { n: psStore.productsMeta.total }) }}</p>
       </div>
       <button v-can="['create', 'products']" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau produit
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.products.newProduct') }}
       </button>
     </div>
 
@@ -16,25 +16,25 @@
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <div class="col-md-4">
-            <label class="form-label small text-muted mb-1">Recherche</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.common.search') }}</label>
             <div class="input-group">
               <span class="input-group-text bg-transparent border-end-0">
                 <i class="bi bi-search text-muted"></i>
               </span>
-              <input v-model="searchQuery" type="text" class="form-control border-start-0" placeholder="Rechercher un produit..." @input="debouncedFetch" />
+              <input v-model="searchQuery" type="text" class="form-control border-start-0" :placeholder="t('admin.products.searchPlaceholder')" @input="debouncedFetch" />
             </div>
           </div>
           <div class="col-md-4">
-            <label class="form-label small text-muted mb-1">Catégorie produit</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.products.category') }}</label>
             <select v-model="categoryFilter" class="form-select" @change="fetchProducts(1)">
-              <option value="">Toutes les catégories</option>
+              <option value="">{{ t('admin.products.allCategories') }}</option>
               <option v-for="cat in productCategories" :key="cat.uuid" :value="cat.uuid">
-                {{ cat.label }}
+                {{ categoryLabel(cat) }}
               </option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Lignes / page</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.categories.linesPerPage') }}</label>
             <select
               :value="psStore.productsMeta.perPage"
               class="form-select"
@@ -46,7 +46,7 @@
             </select>
           </div>
           <div class="col-md-2 text-md-end small text-muted">
-            Page {{ psStore.productsMeta.currentPage }} / {{ psStore.productsMeta.lastPage }}
+            {{ t('admin.pagination.pageOf', { current: psStore.productsMeta.currentPage, last: psStore.productsMeta.lastPage }) }}
           </div>
         </div>
       </div>
@@ -58,11 +58,11 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="bg-light">
             <tr>
-              <th class="px-4 py-3 border-0">Produit</th>
-              <th class="py-3 border-0">Catégorie</th>
-              <th class="py-3 border-0">Prix</th>
-              <th class="py-3 border-0">Description</th>
-              <th class="py-3 border-0 text-end px-4">Actions</th>
+              <th class="px-4 py-3 border-0">{{ t('admin.products.productCol') }}</th>
+              <th class="py-3 border-0">{{ t('admin.products.category') }}</th>
+              <th class="py-3 border-0">{{ t('admin.products.price') }}</th>
+              <th class="py-3 border-0">{{ t('admin.products.description') }}</th>
+              <th class="py-3 border-0 text-end px-4">{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -96,7 +96,7 @@
             <tr v-if="products.length === 0">
               <td colspan="5" class="text-center py-5">
                 <i class="bi bi-box-seam fs-1 text-muted mb-3 d-block"></i>
-                <p class="text-muted mb-0">Aucun produit trouvé</p>
+                <p class="text-muted mb-0">{{ t('admin.products.noProducts') }}</p>
               </td>
             </tr>
           </tbody>
@@ -118,17 +118,20 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingProduct ? 'Modifier' : 'Nouveau' }} produit</h5>
+            <h5 class="modal-title">{{ editingProduct ? t('admin.products.modalEdit') : t('admin.products.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveProduct">
             <div class="modal-body">
               <ul class="nav nav-tabs mb-3">
                 <li class="nav-item">
-                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#prod-fr">Français</button>
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#prod-fr">{{ t('admin.common.french') }}</button>
                 </li>
                 <li class="nav-item">
-                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#prod-en">English</button>
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#prod-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#prod-zh">{{ t('admin.common.chinese') }}</button>
                 </li>
               </ul>
 
@@ -157,6 +160,18 @@
                     </ClientOnly>
                   </div>
                 </div>
+                <div class="tab-pane fade" id="prod-zh">
+                  <div class="mb-3">
+                    <label class="form-label">产品名称 (中文)</label>
+                    <input v-model="form.name_zh" type="text" class="form-control" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">描述 (中文)</label>
+                    <ClientOnly>
+                      <WysiwygEditor v-model="form.description_zh" height="180px" />
+                    </ClientOnly>
+                  </div>
+                </div>
               </div>
 
               <div class="row g-3">
@@ -164,10 +179,10 @@
                   <label class="form-label">Catégorie *</label>
                   <select v-model="form.category_id" class="form-select" required>
                     <option value="">
-                      {{ loadingCategories ? 'Chargement...' : 'Sélectionnez une catégorie' }}
+                      {{ loadingCategories ? t('admin.common.loading') : t('admin.products.selectCategory') }}
                     </option>
                     <option v-for="cat in productCategories" :key="cat.uuid" :value="cat.uuid">
-                      {{ cat.label }}
+                      {{ categoryLabel(cat) }}
                     </option>
                   </select>
                 </div>
@@ -211,10 +226,10 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving || isUploading">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving || isUploading">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving || isUploading">
                 <span v-if="saving || isUploading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Enregistrement...' : isUploading ? 'Upload...' : 'Enregistrer' }}
+                {{ saving ? t('admin.common.savingDots') : isUploading ? t('admin.products.upload') : t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -225,6 +240,9 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+const { categoryLabel } = useCategoryLabel()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotification } from '~/composables/useNotification'
@@ -255,7 +273,7 @@ const currencies = computed(() => {
     .map((c: any) => ({
       uuid: c.uuid,
       code: (c.code || c.label || '').toString().toUpperCase(),
-      label: c.label || c.code || '',
+      label: categoryLabel(c),
     }))
     .filter((c: any) => c.code)
   return list.length > 0 ? list : [{ uuid: 'xof', code: 'XOF', label: 'CFA' }]
@@ -275,8 +293,10 @@ const form = reactive({
   category_id: '',
   name_fr: '',
   name_en: '',
+  name_zh: '',
   description_fr: '',
   description_en: '',
+  description_zh: '',
   price: 0,
   currency: 'XOF',
   image: '',
@@ -308,12 +328,12 @@ onMounted(async () => {
 })
 
 const getCategoryName = (id: string | null | number) => {
-  if (id === null || id === undefined || id === '') return 'Aucune'
+  if (id === null || id === undefined || id === '') return t('admin.categories.none')
   const idStr = String(id)
   const cat = (psStore.categories || []).find((c: any) =>
     String(c.uuid) === idStr || String(c.id) === idStr
   )
-  return cat ? cat.label : 'Inconnue'
+  return cat ? categoryLabel(cat) : '—'
 }
 
 const resolveCategoryUuid = (categoryId: any): string => {
@@ -330,7 +350,7 @@ const handleImageUpload = async (event: any) => {
   if (!file) return
 
   if (file.size > 2 * 1024 * 1024) {
-    error('L\'image est trop lourde (max 2Mo)')
+    error(t('admin.products.imageTooHeavy'))
     return
   }
 
@@ -344,10 +364,10 @@ const handleImageUpload = async (event: any) => {
     if (res.success && res.data?.url) {
       form.image = res.data.url
     } else {
-      error(res.message || 'Erreur lors de l\'upload')
+      error(res.message || t('admin.products.uploadError'))
     }
   } catch (err: any) {
-    error('Erreur lors de l\'upload de l\'image')
+    error(t('admin.products.uploadError'))
   } finally {
     isUploading.value = false
   }
@@ -367,8 +387,10 @@ const openModal = async (prod?: any) => {
       category_id: resolveCategoryUuid(prod.category_id),
       name_fr: prod.name_fr || '',
       name_en: prod.name_en || '',
+      name_zh: prod.name_zh || '',
       description_fr: prod.description_fr || '',
       description_en: prod.description_en || '',
+      description_zh: prod.description_zh || '',
       price: Number(prod.price) || 0,
       currency: prod.currency || 'XOF',
       image: prod.image || '',
@@ -381,8 +403,10 @@ const openModal = async (prod?: any) => {
       category_id: productCategories.value[0]?.uuid || '',
       name_fr: '',
       name_en: '',
+      name_zh: '',
       description_fr: '',
       description_en: '',
+      description_zh: '',
       price: 0,
       currency: currencies.value[0]?.code || 'XOF',
       image: '',
@@ -398,24 +422,24 @@ const saveProduct = async () => {
   try {
     if (editingProduct.value) {
       await psStore.updateProduct(editingProduct.value.id, { ...form })
-      success('Produit modifié')
+      success(t('admin.products.updated'))
     } else {
       await psStore.createProduct({ ...form })
-      success('Produit créé')
+      success(t('admin.products.created'))
     }
     modalInstance?.hide()
     await fetchProducts(psStore.productsMeta.currentPage)
   } catch (err) {
-    error('Erreur lors de l\'enregistrement')
+    error(t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
 }
 
 const confirmDelete = async (id: string) => {
-  if (confirm('Supprimer ce produit ?')) {
+  if (confirm(t('admin.confirm.deleteProduct'))) {
     await psStore.deleteProduct(id)
-    success('Produit supprimé')
+    success(t('admin.products.deleted'))
     await fetchProducts(psStore.productsMeta.currentPage)
   }
 }

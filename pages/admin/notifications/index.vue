@@ -59,7 +59,7 @@
     <div v-else-if="filteredItems.length === 0" class="card border-0 shadow-sm">
       <div class="card-body text-center py-5 text-muted">
         <i class="bi bi-bell-slash fs-1 d-block mb-3 opacity-50"></i>
-        <h6>Aucune notification</h6>
+        <h6>{{ t('admin.notifications.none') }}</h6>
         <p class="small mb-0">Vous êtes à jour !</p>
       </div>
     </div>
@@ -134,6 +134,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationsStore, type AppNotification } from '~/stores/notifications'
 

@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="mb-4">
-      <h4 class="mb-1">Personal Shopping</h4>
+      <h4 class="mb-1">{{ t('admin.personalShoppingHub.title') }}</h4>
       <p class="text-muted mb-0">
-        Accès rapide au catalogue boutique et aux demandes clients.
+        {{ t('admin.personalShoppingHub.subtitle') }}
       </p>
     </div>
 
@@ -17,8 +17,8 @@
                   <i class="bi bi-bag-check fs-4"></i>
                 </span>
                 <div>
-                  <h5 class="mb-0 text-dark">Demandes</h5>
-                  <small class="text-muted">Suivi des demandes PS</small>
+                  <h5 class="mb-0 text-dark">{{ t('admin.personalShoppingHub.requests') }}</h5>
+                  <small class="text-muted">{{ t('admin.personalShoppingHub.trackPs') }}</small>
                 </div>
               </div>
             </div>
@@ -35,8 +35,8 @@
                   <i class="bi bi-tags fs-4"></i>
                 </span>
                 <div>
-                  <h5 class="mb-0 text-dark">Catégories</h5>
-                  <small class="text-muted">Types de lignes catalogue</small>
+                  <h5 class="mb-0 text-dark">{{ t('admin.personalShoppingHub.categories') }}</h5>
+                  <small class="text-muted">{{ t('admin.personalShoppingHub.catalogLines') }}</small>
                 </div>
               </div>
             </div>
@@ -53,8 +53,8 @@
                   <i class="bi bi-grid-3x3-gap fs-4"></i>
                 </span>
                 <div>
-                  <h5 class="mb-0 text-dark">Produits</h5>
-                  <small class="text-muted">Fiches produits boutique</small>
+                  <h5 class="mb-0 text-dark">{{ t('admin.personalShoppingHub.products') }}</h5>
+                  <small class="text-muted">{{ t('admin.personalShoppingHub.productSheets') }}</small>
                 </div>
               </div>
             </div>
@@ -71,8 +71,8 @@
                   <i class="bi bi-box-arrow-up-right fs-4"></i>
                 </span>
                 <div>
-                  <h5 class="mb-0 text-dark">Page vitrine <i class="bi bi-box-arrow-up-right small"></i></h5>
-                  <small class="text-muted">Aperçu côté client</small>
+                  <h5 class="mb-0 text-dark">{{ t('admin.personalShoppingHub.storefront') }} <i class="bi bi-box-arrow-up-right small"></i></h5>
+                  <small class="text-muted">{{ t('admin.personalShoppingHub.clientPreview') }}</small>
                 </div>
               </div>
             </div>
@@ -84,6 +84,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 definePageMeta({
   layout: 'admin',
 })

@@ -15,7 +15,7 @@
           <li v-can="['view', 'dashboard']" class="nav-item">
             <NuxtLink to="/admin/dashboard" class="nav-link" :class="{ 'active': isActive('/admin/dashboard') }">
               <i class="bi bi-speedometer2"></i>
-              <span v-if="showSidebarText">Tableau de bord</span>
+              <span v-if="showSidebarText">{{ t('admin.nav.dashboard') }}</span>
             </NuxtLink>
           </li>
 
@@ -29,7 +29,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-box-seam"></i>
-                <span v-if="showSidebarText">Fret &amp; logistique</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.fretLogistics') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="fretMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -37,26 +37,26 @@
               <li v-can="['list', 'personal-shopping-requests']" class="nav-item">
                 <NuxtLink to="/admin/requests" class="nav-link py-1" :class="{ 'active': isActive('/admin/requests') }">
                   <i class="bi bi-bag-check"></i>
-                  <span>Demandes</span>
+                  <span>{{ t('admin.nav.requests') }}</span>
                   <span v-if="pendingRequestsCount > 0" class="badge bg-danger ms-auto">{{ pendingRequestsCount }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'shipments']" class="nav-item">
                 <NuxtLink to="/admin/shipments" class="nav-link py-1" :class="{ 'active': isActive('/admin/shipments') }">
                   <i class="bi bi-truck"></i>
-                  <span>Expéditions</span>
+                  <span>{{ t('admin.nav.shipments') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'destinations']" class="nav-item">
                 <NuxtLink to="/admin/destinations" class="nav-link py-1" :class="{ 'active': isActive('/admin/destinations') }">
                   <i class="bi bi-geo-alt"></i>
-                  <span>Destinations fret</span>
+                  <span>{{ t('admin.nav.freightDestinations') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'shipping-modes']" class="nav-item">
                 <NuxtLink to="/admin/shipping/modes" class="nav-link py-1" :class="{ 'active': isActive('/admin/shipping/modes') }">
                   <i class="bi bi-speedometer"></i>
-                  <span>Tarifs au kg</span>
+                  <span>{{ t('admin.nav.ratesPerKg') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -72,7 +72,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-shop"></i>
-                <span v-if="showSidebarText">Catalogue boutique</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.catalogShop') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="psMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -80,19 +80,19 @@
               <li v-can="['list', 'categories']" class="nav-item">
                 <NuxtLink to="/admin/categories" class="nav-link py-1" :class="{ 'active': isActive('/admin/categories') }">
                   <i class="bi bi-tags"></i>
-                  <span>Catégories</span>
+                  <span>{{ t('admin.nav.categories') }}</span>
                 </NuxtLink>
               </li>
               <li class="nav-item">
                 <NuxtLink to="/admin/products" class="nav-link py-1" :class="{ 'active': isActive('/admin/products') }">
                   <i class="bi bi-grid-3x3-gap"></i>
-                  <span>Produits</span>
+                  <span>{{ t('admin.nav.products') }}</span>
                 </NuxtLink>
               </li>
               <li class="nav-item">
                 <NuxtLink to="/admin/personal-shopping" class="nav-link py-1" :class="{ 'active': isActive('/admin/personal-shopping') }">
                   <i class="bi bi-cart4"></i>
-                  <span>Personal Shopping</span>
+                  <span>{{ t('admin.nav.personalShopping') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -108,7 +108,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-airplane"></i>
-                <span v-if="showSidebarText">Voyages &amp; services</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.travelServices') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="voyagesMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -116,31 +116,31 @@
               <li v-can="['list', 'guides']" class="nav-item">
                 <NuxtLink to="/admin/guides" class="nav-link py-1" :class="{ 'active': isActive('/admin/guides') }">
                   <i class="bi bi-person-badge"></i>
-                  <span>Guides</span>
+                  <span>{{ t('admin.nav.guides') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'guide-accompaniment-services']" class="nav-item">
                 <NuxtLink to="/admin/guide-accompaniment-services" class="nav-link py-1" :class="{ 'active': isActive('/admin/guide-accompaniment-services') }">
                   <i class="bi bi-briefcase"></i>
-                  <span>Accompagnement</span>
+                  <span>{{ t('admin.nav.accompaniment') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'guide-bookings']" class="nav-item">
                 <NuxtLink to="/admin/guide-bookings" class="nav-link py-1" :class="{ 'active': isActive('/admin/guide-bookings') }">
                   <i class="bi bi-calendar-check"></i>
-                  <span>Réservations guides</span>
+                  <span>{{ t('admin.nav.guideBookings') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'visa-applications']" class="nav-item">
                 <NuxtLink to="/admin/visas" class="nav-link py-1" :class="{ 'active': isActive('/admin/visas') }">
                   <i class="bi bi-passport"></i>
-                  <span>Visas</span>
+                  <span>{{ t('admin.nav.visas') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'visa-types']" class="nav-item">
                 <NuxtLink to="/admin/pricing" class="nav-link py-1" :class="{ 'active': isActive('/admin/pricing') }">
                   <i class="bi bi-currency-exchange"></i>
-                  <span>Grilles &amp; tarifs</span>
+                  <span>{{ t('admin.nav.gridsRates') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -156,7 +156,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-file-earmark-text"></i>
-                <span v-if="showSidebarText">Contenu du site</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.siteContent') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="contenuMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -164,37 +164,37 @@
               <li v-can="['list', 'blog-posts']" class="nav-item">
                 <NuxtLink to="/admin/blog" class="nav-link py-1" :class="{ 'active': isActive('/admin/blog') }">
                   <i class="bi bi-journal-text"></i>
-                  <span>Blog</span>
+                  <span>{{ t('admin.nav.blog') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'faq']" class="nav-item">
                 <NuxtLink to="/admin/faq" class="nav-link py-1" :class="{ 'active': isActive('/admin/faq') }">
                   <i class="bi bi-question-circle"></i>
-                  <span>FAQ</span>
+                  <span>{{ t('admin.nav.faq') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'home-services']" class="nav-item">
                 <NuxtLink to="/admin/home-services" class="nav-link py-1" :class="{ 'active': isActive('/admin/home-services') }">
                   <i class="bi bi-grid"></i>
-                  <span>Bloc accueil</span>
+                  <span>{{ t('admin.nav.homeBlock') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'site-static-pages']" class="nav-item">
                 <NuxtLink to="/admin/site-pages" class="nav-link py-1" :class="{ 'active': isActive('/admin/site-pages') }">
                   <i class="bi bi-file-earmark-richtext"></i>
-                  <span>À propos &amp; Contact</span>
+                  <span>{{ t('admin.nav.aboutContact') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'site-footer']" class="nav-item">
                 <NuxtLink to="/admin/footer" class="nav-link py-1" :class="{ 'active': isActive('/admin/footer') }">
                   <i class="bi bi-layout-text-window-reverse"></i>
-                  <span>Pied de page</span>
+                  <span>{{ t('admin.nav.footer') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'contact-leads']" class="nav-item">
                 <NuxtLink to="/admin/contact-leads" class="nav-link py-1" :class="{ 'active': isActive('/admin/contact-leads') }">
                   <i class="bi bi-mailbox"></i>
-                  <span>Demandes contact</span>
+                  <span>{{ t('admin.nav.contactLeads') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -210,7 +210,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-headset"></i>
-                <span v-if="showSidebarText">Support &amp; système</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.supportSystem') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="supportMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -218,19 +218,19 @@
               <li class="nav-item">
                 <NuxtLink to="/admin/support" class="nav-link py-1" :class="{ 'active': isActive('/admin/support') }">
                   <i class="bi bi-chat-dots"></i>
-                  <span>Support</span>
+                  <span>{{ t('admin.nav.support') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'reports']" class="nav-item">
                 <NuxtLink to="/admin/reports" class="nav-link py-1" :class="{ 'active': isActive('/admin/reports') }">
                   <i class="bi bi-bar-chart"></i>
-                  <span>Rapports</span>
+                  <span>{{ t('admin.nav.reports') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'global-settings']" class="nav-item">
                 <NuxtLink to="/admin/settings" class="nav-link py-1" :class="{ 'active': isActive('/admin/settings') }">
                   <i class="bi bi-gear"></i>
-                  <span>Paramètres</span>
+                  <span>{{ t('admin.nav.settings') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -246,7 +246,7 @@
             >
               <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-people"></i>
-                <span v-if="showSidebarText">Équipe &amp; accès</span>
+                <span v-if="showSidebarText">{{ t('admin.nav.teamAccess') }}</span>
               </div>
               <i v-if="showSidebarText" class="bi" :class="usersMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'" style="font-size: 0.8rem;"></i>
             </div>
@@ -254,25 +254,25 @@
               <li v-can="['list', 'users']" class="nav-item">
                 <NuxtLink to="/admin/users" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users' }">
                   <i class="bi bi-list-ul"></i>
-                  <span>Utilisateurs</span>
+                  <span>{{ t('admin.nav.users') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'countries']" class="nav-item">
                 <NuxtLink to="/admin/countries" class="nav-link py-1" :class="{ 'active': isActive('/admin/countries') }">
                   <i class="bi bi-globe"></i>
-                  <span>Pays</span>
+                  <span>{{ t('admin.nav.countries') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'roles']" class="nav-item">
                 <NuxtLink to="/admin/users/roles" class="nav-link py-1" :class="{ 'active': route.path === '/admin/users/roles' }">
                   <i class="bi bi-shield-lock"></i>
-                  <span>Rôles &amp; profils</span>
+                  <span>{{ t('admin.nav.rolesProfiles') }}</span>
                 </NuxtLink>
               </li>
               <li v-can="['list', 'activity-logs']" class="nav-item">
                 <NuxtLink to="/admin/activity-logs" class="nav-link py-1" :class="{ 'active': isActive('/admin/activity-logs') }">
                   <i class="bi bi-journal-check"></i>
-                  <span>Journal d'activité</span>
+                  <span>{{ t('admin.nav.activityLog') }}</span>
                 </NuxtLink>
               </li>
             </ul>
@@ -284,7 +284,7 @@
       <div class="sidebar-footer">
         <NuxtLink to="/" class="nav-link">
           <i class="bi bi-house"></i>
-          <span v-if="showSidebarText">Retour au site</span>
+          <span v-if="showSidebarText">{{ t('admin.nav.backToSite') }}</span>
         </NuxtLink>
       </div>
     </aside>
@@ -304,6 +304,37 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
+          <!-- Langue backoffice (FR / EN / 中文) -->
+          <div class="dropdown">
+            <button
+              class="btn btn-link d-flex align-items-center text-decoration-none"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <span :class="['fi', adminFlag, 'me-1']"></span>
+              <span class="d-none d-md-inline">{{ adminLangLabel }}</span>
+              <i class="bi bi-chevron-down ms-1 small"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <button type="button" class="dropdown-item" @click="switchAdminLocale('fr')">
+                  <span class="fi fi-fr me-2"></span>Français
+                </button>
+              </li>
+              <li>
+                <button type="button" class="dropdown-item" @click="switchAdminLocale('en')">
+                  <span class="fi fi-gb me-2"></span>English
+                </button>
+              </li>
+              <li>
+                <button type="button" class="dropdown-item" @click="switchAdminLocale('zh')">
+                  <span class="fi fi-cn me-2"></span>{{ t('nav.chinese') }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
           <!-- Notifications -->
           <div class="dropdown">
             <button class="btn btn-link bell-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" @click="onBellOpen">
@@ -314,18 +345,18 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
               <li class="d-flex justify-content-between align-items-center px-3 py-2">
-                <h6 class="mb-0">Notifications</h6>
+                <h6 class="mb-0">{{ t('admin.nav.notifications') }}</h6>
                 <button
                   v-if="notifStore.unread > 0"
                   class="btn btn-sm btn-link p-0 small"
                   @click.stop="notifStore.markAllRead()"
                 >
-                  Tout marquer lu
+                  {{ t('admin.nav.markAllRead') }}
                 </button>
               </li>
               <li><hr class="dropdown-divider my-0"></li>
               <li v-if="notifStore.items.filter(n => !n.is_read).length === 0" class="text-center text-muted small py-3">
-                Aucune notification non lue
+                {{ t('admin.nav.noUnreadNotifications') }}
               </li>
               <li v-for="n in notifStore.items.filter(n => !n.is_read).slice(0, 8)" :key="n.id">
                 <a
@@ -351,7 +382,7 @@
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <NuxtLink class="dropdown-item text-center small" to="/admin/notifications">Voir toutes</NuxtLink>
+                <NuxtLink class="dropdown-item text-center small" to="/admin/notifications">{{ t('admin.nav.viewAllNotifications') }}</NuxtLink>
               </li>
             </ul>
           </div>
@@ -370,9 +401,9 @@
               <i class="bi bi-chevron-down ms-1"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><NuxtLink class="dropdown-item" to="/admin/profile"><i class="bi bi-person me-2"></i>Mon profil</NuxtLink></li>
+              <li><NuxtLink class="dropdown-item" to="/admin/profile"><i class="bi bi-person me-2"></i>{{ t('admin.nav.myProfile') }}</NuxtLink></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#" @click.prevent="handleLogout"><i class="bi bi-box-arrow-right me-2"></i>Deconnexion</a></li>
+              <li><a class="dropdown-item text-danger" href="#" @click.prevent="handleLogout"><i class="bi bi-box-arrow-right me-2"></i>{{ t('admin.nav.logout') }}</a></li>
             </ul>
           </div>
         </div>
@@ -417,9 +448,9 @@
     >
       <div class="text-center">
         <div class="spinner-border text-primary mb-3" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{{ t('common.loading') }}</span>
         </div>
-        <p class="text-muted">Verification de l'acces...</p>
+        <p class="text-muted">{{ t('admin.verifyingAccess') }}</p>
       </div>
     </div>
   </div>
@@ -432,7 +463,24 @@ import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useNotification } from '~/composables/useNotification'
 
+const { t, locale, setLocale } = useI18n()
 const route = useRoute()
+
+const adminFlag = computed(() => {
+  if (locale.value === 'en') return 'fi-gb'
+  if (locale.value === 'zh') return 'fi-cn'
+  return 'fi-fr'
+})
+const adminLangLabel = computed(() => {
+  if (locale.value === 'en') return 'EN'
+  if (locale.value === 'zh') return 'ZH'
+  return 'FR'
+})
+
+function switchAdminLocale(lang: 'fr' | 'en' | 'zh') {
+  setLocale(lang)
+}
+
 const router = useRouter()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
@@ -443,10 +491,10 @@ const config = useRuntimeConfig()
 const formatRelativeTime = (iso: string) => {
   if (!iso) return ''
   const diff = (Date.now() - new Date(iso).getTime()) / 1000
-  if (diff < 60) return 'à l\'instant'
-  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`
-  return `il y a ${Math.floor(diff / 86400)} j`
+  if (diff < 60) return t('admin.time.justNow')
+  if (diff < 3600) return t('admin.time.minutesAgo', { n: Math.floor(diff / 60) })
+  if (diff < 86400) return t('admin.time.hoursAgo', { n: Math.floor(diff / 3600) })
+  return t('admin.time.daysAgo', { n: Math.floor(diff / 86400) })
 }
 
 const onBellOpen = () => {
@@ -540,34 +588,42 @@ const pendingRequestsCount = computed(() => psStore.getPendingRequests.length)
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
-    '/admin/dashboard': 'Tableau de bord',
-    '/admin/requests': 'Gestion des demandes',
-    '/admin/shipments': 'Gestion des expeditions',
-    '/admin/destinations': 'Destinations fret (calculateur)',
-    '/admin/shipping/modes': 'Tarifs au kg (calculateur)',
-    '/admin/users': 'Gestion des utilisateurs',
-    '/admin/users/roles': 'Gestion des Profils',
-    '/admin/guides': 'Gestion des guides',
-    '/admin/guide-accompaniment-services': "Services d'accompagnement (Guides)",
-    '/admin/guide-bookings': 'Réservations guides',
-    '/admin/visas': 'Gestion des visas',
-    '/admin/pricing': 'Gestion des tarifs',
-    '/admin/blog': 'Gestion du blog',
-    '/admin/faq': 'Gestion des FAQ',
-    '/admin/home-services': 'Services (accueil)',
-    '/admin/site-pages': 'Pages À propos & Contact',
-    '/admin/footer': 'Pied de page (site)',
-    '/admin/support': 'Support client',
-    '/admin/activity-logs': "Journal d'activité",
-    '/admin/countries': 'Pays (référentiel)',
-    '/admin/reports': 'Rapports',
-    '/admin/notifications': 'Notifications',
-    '/admin/settings': 'Paramètres',
-    '/admin/categories': 'Catégories',
-    '/admin/products': 'Produits',
-    '/admin/personal-shopping': 'Personal Shopping'
+    '/admin/dashboard': t('admin.pages.dashboard'),
+    '/admin/requests': t('admin.pages.requests'),
+    '/admin/shipments': t('admin.pages.shipments'),
+    '/admin/destinations': t('admin.pages.destinations'),
+    '/admin/shipping/modes': t('admin.pages.shippingModes'),
+    '/admin/users': t('admin.pages.users'),
+    '/admin/users/roles': t('admin.pages.roles'),
+    '/admin/guides': t('admin.pages.guides'),
+    '/admin/guide-accompaniment-services': t('admin.pages.guideServices'),
+    '/admin/guide-bookings': t('admin.pages.guideBookings'),
+    '/admin/visas': t('admin.pages.visas'),
+    '/admin/pricing': t('admin.pages.pricing'),
+    '/admin/blog': t('admin.pages.blog'),
+    '/admin/faq': t('admin.pages.faq'),
+    '/admin/home-services': t('admin.pages.homeServices'),
+    '/admin/site-pages': t('admin.pages.sitePages'),
+    '/admin/footer': t('admin.pages.footer'),
+    '/admin/support': t('admin.pages.support'),
+    '/admin/activity-logs': t('admin.pages.activityLogs'),
+    '/admin/countries': t('admin.pages.countries'),
+    '/admin/reports': t('admin.pages.reports'),
+    '/admin/notifications': t('admin.pages.notifications'),
+    '/admin/settings': t('admin.pages.settings'),
+    '/admin/categories': t('admin.pages.categories'),
+    '/admin/products': t('admin.pages.products'),
+    '/admin/personal-shopping': t('admin.pages.personalShopping'),
+    '/admin/contact-leads': t('admin.pages.contactLeads'),
   }
-  return titles[route.path] || 'Administration'
+  if (route.path.startsWith('/admin/requests/') && route.path !== '/admin/requests') {
+    return t('admin.pages.requests')
+  }
+  if (route.path.startsWith('/admin/shipments/') && route.path !== '/admin/shipments') {
+    const trackingId = String(route.params.id || '').slice(-8)
+    return trackingId ? t('admin.shipments.trackingTitle', { id: trackingId }) : t('admin.pages.shipments')
+  }
+  return titles[route.path] || t('admin.title')
 })
 
 
@@ -652,21 +708,17 @@ onMounted(async () => {
 
     const { $echo } = useNuxtApp() as any
     const pusher: any = $echo?.connector?.pusher
-    const { success: notifSuccess, warning: notifWarning } = useNotification()
     if (pusher?.connection) {
-      const showPing = (state: string, ok: boolean) => {
-        if (ok) notifSuccess(`Pusher connecte (${state})`, 2500)
-        else notifWarning(`Pusher: ${state}`, 4000)
-      }
+      const logState = (state: string) => console.log('[Pusher]', state)
       if (pusher.connection.state === 'connected') {
-        showPing('connected', true)
+        logState('connected')
       } else {
-        pusher.connection.bind('connected', () => showPing('connected', true))
-        pusher.connection.bind('failed', () => showPing('failed', false))
-        pusher.connection.bind('unavailable', () => showPing('unavailable', false))
+        pusher.connection.bind('connected', () => logState('connected'))
+        pusher.connection.bind('failed', () => console.warn('[Pusher] failed'))
+        pusher.connection.bind('unavailable', () => console.warn('[Pusher] unavailable'))
       }
     } else {
-      notifWarning('Pusher non initialise (verifier la cle dans nuxt.config.ts)', 5000)
+      console.warn('[Pusher] non initialise (verifier la cle dans nuxt.config.ts)')
     }
   } finally {
     loading.value = false

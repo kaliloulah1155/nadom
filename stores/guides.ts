@@ -21,6 +21,8 @@ export interface Guide {
   currency?: string | null
   description_fr: string | null
   description_en: string | null
+  description_zh?: string | null
+  specializations_zh?: string[]
   available: boolean
   created_at?: string
   updated_at?: string
@@ -60,6 +62,8 @@ interface GuidesState {
   guidesMeta: Meta
   bookings: GuideBooking[]
   bookingsMeta: Meta
+  myBookings: GuideBooking[]
+  myBookingsLoading: boolean
   loading: boolean
   error: string | null
 }
@@ -90,6 +94,8 @@ export const useGuidesStore = defineStore('guides', {
     guidesMeta: newMeta(15),
     bookings: [],
     bookingsMeta: newMeta(15),
+    myBookings: [],
+    myBookingsLoading: false,
     loading: false,
     error: null
   }),
@@ -101,8 +107,10 @@ export const useGuidesStore = defineStore('guides', {
     getGuidesByLanguage: (state) => (language: string) => state.guides.filter(g => g.languages?.includes(language)),
     getGuidesBySpecialization: (state) => (spec: string) =>
       state.guides.filter(g => g.specializations_fr?.includes(spec) || g.specializations_en?.includes(spec)),
-    getBookingsByUser: (state) => (userId: string) => state.bookings.filter(b => b.userId === userId),
-    getBookingsByGuide: (state) => (guideId: string) => state.bookings.filter(b => b.guideId === guideId),
+    getBookingsByUser: (state) => (userId: number | string) =>
+      state.myBookings.filter(b => String(b.user_id) === String(userId)),
+    getBookingsByGuide: (state) => (guideId: string) =>
+      state.myBookings.filter(b => b.guide_id === guideId),
     allCities: (state) => {
       const cities = new Set<string>()
       state.guides.forEach(g => g.cities?.forEach(c => cities.add(c)))
@@ -124,6 +132,26 @@ export const useGuidesStore = defineStore('guides', {
   },
 
   actions: {
+    /** Accompagnateurs (≠ documentation) — même liste que Admin → Guides, filtre « Accompagnateurs ». */
+    async fetchAccompanistsForBooking(): Promise<
+      Array<{ id: string; name: string; available?: boolean; citiesLabel?: string }>
+    > {
+      const api = useApi()
+      const res = await api.get<Guide[]>('/guides/booking-options')
+      if (!res.success || !Array.isArray(res.data)) {
+        return []
+      }
+      return res.data
+        .filter(g => g.kind !== 'documentation')
+        .map(g => ({
+          id: String(g.id),
+          name: String(g.name || '—').trim() || '—',
+          available: g.available,
+          citiesLabel: Array.isArray(g.cities) ? g.cities.slice(0, 2).join(', ') : '',
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+    },
+
     async fetchGuides(params: {
       page?: number
       limit?: number
@@ -201,20 +229,60 @@ export const useGuidesStore = defineStore('guides', {
       }
     },
 
+    async fetchMyBookings() {
+      this.myBookingsLoading = true
+      try {
+        const api = useApi()
+        const res = await api.get<any>('/guide-bookings')
+        if (res.success && res.data) {
+          const d = res.data
+          const rows = Array.isArray(d) ? d : d.data ?? []
+          this.myBookings = rows
+        }
+      } catch (_) {
+        this.myBookings = []
+      } finally {
+        this.myBookingsLoading = false
+      }
+    },
+
     async createBooking(bookingData: Partial<GuideBooking>) {
       this.loading = true
       try {
         const api = useApi()
         const res = await api.post<GuideBooking>('/guide-bookings', bookingData)
         if (res.success && res.data) {
-          this.bookings.unshift(res.data)
-          this.bookingsMeta.total++
+          this.myBookings.unshift(res.data)
           return res.data
         }
         throw new Error(res.message)
       } finally {
         this.loading = false
       }
+    },
+
+    async createBookingAdmin(bookingData: Record<string, unknown>) {
+      const api = useApi()
+      const res = await api.post<GuideBooking>('/guide-bookings/admin', bookingData)
+      if (res.success && res.data) {
+        this.bookings.unshift(res.data)
+        this.bookingsMeta.total++
+        return res.data
+      }
+      throw new Error(res.message || 'Création impossible')
+    },
+
+    async updateBooking(id: string, bookingData: Record<string, unknown>) {
+      const api = useApi()
+      const res = await api.put<GuideBooking>(`/guide-bookings/${id}`, bookingData)
+      if (res.success && res.data) {
+        const idx = this.bookings.findIndex(b => b.id === id)
+        if (idx !== -1) {
+          this.bookings[idx] = { ...this.bookings[idx], ...res.data }
+        }
+        return res.data
+      }
+      throw new Error(res.message || 'Mise à jour impossible')
     },
 
     async updateBookingStatus(id: string, status: GuideBooking['status']) {

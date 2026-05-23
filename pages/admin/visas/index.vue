@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des visas</h4>
+        <h4 class="mb-1">{{ t('admin.visas.title') }}</h4>
         <p class="text-muted mb-0">{{ visasStore.visaTypesMeta.total }} types de visa configurés</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
@@ -59,7 +59,7 @@
           <div class="card-footer bg-transparent border-0">
             <div class="d-flex w-100">
               <button class="btn btn-sm btn-outline-primary me-2" @click="openModal(visa)">
-                <i class="bi bi-pencil me-1"></i>Modifier
+                <i class="bi bi-pencil me-1"></i>{{ t('admin.common.edit') }}
               </button>
               <button class="btn btn-sm btn-outline-danger" @click="deleteVisa(visa.id)">
                 <i class="bi bi-trash"></i>
@@ -74,7 +74,7 @@
         <div class="card border-0 shadow-sm">
           <div class="card-body text-center py-5">
             <i class="bi bi-passport display-4 text-muted"></i>
-            <h5 class="mt-3">Aucun visa configuré</h5>
+            <h5 class="mt-3">{{ t('admin.visas.noVisas') }}</h5>
             <p class="text-muted">Configurez les types de visas disponibles.</p>
             <button class="btn btn-primary" @click="openModal()">
               <i class="bi bi-plus-lg me-2"></i>Ajouter un visa
@@ -110,10 +110,13 @@
               <!-- Tabs -->
               <ul class="nav nav-tabs mb-3">
                 <li class="nav-item">
-                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#visa-fr">Français</button>
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#visa-fr">{{ t('admin.common.french') }}</button>
                 </li>
                 <li class="nav-item">
-                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#visa-en">English</button>
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#visa-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#visa-zh">{{ t('admin.common.chinese') }}</button>
                 </li>
               </ul>
 
@@ -166,6 +169,30 @@
                     </div>
                   </div>
                 </div>
+                <div class="tab-pane fade" id="visa-zh">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">签证名称 (中文)</label>
+                      <input v-model="form.name_zh" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">停留期限</label>
+                      <input v-model="form.duration_zh" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">有效期</label>
+                      <input v-model="form.validity_zh" type="text" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">办理时间</label>
+                      <input v-model="form.processing_time_zh" type="text" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">描述 (中文)</label>
+                      <WysiwygEditor v-model="form.description_zh" height="160px" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="row g-3">
@@ -175,7 +202,7 @@
                     <option value="">Sélectionner</option>
                     <option value="touriste">Touriste</option>
                     <option value="affaires">Affaires</option>
-                    <option value="transit">Transit</option>
+                    <option value="transit">{{ t('admin.dashboard.transit') }}</option>
                     <option value="travail">Travail</option>
                     <option value="etudes">Études</option>
                     <option value="familial">Regroupement familial</option>
@@ -226,8 +253,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
             </div>
           </form>
         </div>
@@ -237,6 +264,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useVisasStore } from '~/stores/visas'
 import { useNotification } from '~/composables/useNotification'
@@ -297,16 +326,21 @@ const form = reactive({
   type: '',
   name_fr: '',
   name_en: '',
+  name_zh: '',
   duration_fr: '',
   duration_en: '',
+  duration_zh: '',
   validity_fr: '',
   validity_en: '',
+  validity_zh: '',
   processing_time_fr: '',
   processing_time_en: '',
+  processing_time_zh: '',
   cost: 0,
   requirementsInput: '',
   description_fr: '',
   description_en: '',
+  description_zh: '',
   pdf_url: '',
   is_active: true
 })
@@ -331,16 +365,21 @@ const openModal = (visa?: any) => {
     form.type = visa.type || ''
     form.name_fr = visa.name_fr || ''
     form.name_en = visa.name_en || ''
+    form.name_zh = visa.name_zh || ''
     form.duration_fr = visa.duration_fr || ''
     form.duration_en = visa.duration_en || ''
+    form.duration_zh = visa.duration_zh || ''
     form.validity_fr = visa.validity_fr || ''
     form.validity_en = visa.validity_en || ''
+    form.validity_zh = visa.validity_zh || ''
     form.processing_time_fr = visa.processing_time_fr || ''
     form.processing_time_en = visa.processing_time_en || ''
+    form.processing_time_zh = visa.processing_time_zh || ''
     form.cost = visa.cost || 0
     form.requirementsInput = (visa.requirements_fr || []).join(', ')
     form.description_fr = visa.description_fr || ''
     form.description_en = visa.description_en || ''
+    form.description_zh = visa.description_zh || ''
     form.pdf_url = visa.pdf_url || ''
     form.is_active = visa.is_active ?? true
   } else {
@@ -348,16 +387,21 @@ const openModal = (visa?: any) => {
     form.type = ''
     form.name_fr = ''
     form.name_en = ''
+    form.name_zh = ''
     form.duration_fr = ''
     form.duration_en = ''
+    form.duration_zh = ''
     form.validity_fr = ''
     form.validity_en = ''
+    form.validity_zh = ''
     form.processing_time_fr = ''
     form.processing_time_en = ''
+    form.processing_time_zh = ''
     form.cost = 0
     form.requirementsInput = ''
     form.description_fr = ''
     form.description_en = ''
+    form.description_zh = ''
     form.pdf_url = ''
     form.is_active = true
   }
@@ -378,17 +422,23 @@ const saveVisa = async () => {
     type: form.type,
     name_fr: form.name_fr,
     name_en: form.name_en || null,
+    name_zh: form.name_zh || null,
     duration_fr: form.duration_fr || null,
     duration_en: form.duration_en || null,
+    duration_zh: form.duration_zh || null,
     validity_fr: form.validity_fr || null,
     validity_en: form.validity_en || null,
+    validity_zh: form.validity_zh || null,
     processing_time_fr: form.processing_time_fr || null,
     processing_time_en: form.processing_time_en || null,
+    processing_time_zh: form.processing_time_zh || null,
     cost: form.cost,
     requirements_fr: parseRequirements(form.requirementsInput),
     requirements_en: parseRequirements(form.requirementsInput),
+    requirements_zh: parseRequirements(form.requirementsInput),
     description_fr: form.description_fr || null,
     description_en: form.description_en || null,
+    description_zh: form.description_zh || null,
     pdf_url: form.pdf_url || null,
     is_active: form.is_active
   }
@@ -409,7 +459,7 @@ const saveVisa = async () => {
 }
 
 const deleteVisa = async (id: number) => {
-  if (confirm('Supprimer ce type de visa ?')) {
+  if (confirm(t('admin.confirm.deleteGuide'))) {
     await visasStore.deleteVisaType(id)
     success('Visa supprimé')
     await fetchVisaTypes(visasStore.visaTypesMeta.currentPage)

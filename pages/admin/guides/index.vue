@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des guides</h4>
+        <h4 class="mb-1">{{ t('admin.guides.title') }}</h4>
         <p class="text-muted mb-0">{{ guidesStore.guidesMeta.total }} guides disponibles</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
@@ -25,14 +25,14 @@
           </div>
           <div class="col-md-3">
             <select v-model="filterKind" class="form-select" @change="fetchGuides(1)">
-              <option value="">Tous les types</option>
+              <option value="">{{ t('admin.guides.allTypes') }}</option>
               <option value="tour">Accompagnateurs</option>
               <option value="documentation">Documentation</option>
             </select>
           </div>
           <div class="col-md-3">
             <select v-model="filters.available" class="form-select" @change="fetchGuides(1)">
-              <option :value="undefined">Tous</option>
+              <option :value="undefined">{{ t('admin.common.all') }}</option>
               <option :value="true">Disponibles</option>
               <option :value="false">Indisponibles</option>
             </select>
@@ -147,7 +147,7 @@
                   <label class="form-label">Catégorie GDC *</label>
                   <select v-model.number="form.category_id" class="form-select">
                     <option :value="0">— Choisir —</option>
-                    <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ c.label }}</option>
+                    <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ categoryLabel(c) }}</option>
                   </select>
                 </div>
                 <div v-if="form.kind === 'documentation'" class="col-12">
@@ -178,6 +178,10 @@
                   <div class="col-md-6">
                     <label class="form-label">Spécialisations (EN)</label>
                     <input v-model="form.specializations_enInput" type="text" class="form-control" placeholder="Sourcing, Quality control, Procurement" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Spécialisations (中文)</label>
+                    <input v-model="form.specializations_zhInput" type="text" class="form-control" placeholder="采购, 质检" />
                   </div>
 
                   <div class="col-md-4">
@@ -213,13 +217,32 @@
                   </div>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label">Description (FR)</label>
-                  <WysiwygEditor v-model="form.description_fr" height="160px" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Description (EN)</label>
-                  <WysiwygEditor v-model="form.description_en" height="160px" />
+                <div class="col-12">
+                  <ul class="nav nav-tabs mb-2">
+                    <li class="nav-item">
+                      <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#guide-desc-fr">{{ t('admin.common.french') }}</button>
+                    </li>
+                    <li class="nav-item">
+                      <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#guide-desc-en">{{ t('admin.common.english') }}</button>
+                    </li>
+                    <li class="nav-item">
+                      <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#guide-desc-zh">{{ t('admin.common.chinese') }}</button>
+                    </li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane fade show active" id="guide-desc-fr">
+                      <label class="form-label">Description (FR)</label>
+                      <WysiwygEditor v-model="form.description_fr" height="160px" />
+                    </div>
+                    <div class="tab-pane fade" id="guide-desc-en">
+                      <label class="form-label">Description (EN)</label>
+                      <WysiwygEditor v-model="form.description_en" height="160px" />
+                    </div>
+                    <div class="tab-pane fade" id="guide-desc-zh">
+                      <label class="form-label">描述 (中文)</label>
+                      <WysiwygEditor v-model="form.description_zh" height="160px" />
+                    </div>
+                  </div>
                 </div>
 
                 <div class="col-12">
@@ -233,8 +256,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
             </div>
           </form>
         </div>
@@ -244,6 +267,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useGuidesStore } from '~/stores/guides'
 import { useNotification } from '~/composables/useNotification'
@@ -255,6 +280,7 @@ definePageMeta({
 
 const guidesStore = useGuidesStore()
 const { success, error } = useNotification()
+const { categoryLabel } = useCategoryLabel()
 const api = useApi()
 
 const guides = computed(() => guidesStore.guides)
@@ -279,6 +305,7 @@ const form = reactive({
   languagesInput: '',
   specializations_frInput: '',
   specializations_enInput: '',
+  specializations_zhInput: '',
   citiesInput: '',
   experience: 0,
   avatar: '',
@@ -287,6 +314,7 @@ const form = reactive({
   price_per_hour: 0,
   description_fr: '',
   description_en: '',
+  description_zh: '',
   available: true
 })
 
@@ -332,6 +360,7 @@ const openModal = (guide?: any) => {
     form.languagesInput = guide.languages?.join(', ') || ''
     form.specializations_frInput = guide.specializations_fr?.join(', ') || ''
     form.specializations_enInput = guide.specializations_en?.join(', ') || ''
+    form.specializations_zhInput = guide.specializations_zh?.join(', ') || ''
     form.citiesInput = guide.cities?.join(', ') || ''
     form.experience = guide.experience || 0
     form.avatar = guide.avatar || ''
@@ -340,6 +369,7 @@ const openModal = (guide?: any) => {
     form.price_per_hour = guide.price_per_hour || 0
     form.description_fr = guide.description_fr || ''
     form.description_en = guide.description_en || ''
+    form.description_zh = guide.description_zh || ''
     form.available = guide.available ?? true
   } else {
     editingGuide.value = null
@@ -350,6 +380,7 @@ const openModal = (guide?: any) => {
     form.languagesInput = ''
     form.specializations_frInput = ''
     form.specializations_enInput = ''
+    form.specializations_zhInput = ''
     form.citiesInput = ''
     form.experience = 0
     form.avatar = ''
@@ -358,6 +389,7 @@ const openModal = (guide?: any) => {
     form.price_per_hour = 0
     form.description_fr = ''
     form.description_en = ''
+    form.description_zh = ''
     form.available = true
   }
   modalInstance?.show()
@@ -381,6 +413,7 @@ const saveGuide = async () => {
     languages: parseArrayInput(form.languagesInput),
     specializations_fr: parseArrayInput(form.specializations_frInput),
     specializations_en: parseArrayInput(form.specializations_enInput),
+    specializations_zh: parseArrayInput(form.specializations_zhInput),
     cities: parseArrayInput(form.citiesInput),
     experience: form.experience,
     avatar: form.avatar || null,
@@ -389,6 +422,7 @@ const saveGuide = async () => {
     price_per_hour: form.price_per_hour,
     description_fr: form.description_fr || null,
     description_en: form.description_en || null,
+    description_zh: form.description_zh || null,
     available: form.available
   }
 
@@ -408,7 +442,7 @@ const saveGuide = async () => {
 }
 
 const deleteGuide = async (id: string) => {
-  if (confirm('Supprimer ce guide ?')) {
+  if (confirm(t('admin.confirm.deleteGuide'))) {
     await guidesStore.deleteGuide(id)
     success('Guide supprimé')
     await fetchGuides(guidesStore.guidesMeta.currentPage)

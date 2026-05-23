@@ -3,12 +3,12 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Paramètres globaux</h4>
+        <h4 class="mb-1">{{ t('admin.settings.title') }}</h4>
         <p class="text-muted mb-0">{{ items.length }} paramètres configurés</p>
       </div>
       <div class="d-flex gap-2">
         <button v-can="['update', 'global-settings']" class="btn btn-outline-primary" @click="openMarqueeEditor">
-          <i class="bi bi-megaphone me-2"></i>Modifier le marquee
+          <i class="bi bi-megaphone me-2"></i>{{ t('admin.settings.editMarquee') }}
         </button>
         <button v-can="['create', 'global-settings']" class="btn btn-primary" @click="openModal()">
           <i class="bi bi-plus-lg me-2"></i>Nouveau paramètre
@@ -56,7 +56,7 @@
     <div class="card border-0 shadow-sm">
       <div v-if="settingsStore.loading && items.length === 0" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="text-muted mt-3 mb-0">Chargement...</p>
+        <p class="text-muted mt-3 mb-0">{{ t('admin.common.loading') }}</p>
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
@@ -90,10 +90,10 @@
                 </td>
                 <td class="text-end">
                   <div class="d-flex gap-1 justify-content-end">
-                    <button v-can="['update', 'global-settings']" class="btn btn-sm btn-outline-primary" @click="openModal(s)" title="Modifier">
+                    <button v-can="['update', 'global-settings']" class="btn btn-sm btn-outline-primary" @click="openModal(s)" :title="t('admin.common.edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button v-can="['delete', 'global-settings']" class="btn btn-sm btn-outline-danger" @click="confirmDelete(s)" title="Supprimer">
+                    <button v-can="['delete', 'global-settings']" class="btn btn-sm btn-outline-danger" @click="confirmDelete(s)" :title="t('admin.common.delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -166,7 +166,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                 Enregistrer
@@ -180,6 +180,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useGlobalSettingsStore } from '~/stores/globalSettings'
 import { useNotification } from '~/composables/useNotification'

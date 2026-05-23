@@ -33,7 +33,7 @@
       </div>
       <div class="btn-group">
         <button class="btn btn-outline-primary me-2" @click="openEditModal">
-          <i class="bi bi-pencil me-2"></i>Modifier profil
+          <i class="bi bi-pencil me-2"></i>{{ t('admin.users.editProfile') }}
         </button>
         <button class="btn btn-outline-danger">
           <i class="bi bi-slash-circle me-2"></i>Désactiver
@@ -119,7 +119,7 @@
                     </thead>
                     <tbody>
                       <tr v-if="userRequests.length === 0">
-                        <td colspan="4" class="text-center py-4 text-muted">Aucune demande</td>
+                        <td colspan="4" class="text-center py-4 text-muted">{{ t('admin.users.noUserRequests') }}</td>
                       </tr>
                       <tr v-for="req in userRequests" :key="req.id">
                         <td class="ps-4">
@@ -155,7 +155,7 @@
                     </thead>
                     <tbody>
                       <tr v-if="userShipments.length === 0">
-                        <td colspan="4" class="text-center py-4 text-muted">Aucune expédition</td>
+                        <td colspan="4" class="text-center py-4 text-muted">{{ t('admin.users.noUserShipments') }}</td>
                       </tr>
                       <tr v-for="ship in userShipments" :key="ship.id">
                         <td class="ps-4">
@@ -222,7 +222,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-lg me-2"></i>Enregistrer
               </button>
@@ -238,6 +238,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { computed, onMounted, ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { FAKE_USERS } from '~/utils/data/fakeData'

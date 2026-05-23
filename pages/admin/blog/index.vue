@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion du blog</h4>
-        <p class="text-muted mb-0">{{ blogStore.postsMeta.total }} articles</p>
+        <h4 class="mb-1">{{ t('admin.blog.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.blog.totalCount', { n: blogStore.postsMeta.total }) }}</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouvel article
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.blog.newArticle') }}
       </button>
     </div>
 
@@ -20,14 +20,14 @@
               <span class="input-group-text bg-transparent border-end-0">
                 <i class="bi bi-search text-muted"></i>
               </span>
-              <input v-model="searchQuery" type="text" class="form-control border-start-0" placeholder="Rechercher..." @input="debouncedFetch" />
+              <input v-model="searchQuery" type="text" class="form-control border-start-0" :placeholder="t('admin.requests.searchPlaceholder')" @input="debouncedFetch" />
             </div>
           </div>
           <div class="col-md-3">
             <select v-model="isPublished" class="form-select" @change="fetchPosts(1)">
-              <option :value="undefined">Tous</option>
-              <option :value="true">Publiés</option>
-              <option :value="false">Brouillons</option>
+              <option :value="undefined">{{ t('admin.common.all') }}</option>
+              <option :value="true">{{ t('admin.blog.published') }}</option>
+              <option :value="false">{{ t('admin.blog.drafts') }}</option>
             </select>
           </div>
         </div>
@@ -62,7 +62,7 @@
           <div class="card-footer bg-transparent border-0">
             <div class="d-flex w-100">
               <button class="btn btn-sm btn-outline-primary me-2" @click="openModal(post)">
-                <i class="bi bi-pencil"></i> Modifier
+                <i class="bi bi-pencil"></i> {{ t('admin.common.edit') }}
               </button>
               <button class="btn btn-sm btn-outline-danger" @click="deletePost(post.id)">
                 <i class="bi bi-trash"></i>
@@ -77,10 +77,10 @@
         <div class="card border-0 shadow-sm">
           <div class="card-body text-center py-5">
             <i class="bi bi-journal-x display-4 text-muted"></i>
-            <h5 class="mt-3">Aucun article</h5>
-            <p class="text-muted">Commencez par créer votre premier article de blog.</p>
+            <h5 class="mt-3">{{ t('admin.blog.noArticles') }}</h5>
+            <p class="text-muted">{{ t('admin.blog.createFirst') }}</p>
             <button class="btn btn-primary" @click="openModal()">
-              <i class="bi bi-plus-lg me-2"></i>Créer un article
+              <i class="bi bi-plus-lg me-2"></i>{{ t('admin.blog.createArticle') }}
             </button>
           </div>
         </div>
@@ -105,17 +105,20 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingPost ? 'Modifier' : 'Nouvel' }} article</h5>
+            <h5 class="modal-title">{{ editingPost ? t('admin.blog.modalEdit') : t('admin.blog.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="savePost">
             <div class="modal-body">
               <ul class="nav nav-tabs mb-3">
                 <li class="nav-item">
-                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#post-fr">Français</button>
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#post-fr">{{ t('admin.common.french') }}</button>
                 </li>
                 <li class="nav-item">
-                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#post-en">English</button>
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#post-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#post-zh">{{ t('admin.common.chinese') }}</button>
                 </li>
               </ul>
 
@@ -155,6 +158,22 @@
                         Paste a YouTube URL or use the editor video button; playback is embedded on the public article.
                       </p>
                       <WysiwygEditor v-model="form.content_en" height="200px" />
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="post-zh">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">标题 (中文)</label>
+                      <input v-model="form.title_zh" type="text" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">摘要 (中文)</label>
+                      <WysiwygEditor v-model="form.excerpt_zh" height="120px" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">正文 (中文)</label>
+                      <WysiwygEditor v-model="form.content_zh" height="200px" />
                     </div>
                   </div>
                 </div>
@@ -226,8 +245,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
             </div>
           </form>
         </div>
@@ -237,6 +256,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useBlogStore } from '~/stores/blog'
 import { useNotification } from '~/composables/useNotification'
@@ -274,12 +295,12 @@ const onImageSelected = async (e: Event) => {
     const json = await res.json()
     if (json?.status === 'success' && (json.data?.path || json.data?.url)) {
       form.image = json.data.path || json.data.url
-      success('Image téléversée')
+      success(t('admin.messages.uploaded'))
     } else {
       throw new Error(json?.message || 'Échec du téléversement')
     }
   } catch (err: any) {
-    error(err.message || 'Erreur de téléversement')
+    error(err.message || t('admin.messages.uploadError'))
   } finally {
     uploading.value = false
     input.value = ''
@@ -298,10 +319,13 @@ const form = reactive({
   slug: '',
   title_fr: '',
   title_en: '',
+  title_zh: '',
   excerpt_fr: '',
   excerpt_en: '',
+  excerpt_zh: '',
   content_fr: '',
   content_en: '',
+  content_zh: '',
   category: '',
   author: '',
   author_avatar: '',
@@ -348,10 +372,13 @@ const openModal = (post?: any) => {
     form.slug = post.slug || ''
     form.title_fr = post.title_fr || ''
     form.title_en = post.title_en || ''
+    form.title_zh = post.title_zh || ''
     form.excerpt_fr = post.excerpt_fr || ''
     form.excerpt_en = post.excerpt_en || ''
+    form.excerpt_zh = post.excerpt_zh || ''
     form.content_fr = post.content_fr || ''
     form.content_en = post.content_en || ''
+    form.content_zh = post.content_zh || ''
     form.category = post.category || ''
     form.author = post.author || ''
     form.author_avatar = post.author_avatar || ''
@@ -364,10 +391,13 @@ const openModal = (post?: any) => {
     form.slug = ''
     form.title_fr = ''
     form.title_en = ''
+    form.title_zh = ''
     form.excerpt_fr = ''
     form.excerpt_en = ''
+    form.excerpt_zh = ''
     form.content_fr = ''
     form.content_en = ''
+    form.content_zh = ''
     form.category = ''
     form.author = ''
     form.author_avatar = ''
@@ -384,10 +414,13 @@ const savePost = async () => {
     slug: form.slug,
     title_fr: form.title_fr,
     title_en: form.title_en || null,
+    title_zh: form.title_zh || null,
     excerpt_fr: form.excerpt_fr || null,
     excerpt_en: form.excerpt_en || null,
+    excerpt_zh: form.excerpt_zh || null,
     content_fr: form.content_fr || null,
     content_en: form.content_en || null,
+    content_zh: form.content_zh || null,
     category: form.category || null,
     author: form.author || null,
     author_avatar: form.author_avatar || null,
@@ -400,22 +433,22 @@ const savePost = async () => {
   try {
     if (editingPost.value) {
       await blogStore.updatePost(editingPost.value.id, data as any)
-      success('Article modifié')
+      success(t('admin.blog.updated'))
     } else {
       await blogStore.createPost(data as any)
-      success('Article créé')
+      success(t('admin.blog.created'))
     }
     modalInstance?.hide()
     await fetchPosts(blogStore.postsMeta.currentPage)
   } catch (err: any) {
-    error(err.message || 'Erreur lors de l\'enregistrement')
+    error(err.message || t('admin.messages.saveError'))
   }
 }
 
 const deletePost = async (id: number) => {
-  if (confirm('Supprimer cet article ?')) {
+  if (confirm(t('admin.confirm.deleteArticle'))) {
     await blogStore.deletePost(id)
-    success('Article supprimé')
+    success(t('admin.blog.deleted'))
     await fetchPosts(blogStore.postsMeta.currentPage)
   }
 }

@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1 fw-bold">Tableau de bord</h4>
-        <p class="text-muted mb-0 small">Résumé de l'activité NADOM.</p>
+        <h4 class="mb-1 fw-bold">{{ t('admin.dashboard.title') }}</h4>
+        <p class="text-muted mb-0 small">{{ t('admin.dashboard.subtitle') }}</p>
       </div>
       <span class="text-muted small d-none d-md-block">
         <i class="bi bi-calendar3 me-1"></i>{{ currentDate }}
@@ -20,10 +20,10 @@
               <div class="kpi-icon bg-primary-subtle text-primary">
                 <i class="bi bi-bag-check fs-5"></i>
               </div>
-              <span class="badge bg-primary-subtle text-primary fw-normal">Total</span>
+              <span class="badge bg-primary-subtle text-primary fw-normal">{{ t('admin.dashboard.total') }}</span>
             </div>
             <h2 class="mb-0 fw-bold">{{ stats.totalRequests }}</h2>
-            <p class="text-muted mb-0 small mt-1">Demandes enregistrées</p>
+            <p class="text-muted mb-0 small mt-1">{{ t('admin.dashboard.registeredRequests') }}</p>
           </div>
         </div>
       </div>
@@ -35,10 +35,10 @@
               <div class="kpi-icon bg-warning-subtle text-warning">
                 <i class="bi bi-hourglass-split fs-5"></i>
               </div>
-              <span class="badge bg-warning-subtle text-warning fw-normal">En attente</span>
+              <span class="badge bg-warning-subtle text-warning fw-normal">{{ t('admin.requests.status.pending') }}</span>
             </div>
             <h2 class="mb-0 fw-bold">{{ stats.pendingRequests }}</h2>
-            <p class="text-muted mb-0 small mt-1">Demandes en attente</p>
+            <p class="text-muted mb-0 small mt-1">{{ t('admin.dashboard.pendingRequests') }}</p>
           </div>
         </div>
       </div>
@@ -50,10 +50,10 @@
               <div class="kpi-icon bg-info-subtle text-info">
                 <i class="bi bi-box-seam fs-5"></i>
               </div>
-              <span class="badge bg-info-subtle text-info fw-normal">Transit</span>
+              <span class="badge bg-info-subtle text-info fw-normal">{{ t('admin.dashboard.transit') }}</span>
             </div>
             <h2 class="mb-0 fw-bold">{{ stats.inTransitShipments }}</h2>
-            <p class="text-muted mb-0 small mt-1">Colis en transit</p>
+            <p class="text-muted mb-0 small mt-1">{{ t('admin.dashboard.inTransitPackages') }}</p>
           </div>
         </div>
       </div>
@@ -65,7 +65,7 @@
               <div class="kpi-icon bg-success-subtle text-success">
                 <i class="bi bi-cash-coin fs-5"></i>
               </div>
-              <span class="badge bg-success-subtle text-success fw-normal">Revenus</span>
+              <span class="badge bg-success-subtle text-success fw-normal">{{ t('admin.dashboard.revenue') }}</span>
             </div>
             <div v-if="revenueEntries.length === 0">
               <h3 class="mb-0 fw-bold text-muted">—</h3>
@@ -75,7 +75,7 @@
                 <h4 class="mb-0 fw-bold text-success lh-1">{{ formatCurrency(amt, cur) }}</h4>
               </div>
             </div>
-            <p class="text-muted mb-0 small mt-1">Devis facturés</p>
+            <p class="text-muted mb-0 small mt-1">{{ t('admin.dashboard.invoicedQuotes') }}</p>
           </div>
         </div>
       </div>
@@ -87,18 +87,18 @@
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-            <h6 class="mb-0 fw-bold">Demandes récentes</h6>
-            <NuxtLink to="/admin/requests" class="btn btn-sm btn-primary">Voir tout</NuxtLink>
+            <h6 class="mb-0 fw-bold">{{ t('admin.dashboard.recentRequests') }}</h6>
+            <NuxtLink to="/admin/requests" class="btn btn-sm btn-primary">{{ t('admin.dashboard.viewAll') }}</NuxtLink>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="ps-3">Produit</th>
-                    <th>Statut</th>
-                    <th>Budget / Devis</th>
-                    <th>Date</th>
+                    <th class="ps-3">{{ t('admin.dashboard.product') }}</th>
+                    <th>{{ t('admin.dashboard.status') }}</th>
+                    <th>{{ t('admin.dashboard.budgetQuote') }}</th>
+                    <th>{{ t('admin.dashboard.date') }}</th>
                     <th class="pe-3"></th>
                   </tr>
                 </thead>
@@ -133,7 +133,7 @@
                         {{ formatCurrency(request.budgetEstimated, (request as any).currency || 'XOF') }}
                       </div>
                       <div v-if="request.quotedPrice" class="small fw-semibold text-success">
-                        Devis : {{ formatCurrency(request.quotedPrice, (request as any).currency || 'XOF') }}
+                        {{ t('admin.dashboard.quote') }} : {{ formatCurrency(request.quotedPrice, (request as any).currency || 'XOF') }}
                       </div>
                     </td>
                     <td>
@@ -148,7 +148,7 @@
                   <tr v-if="recentRequests.length === 0">
                     <td colspan="5" class="text-center text-muted py-5">
                       <i class="bi bi-inbox fs-3 d-block mb-2 opacity-25"></i>
-                      Aucune demande
+                      {{ t('admin.dashboard.noRequests') }}
                     </td>
                   </tr>
                 </tbody>
@@ -163,10 +163,10 @@
         <!-- Status Distribution -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3">
-            <h6 class="mb-0 fw-bold">Répartition des statuts</h6>
+            <h6 class="mb-0 fw-bold">{{ t('admin.dashboard.statusDistribution') }}</h6>
           </div>
           <div class="card-body">
-            <div v-if="stats.totalRequests === 0" class="text-center text-muted py-2 small">Aucune donnée</div>
+            <div v-if="stats.totalRequests === 0" class="text-center text-muted py-2 small">{{ t('admin.dashboard.noData') }}</div>
             <div v-for="(count, status) in requestStats" :key="status" class="mb-3">
               <div class="d-flex justify-content-between mb-1">
                 <small class="text-muted">{{ formatRequestStatus(status as string).label }}</small>
@@ -188,12 +188,12 @@
         <!-- In-Transit Shipments -->
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-            <h6 class="mb-0 fw-bold">Colis en transit</h6>
-            <NuxtLink to="/admin/shipments" class="btn btn-sm btn-outline-info">Tout voir</NuxtLink>
+            <h6 class="mb-0 fw-bold">{{ t('admin.dashboard.inTransitPackages') }}</h6>
+            <NuxtLink to="/admin/shipments" class="btn btn-sm btn-outline-info">{{ t('admin.dashboard.viewAll') }}</NuxtLink>
           </div>
           <div v-if="inTransitShipments.length === 0" class="card-body text-center text-muted py-4">
             <i class="bi bi-box-seam fs-3 d-block mb-2 opacity-25"></i>
-            <small>Aucun colis en transit</small>
+            <small>{{ t('admin.dashboard.noTransitPackages') }}</small>
           </div>
           <div v-else>
             <NuxtLink
@@ -222,29 +222,29 @@
         <div class="card border-0 shadow-sm">
           <div class="card-body">
             <p class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: .5px;">
-              <i class="bi bi-lightning-charge me-1"></i>Actions rapides
+              <i class="bi bi-lightning-charge me-1"></i>{{ t('admin.dashboard.quickActions') }}
             </p>
             <div class="d-flex flex-wrap gap-2">
               <NuxtLink to="/admin/requests" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-bag me-1"></i>Demandes
+                <i class="bi bi-bag me-1"></i>{{ t('admin.nav.requests') }}
               </NuxtLink>
               <NuxtLink to="/admin/shipments" class="btn btn-sm btn-outline-info">
-                <i class="bi bi-box-seam me-1"></i>Expéditions
+                <i class="bi bi-box-seam me-1"></i>{{ t('admin.nav.shipments') }}
               </NuxtLink>
               <NuxtLink to="/admin/users" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-people me-1"></i>Utilisateurs
+                <i class="bi bi-people me-1"></i>{{ t('admin.nav.users') }}
               </NuxtLink>
               <NuxtLink to="/admin/pricing" class="btn btn-sm btn-outline-success">
-                <i class="bi bi-currency-exchange me-1"></i>Tarifs
+                <i class="bi bi-currency-exchange me-1"></i>{{ t('admin.nav.gridsRates') }}
               </NuxtLink>
               <NuxtLink to="/admin/guides" class="btn btn-sm btn-outline-warning">
-                <i class="bi bi-person-badge me-1"></i>Guides
+                <i class="bi bi-person-badge me-1"></i>{{ t('admin.nav.guides') }}
               </NuxtLink>
               <NuxtLink to="/admin/visas" class="btn btn-sm btn-outline-danger">
-                <i class="bi bi-card-heading me-1"></i>Visas
+                <i class="bi bi-card-heading me-1"></i>{{ t('admin.nav.visas') }}
               </NuxtLink>
               <NuxtLink to="/admin/blog" class="btn btn-sm btn-outline-dark">
-                <i class="bi bi-journal-text me-1"></i>Blog
+                <i class="bi bi-journal-text me-1"></i>{{ t('admin.nav.blog') }}
               </NuxtLink>
             </div>
           </div>
@@ -255,6 +255,8 @@
 </template>
 
 <script setup lang="ts">
+const { t, locale } = useI18n()
+
 import { computed, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
@@ -274,7 +276,8 @@ onMounted(async () => {
 })
 
 const currentDate = computed(() => {
-  return new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const loc = locale.value === 'en' ? 'en-US' : locale.value === 'zh' ? 'zh-CN' : 'fr-FR'
+  return new Date().toLocaleDateString(loc, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 })
 
 const revenueGrouped = computed(() => {

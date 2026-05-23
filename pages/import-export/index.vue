@@ -57,11 +57,11 @@
                 >
                   <i :class="mode.icon || defaultIcon(mode.code ?? '')"></i>
                 </div>
-                <h5>{{ mode.label }}</h5>
+                <h5>{{ categoryLabel(mode) }}</h5>
                 <div
-                  v-if="mode.description"
+                  v-if="field(mode, 'description')"
                   class="shipping-mode-desc text-muted text-start"
-                  v-html="mode.description"
+                  v-html="field(mode, 'description')"
                 ></div>
               </div>
             </div>
@@ -84,7 +84,7 @@
 
         <div v-else-if="destinationCountries.length === 0" class="text-center py-4 text-muted">
           <i class="bi bi-globe fs-1 d-block mb-2"></i>
-          Aucun pays configuré.
+          {{ t('importExport.noCountriesConfigured') }}
         </div>
 
         <div v-else class="row g-3">
@@ -182,7 +182,9 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const { countryName, globalSettingSlug, field } = useLocaleField()
+const { categoryLabel } = useCategoryLabel()
 const shippingStore = useShippingStore()
 const psStore = usePersonalShoppingStore()
 const countriesStore = useCountriesStore()
@@ -213,13 +215,27 @@ onMounted(async () => {
 })
 
 const destSectionHeading = computed(() => {
-  const slug = locale.value === 'en' ? 'import_export_dest_heading_en' : 'import_export_dest_heading_fr'
-  return destSettingsBySlug.value[slug]?.trim() || ''
+  const slug = globalSettingSlug('import_export_dest_heading')
+  const zhSlug = 'import_export_dest_heading_zh'
+  return (
+    destSettingsBySlug.value[slug]?.trim()
+    || destSettingsBySlug.value[zhSlug]?.trim()
+    || destSettingsBySlug.value.import_export_dest_heading_en?.trim()
+    || destSettingsBySlug.value.import_export_dest_heading_fr?.trim()
+    || ''
+  )
 })
 
 const destSectionSubtitle = computed(() => {
-  const slug = locale.value === 'en' ? 'import_export_dest_subtitle_en' : 'import_export_dest_subtitle_fr'
-  return destSettingsBySlug.value[slug]?.trim() || ''
+  const slug = globalSettingSlug('import_export_dest_subtitle')
+  const zhSlug = 'import_export_dest_subtitle_zh'
+  return (
+    destSettingsBySlug.value[slug]?.trim()
+    || destSettingsBySlug.value[zhSlug]?.trim()
+    || destSettingsBySlug.value.import_export_dest_subtitle_en?.trim()
+    || destSettingsBySlug.value.import_export_dest_subtitle_fr?.trim()
+    || ''
+  )
 })
 
 /** Aligné sur le titre « livrer en Afrique » : uniquement les pays dont le continent est Afrique. */
@@ -231,7 +247,6 @@ const isAfricaContinent = (continent: string | null | undefined) => {
 const destinationCountries = computed(() =>
   countriesStore.activeCountries.filter((c) => isAfricaContinent(c.continent))
 )
-const countryName = (c: any) => (locale.value === 'en' ? c.name_en : c.name_fr) || c.label || c.code
 
 const shippingModes = computed(() => {
   return (psStore.categories || [])

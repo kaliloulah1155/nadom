@@ -50,7 +50,7 @@
                   <li>
                     <NuxtLink class="lh-dropdown-item" to="/personal-shopping">
                       <i class="bi bi-info-circle me-2"></i>
-                      {{ locale === 'fr' ? 'Comment ca marche' : 'How it works' }}
+                      {{ t('nav.howItWorks') }}
                     </NuxtLink>
                   </li>
                   <li>
@@ -72,7 +72,7 @@
                   <li>
                     <NuxtLink class="lh-dropdown-item" to="/import-export">
                       <i class="bi bi-box-seam me-2"></i>
-                      {{ locale === 'fr' ? 'Nos services' : 'Our services' }}
+                      {{ t('nav.ourServices') }}
                     </NuxtLink>
                   </li>
                   <li>
@@ -133,20 +133,20 @@
               <!-- Pages -->
               <li class="lh-nav-item lh-dropdown">
                 <a class="lh-link" href="#" @click.prevent="toggleDropdown('pages')">
-                  Pages
+                  {{ t('nav.pages') }}
                   <i class="bi bi-chevron-down"></i>
                 </a>
                 <ul class="lh-dropdown-menu" :class="{ show: activeDropdown === 'pages' }">
                   <li>
                     <NuxtLink class="lh-dropdown-item" to="/about-us">
                       <i class="bi bi-building me-2"></i>
-                      {{ locale === 'fr' ? 'A propos' : 'About us' }}
+                      {{ t('nav.aboutUs') }}
                     </NuxtLink>
                   </li>
                   <li>
                     <NuxtLink class="lh-dropdown-item" to="/contact-us">
                       <i class="bi bi-envelope me-2"></i>
-                      Contact
+                      {{ t('nav.contact') }}
                     </NuxtLink>
                   </li>
                 </ul>
@@ -173,12 +173,17 @@
                 <ul class="lh-dropdown-menu lh-dropdown-end" :class="{ show: activeDropdown === 'lang' }">
                   <li>
                     <a class="lh-dropdown-item" href="#" @click.prevent="switchLanguage('fr')">
-                      <span class="fi fi-fr me-1"></span> Francais
+                      <span class="fi fi-fr me-1"></span> Français
                     </a>
                   </li>
                   <li>
                     <a class="lh-dropdown-item" href="#" @click.prevent="switchLanguage('en')">
                       <span class="fi fi-gb me-1"></span> English
+                    </a>
+                  </li>
+                  <li>
+                    <a class="lh-dropdown-item" href="#" @click.prevent="switchLanguage('zh')">
+                      <span class="fi fi-cn me-1"></span> {{ t('nav.chinese') }}
                     </a>
                   </li>
                 </ul>
@@ -306,10 +311,10 @@
           </div>
           <div class="col-md-6 text-center text-md-end">
             <NuxtLink to="/privacy-policy" class="text-white opacity-50 me-3">
-              {{ locale === 'fr' ? 'Confidentialite' : 'Privacy' }}
+              {{ t('nav.privacy') }}
             </NuxtLink>
             <NuxtLink to="/faq" class="text-white opacity-50">
-              {{ locale === 'fr' ? 'CGV' : 'Terms' }}
+              {{ t('nav.terms') }}
             </NuxtLink>
           </div>
         </div>
@@ -386,8 +391,16 @@ const orderCount = ref(0)
 
 // Language
 const currentLocale = computed(() => locale.value)
-const currentFlag = computed(() => (locale.value === 'fr' ? 'fi-fr' : 'fi-gb'))
-const currentLang = computed(() => (locale.value === 'fr' ? 'FR' : 'EN'))
+const currentFlag = computed(() => {
+  if (locale.value === 'fr') return 'fi-fr'
+  if (locale.value === 'zh') return 'fi-cn'
+  return 'fi-gb'
+})
+const currentLang = computed(() => {
+  if (locale.value === 'fr') return 'FR'
+  if (locale.value === 'zh') return 'ZH'
+  return 'EN'
+})
 
 const footerSocialLinks = computed(() =>
   (siteFooterStore.activeSocials || []).map(s => ({
@@ -405,8 +418,12 @@ const footerAboutHtml = computed(() => {
   }
   const s = siteFooterStore.footerSettings
   if (!s) return ''
-  const fr = locale.value === 'fr'
-  const raw = fr ? (s.about_fr || s.about_en) : (s.about_en || s.about_fr)
+  const loc = locale.value
+  const raw = loc === 'zh'
+    ? (s.about_zh || s.about_en || s.about_fr)
+    : loc === 'fr'
+      ? (s.about_fr || s.about_en)
+      : (s.about_en || s.about_fr)
   const html = String(raw || '').trim()
   return html || ''
 })
@@ -418,11 +435,13 @@ function contactIconClass(kind: string) {
 }
 
 function contactBody(entry: { body_fr?: string | null; body_en?: string | null }) {
-  const fr = locale.value === 'fr'
-  return fr ? entry.body_fr || entry.body_en || '' : entry.body_en || entry.body_fr || ''
+  const loc = locale.value
+  if (loc === 'zh') return entry.body_zh || entry.body_en || entry.body_fr || ''
+  if (loc === 'fr') return entry.body_fr || entry.body_en || ''
+  return entry.body_en || entry.body_fr || ''
 }
 
-const switchLanguage = (lang: 'fr' | 'en') => {
+const switchLanguage = (lang: 'fr' | 'en' | 'zh') => {
   setLocale(lang)
 }
 

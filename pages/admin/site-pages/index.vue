@@ -2,9 +2,9 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
-        <h4 class="mb-1">Pages À propos &amp; Contact</h4>
+        <h4 class="mb-1">{{ t('admin.sitePages.title') }}</h4>
         <p class="text-muted mb-0">
-          Textes FR/EN, images de fond (upload + miniature). Enregistrez chaque page séparément.
+          {{ t('admin.sitePages.subtitle') }}
         </p>
       </div>
     </div>
@@ -18,7 +18,7 @@
           :class="{ active: tab === 'contact_us' }"
           @click="tab = 'contact_us'"
         >
-          Contact
+          {{ t('admin.sitePages.contact') }}
         </button>
       </li>
       <li class="nav-item">
@@ -29,7 +29,7 @@
           :class="{ active: tab === 'about_us' }"
           @click="tab = 'about_us'"
         >
-          À propos
+          {{ t('admin.sitePages.about') }}
         </button>
       </li>
     </ul>
@@ -39,37 +39,37 @@
       <div class="card-body">
         <ul class="nav nav-pills flex-wrap gap-1 mb-3 site-page-subnav" role="tablist">
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: contactSub === 'hero' }" @click="contactSub = 'hero'">Bandeau héros</button>
+            <button type="button" class="nav-link" :class="{ active: contactSub === 'hero' }" @click="contactSub = 'hero'">{{ t('admin.sitePages.heroBanner') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: contactSub === 'cards' }" @click="contactSub = 'cards'">Trois encarts</button>
+            <button type="button" class="nav-link" :class="{ active: contactSub === 'cards' }" @click="contactSub = 'cards'">{{ t('admin.sitePages.threeCards') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: contactSub === 'form' }" @click="contactSub = 'form'">Formulaire &amp; carte</button>
+            <button type="button" class="nav-link" :class="{ active: contactSub === 'form' }" @click="contactSub = 'form'">{{ t('admin.sitePages.formMap') }}</button>
           </li>
         </ul>
 
         <div v-show="contactSub === 'hero'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Bandeau héros</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.heroBanner') }}</h5>
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Titre (FR)</label>
+              <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
               <input v-model="c.hero.title.fr" type="text" class="form-control" />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Title (EN)</label>
+              <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
               <input v-model="c.hero.title.en" type="text" class="form-control" />
             </div>
             <div class="col-12">
-              <label class="form-label">Sous-titre (FR)</label>
+              <label class="form-label">{{ t('admin.sitePages.subtitleFr') }}</label>
               <textarea v-model="c.hero.subtitle.fr" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-12">
-              <label class="form-label">Subtitle (EN)</label>
+              <label class="form-label">{{ t('admin.sitePages.subtitleEn') }}</label>
               <textarea v-model="c.hero.subtitle.en" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-12">
-              <label class="form-label d-block">Image de fond</label>
+              <label class="form-label d-block">{{ t('admin.sitePages.backgroundImage') }}</label>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
@@ -86,37 +86,37 @@
                   alt=""
                 />
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="c.hero.background_path = null">
-                  Retirer
+                  {{ t('admin.sitePages.remove') }}
                 </button>
               </div>
-              <small class="text-muted d-block mt-1">Dossier : site-static-pages (max ~2&nbsp;Mo, formats usuels).</small>
+              <small class="text-muted d-block mt-1">{{ t('admin.sitePages.uploadHint') }}</small>
             </div>
           </div>
         </div>
 
         <div v-show="contactSub === 'cards'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Trois encarts sous le bandeau</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.cardsBanner') }}</h5>
           <div v-for="(card, idx) in c.cards" :key="idx" class="border rounded p-3 mb-3">
-            <strong class="d-block mb-2">Carte {{ idx + 1 }}</strong>
+            <strong class="d-block mb-2">{{ t('admin.sitePages.cardN', { n: idx + 1 }) }}</strong>
             <div class="row g-2">
               <div class="col-md-12">
-                <label class="form-label">Classe icône (Font Awesome)</label>
+                <label class="form-label">{{ t('admin.sitePages.iconClass') }}</label>
                 <input v-model="card.icon" type="text" class="form-control" placeholder="fa-solid fa-briefcase" />
               </div>
               <div class="col-md-6">
-                <label class="form-label">Titre FR</label>
+                <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
                 <input v-model="card.title.fr" type="text" class="form-control" />
               </div>
               <div class="col-md-6">
-                <label class="form-label">Title EN</label>
+                <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
                 <input v-model="card.title.en" type="text" class="form-control" />
               </div>
               <div class="col-md-6">
-                <label class="form-label">Texte FR</label>
+                <label class="form-label">{{ t('admin.sitePages.textFr') }}</label>
                 <textarea v-model="card.body.fr" rows="3" class="form-control"></textarea>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Text EN</label>
+                <label class="form-label">{{ t('admin.sitePages.textEn') }}</label>
                 <textarea v-model="card.body.en" rows="3" class="form-control"></textarea>
               </div>
             </div>
@@ -124,26 +124,26 @@
         </div>
 
         <div v-show="contactSub === 'form'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Bloc formulaire &amp; carte</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.formBlock') }}</h5>
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Titre FR</label>
+              <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
               <input v-model="c.form_block.title.fr" type="text" class="form-control" />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Title EN</label>
+              <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
               <input v-model="c.form_block.title.en" type="text" class="form-control" />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Intro FR</label>
+              <label class="form-label">{{ t('admin.sitePages.introFr') }}</label>
               <textarea v-model="c.form_block.intro.fr" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Intro EN</label>
+              <label class="form-label">{{ t('admin.sitePages.introEn') }}</label>
               <textarea v-model="c.form_block.intro.en" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-12">
-              <label class="form-label">URL iframe Google Maps (embed)</label>
+              <label class="form-label">{{ t('admin.sitePages.mapEmbedUrl') }}</label>
               <input v-model="c.map_embed_url" type="url" class="form-control" />
             </div>
           </div>
@@ -158,7 +158,7 @@
             @click="saveContact"
           >
             <span v-if="savingContact" class="spinner-border spinner-border-sm"></span>
-            Enregistrer la page Contact
+            {{ t('admin.sitePages.saveContact') }}
           </button>
         </div>
       </div>
@@ -169,148 +169,148 @@
       <div class="card-body">
         <ul class="nav nav-pills flex-wrap gap-1 mb-3 site-page-subnav" role="tablist">
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'hero' }" @click="aboutSub = 'hero'">Bandeau héros</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'hero' }" @click="aboutSub = 'hero'">{{ t('admin.sitePages.heroBanner') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'mission_intro' }" @click="aboutSub = 'mission_intro'">Intro mission</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'mission_intro' }" @click="aboutSub = 'mission_intro'">{{ t('admin.sitePages.missionIntro') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'mission' }" @click="aboutSub = 'mission'">Bloc mission</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'mission' }" @click="aboutSub = 'mission'">{{ t('admin.sitePages.missionBlock') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'counters' }" @click="aboutSub = 'counters'">Compteurs</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'counters' }" @click="aboutSub = 'counters'">{{ t('admin.sitePages.counters') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'promo' }" @click="aboutSub = 'promo'">Bandeau promo</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'promo' }" @click="aboutSub = 'promo'">{{ t('admin.sitePages.promoBanner') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'process' }" @click="aboutSub = 'process'">Processus</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'process' }" @click="aboutSub = 'process'">{{ t('admin.sitePages.process') }}</button>
           </li>
           <li class="nav-item">
-            <button type="button" class="nav-link" :class="{ active: aboutSub === 'reviews_team' }" @click="aboutSub = 'reviews_team'">Avis &amp; équipe</button>
+            <button type="button" class="nav-link" :class="{ active: aboutSub === 'reviews_team' }" @click="aboutSub = 'reviews_team'">{{ t('admin.sitePages.reviewsTeam') }}</button>
           </li>
         </ul>
 
         <div v-show="aboutSub === 'hero'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Bandeau héros</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.heroBanner') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Titre FR</label><input v-model="a.hero.title.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Title EN</label><input v-model="a.hero.title.en" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">Sous-titre FR</label><textarea v-model="a.hero.subtitle.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-12"><label class="form-label">Subtitle EN</label><textarea v-model="a.hero.subtitle.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.hero.title.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.hero.title.en" type="text" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.subtitleFr') }}</label><textarea v-model="a.hero.subtitle.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.subtitleEn') }}</label><textarea v-model="a.hero.subtitle.en" rows="2" class="form-control"></textarea></div>
             <div class="col-12">
-              <label class="form-label">Image de fond</label>
+              <label class="form-label">{{ t('admin.sitePages.backgroundImage') }}</label>
               <input type="file" accept="image/*" class="form-control mb-2" :disabled="uploadKey === 'a-hero'" @change="onUpload($event, 'about_us', 'hero.background_path')" />
               <span v-if="uploadKey === 'a-hero'" class="spinner-border spinner-border-sm me-2"></span>
               <div v-if="a.hero.background_path" class="d-flex align-items-center gap-2">
                 <img class="img-thumbnail" style="max-height:120px" :src="resolveStorageAssetUrl(a.hero.background_path)" alt="" />
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.hero.background_path = null">Retirer</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.hero.background_path = null">{{ t('admin.sitePages.remove') }}</button>
               </div>
             </div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'mission_intro'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Intro mission (titre section)</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.missionIntroTitle') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Titre FR</label><input v-model="a.mission_intro.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Heading EN</label><input v-model="a.mission_intro.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Accroche FR</label><textarea v-model="a.mission_intro.lead.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Lead EN</label><textarea v-model="a.mission_intro.lead.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission_intro.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.mission_intro.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.hookFr') }}</label><textarea v-model="a.mission_intro.lead.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.hookEn') }}</label><textarea v-model="a.mission_intro.lead.en" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'mission'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Bloc mission</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.missionBlock') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Badge FR</label><input v-model="a.mission.badge.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Badge EN</label><input v-model="a.mission.badge.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Titre FR</label><input v-model="a.mission.title.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Title EN</label><input v-model="a.mission.title.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Texte FR</label><textarea v-model="a.mission.body_fr" rows="5" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Text EN</label><textarea v-model="a.mission.body_en" rows="5" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.mission.badge.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.mission.badge.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission.title.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.mission.title.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.textFr') }}</label><textarea v-model="a.mission.body_fr" rows="5" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.textEn') }}</label><textarea v-model="a.mission.body_en" rows="5" class="form-control"></textarea></div>
             <div class="col-12">
-              <label class="form-label">Image illustrative</label>
+              <label class="form-label">{{ t('admin.sitePages.illustrativeImage') }}</label>
               <input type="file" accept="image/*" class="form-control mb-2" :disabled="uploadKey === 'a-mission'" @change="onUpload($event, 'about_us', 'mission.image_path')" />
               <span v-if="uploadKey === 'a-mission'" class="spinner-border spinner-border-sm"></span>
               <div v-if="a.mission.image_path" class="d-flex align-items-center gap-2">
                 <img class="img-thumbnail" style="max-height:140px" :src="resolveStorageAssetUrl(a.mission.image_path)" alt="" />
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.mission.image_path = null">Retirer</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.mission.image_path = null">{{ t('admin.sitePages.remove') }}</button>
               </div>
             </div>
-            <div class="col-md-6"><label class="form-label">Bouton FR</label><input v-model="a.mission.cta_label.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Button EN</label><input v-model="a.mission.cta_label.en" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">Lien du bouton</label><input v-model="a.mission.cta_href" type="text" class="form-control" placeholder="/contact-us" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.buttonFr') }}</label><input v-model="a.mission.cta_label.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.buttonEn') }}</label><input v-model="a.mission.cta_label.en" type="text" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.buttonLink') }}</label><input v-model="a.mission.cta_href" type="text" class="form-control" placeholder="/contact-us" /></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'counters'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Compteurs</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.counters') }}</h5>
           <div v-for="(ctr, idx) in a.counters" :key="idx" class="row g-2 mb-3 border-bottom pb-2">
-            <div class="col-md-3"><label class="form-label">Valeur</label><input v-model.number="ctr.value" type="number" min="0" step="1" class="form-control" /></div>
-            <div class="col-md-3"><label class="form-label">Suffixe</label><input v-model="ctr.suffix" type="text" class="form-control" placeholder="K ou vide" /></div>
-            <div class="col-md-6"><label class="form-label">Libellé FR</label><input v-model="ctr.label.fr" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">Label EN</label><input v-model="ctr.label.en" type="text" class="form-control" /></div>
+            <div class="col-md-3"><label class="form-label">{{ t('admin.sitePages.value') }}</label><input v-model.number="ctr.value" type="number" min="0" step="1" class="form-control" /></div>
+            <div class="col-md-3"><label class="form-label">{{ t('admin.sitePages.suffix') }}</label><input v-model="ctr.suffix" type="text" class="form-control" :placeholder="t('admin.sitePages.suffixPlaceholder')" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.labelFr') }}</label><input v-model="ctr.label.fr" type="text" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.labelEn') }}</label><input v-model="ctr.label.en" type="text" class="form-control" /></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'promo'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Bandeau promotion (pleine largeur)</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.promoBannerWide') }}</h5>
           <div class="row g-3">
             <div class="col-12">
-              <label class="form-label">Image de fond</label>
+              <label class="form-label">{{ t('admin.sitePages.backgroundImage') }}</label>
               <input type="file" accept="image/*" class="form-control mb-2" :disabled="uploadKey === 'a-promo'" @change="onUpload($event, 'about_us', 'promo_banner.background_path')" />
               <span v-if="uploadKey === 'a-promo'" class="spinner-border spinner-border-sm"></span>
               <div v-if="a.promo_banner.background_path" class="d-flex align-items-center gap-2">
                 <img class="img-thumbnail" style="max-height:120px" :src="resolveStorageAssetUrl(a.promo_banner.background_path)" alt="" />
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.promo_banner.background_path = null">Retirer</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.promo_banner.background_path = null">{{ t('admin.sitePages.remove') }}</button>
               </div>
             </div>
-            <div class="col-md-6"><label class="form-label">Badge FR</label><input v-model="a.promo_banner.badge.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Badge EN</label><input v-model="a.promo_banner.badge.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Titre FR</label><input v-model="a.promo_banner.headline.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Headline EN</label><input v-model="a.promo_banner.headline.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Sous-titre FR</label><textarea v-model="a.promo_banner.subheadline.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Sub EN</label><textarea v-model="a.promo_banner.subheadline.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.promo_banner.badge.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.promo_banner.badge.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.headlineFr') }}</label><input v-model="a.promo_banner.headline.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.headlineEn') }}</label><input v-model="a.promo_banner.headline.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.subheadlineFr') }}</label><textarea v-model="a.promo_banner.subheadline.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.subheadlineEn') }}</label><textarea v-model="a.promo_banner.subheadline.en" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'process'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Processus (3 colonnes)</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.processCols') }}</h5>
           <div class="row g-3 mb-2">
-            <div class="col-md-6"><label class="form-label">Titre section FR</label><input v-model="a.process_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Heading EN</label><input v-model="a.process_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Intro FR</label><textarea v-model="a.process_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Intro EN</label><textarea v-model="a.process_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleFr') }}</label><input v-model="a.process_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.process_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.introFr') }}</label><textarea v-model="a.process_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.introEn') }}</label><textarea v-model="a.process_section.intro.en" rows="2" class="form-control"></textarea></div>
           </div>
           <div v-for="(pi, ix) in a.process_section.items" :key="ix" class="border rounded p-3 mb-2">
-            <strong>Étape {{ ix + 1 }}</strong>
+            <strong>{{ t('admin.sitePages.stepN', { n: ix + 1 }) }}</strong>
             <div class="row g-2 mt-1">
-              <div class="col-md-12"><label class="form-label">Icône Bootstrap</label><input v-model="pi.icon" type="text" class="form-control" placeholder="bi bi-pin-map-fill" /></div>
-              <div class="col-md-6"><label class="form-label">Titre FR</label><input v-model="pi.title.fr" type="text" class="form-control" /></div>
-              <div class="col-md-6"><label class="form-label">Title EN</label><input v-model="pi.title.en" type="text" class="form-control" /></div>
-              <div class="col-md-6"><label class="form-label">Desc FR</label><textarea v-model="pi.description.fr" rows="2" class="form-control"></textarea></div>
-              <div class="col-md-6"><label class="form-label">Desc EN</label><textarea v-model="pi.description.en" rows="2" class="form-control"></textarea></div>
+              <div class="col-md-12"><label class="form-label">{{ t('admin.sitePages.bootstrapIcon') }}</label><input v-model="pi.icon" type="text" class="form-control" placeholder="bi bi-pin-map-fill" /></div>
+              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="pi.title.fr" type="text" class="form-control" /></div>
+              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="pi.title.en" type="text" class="form-control" /></div>
+              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.descFr') }}</label><textarea v-model="pi.description.fr" rows="2" class="form-control"></textarea></div>
+              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.descEn') }}</label><textarea v-model="pi.description.en" rows="2" class="form-control"></textarea></div>
             </div>
           </div>
           <div class="row g-2 mb-2">
-            <div class="col-md-6"><label class="form-label">Bouton bas FR</label><input v-model="a.process_section.bottom_cta.label.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Bottom EN</label><input v-model="a.process_section.bottom_cta.label.en" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">Lien bouton bas</label><input v-model="a.process_section.bottom_cta.href" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.bottomBtnFr') }}</label><input v-model="a.process_section.bottom_cta.label.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.bottomBtnEn') }}</label><input v-model="a.process_section.bottom_cta.label.en" type="text" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.bottomBtnLink') }}</label><input v-model="a.process_section.bottom_cta.href" type="text" class="form-control" /></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'reviews_team'" class="pt-1">
-          <h5 class="mb-3 text-muted small text-uppercase">Titres sections Avis / Équipe</h5>
+          <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.reviewsTeamHeadings') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Avis titre FR</label><input v-model="a.reviews_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Reviews EN</label><input v-model="a.reviews_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Avis intro FR</label><textarea v-model="a.reviews_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Reviews intro EN</label><textarea v-model="a.reviews_section.intro.en" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Équipe titre FR</label><input v-model="a.team_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Team EN</label><input v-model="a.team_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">Équipe intro FR</label><textarea v-model="a.team_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">Team intro EN</label><textarea v-model="a.team_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingFr') }}</label><input v-model="a.reviews_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingEn') }}</label><input v-model="a.reviews_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsIntroFr') }}</label><textarea v-model="a.reviews_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsIntroEn') }}</label><textarea v-model="a.reviews_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamHeadingFr') }}</label><input v-model="a.team_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamHeadingEn') }}</label><input v-model="a.team_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamIntroFr') }}</label><textarea v-model="a.team_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamIntroEn') }}</label><textarea v-model="a.team_section.intro.en" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
@@ -323,7 +323,7 @@
             @click="saveAbout"
           >
             <span v-if="savingAbout" class="spinner-border spinner-border-sm"></span>
-            Enregistrer la page À propos
+            {{ t('admin.sitePages.saveAbout') }}
           </button>
         </div>
       </div>
@@ -332,6 +332,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { reactive, ref, onMounted, watch } from 'vue'
 import { useSiteStaticPagesStore } from '~/stores/siteStaticPages'
 import { useNotification } from '~/composables/useNotification'
@@ -504,9 +506,9 @@ async function saveContact() {
   try {
     await store.savePage('contact_us', JSON.parse(JSON.stringify(c)))
     await hydrate()
-    success('Page Contact enregistrée.')
+    success(t('admin.sitePages.contactSaved'))
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     savingContact.value = false
   }
@@ -517,9 +519,9 @@ async function saveAbout() {
   try {
     await store.savePage('about_us', JSON.parse(JSON.stringify(a)))
     await hydrate()
-    success('Page À propos enregistrée.')
+    success(t('admin.sitePages.aboutSaved'))
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     savingAbout.value = false
   }
@@ -539,7 +541,7 @@ async function onUpload(ev: Event, pageMode: string, dotted: string) {
     const res = await api.post<{ path?: string } & { url?: string }>('/upload/image', fd as any)
     const path =
       typeof res.data === 'object' && res.data !== null ? (res.data as any).path : undefined
-    if (!res.success || !path) throw new Error((res.message as string) || 'Échec upload')
+    if (!res.success || !path) throw new Error((res.message as string) || t('admin.sitePages.uploadFailed'))
     const p = dotted.split('.')
     if (pageMode === 'contact_us') {
       if (p[0] === 'hero') (c as any).hero.background_path = path
@@ -548,9 +550,9 @@ async function onUpload(ev: Event, pageMode: string, dotted: string) {
       if (p[0] === 'mission') a.mission.image_path = path
       if (p[0] === 'promo_banner') a.promo_banner.background_path = path
     }
-    success('Image enregistrée sur le serveur.')
+    success(t('admin.sitePages.imageSaved'))
   } catch (e: any) {
-    error(e?.message || 'Upload impossible')
+    error(e?.message || t('admin.sitePages.uploadImpossible'))
   } finally {
     uploadKey.value = ''
     input.value = ''

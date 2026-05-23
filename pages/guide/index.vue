@@ -40,7 +40,7 @@
             :class="selectedCategory === cat.id ? 'btn-primary' : 'btn-outline-primary'"
             @click="selectedCategory = cat.id"
           >
-            <i :class="cat.icon" class="me-2"></i>{{ cat.label }}
+            <i :class="cat.icon" class="me-2"></i>{{ categoryLabel(cat) }}
           </button>
         </div>
 
@@ -95,8 +95,8 @@
           <div v-if="filteredDocs.length === 0" class="col-12">
             <div class="card border-0 shadow text-center py-5">
               <i class="bi bi-file-earmark-x display-1 text-muted"></i>
-              <h5 class="mt-3">{{ locale === 'fr' ? 'Aucun guide disponible' : 'No guide available' }}</h5>
-              <p class="text-muted">{{ locale === 'fr' ? 'Contactez-nous pour plus d\'informations.' : 'Contact us for more information.' }}</p>
+              <h5 class="mt-3">{{ t('guide.noGuide') }}</h5>
+              <p class="text-muted">{{ t('guide.contactInfo') }}</p>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@
                   </div>
                   <div>
                     <i class="bi bi-briefcase text-primary me-2"></i>
-                    <small>{{ guide.experience }} {{ locale === 'fr' ? 'ans d\'experience' : 'years experience' }}</small>
+                    <small>{{ guide.experience }} {{ t('guide.yearsExp') }}</small>
                   </div>
                 </div>
 
@@ -188,11 +188,11 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <small class="text-muted">{{ locale === 'fr' ? 'A partir de' : 'From' }}</small>
-                    <div class="fw-bold text-primary">{{ formatCurrency(Number(guide.price_per_day || guide.pricePerDay) || 0) }}/{{ locale === 'fr' ? 'jour' : 'day' }}</div>
+                    <small class="text-muted">{{ t('guide.from') }}</small>
+                    <div class="fw-bold text-primary">{{ formatCurrency(Number(guide.price_per_day || guide.pricePerDay) || 0) }}/{{ t('guide.perDay') }}</div>
                   </div>
-                  <span v-if="guide.available" class="badge bg-success">{{ locale === 'fr' ? 'Disponible' : 'Available' }}</span>
-                  <span v-else class="badge bg-secondary">{{ locale === 'fr' ? 'Indisponible' : 'Unavailable' }}</span>
+                  <span v-if="guide.available" class="badge bg-success">{{ t('guide.available') }}</span>
+                  <span v-else class="badge bg-secondary">{{ t('guide.unavailable') }}</span>
                 </div>
               </div>
               <div class="card-footer bg-transparent border-0 p-4 pt-0">
@@ -213,8 +213,8 @@
           <div v-if="filteredGuides.length === 0" class="col-12">
             <div class="card border-0 shadow text-center py-5">
               <i class="bi bi-search display-1 text-muted"></i>
-              <h5 class="mt-3">{{ locale === 'fr' ? 'Aucun guide trouve' : 'No guide found' }}</h5>
-              <p class="text-muted">{{ locale === 'fr' ? 'Modifiez vos filtres de recherche' : 'Adjust your search filters' }}</p>
+              <h5 class="mt-3">{{ t('guide.noGuideFound') }}</h5>
+              <p class="text-muted">{{ t('guide.adjustFilters') }}</p>
             </div>
           </div>
         </div>
@@ -239,7 +239,7 @@
                     <label class="form-label">{{ t('guide.bookingDocTheme') }}</label>
                     <select v-model.number="bookingForm.documentation_category_id" class="form-select">
                       <option :value="0">{{ t('guide.bookingDocThemeNone') }}</option>
-                      <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ c.label }}</option>
+                      <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ categoryLabel(c) }}</option>
                     </select>
                     <small class="text-muted">{{ t('guide.bookingDocThemeHint') }}</small>
                   </div>
@@ -274,7 +274,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ locale === 'fr' ? 'Annuler' : 'Cancel' }}</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="submit" class="btn btn-primary" :disabled="bookingSubmitting">
                   <span v-if="bookingSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
                   {{ t('guide.bookingSubmit') }}
@@ -284,6 +284,40 @@
           </div>
         </div>
       </div>
+
+      <!-- My bookings (logged-in) -->
+      <section v-if="isLoggedIn" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="fw-bold mb-0">{{ t('guide.myBookingsTitle') }}</h3>
+        </div>
+        <div v-if="myBookingsLoading" class="text-center py-4 text-muted">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+          {{ t('guide.myBookingsLoading') }}
+        </div>
+        <div v-else-if="myBookings.length === 0" class="alert alert-light border mb-0">
+          {{ t('guide.myBookingsEmpty') }}
+        </div>
+        <div v-else class="table-responsive">
+          <table class="table table-sm align-middle bg-white border rounded shadow-sm mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>{{ t('admin.guideBookings.guide') }}</th>
+                <th>{{ t('admin.guideBookings.period') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th class="text-end">{{ t('admin.guideBookings.amount') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="b in myBookings" :key="b.id">
+                <td class="fw-medium">{{ b.guide?.name || '—' }}</td>
+                <td><small>{{ formatBookingDay(b.start_date) }} → {{ formatBookingDay(b.end_date) }}</small></td>
+                <td><span class="badge" :class="bookingStatusClass(b.status)">{{ bookingStatusLabel(b.status) }}</span></td>
+                <td class="text-end small">{{ formatCurrency(b.total_price, b.guide?.currency || 'XOF') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <!-- Services Section -->
       <section class="services-section mb-5">
@@ -336,7 +370,19 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
+const { field } = useLocaleField()
+const { categoryLabel } = useCategoryLabel()
+const { resolveList } = useI18nResolved()
+
+const GUIDE_FB_ICONS = [
+  'bi bi-shop',
+  'bi bi-building',
+  'bi bi-people',
+  'bi bi-translate',
+  'bi bi-truck',
+  'bi bi-calendar-check',
+]
 const { formatCurrency } = useFormatters()
 const pub = usePublicApi()
 const guidesStore = useGuidesStore()
@@ -351,6 +397,34 @@ const bookingModalRef = ref<HTMLElement | null>(null)
 let bookingBsModal: any = null
 const bookingGuide = ref<any>(null)
 const bookingSubmitting = ref(false)
+const isLoggedIn = computed(() => Boolean(getToken()))
+const myBookings = computed(() => guidesStore.myBookings)
+const myBookingsLoading = computed(() => guidesStore.myBookingsLoading)
+
+const bookingStatusLabel = (status: string) => {
+  const key = `guide.bookingStatus.${status}` as const
+  return te(key) ? t(key) : status
+}
+
+const bookingStatusClass = (status: string) => {
+  const m: Record<string, string> = {
+    pending: 'bg-warning text-dark',
+    confirmed: 'bg-primary',
+    completed: 'bg-success',
+    cancelled: 'bg-secondary',
+  }
+  return m[status] || 'bg-light text-dark'
+}
+
+const formatBookingDay = (d?: string) => {
+  if (!d) return '—'
+  try {
+    return new Date(`${d}T12:00:00`).toLocaleDateString(locale.value === 'zh' ? 'zh-CN' : locale.value === 'en' ? 'en-GB' : 'fr-FR')
+  } catch {
+    return d
+  }
+}
+
 const bookingForm = reactive({
   documentation_category_id: 0,
   service_type: 'daily' as 'daily' | 'hourly',
@@ -416,11 +490,16 @@ async function submitBooking() {
     }
     if (bookingForm.service_type === 'daily') {
       payload.end_date = bookingForm.end_date
+      const start = new Date(`${bookingForm.start_date}T12:00:00`)
+      const end = new Date(`${bookingForm.end_date}T12:00:00`)
+      const diff = Math.round((end.getTime() - start.getTime()) / 86400000) + 1
+      payload.days = Math.max(1, diff)
     } else {
       payload.end_date = bookingForm.start_date
       payload.hours = bookingForm.hours
     }
     await guidesStore.createBooking(payload as any)
+    await guidesStore.fetchMyBookings()
     success(t('guide.bookingSuccess'))
     bookingBsModal?.hide()
   } catch (e: any) {
@@ -448,8 +527,11 @@ onMounted(async () => {
   const [guidesRes, catRes] = await Promise.all([
     pub.get<any[]>('/guides/all'),
     pub.get<any[]>('/category/slug/GDC'),
-    gasStore.fetchPublic()
+    gasStore.fetchPublic(),
   ])
+  if (getToken()) {
+    await guidesStore.fetchMyBookings()
+  }
   if (guidesRes.success && Array.isArray(guidesRes.data)) {
     allGuides.value = guidesRes.data
   }
@@ -467,12 +549,12 @@ onMounted(async () => {
 const docCategories = computed(() => {
   const allTab = {
     id: 'all',
-    label: locale.value === 'fr' ? 'Tous' : 'All',
+    label: t('guide.all'),
     icon: 'bi bi-grid'
   }
   const rows = gdcCategories.value.map((c: any) => ({
     id: String(c.id),
-    label: c.label || c.code || '',
+    label: categoryLabel(c),
     icon: String(c.icon || 'bi bi-tag').trim()
   }))
   return [allTab, ...rows]
@@ -494,11 +576,7 @@ function stripHtml(s: string): string {
 }
 
 function docDescription(doc: any): string {
-  const raw =
-    locale.value === 'fr'
-      ? doc.description_fr || doc.description_en || ''
-      : doc.description_en || doc.description_fr || ''
-  return stripHtml(raw)
+  return stripHtml(field(doc, 'description'))
 }
 
 function docLanguages(doc: any): string {
@@ -511,7 +589,8 @@ function getDocCategoryIcon(doc: any): string {
 }
 
 function getDocCategoryLabel(doc: any): string {
-  return doc.category?.label || doc.category?.code || '—'
+  if (!doc.category) return '—'
+  return categoryLabel(doc.category as Record<string, unknown>)
 }
 
 const allCities = computed(() => {
@@ -554,33 +633,20 @@ function normalizeAccompIcon(ic: string | null | undefined): string {
 }
 
 const fallbackGuideAccompanimentCards = computed(() =>
-  locale.value === 'fr'
-    ? [
-        { id: 'fb-visit-marches', icon: 'bi bi-shop', title: 'Visite de marches', description: 'Accompagnement dans les grands marches de gros en Chine' },
-        { id: 'fb-visit-usines', icon: 'bi bi-building', title: 'Visite d\'usines', description: 'Organisation de visites chez les fabricants et producteurs' },
-        { id: 'fb-negociation', icon: 'bi bi-people', title: 'Negociation', description: 'Assistance pour negocier les meilleurs prix avec les fournisseurs' },
-        { id: 'fb-interpretation', icon: 'bi bi-translate', title: 'Interpretation', description: 'Traduction professionnelle lors de vos reunions d\'affaires' },
-        { id: 'fb-logistique', icon: 'bi bi-truck', title: 'Logistique locale', description: 'Gestion du transport local et des formalites' },
-        { id: 'fb-planification', icon: 'bi bi-calendar-check', title: 'Planification', description: 'Organisation complete de votre voyage d\'affaires' }
-      ]
-    : [
-        { id: 'fb-visit-marches', icon: 'bi bi-shop', title: 'Market Visits', description: 'Accompaniment in major wholesale markets in China' },
-        { id: 'fb-visit-usines', icon: 'bi bi-building', title: 'Factory Visits', description: 'Organization of visits to manufacturers and producers' },
-        { id: 'fb-negociation', icon: 'bi bi-people', title: 'Negotiation', description: 'Assistance to negotiate the best prices with suppliers' },
-        { id: 'fb-interpretation', icon: 'bi bi-translate', title: 'Interpretation', description: 'Professional translation during your business meetings' },
-        { id: 'fb-logistique', icon: 'bi bi-truck', title: 'Local Logistics', description: 'Management of local transport and formalities' },
-        { id: 'fb-planification', icon: 'bi bi-calendar-check', title: 'Planning', description: 'Complete organization of your business trip' }
-      ]
+  resolveList('guide.accompanimentFallback', ['title', 'description'] as const).map((item, i) => ({
+    id: `fb-${i}`,
+    icon: GUIDE_FB_ICONS[i] || 'bi bi-grid',
+    ...item,
+  })),
 )
 
 const guideAccompanimentCards = computed(() => {
   if (gasStore.publicFetched && !gasStore.publicFetchFailed && gasStore.publicItems.length > 0) {
-    const fr = locale.value === 'fr'
     return gasStore.publicItems.map(row => ({
       id: row.slug || row.id,
       icon: normalizeAccompIcon(row.icon),
-      title: fr ? row.title_fr : row.title_en || row.title_fr,
-      description: stripHtml(fr ? row.description_fr || '' : row.description_en || row.description_fr || '')
+      title: field(row, 'title'),
+      description: stripHtml(field(row, 'description')),
     }))
   }
   return fallbackGuideAccompanimentCards.value

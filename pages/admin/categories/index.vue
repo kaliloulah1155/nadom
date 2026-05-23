@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des catégories</h4>
-        <p class="text-muted mb-0">{{ psStore.categoriesMeta.total }} catégories</p>
+        <h4 class="mb-1">{{ t('admin.categories.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.categories.totalCount', { n: psStore.categoriesMeta.total }) }}</p>
       </div>
       <button v-can="['create', 'categories']" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouvelle catégorie
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.categories.newCategory') }}
       </button>
     </div>
 
@@ -16,20 +16,20 @@
       <div class="card-body py-3">
         <div class="row g-2 align-items-center">
           <div class="col-md-4">
-            <label class="form-label small text-muted mb-1">Filtrer par slug (type)</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.categories.filterSlug') }}</label>
             <select v-model="filterSlug" class="form-select form-select-sm" @change="fetchCategories(1)">
-              <option value="">— Tous les types —</option>
-              <option value="POD">POD · Produits</option>
-              <option value="DVS">DVS · Devises</option>
-              <option value="MEX">MEX · Modes d'expédition</option>
-              <option value="TVS">TVS · Types de visa</option>
-              <option value="BLG">BLG · Blog</option>
-              <option value="FAQ">FAQ · Questions</option>
-              <option value="GDC">GDC · Guides & documentation</option>
+              <option value="">{{ t('admin.categories.allTypes') }}</option>
+              <option value="POD">{{ t('admin.categories.slugTypePod') }}</option>
+              <option value="DVS">{{ t('admin.categories.slugTypeDvs') }}</option>
+              <option value="MEX">{{ t('admin.categories.slugTypeMex') }}</option>
+              <option value="TVS">{{ t('admin.categories.slugTypeTvs') }}</option>
+              <option value="BLG">{{ t('admin.categories.slugTypeBlg') }}</option>
+              <option value="FAQ">{{ t('admin.categories.slugTypeFaq') }}</option>
+              <option value="GDC">{{ t('admin.categories.slugTypeGdc') }}</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Lignes / page</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.categories.linesPerPage') }}</label>
             <select
               :value="psStore.categoriesMeta.perPage"
               class="form-select form-select-sm"
@@ -42,7 +42,7 @@
             </select>
           </div>
           <div class="col-md-5 text-md-end small text-muted">
-            Page {{ psStore.categoriesMeta.currentPage }} / {{ psStore.categoriesMeta.lastPage }}
+            {{ t('admin.pagination.pageOf', { current: psStore.categoriesMeta.currentPage, last: psStore.categoriesMeta.lastPage }) }}
           </div>
         </div>
       </div>
@@ -54,17 +54,17 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>Label</th>
-              <th>Slug</th>
-              <th>Code</th>
-              <th>Statut</th>
-              <th>Ordre</th>
-              <th>Actions</th>
+              <th>{{ t('admin.users.label') }}</th>
+              <th>{{ t('admin.categories.slug') }}</th>
+              <th>{{ t('admin.users.code') }}</th>
+              <th>{{ t('admin.dashboard.status') }}</th>
+              <th>{{ t('admin.categories.order') }}</th>
+              <th>{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="cat in categories" :key="cat.uuid">
-              <td class="fw-medium">{{ cat.label }}</td>
+              <td class="fw-medium">{{ categoryLabel(cat) }}</td>
               <td><code>{{ cat.slug }}</code></td>
               <td><span v-if="cat.code" class="badge bg-secondary">{{ cat.code }}</span></td>
               <td>
@@ -107,18 +107,80 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingCategory ? 'Modifier' : 'Nouvelle' }} catégorie</h5>
+            <h5 class="modal-title">{{ editingCategory ? t('admin.categories.modalEdit') : t('admin.categories.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveCategory">
             <div class="modal-body">
+              <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#cat-fr">{{ t('admin.common.french') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#cat-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#cat-zh">{{ t('admin.common.chinese') }}</button>
+                </li>
+              </ul>
+
+              <div class="tab-content mb-3">
+                <div class="tab-pane fade show active" id="cat-fr">
+                  <div class="mb-3">
+                    <label class="form-label">{{ t('admin.categories.labelFr') }} *</label>
+                    <input v-model="form.label_fr" type="text" class="form-control" required />
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label">{{ t('admin.categories.descriptionFr') }}</label>
+                    <ClientOnly>
+                      <WysiwygEditor
+                        v-if="modalOpen"
+                        v-model="form.description_fr"
+                        height="180px"
+                        :placeholder="t('admin.categories.describePlaceholder')"
+                      />
+                    </ClientOnly>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="cat-en">
+                  <div class="mb-3">
+                    <label class="form-label">{{ t('admin.categories.labelEn') }}</label>
+                    <input v-model="form.label_en" type="text" class="form-control" />
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label">{{ t('admin.categories.descriptionEn') }}</label>
+                    <ClientOnly>
+                      <WysiwygEditor
+                        v-if="modalOpen"
+                        v-model="form.description_en"
+                        height="180px"
+                        :placeholder="t('admin.categories.describePlaceholder')"
+                      />
+                    </ClientOnly>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="cat-zh">
+                  <div class="mb-3">
+                    <label class="form-label">{{ t('admin.categories.labelZh') }}</label>
+                    <input v-model="form.label_zh" type="text" class="form-control" />
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label">{{ t('admin.categories.descriptionZh') }}</label>
+                    <ClientOnly>
+                      <WysiwygEditor
+                        v-if="modalOpen"
+                        v-model="form.description_zh"
+                        height="180px"
+                        :placeholder="t('admin.categories.describePlaceholder')"
+                      />
+                    </ClientOnly>
+                  </div>
+                </div>
+              </div>
+
               <div class="row g-3">
                 <div class="col-md-8">
-                  <label class="form-label">Label *</label>
-                  <input v-model="form.label" type="text" class="form-control" required />
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Slug *</label>
+                  <label class="form-label">{{ t('admin.categories.slug') }} *</label>
                   <ClientOnly>
                     <Multiselect
                       v-if="modalOpen"
@@ -129,31 +191,31 @@
                       :show-no-options="false"
                       track-by="value"
                       label="label"
-                      placeholder="Sélectionner ou créer un slug"
-                      tag-placeholder="Ajouter ce nouveau slug"
+                      :placeholder="t('admin.categories.selectSlug')"
+                      :tag-placeholder="t('admin.categories.addSlug')"
                       select-label=""
                       deselect-label=""
                       selected-label=""
                       @tag="addSlugTag"
                     />
                   </ClientOnly>
-                  <small class="text-muted">Ex: MEX, POD, DVS · Tapez pour créer un nouveau slug</small>
+                  <small class="text-muted">{{ t('admin.categories.slugHint') }}</small>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Code</label>
+                  <label class="form-label">{{ t('admin.users.code') }}</label>
                   <input v-model="form.code" type="text" class="form-control" placeholder="air_express" />
                 </div>
                 <div class="col-md-4">
                   <label class="form-label d-flex justify-content-between align-items-center">
-                    <span>Icône</span>
+                    <span>{{ t('admin.categories.icon') }}</span>
                     <a
                       href="https://icons.getbootstrap.com/"
                       target="_blank"
                       rel="noopener"
                       class="small text-decoration-none"
-                      title="Voir tous les icônes Bootstrap"
+                      :title="t('admin.categories.viewIcons')"
                     >
-                      <i class="bi bi-box-arrow-up-right me-1"></i>Voir les icônes
+                      <i class="bi bi-box-arrow-up-right me-1"></i>{{ t('admin.categories.viewIcons') }}
                     </a>
                   </label>
                   <div class="input-group">
@@ -163,47 +225,36 @@
                     </span>
                     <input v-model="form.icon" type="text" class="form-control" placeholder="bi bi-airplane" />
                   </div>
-                  <small class="text-muted">Classe Bootstrap Icons (ex: <code>bi bi-airplane</code>)</small>
+                  <small class="text-muted">{{ t('admin.categories.iconBootstrapHint') }}</small>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Ordre de tri</label>
+                  <label class="form-label">{{ t('admin.categories.sortOrder') }}</label>
                   <input v-model.number="form.sort_order" type="number" class="form-control" min="0" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.dashboard.status') }}</label>
                   <select v-model="form.status" class="form-select">
-                    <option value="1">Actif</option>
-                    <option value="2">Inactif</option>
-                    <option value="0">Archivé</option>
+                    <option value="1">{{ t('admin.categories.statusActive') }}</option>
+                    <option value="2">{{ t('admin.categories.statusInactive') }}</option>
+                    <option value="0">{{ t('admin.categories.archived') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Catégorie parente</label>
+                  <label class="form-label">{{ t('admin.categories.parentCategory') }}</label>
                   <select v-model="form.parent_uuid" class="form-select">
-                    <option :value="null">Aucune</option>
+                    <option :value="null">{{ t('admin.categories.none') }}</option>
                     <option v-for="cat in parentOptions" :key="cat.uuid" :value="cat.uuid">
-                      {{ cat.label }}
+                      {{ categoryLabel(cat) }}
                     </option>
                   </select>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Description</label>
-                  <ClientOnly>
-                    <WysiwygEditor
-                      v-if="modalOpen"
-                      v-model="form.description"
-                      height="180px"
-                      placeholder="Décrivez la catégorie..."
-                    />
-                  </ClientOnly>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+                {{ saving ? t('admin.common.savingDots') : t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -214,6 +265,9 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+const { categoryLabel } = useCategoryLabel()
+
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
@@ -239,10 +293,14 @@ const parentOptions = computed(() => {
 })
 
 const form = reactive({
-  label: '',
+  label_fr: '',
+  label_en: '',
+  label_zh: '',
   slug: '',
   code: '',
-  description: '',
+  description_fr: '',
+  description_en: '',
+  description_zh: '',
   icon: '',
   sort_order: 0,
   status: '1',
@@ -253,14 +311,14 @@ const filterSlug = ref('')
 
 type SlugOption = { value: string; label: string }
 
-const KNOWN_SLUGS: SlugOption[] = [
-  { value: 'POD', label: 'POD · Produits' },
-  { value: 'DVS', label: 'DVS · Devises' },
-  { value: 'MEX', label: 'MEX · Modes d\'expédition' },
-  { value: 'TVS', label: 'TVS · Types de visa' },
-  { value: 'BLG', label: 'BLG · Blog' },
-  { value: 'FAQ', label: 'FAQ · Questions' },
-  { value: 'GDC', label: 'GDC · Guides & documentation' },
+const knownSlugs = (): SlugOption[] => [
+  { value: 'POD', label: t('admin.categories.slugTypePod') },
+  { value: 'DVS', label: t('admin.categories.slugTypeDvs') },
+  { value: 'MEX', label: t('admin.categories.slugTypeMex') },
+  { value: 'TVS', label: t('admin.categories.slugTypeTvs') },
+  { value: 'BLG', label: t('admin.categories.slugTypeBlg') },
+  { value: 'FAQ', label: t('admin.categories.slugTypeFaq') },
+  { value: 'GDC', label: t('admin.categories.slugTypeGdc') },
 ]
 
 const slugOptions = computed<SlugOption[]>(() => {
@@ -268,7 +326,7 @@ const slugOptions = computed<SlugOption[]>(() => {
     .map((c: any) => (c.slug || '').toString().toUpperCase())
     .filter(Boolean)
   const merged = new Map<string, SlugOption>()
-  for (const opt of KNOWN_SLUGS) merged.set(opt.value, opt)
+  for (const opt of knownSlugs()) merged.set(opt.value, opt)
   for (const slug of fromCategories) {
     if (!merged.has(slug)) merged.set(slug, { value: slug, label: slug })
   }
@@ -289,9 +347,9 @@ const addSlugTag = (newSlug: string) => {
 
 const getStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    '0': 'Archivé',
-    '1': 'Actif',
-    '2': 'Inactif'
+    '0': t('admin.categories.archived'),
+    '1': t('admin.categories.statusActive'),
+    '2': t('admin.categories.statusInactive'),
   }
   return labels[status] || status
 }
@@ -330,20 +388,28 @@ const syncSlugSelected = (slug: string) => {
 const openModal = (cat?: any) => {
   if (cat) {
     editingCategory.value = cat
-    form.label = cat.label
+    form.label_fr = cat.label_fr || cat.label || ''
+    form.label_en = cat.label_en || ''
+    form.label_zh = cat.label_zh || ''
     form.slug = cat.slug
     form.code = cat.code || ''
-    form.description = cat.description || ''
+    form.description_fr = cat.description_fr || cat.description || ''
+    form.description_en = cat.description_en || ''
+    form.description_zh = cat.description_zh || ''
     form.icon = cat.icon || ''
     form.sort_order = cat.sort_order || 0
     form.status = cat.status
     form.parent_uuid = cat.parent?.uuid || null
   } else {
     editingCategory.value = null
-    form.label = ''
+    form.label_fr = ''
+    form.label_en = ''
+    form.label_zh = ''
     form.slug = ''
     form.code = ''
-    form.description = ''
+    form.description_fr = ''
+    form.description_en = ''
+    form.description_zh = ''
     form.icon = ''
     form.sort_order = 0
     form.status = '1'
@@ -355,14 +421,22 @@ const openModal = (cat?: any) => {
 
 const saveCategory = async () => {
   if (!form.slug) {
-    error('Le slug est obligatoire')
+    error(t('admin.categories.slugRequired'))
+    return
+  }
+  if (!form.label_fr?.trim()) {
+    error(t('admin.categories.labelFrRequired'))
     return
   }
   const data = {
-    label: form.label,
+    label_fr: form.label_fr.trim(),
+    label_en: form.label_en?.trim() || null,
+    label_zh: form.label_zh?.trim() || null,
     slug: form.slug,
     code: form.code || null,
-    description: form.description || null,
+    description_fr: form.description_fr || null,
+    description_en: form.description_en || null,
+    description_zh: form.description_zh || null,
     icon: form.icon || null,
     sort_order: form.sort_order,
     status: form.status,
@@ -373,10 +447,10 @@ const saveCategory = async () => {
   try {
     if (editingCategory.value) {
       await psStore.updateCategory(editingCategory.value.uuid, data)
-      success('Catégorie modifiée')
+      success(t('admin.categories.updated'))
     } else {
       await psStore.addCategory(data)
-      success('Catégorie créée')
+      success(t('admin.categories.created'))
     }
     modalInstance?.hide()
   } catch (err: any) {
@@ -387,9 +461,9 @@ const saveCategory = async () => {
 }
 
 const confirmDelete = async (uuid: string) => {
-  if (confirm('Supprimer cette catégorie ?')) {
+  if (confirm(t('admin.confirm.deleteCategory'))) {
     await psStore.deleteCategory(uuid)
-    success('Catégorie supprimée')
+    success(t('admin.categories.deleted'))
   }
 }
 </script>

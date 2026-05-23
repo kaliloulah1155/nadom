@@ -98,7 +98,7 @@ const allFaqs = ref<any[]>([])
 const faqsByCategory = computed(() => {
   const groups = new Map<string, any[]>()
   for (const f of allFaqs.value) {
-    const cat = f.category || (locale.value === 'fr' ? 'Général' : 'General')
+    const cat = f.category || t('faq.general')
     if (!groups.has(cat)) groups.set(cat, [])
     groups.get(cat)!.push(f)
   }

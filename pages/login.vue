@@ -12,22 +12,22 @@
                   <div class="mb-4">
                     <img :src="config.public.logo" :alt="config.public.siteName" height="50" />
                   </div>
-                  <h3 class="text-white mb-3">{{ locale === 'fr' ? 'Bienvenue sur NADOM' : 'Welcome to NADOM' }}</h3>
+                  <h3 class="text-white mb-3">{{ t('auth.welcome') }}</h3>
                   <p class="text-white opacity-75">
-                    {{ locale === 'fr' ? 'Votre partenaire de confiance pour l\'import-export avec la Chine.' : 'Your trusted partner for import-export with China.' }}
+                    {{ t('auth.welcomeSubtitle') }}
                   </p>
                   <div class="mt-4">
                     <div class="d-flex align-items-center mb-3">
                       <i class="bi bi-check-circle-fill text-success me-2"></i>
-                      <span class="text-white">{{ locale === 'fr' ? 'Personal Shopping' : 'Personal Shopping' }}</span>
+                      <span class="text-white">{{ t('auth.personalShoppingFeature') }}</span>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                       <i class="bi bi-check-circle-fill text-success me-2"></i>
-                      <span class="text-white">{{ locale === 'fr' ? 'Expedition securisee' : 'Secure shipping' }}</span>
+                      <span class="text-white">{{ t('auth.secureShipping') }}</span>
                     </div>
                     <div class="d-flex align-items-center">
                       <i class="bi bi-check-circle-fill text-success me-2"></i>
-                      <span class="text-white">{{ locale === 'fr' ? 'Suivi en temps reel' : 'Real-time tracking' }}</span>
+                      <span class="text-white">{{ t('tracking.realTimeTracking') }}</span>
                     </div>
                   </div>
                 </div>
@@ -71,9 +71,9 @@
                       <div class="client-icon mb-3">
                         <i class="bi bi-box-seam"></i>
                       </div>
-                      <h5>{{ locale === 'fr' ? 'Suivez votre commande' : 'Track your order' }}</h5>
+                      <h5>{{ t('auth.trackOrder') }}</h5>
                       <p class="text-muted small">
-                        {{ locale === 'fr' ? 'Entrez votre code de suivi pour acceder a vos demandes et colis' : 'Enter your tracking code to access your requests and packages' }}
+                        {{ t('auth.trackOrderHint') }}
                       </p>
                     </div>
 
@@ -88,12 +88,12 @@
                             v-model="clientCode"
                             type="text"
                             class="form-control"
-                            :placeholder="locale === 'fr' ? 'Ex: TRK-2024-001234 ou REQ-001234' : 'E.g., TRK-2024-001234 or REQ-001234'"
+                            :placeholder="t('auth.trackingPlaceholder')"
                             required
                           />
                         </div>
                         <small class="text-muted">
-                          {{ locale === 'fr' ? 'Numero de suivi colis ou numero de demande' : 'Package tracking number or request number' }}
+                          {{ t('auth.trackingHint') }}
                         </small>
                       </div>
 
@@ -108,7 +108,7 @@
                     </form>
 
                     <div class="text-center mt-4">
-                      <p class="text-muted small mb-2">{{ locale === 'fr' ? 'Pas de code ?' : 'No code?' }}</p>
+                      <p class="text-muted small mb-2">{{ t('auth.noCode') }}</p>
                       <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-plus-circle me-1"></i>{{ t('personalShopping.newRequest') }}
                       </NuxtLink>
@@ -146,15 +146,27 @@
 
                       <div class="mb-4">
                         <label class="form-label">{{ t('auth.password') }}</label>
-                        <input
-                          v-model="form.password"
-                          type="password"
-                          class="form-control form-control-lg"
-                          :class="{ 'is-invalid': errors.password }"
-                          :placeholder="locale === 'fr' ? 'Votre mot de passe' : 'Your password'"
-                          required
-                        />
-                        <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
+                        <div class="input-group input-group-lg has-validation">
+                          <input
+                            v-model="form.password"
+                            :type="showPassword ? 'text' : 'password'"
+                            class="form-control"
+                            :class="{ 'is-invalid': errors.password }"
+                            :placeholder="t('auth.passwordPlaceholder')"
+                            required
+                            autocomplete="current-password"
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary password-toggle-btn"
+                            :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                            :title="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                            @click="showPassword = !showPassword"
+                          >
+                            <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" aria-hidden="true"></i>
+                          </button>
+                          <div v-if="errors.password" class="invalid-feedback d-block">{{ errors.password }}</div>
+                        </div>
                       </div>
 
                       <button
@@ -172,7 +184,7 @@
                   <!-- Back to Home -->
                   <div class="text-center mt-4 pt-3 border-top">
                     <NuxtLink to="/" class="text-muted small">
-                      <i class="bi bi-arrow-left me-1"></i>{{ locale === 'fr' ? 'Retour a l\'accueil' : 'Back to home' }}
+                      <i class="bi bi-arrow-left me-1"></i>{{ t('auth.backHome') }}
                     </NuxtLink>
                   </div>
                 </div>
@@ -216,6 +228,7 @@ const errors = reactive({
 
 const loading = ref(false)
 const error = ref('')
+const showPassword = ref(false)
 
 // Client Access
 const handleClientAccess = () => {
@@ -245,28 +258,16 @@ const validateForm = () => {
   errors.email = ''
   errors.password = ''
 
-  const msgs = locale.value === 'fr' ? {
-    emailRequired: 'L\'email est requis',
-    emailInvalid: 'Email invalide',
-    passwordRequired: 'Le mot de passe est requis',
-    passwordShort: 'Le mot de passe doit contenir au moins 6 caracteres'
-  } : {
-    emailRequired: 'Email is required',
-    emailInvalid: 'Invalid email',
-    passwordRequired: 'Password is required',
-    passwordShort: 'Password must be at least 6 characters'
-  }
-
   if (!form.email) {
-    errors.email = msgs.emailRequired
+    errors.email = t('auth.emailRequired')
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = msgs.emailInvalid
+    errors.email = t('auth.emailInvalid')
   }
 
   if (!form.password) {
-    errors.password = msgs.passwordRequired
+    errors.password = t('auth.passwordRequired')
   } else if (form.password.length < 6) {
-    errors.password = msgs.passwordShort
+    errors.password = t('auth.passwordShort')
   }
 
   return !errors.email && !errors.password
@@ -294,15 +295,15 @@ const handleAdminLogin = async () => {
 
     // Determine if user has backoffice access (admin or agent)
     if (!authStore.hasBackofficeAccess) {
-      error.value = locale.value === 'fr' ? 'Accès réservé au personnel autorisé' : 'Authorized personnel only'
+      error.value = t('auth.staffOnly')
       await authStore.logout()
       return
     }
 
-    success(locale.value === 'fr' ? 'Connexion reussie !' : 'Login successful!')
+    success(t('auth.loginSuccess'))
     router.push('/admin/dashboard')
   } catch (err: any) {
-    error.value = err.message || (locale.value === 'fr' ? 'Erreur lors de la connexion' : 'Login error')
+    error.value = err.message || (t('auth.loginError'))
     notifyError(error.value)
   } finally {
     loading.value = false
@@ -364,5 +365,18 @@ const handleAdminLogin = async () => {
 .nav-pills .nav-link.active {
   background: var(--bs-primary);
   color: white;
+}
+
+.password-toggle-btn {
+  border-color: #dee2e6;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.password-toggle-btn:hover,
+.password-toggle-btn:focus {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
 }
 </style>

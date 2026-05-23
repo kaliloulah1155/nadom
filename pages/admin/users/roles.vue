@@ -2,11 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Rôles et Permissions</h4>
-        <p class="text-muted mb-0">{{ rolesStore.total }} profils configurés</p>
+        <h4 class="mb-1">{{ t('admin.users.rolesTitle') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.users.rolesProfilesCount', { n: rolesStore.total }) }}</p>
       </div>
       <button v-can="['create', 'roles']" class="btn btn-primary px-4" @click="openModal()">
-        <i class="bi bi-shield-plus me-2"></i>Nouveau rôle
+        <i class="bi bi-shield-plus me-2"></i>{{ t('admin.users.newRole') }}
       </button>
     </div>
 
@@ -17,11 +17,11 @@
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th style="width: 250px;">Libellé</th>
-                <th style="width: 180px;">Code</th>
-                <th>Description</th>
-                <th style="width: 120px;">Statut</th>
-                <th style="width: 160px;">Actions</th>
+                <th style="width: 250px;">{{ t('admin.users.label') }}</th>
+                <th style="width: 180px;">{{ t('admin.users.code') }}</th>
+                <th>{{ t('admin.users.description') }}</th>
+                <th style="width: 120px;">{{ t('admin.dashboard.status') }}</th>
+                <th style="width: 160px;">{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                 </td>
               </tr>
               <tr v-else-if="rolesStore.paginatedRoles.length === 0">
-                <td colspan="5" class="text-center py-4 text-muted">Aucun rôle trouvé</td>
+                <td colspan="5" class="text-center py-4 text-muted">{{ t('admin.users.noRoles') }}</td>
               </tr>
               <tr
                 v-for="item in rolesStore.paginatedRoles"
@@ -45,7 +45,7 @@
                 <td class="text-muted small">{{ item.role.description || '-' }}</td>
                 <td>
                   <span class="badge rounded-pill" :class="item.role.status === 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
-                    {{ item.role.status === 1 ? 'Actif' : 'Inactif' }}
+                    {{ item.role.status === 1 ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
                 </td>
                 <td @click.stop>
@@ -82,12 +82,12 @@
               <div v-if="selectedRole" class="d-flex align-items-center gap-3">
                 <i class="bi bi-shield-check fs-2 text-primary"></i>
                 <div>
-                  <small class="text-muted text-uppercase fw-bold">Profil sélectionné</small>
+                  <small class="text-muted text-uppercase fw-bold">{{ t('admin.users.selectedProfile') }}</small>
                   <h5 class="mb-0">{{ selectedRole.role.libelle }}</h5>
                 </div>
               </div>
               <div v-else class="text-muted">
-                <i class="bi bi-info-circle me-2"></i>Sélectionnez un rôle dans le tableau pour configurer ses accès
+                <i class="bi bi-info-circle me-2"></i>{{ t('admin.users.selectRoleHint') }}
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light sticky-top">
                   <tr>
-                    <th class="ps-4" style="min-width: 200px;">Modules / Menus</th>
+                    <th class="ps-4" style="min-width: 200px;">{{ t('admin.users.modulesMenus') }}</th>
                     <th v-for="action in rolesStore.allActions" :key="action.uuid" class="text-center small text-uppercase">
                       {{ action.label }}
                     </th>
@@ -129,7 +129,7 @@
           <div class="card-footer bg-transparent border-top-0 p-4 text-end">
             <button class="btn btn-primary px-5" :disabled="submitting || !hasChanges" @click="savePermissions">
               <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
-              Enregistrer les accès
+              {{ t('admin.users.saveAccess') }}
             </button>
           </div>
         </div>
@@ -141,7 +141,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
           <div class="modal-header border-0 pt-4 px-4">
-            <h5 class="modal-title fw-bold">{{ editingRole ? 'Modifier le rôle' : 'Nouveau rôle' }}</h5>
+            <h5 class="modal-title fw-bold">{{ editingRole ? t('admin.users.modalEditRole') : t('admin.users.newRole') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="handleSaveRole">
@@ -160,7 +160,7 @@
               </div>
             </div>
             <div class="modal-footer border-0 pb-4 px-4">
-              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary px-4" :disabled="submitting">
                 {{ editingRole ? 'Mettre à jour' : 'Créer le rôle' }}
               </button>
@@ -173,6 +173,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, onMounted } from 'vue'
 import { useRolesStore } from '~/stores/roles'
 import { useNotification } from '~/composables/useNotification'
@@ -275,7 +277,7 @@ const handleSaveRole = async () => {
       // Ne pas envoyer permissions pour éviter de les supprimer involontairement
     }
     await rolesStore.saveRole(payload, editingRole.value?.uuid)
-    success(editingRole.value ? 'Rôle mis à jour' : 'Rôle créé')
+    success(editingRole.value ? t('admin.users.roleUpdated') : t('admin.users.roleCreated'))
     modalInstance?.hide()
     await fetchRoles(rolesStore.currentPage)
   } catch (err: any) {
@@ -300,7 +302,7 @@ const savePermissions = async () => {
     }, selectedRole.value.role.uuid)
     
     hasChanges.value = false
-    success('Permissions mises à jour avec succès')
+    success(t('admin.users.permissionsUpdated'))
   } catch (err: any) {
     error(err.message)
   } finally {
@@ -309,10 +311,10 @@ const savePermissions = async () => {
 }
 
 const handleDelete = async (role: any) => {
-  if (confirm(`Supprimer définitivement le rôle ${role.libelle} ?`)) {
+  if (confirm(t('admin.users.confirmDeleteRole', { name: role.libelle }))) {
     try {
       await rolesStore.deleteRole(role.uuid)
-      success('Rôle supprimé')
+      success(t('admin.users.roleDeleted'))
       await fetchRoles(rolesStore.currentPage)
       selectedRole.value = rolesStore.paginatedRoles[0] || null
       if (selectedRole.value) currentPermissions.value = { ...selectedRole.value.perm }

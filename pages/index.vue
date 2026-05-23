@@ -124,7 +124,7 @@
                   >
                     <i :class="cat.iconClass"></i>
                   </div>
-                  <h6 class="mb-0 text-body">{{ cat.label }}</h6>
+                  <h6 class="mb-0 text-body">{{ categoryLabel(cat) }}</h6>
                 </div>
               </div>
             </NuxtLink>
@@ -226,6 +226,19 @@ definePageMeta({
 })
 
 const { t, tm, rt, locale } = useI18n()
+const { field } = useLocaleField()
+const { categoryLabel } = useCategoryLabel()
+
+function pickFeatures(row: Record<string, unknown>): string[] {
+  const loc = locale.value
+  const raw =
+    loc === 'zh'
+      ? row.features_zh ?? row.features_en ?? row.features_fr
+      : loc === 'en'
+        ? row.features_en ?? row.features_fr
+        : row.features_fr ?? row.features_en
+  return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === 'string') : []
+}
 const blogStore = useBlogStore()
 const psStore = usePersonalShoppingStore()
 const settingsStore = useGlobalSettingsStore()
@@ -256,12 +269,10 @@ const SERVICE_KEYS = [
 
 const servicesFromApi = computed(() => {
   const rows = homeServicesStore.publicItems
-  const fr = locale.value === 'fr'
   return rows.map(row => {
-    const title = fr ? row.title_fr : (row.title_en || row.title_fr)
-    const desc = fr ? row.description_fr : (row.description_en || row.description_fr)
-    const feats = fr ? row.features_fr : (row.features_en || row.features_fr)
-    const rawList = Array.isArray(feats) ? feats.filter((x): x is string => typeof x === 'string') : []
+    const title = field(row, 'title')
+    const desc = field(row, 'description')
+    const rawList = pickFeatures(row as Record<string, unknown>)
     const featureBlocks = rawList.map(f => f || '').filter(f => stripInnerText(f))
     return {
       id: row.slug || row.id,
@@ -307,7 +318,7 @@ const homePodCategories = computed(() => {
     const linkToken = encodeURIComponent(code || String(c.id))
     return {
       uuid: c.uuid,
-      label: c.label || '',
+      label: categoryLabel(c),
       linkToken,
       iconClass: resolvePodCategoryIcon(c),
       color: POD_CATEGORY_COLORS[i % POD_CATEGORY_COLORS.length],

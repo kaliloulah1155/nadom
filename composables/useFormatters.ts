@@ -1,28 +1,42 @@
 export const useFormatters = () => {
+  const { t, locale: i18nLocale } = useI18n()
+
+  const intlLocale = (): string => {
+    if (i18nLocale.value === 'en') return 'en-US'
+    if (i18nLocale.value === 'zh') return 'zh-CN'
+    return 'fr-FR'
+  }
+
+  const statusLabel = (key: string, fallback = key): string => {
+    const msg = t(key)
+    return msg !== key ? msg : fallback
+  }
+
   // Formatage monétaire
   const formatCurrency = (
     amount: number | string | null | undefined,
     currency: string = 'XOF',
-    locale: string = 'fr-FR'
+    locale?: string
   ): string => {
+    const loc = locale ?? intlLocale()
     const n = Number(amount)
     const safe = Number.isFinite(n) ? n : 0
     const code = (currency || 'XOF').toString().toUpperCase()
     // CFA : ISO distinct (XOF UEMOA, XAF CEMAC) — affichage habituel « FCFA » côté FR.
     if (code === 'XOF' || code === 'XAF' || code === 'FCFA') {
-      return new Intl.NumberFormat(locale, {
+      return new Intl.NumberFormat(loc, {
         style: 'decimal',
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       }).format(safe) + ' FCFA'
     }
     try {
-      return new Intl.NumberFormat(locale, {
+      return new Intl.NumberFormat(loc, {
         style: 'currency',
         currency: code,
       }).format(safe)
     } catch (_) {
-      return new Intl.NumberFormat(locale).format(safe) + ' ' + code
+      return new Intl.NumberFormat(loc).format(safe) + ' ' + code
     }
   }
 
@@ -30,61 +44,73 @@ export const useFormatters = () => {
   const formatNumber = (
     num: number,
     decimals: number = 0,
-    locale: string = 'fr-FR'
+    locale?: string
   ): string => {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(locale ?? intlLocale(), {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     }).format(num)
   }
 
-  // Formatage de date
+  // Formatage de date (suit la locale i18n : fr / en / zh)
   const formatDate = (
     date: string | Date,
     options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     },
-    locale: string = 'fr-FR'
+    locale?: string,
   ): string => {
     const d = typeof date === 'string' ? new Date(date) : date
-    return new Intl.DateTimeFormat(locale, options).format(d)
+    if (!d || Number.isNaN(d.getTime())) return ''
+    return new Intl.DateTimeFormat(locale ?? intlLocale(), options).format(d)
   }
 
   // Formatage de date courte
-  const formatDateShort = (date: string | Date, locale: string = 'fr-FR'): string => {
-    return formatDate(date, {
+  const formatDateShort = (date: string | Date, locale?: string): string => {
+    const loc = locale ?? intlLocale()
+    return new Intl.DateTimeFormat(loc, {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
-    }, locale)
+      day: '2-digit',
+    }).format(typeof date === 'string' ? new Date(date) : date)
   }
 
-  // Formatage de date relative (il y a X jours, etc.)
-  const formatRelativeDate = (date: string | Date, locale: string = 'fr-FR'): string => {
+  const formatDateTime = (date: string | Date, locale?: string): string => {
+    const loc = locale ?? intlLocale()
     const d = typeof date === 'string' ? new Date(date) : date
+    if (!d || Number.isNaN(d.getTime())) return ''
+    return new Intl.DateTimeFormat(loc, {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(d)
+  }
+
+  // Formatage de date relative
+  const formatRelativeDate = (date: string | Date): string => {
+    const d = typeof date === 'string' ? new Date(date) : date
+    if (!d || Number.isNaN(d.getTime())) return ''
     const now = new Date()
     const diffMs = now.getTime() - d.getTime()
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
     const diffMinutes = Math.floor(diffMs / (1000 * 60))
 
-    if (diffMinutes < 1) return 'À l\'instant'
-    if (diffMinutes < 60) return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`
-    if (diffHours < 24) return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`
-    if (diffDays < 7) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+    if (diffMinutes < 1) return t('admin.time.justNow')
+    if (diffMinutes < 60) return t('admin.time.minutesAgo', { n: diffMinutes })
+    if (diffHours < 24) return t('admin.time.hoursAgo', { n: diffHours })
+    if (diffDays < 7) return t('admin.time.daysAgo', { n: diffDays })
     if (diffDays < 30) {
       const weeks = Math.floor(diffDays / 7)
-      return `Il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`
+      return t('admin.time.weeksAgo', { n: weeks })
     }
     if (diffDays < 365) {
       const months = Math.floor(diffDays / 30)
-      return `Il y a ${months} mois`
+      return t('admin.time.monthsAgo', { n: months })
     }
-
     const years = Math.floor(diffDays / 365)
-    return `Il y a ${years} an${years > 1 ? 's' : ''}`
+    return t('admin.time.yearsAgo', { n: years })
   }
 
   // Formatage de poids
@@ -135,36 +161,46 @@ export const useFormatters = () => {
       .replace(/(^-|-$)/g, '')
   }
 
-  // Formatage statut demande
-  const formatRequestStatus = (status: string): { label: string; color: string; bgColor: string } => {
-    const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
-      pending: { label: 'En attente', color: '#f59e0b', bgColor: '#fef3c7' },
-      searching: { label: 'Recherche en cours', color: '#3b82f6', bgColor: '#dbeafe' },
-      negotiating: { label: 'Négociation', color: '#8b5cf6', bgColor: '#ede9fe' },
-      confirmed: { label: 'Confirmé', color: '#10b981', bgColor: '#d1fae5' },
-      preparing: { label: 'Préparation', color: '#06b6d4', bgColor: '#cffafe' },
-      shipped: { label: 'Expédié', color: '#6366f1', bgColor: '#e0e7ff' },
-      delivered: { label: 'Livré', color: '#22c55e', bgColor: '#dcfce7' },
-      cancelled: { label: 'Annulé', color: '#ef4444', bgColor: '#fee2e2' }
-    }
-
-    return statusMap[status] || { label: status, color: '#6b7280', bgColor: '#f3f4f6' }
+  const REQUEST_STATUS_STYLE: Record<string, { color: string; bgColor: string }> = {
+    pending: { color: '#f59e0b', bgColor: '#fef3c7' },
+    searching: { color: '#3b82f6', bgColor: '#dbeafe' },
+    negotiating: { color: '#8b5cf6', bgColor: '#ede9fe' },
+    confirmed: { color: '#10b981', bgColor: '#d1fae5' },
+    preparing: { color: '#06b6d4', bgColor: '#cffafe' },
+    shipped: { color: '#6366f1', bgColor: '#e0e7ff' },
+    delivered: { color: '#22c55e', bgColor: '#dcfce7' },
+    cancelled: { color: '#ef4444', bgColor: '#fee2e2' },
+    total: { color: '#6b7280', bgColor: '#f3f4f6' },
   }
 
-  // Formatage statut expédition
-  const formatShipmentStatus = (status: string): { label: string; color: string; icon: string } => {
-    const statusMap: Record<string, { label: string; color: string; icon: string }> = {
-      pending: { label: 'En attente', color: '#f59e0b', icon: 'bi-clock' },
-      picked_up: { label: 'Collecté', color: '#3b82f6', icon: 'bi-box-seam' },
-      in_transit: { label: 'En transit', color: '#8b5cf6', icon: 'bi-truck' },
-      in_customs: { label: 'En douane', color: '#f97316', icon: 'bi-building' },
-      out_for_delivery: { label: 'En livraison', color: '#06b6d4', icon: 'bi-bicycle' },
-      delivered: { label: 'Livré', color: '#22c55e', icon: 'bi-check-circle' },
-      order_placed: { label: 'Commande passée', color: '#6b7280', icon: 'bi-cart-check' },
-      returned: { label: 'Retourné', color: '#ef4444', icon: 'bi-arrow-return-left' }
+  const formatRequestStatus = (status: string): { label: string; color: string; bgColor: string } => {
+    const style = REQUEST_STATUS_STYLE[status] ?? { color: '#6b7280', bgColor: '#f3f4f6' }
+    if (status === 'total') {
+      return { label: statusLabel('admin.dashboard.total', 'Total'), ...style }
     }
+    return {
+      label: statusLabel(`admin.requests.status.${status}`, status),
+      ...style,
+    }
+  }
 
-    return statusMap[status] || { label: status, color: '#6b7280', icon: 'bi-question-circle' }
+  const SHIPMENT_STATUS_STYLE: Record<string, { color: string; icon: string }> = {
+    pending: { color: '#f59e0b', icon: 'bi-clock' },
+    picked_up: { color: '#3b82f6', icon: 'bi-box-seam' },
+    in_transit: { color: '#8b5cf6', icon: 'bi-truck' },
+    in_customs: { color: '#f97316', icon: 'bi-building' },
+    out_for_delivery: { color: '#06b6d4', icon: 'bi-bicycle' },
+    delivered: { color: '#22c55e', icon: 'bi-check-circle' },
+    order_placed: { color: '#6b7280', icon: 'bi-cart-check' },
+    returned: { color: '#ef4444', icon: 'bi-arrow-return-left' },
+  }
+
+  const formatShipmentStatus = (status: string): { label: string; color: string; icon: string } => {
+    const style = SHIPMENT_STATUS_STYLE[status] ?? { color: '#6b7280', icon: 'bi-question-circle' }
+    return {
+      label: statusLabel(`admin.shipments.status.${status}`, status),
+      ...style,
+    }
   }
 
   /**
@@ -196,6 +232,7 @@ export const useFormatters = () => {
     formatNumber,
     formatDate,
     formatDateShort,
+    formatDateTime,
     formatRelativeDate,
     formatWeight,
     formatPhone,

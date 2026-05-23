@@ -28,7 +28,7 @@
                     v-model="trackingNumber"
                     type="text"
                     class="form-control border-start-0"
-                    :placeholder="locale === 'fr' ? 'Entrez votre numero de suivi (ex: TRK-2024-001234)' : 'Enter your tracking number (e.g., TRK-2024-001234)'"
+                    :placeholder="t('tracking.placeholderLong')"
                     required
                   />
                   <button
@@ -105,7 +105,7 @@
                 <div class="d-flex align-items-center">
                   <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
                   <div>
-                    <strong>Position actuelle</strong>
+                    <strong>{{ t('tracking.currentLocation') }}</strong>
                     <p class="mb-0">{{ shipment.current_location || '-' }}</p>
                   </div>
                 </div>
@@ -116,33 +116,33 @@
                 <div class="card-body">
                   <h6 class="fw-bold mb-3">
                     <i class="bi bi-bag-check me-2 text-primary"></i>
-                    {{ locale === 'fr' ? 'Détails du projet' : 'Project Details' }}
+                    {{ t('tracking.projectDetails') }}
                   </h6>
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Titre' : 'Title' }}</small>
+                      <small class="text-muted d-block">{{ t('tracking.projectTitle') }}</small>
                       <strong>{{ linkedRequest.title }}</strong>
                     </div>
                     <div class="col-md-6">
-                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Catégorie' : 'Category' }}</small>
+                      <small class="text-muted d-block">{{ t('tracking.projectCategory') }}</small>
                       <strong>{{ linkedRequest.category }}</strong>
                     </div>
                     <div class="col-md-6">
-                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Statut du projet' : 'Project Status' }}</small>
+                      <small class="text-muted d-block">{{ t('tracking.projectStatus') }}</small>
                       <span class="badge" :class="getRequestStatusClass(linkedRequest.status)">
                         {{ getRequestStatusLabel(linkedRequest.status) }}
                       </span>
                     </div>
                     <div class="col-md-6">
-                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Budget' : 'Budget' }}</small>
+                      <small class="text-muted d-block">{{ t('tracking.budget') }}</small>
                       <strong>{{ formatCurrency(linkedRequest.budget_estimated ?? linkedRequest.budgetEstimated, linkedRequest.currency || 'XOF') }}</strong>
                     </div>
                     <div v-if="linkedRequest.description" class="col-12">
-                      <small class="text-muted d-block">{{ locale === 'fr' ? 'Description' : 'Description' }}</small>
+                      <small class="text-muted d-block">{{ t('tracking.description') }}</small>
                       <div class="mb-0 request-description" v-html="linkedRequest.description"></div>
                     </div>
                     <div v-if="linkedRequest.images && linkedRequest.images.length > 0" class="col-12">
-                      <small class="text-muted d-block mb-2">{{ locale === 'fr' ? 'Images du projet' : 'Project Images' }}</small>
+                      <small class="text-muted d-block mb-2">{{ t('tracking.projectImages') }}</small>
                       <div class="d-flex flex-wrap gap-2">
                         <div
                           v-for="(image, idx) in linkedRequest.images"
@@ -163,7 +163,7 @@
               </div>
 
               <!-- Timeline -->
-              <h6 class="fw-bold mb-3">Historique des étapes</h6>
+              <h6 class="fw-bold mb-3">{{ t('tracking.timeline') }}</h6>
               <div class="timeline">
                 <div
                   v-for="(event, index) in timelineEvents"
@@ -191,10 +191,10 @@
               <!-- Actions (pas d’étiquette/QR : réservé au back-office / usage interne) -->
               <div class="d-flex gap-2 mt-4 pt-4 border-top flex-wrap">
                 <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success flex-fill">
-                  <i class="bi bi-whatsapp me-2"></i>Contacter le support
+                  <i class="bi bi-whatsapp me-2"></i>{{ t('tracking.contactSupport') }}
                 </a>
                 <button class="btn btn-outline-secondary" @click="resetSearch">
-                  <i class="bi bi-arrow-left me-2"></i>Nouvelle recherche
+                  <i class="bi bi-arrow-left me-2"></i>{{ t('tracking.newSearch') }}
                 </button>
               </div>
             </div>
@@ -217,18 +217,14 @@
             </div>
             <div class="card-body">
               <p class="text-muted small mb-3">
-                {{
-                  locale === 'fr'
-                    ? "Votre demande est enregistrée. Des qu'une expedition est créée, le détail du colis pourra aussi être suivi ici."
-                    : 'Your request is registered. Once a shipment is created, parcel tracking will appear here too.'
-                }}
+                {{ t('tracking.psOnlyHint') }}
               </p>
               <div class="d-flex flex-wrap gap-2">
                 <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success btn-sm">
                   <i class="bi bi-whatsapp me-1"></i>{{ t('common.contactUs') }}
                 </a>
                 <button type="button" class="btn btn-outline-secondary btn-sm" @click="resetSearch">
-                  {{ locale === 'fr' ? 'Nouvelle recherche' : 'New search' }}
+                  {{ t('tracking.newSearch') }}
                 </button>
               </div>
             </div>
@@ -238,12 +234,12 @@
           <div v-else-if="searched && !shipment && !psPublicOnly && !loading" class="card border-0 shadow">
             <div class="card-body text-center py-5">
               <i class="bi bi-box-seam display-1 text-muted"></i>
-              <h4 class="mt-3">{{ locale === 'fr' ? 'Colis non trouve' : 'Package not found' }}</h4>
+              <h4 class="mt-3">{{ t('tracking.packageNotFound') }}</h4>
               <p class="text-muted">
-                {{ locale === 'fr' ? 'Aucun colis ne correspond au numero' : 'No package matches the number' }} <strong>{{ trackingNumber }}</strong>
+                {{ t('tracking.noPackageMatch') }} <strong>{{ trackingNumber }}</strong>
               </p>
               <p class="text-muted small">
-                {{ locale === 'fr' ? 'Verifiez le numero de suivi ou contactez notre support.' : 'Check the tracking number or contact our support.' }}
+                {{ t('tracking.checkNumber') }}
               </p>
               <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success">
                 <i class="bi bi-whatsapp me-2"></i>{{ t('common.contactUs') }}
@@ -259,8 +255,8 @@
                   <div class="help-icon mb-3">
                     <i class="bi bi-box-seam"></i>
                   </div>
-                  <h6>{{ locale === 'fr' ? 'Suivi en temps reel' : 'Real-time tracking' }}</h6>
-                  <p class="text-muted small">{{ locale === 'fr' ? 'Suivez votre colis a chaque etape' : 'Track your package at every step' }}</p>
+                  <h6>{{ t('tracking.realTimeTracking') }}</h6>
+                  <p class="text-muted small">{{ t('tracking.trackEveryStep') }}</p>
                 </div>
               </div>
               <div class="col-md-4">
@@ -268,8 +264,8 @@
                   <div class="help-icon mb-3">
                     <i class="bi bi-bell"></i>
                   </div>
-                  <h6>{{ locale === 'fr' ? 'Notifications' : 'Notifications' }}</h6>
-                  <p class="text-muted small">{{ locale === 'fr' ? 'Recevez des alertes sur WhatsApp' : 'Get alerts on WhatsApp' }}</p>
+                  <h6>{{ t('tracking.notifications') }}</h6>
+                  <p class="text-muted small">{{ t('tracking.alertsWhatsApp') }}</p>
                 </div>
               </div>
               <div class="col-md-4">
@@ -277,8 +273,8 @@
                   <div class="help-icon mb-3">
                     <i class="bi bi-headset"></i>
                   </div>
-                  <h6>{{ locale === 'fr' ? 'Support 24/7' : '24/7 Support' }}</h6>
-                  <p class="text-muted small">{{ locale === 'fr' ? 'Notre equipe est a votre ecoute' : 'Our team is here to help' }}</p>
+                  <h6>{{ t('tracking.support247') }}</h6>
+                  <p class="text-muted small">{{ t('tracking.teamHelp') }}</p>
                 </div>
               </div>
             </div>
@@ -418,17 +414,9 @@ watch(
 )
 
 const getRequestStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    pending: locale.value === 'fr' ? 'En attente' : 'Pending',
-    searching: locale.value === 'fr' ? 'Recherche en cours' : 'Searching',
-    negotiating: locale.value === 'fr' ? 'Négociation' : 'Negotiating',
-    confirmed: locale.value === 'fr' ? 'Confirmé' : 'Confirmed',
-    preparing: locale.value === 'fr' ? 'Préparation' : 'Preparing',
-    shipped: locale.value === 'fr' ? 'Expédié' : 'Shipped',
-    delivered: locale.value === 'fr' ? 'Livré' : 'Delivered',
-    cancelled: locale.value === 'fr' ? 'Annulé' : 'Cancelled'
-  }
-  return labels[status] || status
+  const key = `personalShopping.status.${status}`
+  const translated = t(key)
+  return translated !== key ? translated : status
 }
 
 const getRequestStatusClass = (status: string) => {

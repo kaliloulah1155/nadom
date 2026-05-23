@@ -212,7 +212,11 @@ const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()
 const { formatCurrency } = useFormatters()
 
-const intlLocale = computed(() => (locale.value === 'en' ? 'en-US' : 'fr-FR'))
+const intlLocale = computed(() => {
+  if (locale.value === 'en') return 'en-US'
+  if (locale.value === 'zh') return 'zh-CN'
+  return 'fr-FR'
+})
 
 /** Devise de la ligne sélectionnée (liste `/destinations/all`). */
 const selectedDestinationCurrency = computed(() => {
@@ -347,11 +351,12 @@ const getModeIcon = (mode: string) => {
 
 const getModeLabel = (mode: string) => {
   const labels: Record<string, Record<string, string>> = {
-    air_express: { fr: 'Aérien express', en: 'Express air' },
-    air_normal: { fr: 'Aérien standard', en: 'Standard air' },
-    sea: { fr: 'Maritime', en: 'Sea freight' },
+    air_express: { fr: 'Aérien express', en: 'Express air', zh: '空运快递' },
+    air_normal: { fr: 'Aérien standard', en: 'Standard air', zh: '标准空运' },
+    sea: { fr: 'Maritime', en: 'Sea freight', zh: '海运' },
   }
-  return labels[mode]?.[locale.value] || labels[mode]?.fr || mode
+  const loc = locale.value === 'zh' ? 'zh' : locale.value === 'en' ? 'en' : 'fr'
+  return labels[mode]?.[loc] || labels[mode]?.fr || mode
 }
 
 /** Lit le tarif au kg même si l'API renvoie snake_case sans normalisation côté liste. */

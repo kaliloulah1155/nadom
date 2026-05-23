@@ -366,7 +366,7 @@ const addRequestToCart = () => {
       image: request.value.images?.[0] || 'https://placehold.co/400x400?text=Request',
       quantity: request.value.quantity
     }, request.value.quantity)
-    success(locale.value === 'fr' ? 'Demande ajoutee au panier' : 'Request added to cart')
+    success(t('cart.requestAdded'))
     cartStore.openCart()
   }
 }

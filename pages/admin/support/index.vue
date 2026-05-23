@@ -2,11 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Support client</h4>
-        <p class="text-muted mb-0">{{ ticketsStore.total }} tickets</p>
+        <h4 class="mb-1">{{ t('admin.support.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.support.ticketCount', { n: ticketsStore.total }) }}</p>
       </div>
       <button type="button" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau ticket
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.support.newTicket') }}
       </button>
     </div>
 
@@ -24,7 +24,7 @@
       <div class="col-sm-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
-            <div class="text-muted small">Total</div>
+            <div class="text-muted small">{{ t('admin.dashboard.total') }}</div>
             <div class="fs-3 fw-bold text-primary">{{ ticketsStore.stats.total }}</div>
           </div>
         </div>
@@ -32,7 +32,7 @@
       <div class="col-sm-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">
           <div class="card-body">
-            <div class="text-muted small">Actifs (ouverts / en cours / attente)</div>
+            <div class="text-muted small">{{ t('admin.support.activeTickets') }}</div>
             <div class="fs-3 fw-bold">{{ ticketsStore.stats.summary.active }}</div>
           </div>
         </div>
@@ -40,7 +40,7 @@
       <div class="col-sm-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100 border-start border-success border-3">
           <div class="card-body">
-            <div class="text-muted small">Résolus &amp; fermés</div>
+            <div class="text-muted small">{{ t('admin.support.resolvedClosed') }}</div>
             <div class="fs-3 fw-bold text-success">{{ ticketsStore.stats.summary.resolved_closed }}</div>
           </div>
         </div>
@@ -48,7 +48,7 @@
       <div class="col-sm-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
-            <div class="text-muted small mb-2">Par statut</div>
+            <div class="text-muted small mb-2">{{ t('admin.support.byStatus') }}</div>
             <div class="d-flex flex-wrap gap-1 small">
               <span v-for="(st, key) in statusOrder" :key="key" class="badge bg-light text-dark border">
                 {{ st.label }}: {{ ticketsStore.stats.by_status[st.code] ?? 0 }}
@@ -64,43 +64,43 @@
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Recherche</label>
-            <input v-model="filters.search" type="text" class="form-control" placeholder="Sujet, n° ticket…" @input="debouncedFetch">
+            <label class="form-label small text-muted mb-1">{{ t('admin.support.search') }}</label>
+            <input v-model="filters.search" type="text" class="form-control" :placeholder="t('admin.support.searchPlaceholder')" @input="debouncedFetch">
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Statut</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.dashboard.status') }}</label>
             <select v-model="filters.status" class="form-select" @change="fetchTickets(1)">
-              <option value="">Tous</option>
-              <option value="open">Ouverts</option>
-              <option value="in_progress">En cours</option>
-              <option value="pending">En attente</option>
-              <option value="resolved">Résolus</option>
-              <option value="closed">Fermés</option>
+              <option value="">{{ t('admin.support.all') }}</option>
+              <option value="open">{{ t('admin.support.open') }}</option>
+              <option value="in_progress">{{ t('admin.support.inProgress') }}</option>
+              <option value="pending">{{ t('admin.support.waiting') }}</option>
+              <option value="resolved">{{ t('admin.support.resolved') }}</option>
+              <option value="closed">{{ t('admin.support.closed') }}</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Priorité</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.support.priority') }}</label>
             <select v-model="filters.priority" class="form-select" @change="fetchTickets(1)">
-              <option value="">Toutes</option>
-              <option value="low">Basse</option>
-              <option value="medium">Normale</option>
-              <option value="high">Haute</option>
-              <option value="urgent">Urgente</option>
+              <option value="">{{ t('admin.common.allFeminine') }}</option>
+              <option value="low">{{ t('admin.support.low') }}</option>
+              <option value="medium">{{ t('admin.support.normal') }}</option>
+              <option value="high">{{ t('admin.support.high') }}</option>
+              <option value="urgent">{{ t('admin.support.urgent') }}</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Créé du</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.support.createdFrom') }}</label>
             <input v-model="filters.dateFrom" type="date" class="form-control" @change="fetchTickets(1)">
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Au</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.support.to') }}</label>
             <input v-model="filters.dateTo" type="date" class="form-control" @change="fetchTickets(1)">
           </div>
           <div class="col-md-1">
             <button
               type="button"
               class="btn btn-outline-secondary w-100"
-              title="Réinitialiser les dates"
+              :title="t('admin.support.resetDates')"
               :disabled="!filters.dateFrom && !filters.dateTo"
               @click="clearDateFilters"
             >
@@ -122,21 +122,21 @@
             <thead class="table-light">
               <tr>
                 <th>#</th>
-                <th>Client</th>
-                <th>Expédition</th>
-                <th>Sujet</th>
-                <th>Contact ticket</th>
-                <th>Catégorie</th>
-                <th>Priorité</th>
-                <th>Statut</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>{{ t('admin.support.client') }}</th>
+                <th>{{ t('admin.support.shipmentCol') }}</th>
+                <th>{{ t('admin.support.subject') }}</th>
+                <th>{{ t('admin.support.ticketContact') }}</th>
+                <th>{{ t('admin.support.category') }}</th>
+                <th>{{ t('admin.support.priority') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th>{{ t('admin.support.date') }}</th>
+                <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="tickets.length === 0">
                 <td colspan="10" class="text-center py-4 text-muted">
-                  Aucun ticket trouvé
+                  {{ t('admin.support.noTickets') }}
                 </td>
               </tr>
               <tr v-for="ticket in tickets" :key="ticket.id">
@@ -156,7 +156,7 @@
                       <small class="text-muted d-block">{{ ticket.user.email }}</small>
                     </div>
                   </div>
-                  <div v-else class="text-muted">Client #{{ ticket.user_id }}</div>
+                  <div v-else class="text-muted">{{ t('admin.support.clientFallback', { id: ticket.user_id }) }}</div>
                 </td>
                 <td>
                   <template v-if="ticket.shipment">
@@ -218,7 +218,7 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingTicket ? 'Modifier' : 'Nouveau' }} ticket</h5>
+            <h5 class="modal-title">{{ editingTicket ? t('admin.support.modalEdit') : t('admin.support.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveTicket">
@@ -228,7 +228,7 @@
 
                 <!-- Client -->
                 <div class="col-12">
-                  <label class="form-label">Client concerné *</label>
+                  <label class="form-label">{{ t('admin.support.clientRequired') }}</label>
                   <!-- Édition : lecture seule -->
                   <div v-if="editingTicket" class="form-control bg-light d-flex align-items-center gap-2" style="min-height:38px;">
                     <i class="bi bi-person-circle text-muted"></i>
@@ -245,14 +245,14 @@
                     class="form-select"
                     required
                   >
-                    <option :value="0" disabled>Choisir un client…</option>
+                    <option :value="0" disabled>{{ t('admin.support.chooseClient') }}</option>
                     <option v-for="u in clientUsers" :key="u.id" :value="u.id">
                       {{ [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email }} — {{ u.email }}
                     </option>
                   </select>
                   <!-- Création avec expédition : client déduit automatiquement -->
                   <div v-else class="form-control bg-light text-muted" style="min-height:38px;">
-                    <i class="bi bi-link-45deg me-1"></i>Rattaché automatiquement à l'expédition
+                    <i class="bi bi-link-45deg me-1"></i>{{ t('admin.support.autoLinkedShipment') }}
                   </div>
                 </div>
 
@@ -269,7 +269,7 @@
                     class="form-select"
                     :disabled="shipmentsLoading"
                   >
-                    <option value="">— Aucune —</option>
+                    <option value="">{{ t('admin.support.none') }}</option>
                     <option v-for="s in clientShipments" :key="s.id" :value="String(s.id)">
                       {{ s.tracking_number || s.id }} · {{ s.destination_city || '?' }} · {{ shipmentStatusLabel(s.status) }}
                     </option>
@@ -282,7 +282,7 @@
                     :disabled="shipmentsPickerLoading"
                     @change="onNewTicketShipmentChange"
                   >
-                    <option value="">— Aucune / hors expédition —</option>
+                    <option value="">{{ t('admin.support.noneShipment') }}</option>
                     <option v-for="s in shipmentPickerList" :key="s.id" :value="s.id">
                       {{ formatShipmentPickerLabel(s) }}
                     </option>
@@ -294,14 +294,14 @@
 
                 <!-- Contacts -->
                 <div class="col-md-6">
-                  <label class="form-label">Contact e-mail</label>
+                  <label class="form-label">{{ t('admin.support.contactEmail') }}</label>
                   <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
                     <input v-model="form.contact_email" type="email" class="form-control" placeholder="ex@domaine.com" autocomplete="off">
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Contact téléphone</label>
+                  <label class="form-label">{{ t('admin.support.contactPhone') }}</label>
                   <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-telephone text-muted"></i></span>
                     <input v-model="form.contact_phone" type="text" class="form-control" placeholder="+225…" maxlength="40" autocomplete="off">
@@ -312,24 +312,24 @@
 
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label">Sujet *</label>
+                  <label class="form-label">{{ t('admin.support.subject') }} *</label>
                   <input v-model="form.subject" type="text" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Description *</label>
+                  <label class="form-label">{{ t('admin.support.description') }}</label>
                   <div v-if="!wysiwygInModal" class="rounded border bg-light text-muted small p-3" style="min-height: 180px">
                     Ouverture de l'éditeur…
                   </div>
                   <WysiwygEditor v-else v-model="form.description" height="180px" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Catégorie</label>
+                  <label class="form-label">{{ t('admin.support.category') }}</label>
                   <select v-model="form.category" class="form-select">
-                    <option value="general">Général</option>
-                    <option value="technical">Technique</option>
-                    <option value="billing">Facturation</option>
-                    <option value="shipping">Expédition</option>
-                    <option value="other">Autre</option>
+                    <option value="general">{{ t('admin.support.general') }}</option>
+                    <option value="technical">{{ t('admin.support.technical') }}</option>
+                    <option value="billing">{{ t('admin.support.billing') }}</option>
+                    <option value="shipping">{{ t('admin.support.shippingCat') }}</option>
+                    <option value="other">{{ t('admin.support.other') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
@@ -346,7 +346,7 @@
                   <select v-model="form.status" class="form-select">
                     <option value="open">Ouvert</option>
                     <option value="in_progress">En cours</option>
-                    <option value="pending">En attente</option>
+                    <option value="pending">{{ t('admin.requests.status.pending') }}</option>
                     <option value="resolved">Résolu</option>
                     <option value="closed">Fermé</option>
                   </select>
@@ -354,10 +354,10 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -368,6 +368,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useTicketsStore } from '~/stores/tickets'
 import { useNotification } from '~/composables/useNotification'
@@ -380,6 +382,7 @@ definePageMeta({
 const ticketsStore = useTicketsStore()
 const api = useApi()
 const { success, error } = useNotification()
+const { formatDateShort } = useFormatters()
 const config = useRuntimeConfig()
 
 const statusOrder = [
@@ -472,7 +475,7 @@ const debouncedFetch = () => {
   debounceTimer = setTimeout(() => fetchTickets(1), 400)
 }
 
-const formatDate = (date: string) => new Date(date).toLocaleDateString('fr-FR')
+const formatDate = (date: string) => formatDateShort(date)
 
 const getPriorityBadgeClass = (priority: string) => {
   const classes: Record<string, string> = {
@@ -697,10 +700,10 @@ const saveTicket = async () => {
         contact_email: form.contact_email || null,
         contact_phone: form.contact_phone || null,
       })
-      success('Ticket modifié')
+      success(t('admin.support.ticketUpdated'))
     } else {
       if (!form.user_id && !form.shipment_id) {
-        error('Choisissez un client ou une expédition.')
+        error(t('admin.support.chooseClientOrShipment'))
         return
       }
       await ticketsStore.createTicket({
@@ -713,21 +716,21 @@ const saveTicket = async () => {
         contact_email: form.contact_email || undefined,
         contact_phone: form.contact_phone || undefined,
       })
-      success('Ticket créé')
+      success(t('admin.support.ticketCreated'))
     }
     modalInstance?.hide()
     await Promise.all([fetchTickets(ticketsStore.currentPage), ticketsStore.fetchTicketStats()])
   } catch (err: any) {
-    error(err.message || 'Erreur')
+    error(err.message || t('admin.messages.genericError'))
   } finally {
     saving.value = false
   }
 }
 
 const deleteTicket = async (id: number) => {
-  if (confirm('Supprimer ce ticket ?')) {
+  if (confirm(t('admin.confirm.deleteTicket'))) {
     await ticketsStore.deleteTicket(id)
-    success('Ticket supprimé')
+    success(t('admin.support.ticketDeleted'))
     await Promise.all([fetchTickets(ticketsStore.currentPage), ticketsStore.fetchTicketStats()])
   }
 }

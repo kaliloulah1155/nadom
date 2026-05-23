@@ -2,9 +2,9 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
-        <h4 class="mb-1">Demandes contact (site)</h4>
+        <h4 class="mb-1">{{ t('admin.contactLeads.title') }}</h4>
         <p class="text-muted mb-0">
-          Messages du formulaire public. WhatsApp ouvre une conversation avec le numéro fourni et le texte du message prérempli (indiquez le numéro au format international dans le formulaire).
+          {{ t('admin.contactLeads.subtitle') }}
         </p>
       </div>
     </div>
@@ -13,18 +13,18 @@
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <div class="col-md-8">
-            <label class="form-label small text-muted mb-1">Recherche</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.contactLeads.search') }}</label>
             <input
               v-model="filters.search"
               type="text"
               class="form-control"
-              placeholder="Nom, e-mail, sujet, message…"
+              :placeholder="t('admin.contactLeads.searchHint')"
               @input="debouncedFetch"
             >
           </div>
           <div class="col-md-4">
             <button type="button" class="btn btn-outline-secondary" :disabled="!filters.search" @click="clearSearch">
-              Réinitialiser
+              {{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -34,23 +34,24 @@
     <div class="card border-0 shadow-sm">
       <div v-if="loading" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
+        <p class="mt-2 text-muted">{{ t('admin.contactLeads.loading') }}</p>
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th>Date</th>
-                <th>Nom</th>
-                <th>E-mail</th>
-                <th>Téléphone</th>
-                <th>Sujet</th>
+                <th>{{ t('admin.contactLeads.date') }}</th>
+                <th>{{ t('admin.contactLeads.name') }}</th>
+                <th>{{ t('admin.contactLeads.email') }}</th>
+                <th>{{ t('admin.contactLeads.phone') }}</th>
+                <th>{{ t('admin.contactLeads.subject') }}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="rows.length === 0">
-                <td colspan="6" class="text-center py-4 text-muted">Aucune demande</td>
+                <td colspan="6" class="text-center py-4 text-muted">{{ t('admin.contactLeads.noLeads') }}</td>
               </tr>
               <tr v-for="row in rows" :key="row.id">
                 <td><small>{{ formatDate(row.created_at) }}</small></td>
@@ -71,9 +72,9 @@
                     :href="whatsappHref(row)!"
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Ouvrir WhatsApp avec le message"
+                    :title="t('admin.contactLeads.whatsappTitle')"
                   >
-                    <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                    <i class="bi bi-whatsapp me-1"></i>{{ t('admin.contactLeads.whatsapp') }}
                   </a>
                   <button
                     v-can="['view', 'contact-leads']"
@@ -81,7 +82,7 @@
                     class="btn btn-sm btn-outline-primary me-1"
                     @click="openDetail(row)"
                   >
-                    Détail
+                    {{ t('admin.contactLeads.detail') }}
                   </button>
                   <button
                     v-can="['delete', 'contact-leads']"
@@ -112,24 +113,24 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Demande contact #{{ detail?.id }}</h5>
+            <h5 class="modal-title">{{ t('admin.contactLeads.leadDetailTitle', { id: detail?.id }) }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div v-if="detail" class="modal-body">
             <dl class="row small mb-0">
-              <dt class="col-sm-3">Reçu le</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.receivedOn') }}</dt>
               <dd class="col-sm-9">{{ formatDate(detail.created_at) }}</dd>
-              <dt class="col-sm-3">Nom</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.name') }}</dt>
               <dd class="col-sm-9">{{ detail.name }}</dd>
-              <dt class="col-sm-3">E-mail</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.email') }}</dt>
               <dd class="col-sm-9"><a :href="'mailto:' + detail.email">{{ detail.email }}</a></dd>
-              <dt class="col-sm-3">Téléphone</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.phone') }}</dt>
               <dd class="col-sm-9">{{ detail.phone || '—' }}</dd>
-              <dt class="col-sm-3">Sujet</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.subject') }}</dt>
               <dd class="col-sm-9">{{ detail.subject }}</dd>
-              <dt class="col-sm-3">Adresse IP</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.ipAddress') }}</dt>
               <dd class="col-sm-9 font-monospace small">{{ detail.ip_address || '—' }}</dd>
-              <dt class="col-sm-3">Navigateur</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.browser') }}</dt>
               <dd class="col-sm-9">
                 <span v-if="detail.user_agent">
                   <span class="badge bg-secondary me-1">{{ parsedBrowser(detail.user_agent).browser }}</span>
@@ -139,14 +140,14 @@
                 </span>
                 <span v-else class="text-muted">—</span>
               </dd>
-              <dt class="col-sm-3">Message</dt>
+              <dt class="col-sm-3">{{ t('admin.contactLeads.message') }}</dt>
               <dd class="col-sm-9">
                 <div class="border rounded p-3 bg-light message-plain">{{ plainBody(detail.message) }}</div>
               </dd>
             </dl>
           </div>
           <div class="modal-footer flex-wrap gap-2">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.close') }}</button>
             <a
               v-if="detail && whatsappHref(detail)"
               class="btn btn-success"
@@ -154,14 +155,14 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <i class="bi bi-whatsapp me-1"></i>WhatsApp
+              <i class="bi bi-whatsapp me-1"></i>{{ t('admin.contactLeads.whatsapp') }}
             </a>
             <a
               v-if="detail"
               class="btn btn-outline-primary"
               :href="'mailto:' + detail.email + '?subject=' + encodeURIComponent('Re: ' + detail.subject)"
             >
-              <i class="bi bi-envelope me-1"></i>E-mail
+              <i class="bi bi-envelope me-1"></i>{{ t('admin.contactLeads.emailBtn') }}
             </a>
           </div>
         </div>
@@ -171,6 +172,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useApi } from '~/composables/useApi'
 import { useNotification } from '~/composables/useNotification'
@@ -179,6 +182,7 @@ definePageMeta({ layout: 'admin' })
 
 const api = useApi()
 const { success, error } = useNotification()
+const { formatDateTime } = useFormatters()
 
 const rows = ref<any[]>([])
 const total = ref(0)
@@ -247,7 +251,7 @@ function whatsappHref(row: { phone?: string | null; name?: string; subject?: str
   return `https://wa.me/${digits}?text=${encodeURIComponent(whatsappBody(row))}`
 }
 
-const formatDate = (d: string) => new Date(d).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
+const formatDate = (d: string) => formatDateTime(d)
 
 async function load() {
   loading.value = true
@@ -268,7 +272,7 @@ async function load() {
     }
   } catch {
     rows.value = []
-    error('Erreur de chargement')
+    error(t('admin.messages.loadError'))
   } finally {
     loading.value = false
   }
@@ -297,17 +301,17 @@ function openDetail(row: any) {
 }
 
 async function remove(id: number) {
-  if (!confirm('Supprimer cette demande ?')) return
+  if (!confirm(t('admin.confirm.deleteContactLead'))) return
   try {
     const res = await api.delete(`/contact-leads/${id}`)
     if (res.success) {
-      success('Demande supprimée')
+      success(t('admin.contactLeads.deleted'))
       await load()
     } else {
       error(res.message || 'Erreur')
     }
   } catch (e: any) {
-    error(e?.message || 'Suppression impossible')
+    error(e?.message || t('admin.messages.deleteImpossible'))
   }
 }
 

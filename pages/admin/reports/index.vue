@@ -3,17 +3,17 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
       <div class="flex-grow-1" style="min-width: 0;">
-        <h4 class="mb-1">Rapports & Statistiques</h4>
-        <p class="text-muted mb-0">Analyse des performances et activités</p>
+        <h4 class="mb-1">{{ t('admin.reports.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.reports.subtitle') }}</p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
         <button class="btn btn-outline-primary" :disabled="reportsStore.exporting" @click="onExport('pdf')">
           <span v-if="reportsStore.exporting && exportingFormat === 'pdf'" class="spinner-border spinner-border-sm me-2"></span>
-          <i v-else class="bi bi-download me-2"></i>Exporter PDF
+          <i v-else class="bi bi-download me-2"></i>{{ t('admin.common.exportPdf') }}
         </button>
         <button class="btn btn-primary" :disabled="reportsStore.exporting" @click="onExport('excel')">
           <span v-if="reportsStore.exporting && exportingFormat === 'excel'" class="spinner-border spinner-border-sm me-2"></span>
-          <i v-else class="bi bi-file-earmark-excel me-2"></i>Exporter Excel
+          <i v-else class="bi bi-file-earmark-excel me-2"></i>{{ t('admin.common.exportExcel') }}
         </button>
       </div>
     </div>
@@ -26,7 +26,7 @@
           <!-- Pays -->
           <div class="col-md-4">
             <label class="form-label small fw-semibold mb-1 d-flex align-items-center gap-2">
-              <i class="bi bi-geo-alt text-primary"></i> Pays de livraison
+              <i class="bi bi-geo-alt text-primary"></i> {{ t('admin.reports.deliveryCountry') }}
               <span v-if="shippingStore.loadingDestinations" class="spinner-border spinner-border-sm text-primary" style="width:.75rem;height:.75rem;" role="status"></span>
             </label>
             <select
@@ -34,7 +34,7 @@
               class="form-select form-select-sm"
               :disabled="shippingStore.loadingDestinations || reportsStore.statsLoading"
             >
-              <option value="">{{ shippingStore.loadingDestinations ? 'Chargement…' : '🌍 Toutes destinations' }}</option>
+              <option value="">{{ shippingStore.loadingDestinations ? t('admin.common.loading') : t('admin.reports.allDestinations') }}</option>
               <option v-for="dest in countryOptions" :key="dest.id" :value="dest.country">
                 {{ dest.flag ? `${dest.flag} ` : '' }}{{ dest.country }}{{ dest.currency_code ? ` — ${dest.currency_code}` : '' }}
               </option>
@@ -44,7 +44,7 @@
           <!-- Année -->
           <div class="col-md-2">
             <label class="form-label small fw-semibold mb-1">
-              <i class="bi bi-calendar3 text-primary"></i> Année
+              <i class="bi bi-calendar3 text-primary"></i> {{ t('admin.reports.year') }}
             </label>
             <select v-model.number="yearFilter" class="form-select form-select-sm" :disabled="reportsStore.statsLoading">
               <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
@@ -54,13 +54,13 @@
           <!-- Période -->
           <div class="col-md-3">
             <label class="form-label small fw-semibold mb-1">
-              <i class="bi bi-calendar-range text-primary"></i> Période
+              <i class="bi bi-calendar-range text-primary"></i> {{ t('admin.reports.period') }}
             </label>
             <select v-model.number="months" class="form-select form-select-sm" :disabled="reportsStore.statsLoading">
-              <option :value="12">12 derniers mois</option>
-              <option :value="6">6 derniers mois</option>
-              <option :value="3">3 derniers mois</option>
-              <option :value="1">Ce mois-ci</option>
+              <option :value="12">{{ t('admin.reports.last12Months') }}</option>
+              <option :value="6">{{ t('admin.reports.last6Months') }}</option>
+              <option :value="3">{{ t('admin.reports.last3Months') }}</option>
+              <option :value="1">{{ t('admin.reports.thisMonth') }}</option>
             </select>
           </div>
 
@@ -73,11 +73,11 @@
             >
               <span v-if="reportsStore.statsLoading" class="spinner-border spinner-border-sm me-1"></span>
               <i v-else class="bi bi-funnel me-1"></i>
-              {{ reportsStore.statsLoading ? 'Chargement…' : 'Appliquer' }}
+              {{ reportsStore.statsLoading ? t('admin.common.loading') : t('admin.common.apply') }}
             </button>
             <button
               class="btn btn-outline-secondary btn-sm"
-              title="Réinitialiser"
+              :title="t('admin.common.reset')"
               :disabled="reportsStore.statsLoading"
               @click="resetFilters"
             >
@@ -131,7 +131,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h6 class="text-muted small">Nouveaux clients</h6>
+            <h6 class="text-muted small">{{ t('admin.reports.newClients') }}</h6>
             <h4 class="mb-0">{{ reportsStore.overview?.new_clients.current ?? 0 }}</h4>
             <small :class="trendClass(reportsStore.overview?.new_clients.trend)">
               <i :class="trendIcon(reportsStore.overview?.new_clients.trend)"></i>
@@ -182,7 +182,7 @@
               <div class="spinner-border spinner-border-sm text-primary"></div>
             </div>
             <div v-else-if="reportsStore.destinations.length === 0" class="text-center text-muted py-4">
-              Aucune donnée
+              {{ t('admin.dashboard.noData') }}
             </div>
             <div v-for="dest in reportsStore.destinations" :key="dest.name" class="mb-3">
               <div class="d-flex justify-content-between mb-1">
@@ -201,6 +201,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from 'vue'
 import { useReportsStore } from '~/stores/reports'
 import { useShippingStore } from '~/stores/shipping'
@@ -322,7 +324,7 @@ const onExport = async (format: 'pdf' | 'excel') => {
   try {
     await reportsStore.exportStats(format)
   } catch (err: any) {
-    notifyError(err.message || `Erreur export ${format}`)
+    notifyError(err.message || t('admin.reports.exportError', { format }))
   } finally {
     exportingFormat.value = null
   }

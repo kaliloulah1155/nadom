@@ -2,14 +2,14 @@
   <div>
     <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-3">
       <div class="flex-grow-1" style="min-width: 0;">
-        <h4 class="mb-1">Destinations d'expédition</h4>
+        <h4 class="mb-1">{{ t('admin.destinations.title') }}</h4>
         <p class="text-muted mb-0">
-          Gérez les destinations fret, les pays visibles sur le site et les textes du bloc « Destinations » (page Import-Export).
+          {{ t('admin.destinations.subtitle') }}
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0 align-items-center">
         <NuxtLink to="/import-export/calculator" class="btn btn-outline-secondary btn-sm" target="_blank">
-          <i class="bi bi-box-arrow-up-right me-1"></i>Voir le calculateur
+          <i class="bi bi-box-arrow-up-right me-1"></i>{{ t('admin.destinations.viewCalculator') }}
         </NuxtLink>
       </div>
     </div>
@@ -22,7 +22,7 @@
           :class="{ active: activeTab === 'freight' }"
           @click="activeTab = 'freight'"
         >
-          Destinations fret
+          {{ t('admin.destinations.freightDestinations') }}
         </button>
       </li>
       <li class="nav-item">
@@ -32,7 +32,7 @@
           :class="{ active: activeTab === 'vitrine' }"
           @click="activeTab = 'vitrine'"
         >
-          Pays &amp; page Import-Export
+          {{ t('admin.destinations.countriesPage') }}
         </button>
       </li>
     </ul>
@@ -41,7 +41,7 @@
     <div v-show="activeTab === 'freight'">
       <div class="d-flex justify-content-end mb-2">
         <button v-can="['create', 'destinations']" type="button" class="btn btn-primary btn-sm" @click="openModal()">
-          <i class="bi bi-plus-lg me-2"></i>Nouvelle destination
+          <i class="bi bi-plus-lg me-2"></i>{{ t('admin.destinations.newDestination') }}
         </button>
       </div>
 
@@ -50,12 +50,12 @@
           <div class="row g-2 align-items-end">
             <div class="col-md-5">
               <label class="form-label small text-muted mb-1 d-flex align-items-center gap-2">
-                Pays
+                {{ t('admin.countries.country') }}
                 <span v-if="countriesStore.loading" class="spinner-border spinner-border-sm text-primary" style="width: .8rem; height: .8rem;" role="status" aria-hidden="true"></span>
               </label>
               <template v-if="canListCountries">
                 <select v-model="filterCountryUuid" class="form-select form-select-sm" :disabled="countriesStore.loading" @change="reload(1)">
-                  <option value="">{{ countriesStore.loading ? 'Chargement des pays…' : '— Tous les pays —' }}</option>
+                  <option value="">{{ countriesStore.loading ? t('admin.destinations.loadingCountriesEllipsis') : t('admin.destinations.allCountriesFilter') }}</option>
                   <option v-for="c in allCountriesSorted" :key="c.uuid" :value="c.uuid">
                     {{ (c.flag_emoji ? `${c.flag_emoji} ` : '') + countryLabel(c) }}
                   </option>
@@ -63,21 +63,21 @@
               </template>
               <template v-else>
                 <select class="form-select form-select-sm" disabled>
-                  <option>{{ countriesStore.loading ? 'Chargement des pays…' : 'Accès à la liste des pays non autorisé' }}</option>
+                  <option>{{ countriesStore.loading ? t('admin.destinations.loadingCountriesEllipsis') : t('admin.destinations.countriesAccessDenied') }}</option>
                 </select>
               </template>
             </div>
             <div class="col-md-3">
-              <label class="form-label small text-muted mb-1">Statut</label>
+              <label class="form-label small text-muted mb-1">{{ t('admin.dashboard.status') }}</label>
               <select v-model="filterActive" class="form-select form-select-sm" @change="reload(1)">
-                <option value="">Toutes</option>
-                <option value="1">Actives</option>
-                <option value="0">Inactives</option>
+                <option value="">{{ t('admin.common.allFeminine') }}</option>
+                <option value="1">{{ t('admin.common.active') }}</option>
+                <option value="0">{{ t('admin.common.inactive') }}</option>
               </select>
             </div>
             <div class="col-md-3">
               <button type="button" class="btn btn-sm btn-outline-primary" @click="reload(1)">
-                <i class="bi bi-search me-1"></i>Filtrer
+                <i class="bi bi-search me-1"></i>{{ t('admin.common.filter') }}
               </button>
             </div>
           </div>
@@ -92,19 +92,19 @@
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th>Pays</th>
-                <th>Ville</th>
-                <th>Continent</th>
-                <th>Drapeau</th>
-                <th>Devise</th>
-                <th>Modes</th>
-                <th>Statut</th>
-                <th class="text-end">Actions</th>
+                <th>{{ t('admin.countries.country') }}</th>
+                <th>{{ t('admin.destinations.city') }}</th>
+                <th>{{ t('admin.destinations.continent') }}</th>
+                <th>{{ t('admin.destinations.flagEmoji') }}</th>
+                <th>{{ t('admin.products.currency') }}</th>
+                <th>{{ t('admin.shipments.mode') }}</th>
+                <th>{{ t('admin.destinations.statusCol') }}</th>
+                <th class="text-end">{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="cfg.destinations.length === 0">
-                <td colspan="8" class="text-center py-5 text-muted">Aucune destination</td>
+                <td colspan="8" class="text-center py-5 text-muted">{{ t('admin.destinations.noDestinations') }}</td>
               </tr>
               <tr v-for="d in cfg.destinations" :key="d.id">
                 <td class="fw-medium">{{ d.country || '—' }}</td>
@@ -120,21 +120,21 @@
                 </td>
                 <td>
                   <span class="small fw-medium">{{ d.currency_code || '—' }}</span>
-                  <span v-if="!d.currency_code" class="text-muted small d-block">FCFA par défaut</span>
+                  <span v-if="!d.currency_code" class="text-muted small d-block">{{ t('admin.destinations.fcfaDefault') }}</span>
                 </td>
                 <td>
-                  <span class="badge bg-secondary-subtle text-secondary">{{ (d.shipping_modes || []).length }} tarif(s)</span>
+                  <span class="badge bg-secondary-subtle text-secondary">{{ t('admin.destinations.ratesCount', { n: (d.shipping_modes || []).length }) }}</span>
                 </td>
                 <td>
                   <span :class="['badge', d.is_active ? 'bg-success' : 'bg-secondary']">
-                    {{ d.is_active ? 'Actif' : 'Inactif' }}
+                    {{ d.is_active ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
                 </td>
                 <td class="text-end">
-                  <button v-can="['update', 'destinations']" type="button" class="btn btn-sm btn-outline-primary me-1" title="Modifier" @click="openModal(d)">
+                  <button v-can="['update', 'destinations']" type="button" class="btn btn-sm btn-outline-primary me-1" :title="t('admin.common.edit')" @click="openModal(d)">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button v-can="['delete', 'destinations']" type="button" class="btn btn-sm btn-outline-danger" title="Supprimer" @click="onDelete(d)">
+                  <button v-can="['delete', 'destinations']" type="button" class="btn btn-sm btn-outline-danger" :title="t('admin.common.delete')" @click="onDelete(d)">
                     <i class="bi bi-trash"></i>
                   </button>
                 </td>
@@ -159,16 +159,16 @@
       <div class="row g-0">
         <div class="col-lg-4 col-xl-3 border-end bg-light">
           <div class="p-3 border-bottom bg-light sticky-top z-1">
-            <label class="form-label small text-muted mb-1">Liste des pays</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.destinations.countryListLabel') }}</label>
             <input
               v-model="countrySidebarSearch"
               type="search"
               class="form-control form-control-sm"
-              placeholder="Rechercher…"
+              :placeholder="t('admin.common.searchEllipsis')"
               autocomplete="off"
             />
             <p class="small text-muted mb-0 mt-2">
-              Désactiver un pays le retire des listes publiques (calculateur, drapeaux). Les destinations fret restent gérées dans l'autre onglet.
+              {{ t('admin.destinations.countrySidebarHint') }}
             </p>
           </div>
           <div class="country-sidebar-list">
@@ -189,37 +189,45 @@
                   role="switch"
                   :checked="isCountryActive(c)"
                   :disabled="togglingCountryUuid === c.uuid || !canToggleCountry"
-                  :title="isCountryActive(c) ? 'Actif sur le site' : 'Inactif'"
+                  :title="isCountryActive(c) ? t('admin.destinations.activeOnSite') : t('admin.destinations.inactiveOnSite')"
                   @change="toggleCountryStatus(c)"
                 >
               </div>
             </div>
             <div v-if="filteredCountriesSidebar.length === 0" class="p-4 text-center text-muted small">
-              Aucun pays ne correspond.
+              {{ t('admin.destinations.noCountryMatch') }}
             </div>
           </div>
         </div>
         <div class="col-lg-8 col-xl-9 p-4">
-          <h5 class="mb-3">Textes — section « Destinations » (page publique Import-Export)</h5>
+          <h5 class="mb-3">{{ t('admin.destinations.textsSectionPublic') }}</h5>
           <p class="text-muted small mb-4">
-            Ces libellés remplacent les textes par défaut (fichiers de traduction) pour le titre et le sous-titre au-dessus de la grille de drapeaux africains.
+            {{ t('admin.destinations.textsSectionHint') }}
           </p>
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Titre (FR)</label>
+              <label class="form-label">{{ t('admin.destinations.titleFr') }}</label>
               <input v-model="destText.heading_fr" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Titre (EN)</label>
+              <label class="form-label">{{ t('admin.destinations.titleEn') }}</label>
               <input v-model="destText.heading_en" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Sous-titre (FR)</label>
+              <label class="form-label">{{ t('admin.destinations.subtitleFr') }}</label>
               <input v-model="destText.subtitle_fr" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Sous-titre (EN)</label>
+              <label class="form-label">{{ t('admin.destinations.subtitleEn') }}</label>
               <input v-model="destText.subtitle_en" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">标题 (中文)</label>
+              <input v-model="destText.heading_zh" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">副标题 (中文)</label>
+              <input v-model="destText.subtitle_zh" type="text" class="form-control" :disabled="!canEditDestTexts" maxlength="255">
             </div>
           </div>
           <div class="mt-4 d-flex align-items-center gap-2 flex-wrap">
@@ -230,10 +238,10 @@
               @click="saveDestTexts"
             >
               <span v-if="savingDestText" class="spinner-border spinner-border-sm me-2"></span>
-              Enregistrer les textes
+              {{ t('admin.destinations.saveTexts') }}
             </button>
-            <span v-if="!canEditDestTexts" class="small text-warning">Droits « Paramètres globaux » requis pour modifier ces champs.</span>
-            <span v-else-if="!destSettingsReady" class="small text-muted">Paramètres introuvables — exécutez les migrations backend (clés IE_DEST_*).</span>
+            <span v-if="!canEditDestTexts" class="small text-warning">{{ t('admin.destinations.settingsRequiredHint', { module: t('admin.settings.title') }) }}</span>
+            <span v-else-if="!destSettingsReady" class="small text-muted">{{ t('admin.destinations.settingsMissingHint') }}</span>
           </div>
         </div>
       </div>
@@ -243,15 +251,15 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier' : 'Nouvelle' }} destination</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            <h5 class="modal-title">{{ editing ? t('admin.destinations.modalEdit') : t('admin.destinations.modalNew') }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" :aria-label="t('admin.common.close')"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label d-flex align-items-center gap-2">
-                    Pays *
+                    {{ t('admin.countries.country') }} *
                     <span v-if="countriesStore.loading" class="spinner-border spinner-border-sm text-primary" style="width: .85rem; height: .85rem;" role="status" aria-hidden="true"></span>
                   </label>
                   <template v-if="canListCountries">
@@ -263,57 +271,57 @@
                       @change="onCountryPick"
                     >
                       <option value="">
-                        {{ countriesStore.loading ? 'Chargement des pays…' : (editing ? '— Conserver ou changer de pays —' : '— Choisir un pays —') }}
+                        {{ countriesStore.loading ? t('admin.destinations.loadingCountriesEllipsis') : (editing ? t('admin.destinations.keepOrChangeCountry') : t('admin.destinations.chooseCountryDash')) }}
                       </option>
                       <option v-for="c in allCountriesSorted" :key="c.uuid" :value="c.uuid">
                         {{ (c.flag_emoji ? `${c.flag_emoji} ` : '') + countryLabel(c) }}
                       </option>
                     </select>
-                    <small class="text-muted">Liste officielle des pays — drapeau et devise pré-remplis automatiquement.</small>
+                    <small class="text-muted">{{ t('admin.destinations.officialCountriesHint') }}</small>
                   </template>
                   <template v-else>
-                    <input v-model="form.country" type="text" class="form-control" required placeholder="Saisir le nom du pays">
-                    <small class="text-warning">Votre compte n'a pas accès à la liste des pays. Contactez un administrateur pour l'activer.</small>
+                    <input v-model="form.country" type="text" class="form-control" required :placeholder="t('admin.destinations.manualCountryPlaceholder')">
+                    <small class="text-warning">{{ t('admin.destinations.noCountriesListAccess') }}</small>
                   </template>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Ville</label>
+                  <label class="form-label">{{ t('admin.destinations.city') }}</label>
                   <input v-model="form.city" type="text" class="form-control" placeholder="Ex: Douala">
-                  <small v-if="cityOptions.length" class="text-muted">Réf. villes API : {{ cityHint }}</small>
+                  <small v-if="cityOptions.length" class="text-muted">{{ t('admin.destinations.cityRefHint', { hint: cityHint }) }}</small>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Continent</label>
+                  <label class="form-label">{{ t('admin.destinations.continent') }}</label>
                   <input v-model="form.continent" type="text" class="form-control" placeholder="Afrique, Europe...">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Drapeau (emoji)</label>
+                  <label class="form-label">{{ t('admin.destinations.flagEmoji') }}</label>
                   <input v-model="form.flag" type="text" class="form-control" maxlength="10" placeholder="🇨🇲">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Devise (ISO 4217)</label>
+                  <label class="form-label">{{ t('admin.destinations.currencyIso') }}</label>
                   <select v-model="form.currency_code" class="form-select">
-                    <option value="">FCFA par défaut</option>
+                    <option value="">{{ t('admin.destinations.fcfaDefault') }}</option>
                     <option v-for="opt in currencyChoices" :key="opt.code" :value="opt.code">{{ opt.code }} — {{ opt.label }}</option>
                   </select>
                   <small v-if="lockedCurrencyCode" class="text-muted">Devise du pays : {{ lockedCurrencyCode }} — modifiable au besoin.</small>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.destinations.statusCol') }}</label>
                   <select v-model="form.is_active" class="form-select">
-                    <option :value="true">Active</option>
-                    <option :value="false">Inactive</option>
+                    <option :value="true">{{ t('admin.destinations.activeFeminine') }}</option>
+                    <option :value="false">{{ t('admin.destinations.inactiveFeminine') }}</option>
                   </select>
                 </div>
               </div>
               <p class="small text-muted mb-0 mt-3">
-                La devise choisie s'affiche dans le calculateur public. Pensez ensuite à renseigner les <strong>tarifs au kilo</strong> pour chaque mode d'expédition.
+                {{ t('admin.destinations.modalFooterHint') }}
               </p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -341,7 +349,7 @@ const cfg = useShippingConfigStore()
 const countriesStore = useCountriesStore()
 const settingsStore = useGlobalSettingsStore()
 const api = useApi()
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const { success, error: notifyError } = useNotification()
 
 const activeTab = ref<'freight' | 'vitrine'>('freight')
@@ -357,15 +365,19 @@ const canToggleCountry = computed(() => ability.can('update', 'destinations'))
 const DEST_TEXT_SLUGS = [
   { key: 'heading_fr' as const, slug: 'import_export_dest_heading_fr' },
   { key: 'heading_en' as const, slug: 'import_export_dest_heading_en' },
+  { key: 'heading_zh' as const, slug: 'import_export_dest_heading_zh' },
   { key: 'subtitle_fr' as const, slug: 'import_export_dest_subtitle_fr' },
   { key: 'subtitle_en' as const, slug: 'import_export_dest_subtitle_en' },
+  { key: 'subtitle_zh' as const, slug: 'import_export_dest_subtitle_zh' },
 ]
 
 const destText = reactive({
   heading_fr: '',
   heading_en: '',
+  heading_zh: '',
   subtitle_fr: '',
   subtitle_en: '',
+  subtitle_zh: '',
 })
 
 const destUuids: Record<string, string> = {}
@@ -395,9 +407,9 @@ const saveDestTexts = async () => {
         return settingsStore.update(uuid, { vvalue: destText[key] })
       })
     )
-    success('Textes de la page Import-Export enregistrés.')
+    success(t('admin.destinations.textsSaved'))
   } catch (e: any) {
-    notifyError(e.message || "Erreur lors de l'enregistrement")
+    notifyError(e.message || t('admin.messages.saveError'))
   } finally {
     savingDestText.value = false
   }
@@ -435,8 +447,11 @@ const filteredCountriesSidebar = computed(() => {
 
 const canListCountries = computed(() => allCountriesSorted.value.length > 0)
 
-const countryLabel = (c: Country) =>
-  locale.value === 'en' ? (c.name_en || c.label || c.code) : (c.name_fr || c.label || c.code)
+const countryLabel = (c: Country) => {
+  if (locale.value === 'zh') return c.name_zh || c.name_en || c.name_fr || c.label || c.code
+  if (locale.value === 'en') return c.name_en || c.label || c.code
+  return c.name_fr || c.label || c.code
+}
 
 function isCountryActive(c: Country) {
   const s = c.status as any
@@ -449,11 +464,11 @@ const toggleCountryStatus = async (c: Country) => {
   togglingCountryUuid.value = c.uuid
   try {
     const res = await api.post(`/country/${c.uuid}`, { status: next })
-    if (!res.success) throw new Error(res.message || 'Erreur API')
+    if (!res.success) throw new Error(res.message || t('admin.messages.genericError'))
     await countriesStore.fetchAll(true)
-    success(next === 1 ? 'Pays activé.' : 'Pays désactivé.')
+    success(t('admin.messages.statusUpdated'))
   } catch (e: any) {
-    notifyError(e.message || 'Impossible de mettre à jour le pays')
+    notifyError(e.message || t('admin.countries.updateFailed'))
   } finally {
     togglingCountryUuid.value = null
   }
@@ -585,7 +600,7 @@ const openModal = async (row?: any) => {
 
 const save = async () => {
   if (canListCountries.value && !editing.value && !form.country_uuid) {
-    notifyError('Choisissez un pays dans la liste.')
+    notifyError(t('admin.destinations.selectCountryList'))
     return
   }
   saving.value = true
@@ -600,28 +615,28 @@ const save = async () => {
     }
     if (editing.value) {
       await cfg.updateDestination(editing.value.id, payload)
-      success('Destination mise à jour')
+      success(t('admin.destinations.updated'))
     } else {
       await cfg.createDestination(payload)
-      success('Destination créée')
+      success(t('admin.destinations.created'))
     }
     modalInstance?.hide()
     await reload(1)
   } catch (e: any) {
-    notifyError(e.message || 'Erreur')
+    notifyError(e.message || t('admin.messages.genericError'))
   } finally {
     saving.value = false
   }
 }
 
 const onDelete = async (d: any) => {
-  if (!confirm(`Supprimer la destination « ${d.country || d.id} » et ses modes d'expédition ?`)) return
+  if (!confirm(t('admin.confirm.deleteDestinationModes', { name: d.country || String(d.id) }))) return
   try {
     await cfg.deleteDestination(d.id)
-    success('Destination supprimée')
+    success(t('admin.destinations.deleted'))
     await reload()
   } catch (e: any) {
-    notifyError(e.message || 'Erreur')
+    notifyError(e.message || t('admin.messages.genericError'))
   }
 }
 

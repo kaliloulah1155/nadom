@@ -8,11 +8,7 @@
             {{ t("personalShopping.newRequest") }}
           </h1>
           <p class="opacity-75 text-white text-center">
-            {{
-              locale === "fr"
-                ? "Decrivez le produit que vous recherchez"
-                : "Describe the product you are looking for"
-            }}
+            {{ t('personalShopping.newRequestSubtitle') }}
           </p>
         </div>
       </div>
@@ -34,20 +30,21 @@
                     class="form-select form-select-lg"
                     :class="{ 'is-invalid': errors.category }"
                     required
+                    :disabled="podCategories.length === 0"
                   >
                     <option value="">
                       {{
-                        locale === "fr"
-                          ? "Selectionnez une categorie"
-                          : "Select a category"
+                        podCategories.length === 0
+                          ? t('personalShopping.formExtra.noCategoriesAvailable')
+                          : t('personalShopping.formExtra.selectCategory')
                       }}
                     </option>
                     <option
-                      v-for="cat in (categories as any)"
-                      :key="cat.id"
-                      :value="cat[`name_${locale}`] || cat.name_fr"
+                      v-for="cat in podCategories"
+                      :key="cat.code"
+                      :value="cat.code"
                     >
-                      {{ cat[`name_${locale}`] || cat.name_fr }}
+                      {{ cat.label }}
                     </option>
                   </select>
                   <div v-if="errors.category" class="invalid-feedback">
@@ -65,11 +62,7 @@
                     type="text"
                     class="form-control form-control-lg"
                     :class="{ 'is-invalid': errors.title }"
-                    :placeholder="
-                      locale === 'fr'
-                        ? 'Ex: Samsung Galaxy S24 Ultra 256GB'
-                        : 'Ex: Samsung Galaxy S24 Ultra 256GB'
-                    "
+                    :placeholder="t('personalShopping.formExtra.productExample')"
                     required
                   />
                   <div v-if="errors.title" class="invalid-feedback">
@@ -87,11 +80,7 @@
                     class="form-control"
                     :class="{ 'is-invalid': errors.description }"
                     rows="4"
-                    :placeholder="
-                      locale === 'fr'
-                        ? 'Decrivez le produit en detail: couleur, taille, caracteristiques, references...'
-                        : 'Describe the product in detail: color, size, features, references...'
-                    "
+                    :placeholder="t('personalShopping.formExtra.describeDetail')"
                     required
                   ></textarea>
                   <div v-if="errors.description" class="invalid-feedback">
@@ -105,11 +94,7 @@
                     t("personalShopping.form.images")
                   }}</label>
                   <p class="text-muted small mb-3">
-                    {{
-                      locale === "fr"
-                        ? "Televersez des images du produit que vous recherchez (max 5 images)"
-                        : "Upload images of the product you are looking for (max 5 images)"
-                    }}
+                    {{ t('personalShopping.formExtra.uploadMax') }}
                   </p>
 
                   <!-- Upload Zone -->
@@ -183,7 +168,7 @@
                 <div class="row">
                   <div class="col-md-6 mb-4">
                     <label class="form-label fw-medium"
-                      >{{ locale === "fr" ? "Nom complet" : "Full name" }} *</label
+                      >{{ t('personalShopping.formExtra.fullName') }} *</label
                     >
                     <div class="input-group">
                       <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -192,7 +177,7 @@
                         type="text"
                         class="form-control form-control-lg"
                         :class="{ 'is-invalid': errors.contactFullname }"
-                        :placeholder="locale === 'fr' ? 'Prenom Nom' : 'First Last'"
+                        :placeholder="t('personalShopping.formExtra.fullNamePlaceholder')"
                         required
                       />
                     </div>
@@ -202,7 +187,7 @@
                   </div>
                   <div class="col-md-6 mb-4">
                     <label class="form-label fw-medium"
-                      >{{ locale === "fr" ? "Email" : "Email" }} *</label
+                      >{{ t('auth.email') }} *</label
                     >
                     <div class="input-group">
                       <span class="input-group-text"><i class="bi bi-envelope"></i></span>
@@ -273,17 +258,13 @@
                     <div v-if="errors.budgetEstimated" class="invalid-feedback d-block">
                       {{ errors.budgetEstimated }}
                     </div>
-                    <small class="text-muted">{{
-                      locale === "fr"
-                        ? "Budget total (produit + expedition) - choisissez votre devise"
-                        : "Total budget (product + shipping) - pick your currency"
-                    }}</small>
+                    <small class="text-muted">{{ t('personalShopping.formExtra.budgetTotalHint') }}</small>
                   </div>
 
                   <!-- Contact Number -->
                   <div class="col-md-4 mb-4">
                     <label class="form-label fw-medium"
-                      >{{ locale === "fr" ? "Contact WhatsApp" : "WhatsApp Contact" }} *</label
+                      >{{ t('personalShopping.formExtra.whatsappContact') }} *</label
                     >
                     <div class="input-group">
                       <span class="input-group-text">
@@ -302,11 +283,7 @@
                     <div v-if="errors.contactNumber" class="invalid-feedback d-block">
                       {{ errors.contactNumber }}
                     </div>
-                    <small class="text-muted">{{
-                      locale === "fr"
-                        ? "Un agent vous contactera via ce numero"
-                        : "An agent will contact you via this number"
-                    }}</small>
+                    <small class="text-muted">{{ t('personalShopping.formExtra.contactHint') }}</small>
                   </div>
                 </div>
 
@@ -315,17 +292,9 @@
                   <div class="d-flex">
                     <i class="bi bi-info-circle fs-4 me-3"></i>
                     <div>
-                      <strong>{{
-                        locale === "fr"
-                          ? "Comment ca se passe ?"
-                          : "What happens next?"
-                      }}</strong>
+                      <strong>{{ t('personalShopping.formExtra.infoTitle') }}</strong>
                       <p class="mb-0 small">
-                        {{
-                          locale === "fr"
-                            ? "Apres soumission, un agent vous contactera via WhatsApp sous 24-48h pour discuter des details et vous envoyer un devis."
-                            : "After submission, an agent will contact you via WhatsApp within 24-48h to discuss details and send you a quote."
-                        }}
+                        {{ t('personalShopping.formExtra.infoBody') }}
                       </p>
                     </div>
                   </div>
@@ -384,18 +353,23 @@ definePageMeta({
   layout: "default",
 });
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const { label: podCategoryLabel } = usePodCategoryLabel()
+const { categoryLabel } = useCategoryLabel()
+const { compressMany } = useImageCompress();
 const router = useRouter();
 const authStore = useAuthStore();
 const psStore = usePersonalShoppingStore();
 const { success, error: notifyError } = useNotification();
 
-const categories = computed(() =>
-  (psStore.categories || []).filter(c => c.slug === 'POD').map((c: any) => ({
-    id: c.uuid || c.id,
-    name_fr: c.label || c.name_fr || c.name,
-    name_en: c.label || c.name_en || c.name,
-  })),
+const podCategories = computed(() =>
+  (psStore.categories || [])
+    .filter((c: any) => String(c.slug || '') === 'POD')
+    .map((c: any) => ({
+      code: String(c.code || '').trim(),
+      label: podCategoryLabel(c),
+    }))
+    .filter((c: any) => c.code),
 );
 
 const currencies = computed(() => {
@@ -407,16 +381,14 @@ const currencies = computed(() => {
     .map((c: any) => ({
       id: c.uuid || c.id,
       code: (c.code || c.label || '').toString().toUpperCase(),
-      label: c.label || c.code || '',
+      label: categoryLabel(c),
     }))
     .filter((c: any) => c.code)
   return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA' }]
 })
 
 onMounted(async () => {
-  if (!psStore.categories || psStore.categories.length === 0) {
-    await psStore.fetchCategories();
-  }
+  await psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' });
   if (!form.currency && currencies.value.length > 0) {
     form.currency = currencies.value[0].code
   }
@@ -484,11 +456,7 @@ const addFiles = (files: File[]) => {
   const validFiles = files.filter((f) => imageTypes.includes(f.type));
 
   if (imagePreviews.value.length + validFiles.length > 5) {
-    notifyError(
-      locale.value === "fr"
-        ? "Maximum 5 images autorisees"
-        : "Maximum 5 images allowed",
-    );
+    notifyError(t('personalShopping.formExtra.maxImages'));
     return;
   }
 
@@ -526,41 +494,48 @@ const validateForm = () => {
     errors[key as keyof typeof errors] = "";
   });
 
-  const msgs =
-    locale.value === "fr"
-      ? {
-          category: "Selectionnez une categorie",
-          title: "Titre trop court (min 5 caracteres)",
-          description: "Description trop courte (min 20 caracteres)",
-          quantity: "Quantite invalide",
-          budget: "Budget invalide",
-          contact: "Numero de contact invalide",
-        }
-      : {
-          category: "Select a category",
-          title: "Title too short (min 5 characters)",
-          description: "Description too short (min 20 characters)",
-          quantity: "Invalid quantity",
-          budget: "Invalid budget",
-          contact: "Invalid contact number",
-        };
+  const fe = 'personalShopping.formExtra'
 
-  if (!form.category) errors.category = msgs.category;
-  if (!form.title || form.title.length < 5) errors.title = msgs.title;
+  if (!form.category) errors.category = t(`${fe}.validationCategorySelect`);
+  if (!form.title || form.title.length < 5) errors.title = t(`${fe}.validationTitleShort`);
   if (!form.description || form.description.length < 20)
-    errors.description = msgs.description;
-  if (!form.quantity || form.quantity < 1) errors.quantity = msgs.quantity;
+    errors.description = t(`${fe}.validationDescriptionShort`);
+  if (!form.quantity || form.quantity < 1) errors.quantity = t(`${fe}.validationQuantity`);
   if (form.budgetEstimated == null || form.budgetEstimated <= 0)
-    errors.budgetEstimated = msgs.budget;
+    errors.budgetEstimated = t(`${fe}.validationBudget`);
   if (!form.contactNumber || !/^[\+]?[0-9\s\-]{8,20}$/.test(form.contactNumber))
-    errors.contactNumber = msgs.contact;
+    errors.contactNumber = t(`${fe}.validationContact`);
   if (!form.contactFullname || form.contactFullname.trim().length < 2)
-    errors.contactFullname = locale.value === "fr" ? "Nom complet requis" : "Full name required";
+    errors.contactFullname = t(`${fe}.validationName`);
   if (!form.contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail))
-    errors.contactEmail = locale.value === "fr" ? "Email invalide" : "Invalid email";
+    errors.contactEmail = t(`${fe}.validationEmail`);
 
   return !Object.values(errors).some((e) => e);
 };
+
+async function resolveImagesForSubmit(): Promise<string[]> {
+  const api = usePublicApi();
+  const out: string[] = [];
+  for (const file of imageFiles.value) {
+    let added = false;
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await api.post<{ url?: string; path?: string }>('/upload/public-image', fd);
+      if (res.success && res.data?.url) {
+        out.push(res.data.url);
+        added = true;
+      }
+    } catch {
+      /* fallback compression */
+    }
+    if (!added) {
+      const compressed = await compressMany([file]);
+      if (compressed[0]) out.push(compressed[0]);
+    }
+  }
+  return out;
+}
 
 const handleSubmit = async () => {
   if (!validateForm()) return;
@@ -568,11 +543,13 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
+    const selected = podCategories.value.find((c) => c.code === form.category);
+    const images = imageFiles.value.length > 0 ? await resolveImagesForSubmit() : [];
     const request: any = await psStore.createRequest({
-      category: form.category,
+      category: selected?.label || form.category,
       title: form.title,
       description: form.description,
-      images: imagePreviews.value,
+      images,
       quantity: form.quantity,
       budgetEstimated: form.budgetEstimated!,
       currency: form.currency,
@@ -581,19 +558,20 @@ const handleSubmit = async () => {
       contactEmail: form.contactEmail,
     } as any);
 
-    success(
-      locale.value === "fr"
-        ? "Demande soumise avec succes !"
-        : "Request submitted successfully!",
-    );
-    router.push(`/personal-shopping/${request?.id ?? ''}`);
+    success(t('personalShopping.formExtra.submitSuccess'));
+    const requestId = request?.id ?? (request as any)?.uuid;
+    if (!requestId) {
+      notifyError(t('personalShopping.formExtra.submitError'));
+      return;
+    }
+    router.push(`/personal-shopping/${requestId}`);
   } catch (err: any) {
-    notifyError(
-      err.message ||
-        (locale.value === "fr"
-          ? "Erreur lors de la soumission"
-          : "Error submitting request"),
-    );
+    const msg =
+      psStore.error ||
+      err?.data?.message ||
+      err?.message ||
+      t('personalShopping.formExtra.submitError');
+    notifyError(msg);
   } finally {
     loading.value = false;
   }

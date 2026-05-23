@@ -2,7 +2,7 @@
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
     <!-- Per Page Selector -->
     <div class="d-flex align-items-center gap-2">
-      <span class="text-muted small">Afficher</span>
+      <span class="text-muted small">{{ t('admin.pagination.show') }}</span>
       <select
         :value="limit"
         class="form-select input-md"
@@ -11,7 +11,7 @@
       >
         <option v-for="opt in effectiveLimitOptions" :key="opt" :value="opt">{{ opt }}</option>
       </select>
-      <span class="text-muted small">par page</span>
+      <span class="text-muted small">{{ t('admin.pagination.perPage') }}</span>
     </div>
 
     <!-- Navigation -->
@@ -49,13 +49,15 @@
 
     <!-- Info -->
     <div class="text-muted small">
-      Affichage de {{ startItem }} à {{ endItem }} sur {{ totalItems }}
+      {{ t('admin.pagination.range', { from: startItem, to: endItem, total: totalItems }) }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   totalItems: number

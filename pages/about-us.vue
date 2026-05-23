@@ -102,9 +102,7 @@
                 <div class="promoButtons">
                   <button type="button" class="btn btn-whites fw-medium rounded-pill px-4">
                     <i class="bi bi-play-circle-fill me-2"></i>
-                    {{
-                      locale.startsWith('fr') ? 'Découvrir nos services' : 'Watch promo video'
-                    }}
+                    {{ t('about.watchPromo') }}
                   </button>
                 </div>
               </div>

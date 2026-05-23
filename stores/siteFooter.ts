@@ -21,6 +21,7 @@ export interface FooterContactDto {
   kind: string
   body_fr: string | null
   body_en: string | null
+  body_zh: string | null
   display_order?: number
   is_active?: boolean
 }
@@ -29,6 +30,7 @@ export interface FooterBundle {
   settings: {
     about_fr: string | null
     about_en: string | null
+    about_zh: string | null
   }
   platforms?: FooterPlatformsMap
   socials: FooterSocialDto[]
@@ -88,10 +90,10 @@ export const useSiteFooterStore = defineStore('siteFooter', {
       }
     },
 
-    async saveSettings(payload: { about_fr?: string | null; about_en?: string | null }) {
+    async saveSettings(payload: { about_fr?: string | null; about_en?: string | null; about_zh?: string | null }) {
       const api = useApi()
       // POST : certains environnements vident le corps des requêtes PUT.
-      const res = await api.post<{ about_fr?: string | null; about_en?: string | null }>('/footer/settings', payload)
+      const res = await api.post<{ about_fr?: string | null; about_en?: string | null; about_zh?: string | null }>('/footer/settings', payload)
       if (!res.success) throw new Error(res.message || 'Erreur sauvegarde')
       await this.fetchAdminBundle()
       await this.fetchPublic()

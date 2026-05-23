@@ -57,10 +57,16 @@ export interface PersonalShoppingRequest {
 export interface Category {
   uuid: string
   label: string
+  label_fr?: string | null
+  label_en?: string | null
+  label_zh?: string | null
   status: string
   slug: string
   code: string | null
   description?: string | null
+  description_fr?: string | null
+  description_en?: string | null
+  description_zh?: string | null
   icon?: string | null
   sort_order: number | null
   parent_id: number | null

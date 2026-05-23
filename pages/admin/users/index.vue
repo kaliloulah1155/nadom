@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des utilisateurs</h4>
-        <p class="text-muted mb-0">{{ usersStore.total }} utilisateurs au total</p>
+        <h4 class="mb-1">{{ t('admin.users.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.users.totalCount', { n: usersStore.total }) }}</p>
       </div>
       <button v-can="['create', 'users']" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-person-plus me-2"></i>Nouvel utilisateur
+        <i class="bi bi-person-plus me-2"></i>{{ t('admin.users.newUser') }}
       </button>
     </div>
 
@@ -20,13 +20,13 @@
               v-model="filters.search"
               type="text"
               class="form-control"
-              placeholder="Nom, email, téléphone..."
+              :placeholder="t('admin.users.searchPlaceholder')"
               @input="debouncedFetch"
             />
           </div>
           <div class="col-md-3">
             <select v-model="filters.role" class="form-select" @change="fetchUsers(1)">
-              <option value="">Tous les rôles</option>
+              <option value="">{{ t('admin.users.allRoles') }}</option>
               <option v-for="role in rolesStore.roles" :key="role.role.uuid" :value="role.role.code">
                 {{ role.role.libelle }}
               </option>
@@ -34,14 +34,14 @@
           </div>
           <div class="col-md-3">
             <select v-model="filters.status" class="form-select" @change="fetchUsers(1)">
-              <option value="">Tous les statuts</option>
-              <option value="1">Actif</option>
-              <option value="0">Inactif</option>
+              <option value="">{{ t('admin.users.allStatuses') }}</option>
+              <option value="1">{{ t('admin.common.active') }}</option>
+              <option value="0">{{ t('admin.common.inactive') }}</option>
             </select>
           </div>
           <div class="col-md-2">
             <button class="btn btn-outline-secondary w-100" @click="resetFilters">
-              <i class="bi bi-x-circle me-1"></i>Reset
+              <i class="bi bi-x-circle me-1"></i>{{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -52,26 +52,26 @@
     <div class="card border-0 shadow-sm overflow-hidden">
       <div v-if="usersStore.loading" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Chargement des utilisateurs...</p>
+        <p class="mt-2 text-muted">{{ t('admin.users.loading') }}</p>
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th>Utilisateur</th>
-                <th>Rôle</th>
-                <th>Contact</th>
-                <th>Localisation</th>
-                <th>Inscription</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th>{{ t('admin.users.user') }}</th>
+                <th>{{ t('admin.users.role') }}</th>
+                <th>{{ t('admin.users.contact') }}</th>
+                <th>{{ t('admin.users.location') }}</th>
+                <th>{{ t('admin.users.registered') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="usersStore.users.length === 0">
                 <td colspan="7" class="text-center py-4 text-muted">
-                  Aucun utilisateur trouvé
+                  {{ t('admin.users.noUsers') }}
                 </td>
               </tr>
               <tr v-for="user in usersStore.users" :key="user.uuid">
@@ -94,7 +94,7 @@
                     class="badge"
                     :class="getRoleBadgeClass(user.role?.code)"
                   >
-                    {{ user.role?.label || 'Utilisateur' }}
+                    {{ user.role?.label || t('admin.users.defaultRole') }}
                   </span>
                 </td>
                 <td>
@@ -108,7 +108,7 @@
                 </td>
                 <td>
                   <span class="badge rounded-pill" :class="user.status === 1 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
-                    {{ user.status === 1 ? 'Actif' : 'Inactif' }}
+                    {{ user.status === 1 ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
                 </td>
                 <td>
@@ -145,7 +145,7 @@
         <div class="modal-content border-0">
           <div class="modal-header border-bottom-0 pt-4 px-4">
             <h5 class="modal-title fw-bold">
-              {{ editingUser ? 'Modifier l\'utilisateur' : 'Créer un nouvel utilisateur' }}
+              {{ editingUser ? t('admin.users.modalEditUser') : t('admin.users.modalNewUser') }}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
@@ -170,11 +170,11 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Prénom *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.firstName') }} *</label>
                   <input v-model="form.firstname" type="text" class="form-control" required placeholder="Ex: Jean" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Nom *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.lastName') }} *</label>
                   <input v-model="form.lastname" type="text" class="form-control" required placeholder="Ex: Dupont" />
                 </div>
                 <div class="col-md-12">
@@ -183,16 +183,16 @@
                 </div>
                 
                 <div v-if="!editingUser" class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Mot de passe *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.password') }} *</label>
                   <input v-model="form.password" type="password" class="form-control" required />
                 </div>
                 <div v-if="!editingUser" class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Confirmer le mot de passe *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.confirmPassword') }} *</label>
                   <input v-model="form.password_confirmation" type="password" class="form-control" required />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Rôle / Profil *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.profile') }} *</label>
                   <select v-model="form.role_uuid" class="form-select" required>
                     <option v-for="role in rolesStore.roles" :key="role.role.uuid" :value="role.role.uuid">
                       {{ role.role.libelle }}
@@ -200,30 +200,30 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Téléphone</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control" placeholder="+225..." />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Status</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.statusField') }}</label>
                   <select v-model="form.status" class="form-select">
-                    <option :value="1">Actif</option>
-                    <option :value="0">Inactif</option>
+                    <option :value="1">{{ t('admin.common.active') }}</option>
+                    <option :value="0">{{ t('admin.common.inactive') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-medium small text-uppercase">Sexe</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.gender') }}</label>
                   <select v-model="form.sex" class="form-select">
-                    <option value="M">Masculin</option>
-                    <option value="F">Féminin</option>
+                    <option value="M">{{ t('admin.users.male') }}</option>
+                    <option value="F">{{ t('admin.users.female') }}</option>
                   </select>
                 </div>
               </div>
             </div>
             <div class="modal-footer border-top-0 pb-4 px-4">
-              <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary px-4" :disabled="submitting">
                 <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editingUser ? 'Mettre à jour' : 'Créer l\'utilisateur' }}
+                {{ editingUser ? t('admin.users.update') : t('admin.users.create') }}
               </button>
             </div>
           </form>
@@ -234,6 +234,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useUsersStore } from '~/stores/users'
 import { useRolesStore } from '~/stores/roles'
@@ -247,6 +249,7 @@ const config = useRuntimeConfig()
 const usersStore = useUsersStore()
 const rolesStore = useRolesStore()
 const { success, error } = useNotification()
+const { formatDate: fmtDate } = useFormatters()
 
 // State
 const modalRef = ref<HTMLElement | null>(null)
@@ -354,17 +357,17 @@ const handleSave = async () => {
   // Vérification mot de passe côté client
   if (form.password || !editingUser.value) {
     if (form.password !== form.password_confirmation) {
-      error('Les mots de passe ne correspondent pas')
+      error(t('admin.users.passwordMismatch'))
       return
     }
     if (form.password && form.password.length < 8) {
-      error('Le mot de passe doit contenir au moins 8 caractères')
+      error(t('admin.users.passwordMinLength'))
       return
     }
   }
 
   if (!form.role_uuid) {
-    error('Veuillez sélectionner un rôle')
+    error(t('admin.users.selectRoleRequired'))
     return
   }
 
@@ -381,10 +384,10 @@ const handleSave = async () => {
         delete payload.password_confirmation
       }
       await usersStore.updateUser(editingUser.value.uuid, payload)
-      success('Utilisateur mis à jour avec succès')
+      success(t('admin.users.updatedSuccess'))
     } else {
       await usersStore.createUser(payload)
-      success('Utilisateur créé avec succès')
+      success(t('admin.users.createdSuccess'))
     }
     modalInstance?.hide()
     await fetchUsers(usersStore.currentPage)
@@ -396,10 +399,10 @@ const handleSave = async () => {
 }
 
 const handleDelete = async (user: any) => {
-  if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstname} ${user.lastname} ?`)) {
+  if (confirm(t('admin.users.confirmDeleteUser', { name: `${user.firstname} ${user.lastname}` }))) {
     try {
       await usersStore.deleteUser(user.uuid)
-      success('Utilisateur supprimé')
+      success(t('admin.users.deletedSuccess'))
     } catch (err: any) {
       error(err.message)
     }
@@ -428,11 +431,7 @@ const getRoleBadgeClass = (code?: string) => {
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  })
+  return fmtDate(dateString, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 // Lifecycle

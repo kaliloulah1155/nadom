@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des demandes</h4>
-        <p class="text-muted mb-0">{{ psStore.requestsMeta.total }} demandes au total</p>
+        <h4 class="mb-1">{{ t('admin.requests.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.requests.totalCount', { n: psStore.requestsMeta.total }) }}</p>
       </div>
       <NuxtLink to="/personal-shopping/new?for=admin" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-2"></i>Nouvelle demande
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.requests.newRequest') }}
       </NuxtLink>
     </div>
 
@@ -20,34 +20,38 @@
               v-model="filters.search"
               type="text"
               class="form-control"
-              placeholder="Rechercher..."
+              :placeholder="t('admin.requests.searchPlaceholder')"
               @input="debouncedFetch"
             />
           </div>
           <div class="col-md-3">
             <select v-model="filters.status" class="form-select" @change="fetchRequests(1)">
-              <option value="">Tous les statuts</option>
-              <option value="pending">En attente</option>
-              <option value="searching">Recherche</option>
-              <option value="negotiating">Negociation</option>
-              <option value="confirmed">Confirme</option>
-              <option value="preparing">Preparation</option>
-              <option value="shipped">Expedie</option>
-              <option value="delivered">Livre</option>
-              <option value="cancelled">Annule</option>
+              <option value="">{{ t('admin.requests.allStatuses') }}</option>
+              <option value="pending">{{ t('admin.requests.status.pending') }}</option>
+              <option value="searching">{{ t('admin.requests.status.searching') }}</option>
+              <option value="negotiating">{{ t('admin.requests.status.negotiating') }}</option>
+              <option value="confirmed">{{ t('admin.requests.status.confirmed') }}</option>
+              <option value="preparing">{{ t('admin.requests.status.preparing') }}</option>
+              <option value="shipped">{{ t('admin.requests.status.shipped') }}</option>
+              <option value="delivered">{{ t('admin.requests.status.delivered') }}</option>
+              <option value="cancelled">{{ t('admin.requests.status.cancelled') }}</option>
             </select>
           </div>
           <div class="col-md-3">
             <select v-model="filters.category" class="form-select" @change="fetchRequests(1)">
-              <option value="">Toutes categories</option>
-              <option v-for="cat in (categories as any)" :key="cat.id" :value="cat.name_fr">
-                {{ cat.name_fr }}
+              <option value="">{{ t('admin.requests.allCategories') }}</option>
+              <option
+                v-for="cat in podCategories"
+                :key="cat.uuid"
+                :value="cat.label"
+              >
+                {{ podCategoryLabel(cat) }}
               </option>
             </select>
           </div>
           <div class="col-md-2">
             <button class="btn btn-outline-secondary w-100" @click="resetFilters">
-              <i class="bi bi-x-circle me-1"></i>Reset
+              <i class="bi bi-x-circle me-1"></i>{{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -58,28 +62,28 @@
     <div class="card border-0 shadow-sm">
       <div v-if="psStore.loading" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Chargement des demandes...</p>
+        <p class="mt-2 text-muted">{{ t('admin.requests.loading') }}</p>
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>ID</th>
-                <th>Produit</th>
-                <th>Client</th>
-                <th>Statut</th>
-                <th>Budget</th>
-                <th>Devis</th>
-                <th>Date</th>
-                <th>Expédition</th>
-                <th>Actions</th>
+                <th>{{ t('admin.requests.id') }}</th>
+                <th>{{ t('admin.dashboard.product') }}</th>
+                <th>{{ t('admin.requests.client') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th>{{ t('admin.requests.budget') }}</th>
+                <th>{{ t('admin.requests.quote') }}</th>
+                <th>{{ t('admin.dashboard.date') }}</th>
+                <th>{{ t('admin.requests.shipment') }}</th>
+                <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="psStore.requests.length === 0">
                 <td colspan="9" class="text-center py-4 text-muted">
-                  Aucune demande trouvee
+                  {{ t('admin.requests.noRequests') }}
                 </td>
               </tr>
               <tr v-for="request in psStore.requests" :key="request.id">
@@ -131,14 +135,14 @@
                     style="width: 130px;"
                     @change="updateStatus(request.id, ($event.target as HTMLSelectElement).value)"
                   >
-                    <option value="pending">En attente</option>
-                    <option value="searching">Recherche</option>
-                    <option value="negotiating">Negociation</option>
-                    <option value="confirmed">Confirme</option>
-                    <option value="preparing">Preparation</option>
-                    <option value="shipped">Expedie</option>
-                    <option value="delivered">Livre</option>
-                    <option value="cancelled">Annule</option>
+                    <option value="pending">{{ t('admin.requests.status.pending') }}</option>
+                    <option value="searching">{{ t('admin.requests.status.searching') }}</option>
+                    <option value="negotiating">{{ t('admin.requests.status.negotiating') }}</option>
+                    <option value="confirmed">{{ t('admin.requests.status.confirmed') }}</option>
+                    <option value="preparing">{{ t('admin.requests.status.preparing') }}</option>
+                    <option value="shipped">{{ t('admin.requests.status.shipped') }}</option>
+                    <option value="delivered">{{ t('admin.requests.status.delivered') }}</option>
+                    <option value="cancelled">{{ t('admin.requests.status.cancelled') }}</option>
                   </select>
                 </td>
                 <td>{{ formatCurrency(request.budgetEstimated, (request as any).currency || 'XOF') }}</td>
@@ -160,7 +164,7 @@
                   <button
                     v-else
                     class="btn btn-sm btn-outline-secondary"
-                    title="Lier à une expédition"
+                    :title="t('admin.requests.linkShipment')"
                     @click="openLinkShipment(request)"
                   >
                     <i class="bi bi-link-45deg"></i>
@@ -171,13 +175,13 @@
                     <NuxtLink
                       :to="`/admin/requests/${request.id}`"
                       class="btn btn-outline-primary btn-sm me-2"
-                      title="Voir"
+                      :title="t('admin.common.view')"
                     >
                       <i class="bi bi-eye"></i>
                     </NuxtLink>
                     <button
                       class="btn btn-outline-danger btn-sm"
-                      title="Supprimer"
+                      :title="t('admin.common.delete')"
                       @click="deleteRequest(request.id)"
                     >
                       <i class="bi bi-trash"></i>
@@ -207,21 +211,21 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
           <div class="modal-header">
-            <h5 class="modal-title">Lier à une expédition</h5>
+            <h5 class="modal-title">{{ t('admin.requests.linkModalTitle') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <p class="text-muted small">Demande #{{ String(linkingRequest?.id ?? '').slice(-6) }}</p>
-            <label class="form-label">Expédition existante</label>
+            <p class="text-muted small">{{ t('admin.requests.linkModalRequest', { id: String(linkingRequest?.id ?? '').slice(-6) }) }}</p>
+            <label class="form-label">{{ t('admin.requests.existingShipment') }}</label>
             <select v-model="selectedShipmentId" class="form-select">
-              <option value="">— Sélectionner —</option>
+              <option value="">{{ t('admin.requests.selectShipment') }}</option>
               <option v-for="s in shippingStore.shipments" :key="s.id" :value="s.id">
                 {{ s.trackingNumber || String(s.id ?? '').slice(-6) }} — {{ s.status }}
               </option>
             </select>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+            <button class="btn btn-light" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
             <button class="btn btn-primary" :disabled="!selectedShipmentId" @click="confirmLinkShipment">
               Lier
             </button>
@@ -233,7 +237,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+const { t } = useI18n()
+
+import { ref, reactive, onMounted, computed } from 'vue'
 import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
@@ -248,7 +254,12 @@ const shippingStore = useShippingStore()
 const { formatCurrency, formatDateShort, truncate, requestThumbnailUrl } = useFormatters()
 const { success, error } = useNotification()
 
-const categories = computed(() => psStore.categories)
+const { label: podCategoryLabel } = usePodCategoryLabel()
+
+/** Catégories produit (slug POD) — l’API expose `label`, pas `name_fr`. */
+const podCategories = computed(() =>
+  (psStore.categories || []).filter((c: any) => String(c.slug || '') === 'POD'),
+)
 
 const linkModalRef = ref<HTMLElement | null>(null)
 let linkModalInstance: any = null
@@ -268,11 +279,11 @@ const confirmLinkShipment = async () => {
   if (!linkingRequest.value || !selectedShipmentId.value) return
   try {
     await psStore.updateRequest(linkingRequest.value.id, { shipmentId: selectedShipmentId.value })
-    success('Expédition liée à la demande')
+    success(t('admin.requests.linkedSuccess'))
     linkModalInstance?.hide()
     await fetchRequests(psStore.requestsMeta.currentPage)
   } catch (err: any) {
-    error(err.message || 'Erreur lors de la liaison')
+    error(err.message || t('admin.requests.linkError'))
   }
 }
 
@@ -308,20 +319,20 @@ const resetFilters = () => {
 const updateStatus = async (id: string, status: string) => {
   try {
     await psStore.updateRequestStatus(id, status as RequestStatus)
-    success('Statut mis a jour')
+    success(t('admin.requests.statusUpdated'))
   } catch (err) {
-    error('Erreur lors de la mise a jour')
+    error(t('admin.messages.updateError'))
   }
 }
 
 const deleteRequest = async (id: string) => {
-  if (!confirm('Supprimer cette demande ?')) return
+  if (!confirm(t('admin.confirm.deleteRequest'))) return
 
   try {
     await psStore.deleteRequest(id)
-    success('Demande supprimee')
+    success(t('admin.requests.requestDeleted'))
   } catch (err) {
-    error('Erreur lors de la suppression')
+    error(t('admin.requests.deleteError'))
   }
 }
 
@@ -329,7 +340,7 @@ onMounted(async () => {
   if (typeof window !== 'undefined' && (window as any).bootstrap && linkModalRef.value) {
     linkModalInstance = new (window as any).bootstrap.Modal(linkModalRef.value)
   }
-  await psStore.fetchCategories()
+  await psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' })
   await fetchRequests(1)
 })
 </script>

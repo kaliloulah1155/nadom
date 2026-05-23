@@ -71,7 +71,7 @@
                 <div class="category-icon mx-auto mb-3" :style="{ background: category.color + '20', color: category.color }">
                   <i :class="category.icon"></i>
                 </div>
-                <h6 class="mb-0">{{ (category as any)[`name_${locale}`] || (category as any).name_fr }}</h6>
+                <h6 class="mb-0">{{ category.displayLabel }}</h6>
               </div>
             </div>
           </div>
@@ -243,7 +243,22 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const { label: podCategoryLabel } = usePodCategoryLabel()
+const { resolveList } = useI18nResolved()
+
+const PS_ADV_ICONS = ['bi bi-shield-check', 'bi bi-cash-stack', 'bi bi-chat-dots', 'bi bi-geo-alt']
+
+const steps = computed(() =>
+  resolveList('personalShopping.psSteps', ['title', 'description'] as const),
+)
+
+const advantages = computed(() =>
+  resolveList('personalShopping.advantagesList', ['title', 'description'] as const).map((item, i) => ({
+    ...item,
+    icon: PS_ADV_ICONS[i] || 'bi bi-check-circle',
+  })),
+)
 const route = useRoute()
 const router = useRouter()
 const psStore = usePersonalShoppingStore()
@@ -330,8 +345,7 @@ const categories = computed(() =>
       id: String(c.id),
       uuid: c.uuid,
       code: (c.code && String(c.code).trim()) || '',
-      name_fr: c.label || c.name_fr || c.name || '',
-      name_en: c.label || c.name_en || c.name || '',
+      displayLabel: podCategoryLabel(c),
       icon: resolvePodCategoryIcon(c),
       color: POD_CATEGORY_COLORS[i % POD_CATEGORY_COLORS.length],
     })),
@@ -412,8 +426,7 @@ onMounted(async () => {
 const getCategoryName = (id: string) => {
   const sid = String(id)
   const cat = categories.value.find(c => c.id === sid)
-  if (!cat) return ''
-  return (cat as any)[`name_${locale.value}`] || (cat as any).name_fr || ''
+  return cat?.displayLabel || ''
 }
 
 const addToCart = (product: any) => {
@@ -422,7 +435,7 @@ const addToCart = (product: any) => {
   // en tâche de fond sans bloquer l'affichage.
   cartStore.openCart()
   cartStore.addItem(product)
-  success(locale.value === 'fr' ? 'Produit ajouté au panier' : 'Product added to cart')
+  success(t('cart.addedToCart'))
 }
 
 const toggleCart = () => {
@@ -439,31 +452,6 @@ const openZoom = (product: any) => {
   zoomModal?.show()
 }
 
-const steps = computed(() => locale.value === 'fr' ? [
-  { title: 'Envoyez les images', description: 'Partagez des photos ou liens du produit que vous recherchez' },
-  { title: 'Discussion WhatsApp', description: 'Echangez avec notre agent pour preciser vos besoins' },
-  { title: 'Devis detaille', description: 'Recevez un devis complet avec tous les frais' },
-  { title: 'Paiement securise', description: 'Validez et payez via nos moyens de paiement' },
-  { title: 'Livraison', description: 'Recevez votre colis chez vous' }
-] : [
-  { title: 'Send images', description: 'Share photos or links of the product you are looking for' },
-  { title: 'WhatsApp chat', description: 'Chat with our agent to clarify your needs' },
-  { title: 'Detailed quote', description: 'Receive a complete quote with all fees' },
-  { title: 'Secure payment', description: 'Validate and pay via our payment methods' },
-  { title: 'Delivery', description: 'Receive your package at home' }
-])
-
-const advantages = computed(() => locale.value === 'fr' ? [
-  { icon: 'bi bi-shield-check', title: 'Securite', description: 'Verification qualite avant expedition' },
-  { icon: 'bi bi-cash-stack', title: 'Prix competitifs', description: 'Negociation directe avec les fournisseurs' },
-  { icon: 'bi bi-chat-dots', title: 'Support 24/7', description: 'Assistance via WhatsApp' },
-  { icon: 'bi bi-geo-alt', title: 'Suivi en temps reel', description: 'Tracking de votre colis' }
-] : [
-  { icon: 'bi bi-shield-check', title: 'Security', description: 'Quality check before shipping' },
-  { icon: 'bi bi-cash-stack', title: 'Competitive prices', description: 'Direct negotiation with suppliers' },
-  { icon: 'bi bi-chat-dots', title: '24/7 Support', description: 'Assistance via WhatsApp' },
-  { icon: 'bi bi-geo-alt', title: 'Real-time tracking', description: 'Tracking of your package' }
-])
 </script>
 
 <style scoped>

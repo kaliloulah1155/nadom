@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mb-4">
-      <h4 class="mb-1">Mon profil</h4>
+      <h4 class="mb-1">{{ t('admin.profile.title') }}</h4>
       <p class="text-muted">Gérez vos informations personnelles et votre mot de passe</p>
     </div>
 
@@ -71,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { reactive, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'

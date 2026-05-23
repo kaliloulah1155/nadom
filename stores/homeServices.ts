@@ -8,10 +8,13 @@ export interface HomeServiceRow {
   icon: string | null
   title_fr: string | null
   title_en: string | null
+  title_zh: string | null
   description_fr: string | null
   description_en: string | null
+  description_zh: string | null
   features_fr: string[] | null
   features_en: string[] | null
+  features_zh: string[] | null
   display_order: number
   is_active: boolean
   created_at?: string

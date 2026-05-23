@@ -49,11 +49,7 @@
                       <h2>{{ formTitle }}</h2>
                       <p>{{ formIntro }}</p>
                       <p class="small text-muted mb-0">
-                        {{
-                          locale.startsWith('fr')
-                            ? 'Merci de respecter les longueurs indiquées pour chaque champ.'
-                            : 'Please respect the maximum length shown for each field.'
-                        }}
+                        {{ t('contact.fieldLengths') }}
                       </p>
                     </div>
                   </div>
@@ -192,7 +188,7 @@ import { CONTACT_FORM_LIMITS, sanitizePlainText } from '~/composables/usePublicC
 
 const LIMITS = CONTACT_FORM_LIMITS
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const { success, error } = useNotification()
 
 const sending = ref(false)

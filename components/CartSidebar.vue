@@ -217,13 +217,14 @@ import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 import { useFormatters } from '~/composables/useFormatters'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const router = useRouter()
 const cartStore = useCartStore()
 const psStore = usePersonalShoppingStore()
 const authStore = useAuthStore()
 const { success, error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
+const { categoryLabel } = useCategoryLabel()
 const config = useRuntimeConfig()
 
 const showContactForm = ref(false)
@@ -253,7 +254,7 @@ const currencies = computed(() => {
     .map((c: any) => ({
       id: c.uuid || c.id,
       code: (c.code || c.label || '').toString().toUpperCase(),
-      label: c.label || c.code || '',
+      label: categoryLabel(c),
     }))
     .filter((c: any) => c.code)
   return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA (FCFA)' }]
@@ -331,9 +332,7 @@ const checkout = async () => {
       .join(', ')
 
     const request: any = await psStore.createRequest({
-      title:           locale.value === 'fr'
-        ? `Commande de ${cartStore.totalItems} article(s)`
-        : `Order of ${cartStore.totalItems} item(s)`,
+      title:           t('cart.orderTitle', { n: cartStore.totalItems }),
       description:     productNames,
       contactNumber:   contactNumber.value,
       contactFullname: contactName.value,
@@ -344,9 +343,7 @@ const checkout = async () => {
       items,
     } as any)
 
-    success(locale.value === 'fr'
-      ? 'Demande envoyée ! Notre équipe vous contacte sous 24h.'
-      : 'Request sent! Our team will contact you within 24h.')
+    success(t('cart.orderSent'))
 
     cartStore.clearCart()
     cartStore.closeCart()
@@ -356,7 +353,7 @@ const checkout = async () => {
       router.push(`/personal-shopping/${request.id}`)
     }
   } catch (err: any) {
-    notifyError(err.message || (locale.value === 'fr' ? 'Erreur lors de la validation.' : 'Error during checkout.'))
+    notifyError(err.message || t('auth.checkoutError'))
   } finally {
     submitting.value = false
   }
@@ -364,9 +361,7 @@ const checkout = async () => {
 
 const contactWhatsApp = () => {
   const whatsappNumber = (config.public.whatsapp || '+2250714158172').replace('+', '')
-  let message = locale.value === 'fr'
-    ? 'Bonjour NADOM, je souhaite commander :\n\n'
-    : 'Hello NADOM, I would like to order:\n\n'
+  let message = t('cart.whatsappIntro')
 
   cartStore.items.forEach(item => {
     const name = item.product[`name_${locale.value}` as keyof typeof item.product] || item.product.name_fr

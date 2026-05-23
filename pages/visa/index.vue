@@ -103,8 +103,8 @@
           <div class="card border-0 shadow">
             <div class="card-body text-center py-5">
               <i class="bi bi-passport display-1 text-muted"></i>
-              <h4 class="mt-3">{{ locale === 'fr' ? 'Aucun visa disponible' : 'No visa available' }}</h4>
-              <p class="text-muted">{{ locale === 'fr' ? 'Contactez-nous pour plus d\'informations.' : 'Contact us for more information.' }}</p>
+              <h4 class="mt-3">{{ t('visa.noVisa') }}</h4>
+              <p class="text-muted">{{ t('guide.contactInfo') }}</p>
             </div>
           </div>
         </div>
@@ -192,7 +192,24 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const { resolveList } = useI18nResolved()
+
+const VISA_PROCESS_ICONS = [
+  'bi bi-chat-dots',
+  'bi bi-file-earmark-check',
+  'bi bi-send',
+  'bi bi-eye',
+]
+
+const processSteps = computed(() =>
+  resolveList('visa.processSteps', ['title', 'description'] as const).map((item, i) => ({
+    icon: VISA_PROCESS_ICONS[i] || 'bi bi-circle',
+    ...item,
+  })),
+)
+
+const faqs = computed(() => resolveList('visa.faqItems', ['question', 'answer'] as const))
 const visasStore = useVisasStore()
 const { formatCurrency } = useFormatters()
 const config = useRuntimeConfig()
@@ -224,29 +241,6 @@ const getVisaIcon = (type: string) => {
   return icons[type?.toLowerCase()] || 'bi bi-passport'
 }
 
-const processSteps = computed(() => locale.value === 'fr' ? [
-  { icon: 'bi bi-chat-dots', title: 'Consultation', description: 'Evaluation de votre dossier et conseils personnalises' },
-  { icon: 'bi bi-file-earmark-check', title: 'Preparation', description: 'Constitution et verification de votre dossier' },
-  { icon: 'bi bi-send', title: 'Depot', description: 'Soumission de votre demande au consulat' },
-  { icon: 'bi bi-eye', title: 'Suivi', description: 'Suivi de votre dossier jusqu\'a l\'obtention' }
-] : [
-  { icon: 'bi bi-chat-dots', title: 'Consultation', description: 'Evaluation of your file and personalized advice' },
-  { icon: 'bi bi-file-earmark-check', title: 'Preparation', description: 'Constitution and verification of your file' },
-  { icon: 'bi bi-send', title: 'Submission', description: 'Submission of your application to the consulate' },
-  { icon: 'bi bi-eye', title: 'Follow-up', description: 'Follow-up of your file until you receive it' }
-])
-
-const faqs = computed(() => locale.value === 'fr' ? [
-  { question: 'Combien de temps faut-il pour obtenir un visa?', answer: 'Le delai varie selon le type de visa. Un visa tourisme prend generalement 5-7 jours ouvrables, tandis qu\'un visa travail peut prendre 15-20 jours.' },
-  { question: 'Quels documents sont necessaires?', answer: 'Les documents de base incluent: passeport valide 6 mois, photos d\'identite, formulaire de demande. D\'autres documents peuvent etre requis selon le type de visa.' },
-  { question: 'Puis-je faire ma demande en ligne?', answer: 'Non, la demande de visa chinois doit etre faite en personne au consulat. Cependant, nous pouvons vous accompagner dans toutes les demarches.' },
-  { question: 'Le visa est-il remboursable?', answer: 'Les frais de visa ne sont pas remboursables en cas de refus. C\'est pourquoi nous verifions soigneusement votre dossier avant depot.' }
-] : [
-  { question: 'How long does it take to get a visa?', answer: 'The time varies depending on the type of visa. A tourist visa generally takes 5-7 business days, while a work visa can take 15-20 days.' },
-  { question: 'What documents are required?', answer: 'Basic documents include: passport valid for 6 months, ID photos, application form. Other documents may be required depending on the type of visa.' },
-  { question: 'Can I apply online?', answer: 'No, the Chinese visa application must be made in person at the consulate. However, we can assist you with all the steps.' },
-  { question: 'Is the visa refundable?', answer: 'Visa fees are not refundable in case of refusal. That\'s why we carefully check your file before submitting.' }
-])
 </script>
 
 <style scoped>

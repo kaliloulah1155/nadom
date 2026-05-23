@@ -39,7 +39,15 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAdmin: (state) => state.currentUser?.role?.code === 'admin' || state.currentUser?.role === 'admin',
+    isAdmin: (state) => {
+      const code = (typeof state.currentUser?.role === 'object' ? state.currentUser?.role?.code : state.currentUser?.role) || ''
+      const n = code.toString().toLowerCase().trim()
+      return n === 'admin' || n === 'super-admin'
+    },
+    isSuperAdmin: (state) => {
+      const code = (typeof state.currentUser?.role === 'object' ? state.currentUser?.role?.code : state.currentUser?.role) || ''
+      return code.toString().toLowerCase().trim() === 'super-admin'
+    },
     isClient: (state) => state.currentUser?.role?.code === 'client' || state.currentUser?.role === 'client',
     isAgent: (state) => state.currentUser?.role?.code === 'agent' || state.currentUser?.role === 'agent',
     hasBackofficeAccess: (state) => {
@@ -47,7 +55,7 @@ export const useAuthStore = defineStore('auth', {
       const roleData = state.currentUser.role
       const roleCode = (typeof roleData === 'object' ? roleData?.code : roleData) || ''
       const normalizedCode = roleCode.toString().toLowerCase().trim()
-      return ['admin', 'agent'].includes(normalizedCode)
+      return ['admin', 'agent', 'super-admin'].includes(normalizedCode)
     },
     userEmail: (state) => state.currentUser?.email || '',
     userFullName: (state) => {

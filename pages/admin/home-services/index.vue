@@ -26,7 +26,7 @@
             <tbody>
               <tr v-if="rows.length === 0">
                 <td colspan="5" class="text-center py-4 text-muted">
-                  Aucun service — importez les données ou créez une carte.
+                  {{ t('admin.homeServices.noServices') }}
                 </td>
               </tr>
               <tr v-for="row in rows" :key="row.id">
@@ -43,7 +43,7 @@
                     v-can="['update', 'home-services']"
                     type="button"
                     class="btn btn-outline-primary btn-sm me-2"
-                    title="Modifier"
+                    :title="t('admin.common.edit')"
                     @click="openModal(row)"
                   >
                     <i class="bi bi-pencil"></i>
@@ -52,7 +52,7 @@
                     v-can="['delete', 'home-services']"
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    title="Supprimer"
+                    :title="t('admin.common.delete')"
                     @click="remove(row)"
                   >
                     <i class="bi bi-trash"></i>
@@ -69,7 +69,7 @@
       <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier la carte' : 'Nouvelle carte' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.homeServices.editCard') : t('admin.homeServices.newCard') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
@@ -105,10 +105,13 @@
 
               <ul class="nav nav-tabs mb-3">
                 <li class="nav-item">
-                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#hs-fr">Français</button>
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#hs-fr">{{ t('admin.common.french') }}</button>
                 </li>
                 <li class="nav-item">
-                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#hs-en">English</button>
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#hs-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#hs-zh">{{ t('admin.common.chinese') }}</button>
                 </li>
               </ul>
 
@@ -137,6 +140,18 @@
                     </ClientOnly>
                   </div>
                 </div>
+                <div id="hs-zh" class="tab-pane fade">
+                  <div class="mb-3">
+                    <label class="form-label">标题 (中文)</label>
+                    <input v-model="form.title_zh" type="text" class="form-control" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">描述 (中文)</label>
+                    <ClientOnly>
+                      <WysiwygEditor v-model="form.description_zh" height="140px" />
+                    </ClientOnly>
+                  </div>
+                </div>
               </div>
 
               <div class="border rounded p-3 bg-light">
@@ -146,22 +161,28 @@
                     <i class="bi bi-plus-lg"></i> Ligne
                   </button>
                 </div>
-                <p class="small text-muted mb-3">Une ligne = une puce FR à gauche et EN à droite (éditeur riche).</p>
+                <p class="small text-muted mb-3">Une ligne = FR / EN / 中文 (éditeur riche).</p>
                 <div v-for="(_, idx) in form.features_fr" :key="'feat-' + idx" class="row g-2 mb-3 align-items-start border-bottom pb-3">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <span class="small text-muted">FR {{ idx + 1 }}</span>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.features_fr[idx]!" height="100px" />
                     </ClientOnly>
                   </div>
-                  <div class="col-md-5">
+                  <div class="col-md-4">
                     <span class="small text-muted">EN {{ idx + 1 }}</span>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.features_en[idx]!" height="100px" />
                     </ClientOnly>
                   </div>
+                  <div class="col-md-3">
+                    <span class="small text-muted">中文 {{ idx + 1 }}</span>
+                    <ClientOnly>
+                      <WysiwygEditor v-model="form.features_zh[idx]!" height="100px" />
+                    </ClientOnly>
+                  </div>
                   <div class="col-md-1 d-flex justify-content-end pt-4">
-                    <button type="button" class="btn btn-outline-danger btn-sm" title="Supprimer la ligne" @click="removeFeatureRow(idx)">
+                    <button type="button" class="btn btn-outline-danger btn-sm" :title="t('admin.homeServices.deleteLineTitle')" @click="removeFeatureRow(idx)">
                       <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
@@ -169,8 +190,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
             </div>
           </form>
         </div>
@@ -180,6 +201,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { computed, reactive, ref, onMounted } from 'vue'
 import { useHomeServicesStore, type HomeServiceRow } from '~/stores/homeServices'
 import { useNotification } from '~/composables/useNotification'
@@ -204,10 +227,13 @@ const emptyForm = () => ({
   icon: 'bi-grid',
   title_fr: '',
   title_en: '',
+  title_zh: '',
   description_fr: '',
   description_en: '',
+  description_zh: '',
   features_fr: [''],
   features_en: [''],
+  features_zh: [''],
   display_order: 0,
   is_active: true
 })
@@ -221,23 +247,27 @@ const stripInnerText = (html: string) =>
     .trim()
 
 const normalizeFeatureArrays = () => {
-  const n = Math.max(form.features_fr.length, form.features_en.length, 1)
+  const n = Math.max(form.features_fr.length, form.features_en.length, form.features_zh.length, 1)
   while (form.features_fr.length < n) form.features_fr.push('')
   while (form.features_en.length < n) form.features_en.push('')
+  while (form.features_zh.length < n) form.features_zh.push('')
 }
 
 const packFeatures = () => {
   const fr: string[] = []
   const en: string[] = []
-  const len = Math.max(form.features_fr.length, form.features_en.length)
+  const zh: string[] = []
+  const len = Math.max(form.features_fr.length, form.features_en.length, form.features_zh.length)
   for (let i = 0; i < len; i++) {
     const a = form.features_fr[i] ?? ''
     const b = form.features_en[i] ?? ''
-    if (!stripInnerText(a) && !stripInnerText(b)) continue
+    const c = form.features_zh[i] ?? ''
+    if (!stripInnerText(a) && !stripInnerText(b) && !stripInnerText(c)) continue
     fr.push(a)
     en.push(b)
+    zh.push(c)
   }
-  return { features_fr: fr, features_en: en }
+  return { features_fr: fr, features_en: en, features_zh: zh }
 }
 
 onMounted(async () => {
@@ -254,10 +284,13 @@ const openModal = (row?: HomeServiceRow) => {
     form.icon = row.icon || ''
     form.title_fr = row.title_fr || ''
     form.title_en = row.title_en || ''
+    form.title_zh = row.title_zh || ''
     form.description_fr = row.description_fr || ''
     form.description_en = row.description_en || ''
+    form.description_zh = row.description_zh || ''
     form.features_fr = Array.isArray(row.features_fr) && row.features_fr.length ? [...row.features_fr] : ['']
     form.features_en = Array.isArray(row.features_en) && row.features_en.length ? [...row.features_en] : ['']
+    form.features_zh = Array.isArray(row.features_zh) && row.features_zh.length ? [...row.features_zh] : ['']
     normalizeFeatureArrays()
     form.display_order = row.display_order ?? 0
     form.is_active = !!row.is_active
@@ -273,63 +306,72 @@ const openModal = (row?: HomeServiceRow) => {
 const addFeatureRow = () => {
   form.features_fr.push('')
   form.features_en.push('')
+  form.features_zh.push('')
 }
 
 const removeFeatureRow = (idx: number) => {
   form.features_fr.splice(idx, 1)
   form.features_en.splice(idx, 1)
+  form.features_zh.splice(idx, 1)
   if (form.features_fr.length === 0) {
     form.features_fr.push('')
     form.features_en.push('')
+    form.features_zh.push('')
   }
 }
 
 const save = async () => {
-  const { features_fr, features_en } = packFeatures()
+  const { features_fr, features_en, features_zh } = packFeatures()
   try {
     if (editing.value) {
       await store.update(editing.value.id, {
         icon: form.icon || null,
         title_fr: form.title_fr || null,
         title_en: form.title_en || null,
+        title_zh: form.title_zh || null,
         description_fr: form.description_fr || null,
         description_en: form.description_en || null,
+        description_zh: form.description_zh || null,
         features_fr,
         features_en,
+        features_zh,
         display_order: form.display_order,
         is_active: form.is_active
       })
-      success('Carte mise à jour')
+      success(t('admin.homeServices.updated'))
     } else {
       await store.create({
         slug: form.slug.trim(),
         icon: form.icon || null,
         title_fr: form.title_fr || null,
         title_en: form.title_en || null,
+        title_zh: form.title_zh || null,
         description_fr: form.description_fr || null,
         description_en: form.description_en || null,
+        description_zh: form.description_zh || null,
         features_fr,
         features_en,
+        features_zh,
         display_order: form.display_order,
         is_active: form.is_active
       })
-      success('Carte créée')
+      success(t('admin.homeServices.created'))
     }
     modalInstance?.hide()
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || "Erreur lors de l'enregistrement")
+    error(e?.message || t('admin.messages.saveError'))
   }
 }
 
 const remove = async (row: HomeServiceRow) => {
-  if (!confirm(`Supprimer la carte « ${row.slug} » ?`)) return
+  if (!confirm(t('admin.confirm.deleteHomeServiceCard', { slug: row.slug }))) return
   try {
     await store.remove(row.id)
-    success('Carte supprimée')
+    success(t('admin.homeServices.deleted'))
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || 'Erreur suppression')
+    error(e?.message || t('admin.messages.deleteError'))
   }
 }
 </script>

@@ -2,8 +2,8 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Pied de page (site public)</h4>
-        <p class="text-muted mb-0">Texte d'introduction, réseaux sociaux (liste), blocs contact (adresses, téléphones, e-mail).</p>
+        <h4 class="mb-1">{{ t('admin.footerAdmin.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.footerAdmin.subtitle') }}</p>
       </div>
     </div>
 
@@ -17,7 +17,7 @@
           :class="{ active: mainSection === 'pres' }"
           @click="mainSection = 'pres'"
         >
-          Texte sous le logo
+          {{ t('admin.footerAdmin.textUnderLogo') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -29,7 +29,7 @@
           :class="{ active: mainSection === 'social' }"
           @click="mainSection = 'social'"
         >
-          Réseaux sociaux
+          {{ t('admin.footerAdmin.socialNetworks') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -41,7 +41,7 @@
           :class="{ active: mainSection === 'contact' }"
           @click="mainSection = 'contact'"
         >
-          Blocs contact
+          {{ t('admin.footerAdmin.contactBlocks') }}
         </button>
       </li>
     </ul>
@@ -49,7 +49,7 @@
     <!-- Présentation -->
     <div v-show="mainSection === 'pres'" class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <strong>Texte sous le logo</strong>
+        <strong>{{ t('admin.footerAdmin.textUnderLogo') }}</strong>
         <button
           v-can="['update', 'site-footer']"
           type="button"
@@ -63,7 +63,7 @@
             role="status"
             aria-hidden="true"
           />
-          {{ savingSettings ? 'Enregistrement…' : 'Enregistrer le texte' }}
+          {{ savingSettings ? t('admin.countries.saving') : t('admin.footerAdmin.saveText') }}
         </button>
       </div>
       <div class="card-body">
@@ -88,17 +88,33 @@
           >
             English
           </button>
+          <button
+            type="button"
+            class="btn btn-sm"
+            role="tab"
+            :aria-selected="aboutLang === 'zh'"
+            :class="aboutLang === 'zh' ? 'btn-primary' : 'btn-outline-secondary'"
+            @click="aboutLang = 'zh'"
+          >
+            {{ t('admin.common.chinese') }}
+          </button>
         </div>
         <div v-show="aboutLang === 'fr'">
-          <label class="form-label fw-semibold">Français</label>
+          <label class="form-label fw-semibold">{{ t('admin.common.french') }}</label>
           <ClientOnly>
             <WysiwygEditor v-model="aboutFr" height="120px" />
           </ClientOnly>
         </div>
         <div v-show="aboutLang === 'en'">
-          <label class="form-label fw-semibold">English</label>
+          <label class="form-label fw-semibold">{{ t('admin.common.english') }}</label>
           <ClientOnly>
             <WysiwygEditor v-model="aboutEn" height="120px" />
+          </ClientOnly>
+        </div>
+        <div v-show="aboutLang === 'zh'">
+          <label class="form-label fw-semibold">{{ t('admin.common.chinese') }}</label>
+          <ClientOnly>
+            <WysiwygEditor v-model="aboutZh" height="120px" />
           </ClientOnly>
         </div>
       </div>
@@ -107,7 +123,7 @@
     <!-- Réseaux -->
     <div v-show="mainSection === 'social'" class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <strong>Réseaux sociaux</strong>
+        <strong>{{ t('admin.footerAdmin.socialNetworks') }}</strong>
         <button v-can="['create', 'site-footer']" type="button" class="btn btn-sm btn-outline-primary" @click="openSocial()">
           <i class="bi bi-plus-lg me-1"></i>Ajouter
         </button>
@@ -127,7 +143,7 @@
             </thead>
             <tbody>
               <tr v-if="socialRows.length === 0">
-                <td colspan="6" class="text-center py-4 text-muted">Aucun lien configuré.</td>
+                <td colspan="6" class="text-center py-4 text-muted">{{ t('admin.footerAdmin.noSocialLinks') }}</td>
               </tr>
               <tr v-for="row in socialRows" :key="row.id">
                 <td><i :class="row.icon_class"></i></td>
@@ -175,7 +191,7 @@
     <!-- Contact -->
     <div v-show="mainSection === 'contact'" class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <strong>Blocs contact</strong>
+        <strong>{{ t('admin.footerAdmin.contactBlocks') }}</strong>
         <button v-can="['create', 'site-footer']" type="button" class="btn btn-sm btn-outline-primary" @click="openContact()">
           <i class="bi bi-plus-lg me-1"></i>Ajouter
         </button>
@@ -186,7 +202,7 @@
             <thead class="table-light">
               <tr>
                 <th>Type</th>
-                <th>Contenu (FR / EN)</th>
+                <th>Contenu (FR / EN / 中文)</th>
                 <th class="text-center">Ordre</th>
                 <th class="text-center">Actif</th>
                 <th></th>
@@ -194,7 +210,7 @@
             </thead>
             <tbody>
               <tr v-if="contactRows.length === 0">
-                <td colspan="5" class="text-center py-4 text-muted">Aucun bloc contact.</td>
+                <td colspan="5" class="text-center py-4 text-muted">{{ t('admin.footerAdmin.noContactBlocks') }}</td>
               </tr>
               <tr v-for="row in contactRows" :key="row.id">
                 <td>{{ kindLabel(row.kind) }}</td>
@@ -203,6 +219,8 @@
                   <div class="small text-break fr-en-cell">{{ row.body_fr || '—' }}</div>
                   <div class="small text-body-secondary mt-2 mb-1">EN</div>
                   <div class="small text-break fr-en-cell">{{ row.body_en || '—' }}</div>
+                  <div class="small text-body-secondary mt-2 mb-1">中文</div>
+                  <div class="small text-break fr-en-cell">{{ row.body_zh || '—' }}</div>
                 </td>
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
@@ -248,7 +266,7 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ socEditing ? 'Modifier le lien' : 'Nouveau lien social' }}</h5>
+            <h5 class="modal-title">{{ socEditing ? t('admin.footerAdmin.editSocial') : t('admin.footerAdmin.newSocialLink') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveSocial">
@@ -288,7 +306,7 @@
               </button>
               <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" :disabled="savingSocialSubmit">
                 <span v-if="savingSocialSubmit" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -301,7 +319,7 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ cntEditing ? 'Modifier le bloc contact' : 'Nouveau bloc contact' }}</h5>
+            <h5 class="modal-title">{{ cntEditing ? t('admin.footerAdmin.editContactBlock') : t('admin.footerAdmin.newContactBlock') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveContact">
@@ -322,6 +340,10 @@
                 <label class="form-label">Texte anglais</label>
                 <textarea v-model="cntForm.body_en" class="form-control" rows="4"></textarea>
               </div>
+              <div class="mb-3">
+                <label class="form-label">中文</label>
+                <textarea v-model="cntForm.body_zh" class="form-control" rows="4"></textarea>
+              </div>
               <div class="row">
                 <div class="col-6 mb-3">
                   <label class="form-label">Ordre</label>
@@ -341,7 +363,7 @@
               </button>
               <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" :disabled="savingContactSubmit">
                 <span v-if="savingContactSubmit" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -352,6 +374,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { computed, reactive, ref, onMounted, nextTick } from 'vue'
 import { useSiteFooterStore, type FooterContactDto, type FooterPlatformsMap, type FooterSocialDto } from '~/stores/siteFooter'
 import { useNotification } from '~/composables/useNotification'
@@ -378,6 +402,7 @@ function getModal(el: HTMLElement | null) {
 
 const aboutFr = ref('')
 const aboutEn = ref('')
+const aboutZh = ref('')
 const savingSettings = ref(false)
 const savingSocialSubmit = ref(false)
 const savingContactSubmit = ref(false)
@@ -385,7 +410,7 @@ const deletingSocialId = ref<string | null>(null)
 const deletingContactId = ref<string | null>(null)
 /** Réduit le scroll : une section + une langue à la fois. */
 const mainSection = ref<'pres' | 'social' | 'contact'>('pres')
-const aboutLang = ref<'fr' | 'en'>('fr')
+const aboutLang = ref<'fr' | 'en' | 'zh'>('fr')
 
 const socialRows = computed(() => {
   const list = [...(store.adminBundle?.socials ?? [])]
@@ -405,6 +430,7 @@ function hydrateTexts() {
   const s = store.adminBundle?.settings
   aboutFr.value = s?.about_fr || ''
   aboutEn.value = s?.about_en || ''
+  aboutZh.value = s?.about_zh || ''
 }
 
 async function reload() {
@@ -422,11 +448,15 @@ onMounted(async () => {
 async function savePresentation() {
   savingSettings.value = true
   try {
-    await store.saveSettings({ about_fr: aboutFr.value || null, about_en: aboutEn.value || null })
+    await store.saveSettings({
+      about_fr: aboutFr.value || null,
+      about_en: aboutEn.value || null,
+      about_zh: aboutZh.value || null
+    })
     hydrateTexts()
-    success('Présentation enregistrée')
+    success(t('admin.footerAdmin.presentationSaved'))
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     savingSettings.value = false
   }
@@ -467,7 +497,7 @@ async function saveSocial() {
         display_order: socForm.display_order,
         is_active: socForm.is_active
       })
-      success('Lien mis à jour')
+      success(t('admin.footerAdmin.linkUpdated'))
     } else {
       await store.createSocial({
         platform_code: socForm.platform_code,
@@ -475,26 +505,26 @@ async function saveSocial() {
         display_order: socForm.display_order,
         is_active: socForm.is_active
       })
-      success('Lien créé')
+      success(t('admin.footerAdmin.linkCreated'))
     }
     getModal(socModalEl.value)?.hide()
     hydrateTexts()
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     savingSocialSubmit.value = false
   }
 }
 
 async function delSocial(row: FooterSocialDto) {
-  if (!confirm('Supprimer ce lien ?')) return
+  if (!confirm(t('admin.confirm.deleteSocialLink'))) return
   deletingSocialId.value = row.id
   try {
     await store.deleteSocial(row.id)
-    success('Lien supprimé')
+    success(t('admin.footerAdmin.linkDeleted'))
     hydrateTexts()
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     deletingSocialId.value = null
   }
@@ -505,6 +535,7 @@ const cntForm = reactive({
   kind: 'address' as 'address' | 'phone' | 'email',
   body_fr: '',
   body_en: '',
+  body_zh: '',
   display_order: 0,
   is_active: true
 })
@@ -522,12 +553,14 @@ async function openContact(row?: FooterContactDto) {
     cntForm.kind = row.kind as typeof cntForm.kind
     cntForm.body_fr = row.body_fr || ''
     cntForm.body_en = row.body_en || ''
+    cntForm.body_zh = row.body_zh || ''
     cntForm.display_order = row.display_order ?? 0
     cntForm.is_active = !!row.is_active
   } else {
     cntForm.kind = 'address'
     cntForm.body_fr = ''
     cntForm.body_en = ''
+    cntForm.body_zh = ''
     cntForm.display_order = Math.max(0, ...contactRows.value.map(r => Number(r.display_order || 0))) + 10
     cntForm.is_active = true
   }
@@ -542,34 +575,35 @@ async function saveContact() {
       kind: cntForm.kind,
       body_fr: cntForm.body_fr || null,
       body_en: cntForm.body_en || null,
+      body_zh: cntForm.body_zh || null,
       display_order: cntForm.display_order,
       is_active: cntForm.is_active
     }
     if (cntEditing.value) {
       await store.updateContact(cntEditing.value.id, payload)
-      success('Bloc mis à jour')
+      success(t('admin.footerAdmin.blockUpdated'))
     } else {
       await store.createContact(payload)
-      success('Bloc créé')
+      success(t('admin.footerAdmin.blockCreated'))
     }
     getModal(cntModalEl.value)?.hide()
     hydrateTexts()
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     savingContactSubmit.value = false
   }
 }
 
 async function delContact(row: FooterContactDto) {
-  if (!confirm('Supprimer ce bloc ?')) return
+  if (!confirm(t('admin.confirm.deleteContactBlock'))) return
   deletingContactId.value = row.id
   try {
     await store.deleteContact(row.id)
-    success('Bloc supprimé')
+    success(t('admin.footerAdmin.blockDeleted'))
     hydrateTexts()
   } catch (e: any) {
-    error(e?.message || 'Erreur')
+    error(e?.message || t('admin.messages.genericError'))
   } finally {
     deletingContactId.value = null
   }

@@ -2,13 +2,13 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Pays (référentiel)</h4>
+        <h4 class="mb-1">{{ t('admin.countries.title') }}</h4>
         <p class="text-muted mb-0">
           {{ meta.total }} pays — codes ISO, indicatif téléphonique, devise (catégorie DVS), ordre d'affichage
         </p>
       </div>
       <button v-can="['create', 'countries']" type="button" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau pays
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.countries.newCountry') }}
       </button>
     </div>
 
@@ -16,7 +16,7 @@
       <div class="card-body py-3">
         <div class="row g-2 align-items-center">
           <div class="col-md-4">
-            <label class="form-label small text-muted mb-1">Lignes / page</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.categories.linesPerPage') }}</label>
             <select
               :value="meta.perPage"
               class="form-select form-select-sm"
@@ -29,7 +29,7 @@
             </select>
           </div>
           <div class="col-md-8 text-md-end small text-muted">
-            Page {{ meta.currentPage }} / {{ meta.lastPage }}
+            {{ t('admin.pagination.pageOf', { current: meta.currentPage, last: meta.lastPage }) }}
           </div>
         </div>
       </div>
@@ -40,12 +40,12 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>Pays</th>
-              <th>Code</th>
-              <th>Indicatif</th>
-              <th>Devise</th>
-              <th class="text-center">Ordre</th>
-              <th>Statut</th>
+              <th>{{ t('admin.countries.country') }}</th>
+              <th>{{ t('admin.countries.countryCode') }}</th>
+              <th>{{ t('admin.countries.dialCode') }}</th>
+              <th>{{ t('admin.products.currency') }}</th>
+              <th class="text-center">{{ t('admin.countries.displayOrder') }}</th>
+              <th>{{ t('admin.dashboard.status') }}</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -53,11 +53,11 @@
             <tr v-if="loading">
               <td colspan="7" class="text-center py-4 text-muted">
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Chargement…
+                {{ t('admin.common.loading') }}
               </td>
             </tr>
             <tr v-else-if="rows.length === 0">
-              <td colspan="7" class="text-center py-4 text-muted">Aucun pays.</td>
+              <td colspan="7" class="text-center py-4 text-muted">{{ t('admin.countries.noCountries') }}</td>
             </tr>
             <tr v-for="row in rows" :key="row.uuid">
               <td>
@@ -83,7 +83,7 @@
                     v-can="['update', 'countries']"
                     type="button"
                     class="btn btn-sm btn-outline-primary"
-                    title="Modifier"
+                    :title="t('admin.common.edit')"
                     @click="openModal(row)"
                   >
                     <i class="bi bi-pencil"></i>
@@ -92,7 +92,7 @@
                     v-can="['delete', 'countries']"
                     type="button"
                     class="btn btn-sm btn-outline-danger"
-                    title="Supprimer"
+                    :title="t('admin.common.delete')"
                     @click="confirmDelete(row)"
                   >
                     <i class="bi bi-trash"></i>
@@ -118,14 +118,14 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier le pays' : 'Nouveau pays' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.countries.modalEdit') : t('admin.countries.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-md-8">
-                  <label class="form-label">Libellé *</label>
+                  <label class="form-label">{{ t('admin.countries.countryLabel') }} *</label>
                   <input v-model="form.label" type="text" class="form-control" required maxlength="255" />
                 </div>
                 <div class="col-md-4">
@@ -151,7 +151,7 @@
                   <select v-model="form.currency_uuid" class="form-select">
                     <option value="">— Non renseignée —</option>
                     <option v-for="c in currencyOptions" :key="c.uuid" :value="c.uuid">
-                      {{ c.label }} ({{ c.code }})
+                      {{ categoryLabel(c) }} ({{ c.code }})
                     </option>
                   </select>
                 </div>
@@ -160,7 +160,7 @@
                   <input v-model.number="form.sort_order" type="number" min="0" class="form-control" required />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.dashboard.status') }}</label>
                   <select v-model.number="form.status" class="form-select">
                     <option :value="1">Actif</option>
                     <option :value="2">Inactif</option>
@@ -168,12 +168,38 @@
                   </select>
                 </div>
               </div>
+
+              <ul class="nav nav-tabs mb-3 mt-2">
+                <li class="nav-item">
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#country-name-fr">{{ t('admin.common.french') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#country-name-en">{{ t('admin.common.english') }}</button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#country-name-zh">{{ t('admin.common.chinese') }}</button>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div id="country-name-fr" class="tab-pane fade show active">
+                  <label class="form-label">Nom affiché (FR)</label>
+                  <input v-model="form.name_fr" type="text" class="form-control" maxlength="150" />
+                </div>
+                <div id="country-name-en" class="tab-pane fade">
+                  <label class="form-label">Display name (EN)</label>
+                  <input v-model="form.name_en" type="text" class="form-control" maxlength="150" />
+                </div>
+                <div id="country-name-zh" class="tab-pane fade">
+                  <label class="form-label">显示名称 (中文)</label>
+                  <input v-model="form.name_zh" type="text" class="form-control" maxlength="150" />
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+                {{ saving ? t('admin.common.savingEllipsis') : t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -184,6 +210,9 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+const { categoryLabel } = useCategoryLabel()
+
 import { computed, reactive, ref, onMounted } from 'vue'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotification } from '~/composables/useNotification'
@@ -208,6 +237,8 @@ interface CountryRow {
   sort_order?: number | null
   status?: number | null
   name_fr?: string | null
+  name_en?: string | null
+  name_zh?: string | null
   currency_code?: string | null
   currency?: { uuid?: string; label?: string; code?: string } | null
 }
@@ -247,6 +278,9 @@ let modalInstance: any = null
 
 const form = reactive({
   label: '',
+  name_fr: '',
+  name_en: '',
+  name_zh: '',
   code: '',
   phone_code: '',
   currency_uuid: '',
@@ -263,7 +297,7 @@ const currencyOptions = computed(() => {
     .map((c: any) => ({
       uuid: c.uuid as string,
       code: ((c.code || c.label || '') as string).toString().toUpperCase(),
-      label: (c.label || c.code || '') as string
+      label: categoryLabel(c) as string
     }))
     .filter((c: any) => c.uuid)
   return list
@@ -292,10 +326,10 @@ const fetchList = async (page?: number, limit?: number) => {
     if (res.success) {
       applyPaginator(res, rows.value, meta)
     } else {
-      error(res.message || 'Impossible de charger les pays')
+      error(res.message || t('admin.countries.loadFailed'))
     }
   } catch (e: any) {
-    error(e.message || 'Erreur réseau')
+    error(e.message || t('admin.countries.networkError'))
   } finally {
     loading.value = false
   }
@@ -305,6 +339,9 @@ const openModal = (row?: CountryRow) => {
   if (row) {
     editing.value = row
     form.label = row.label || ''
+    form.name_fr = row.name_fr || row.label || ''
+    form.name_en = row.name_en || ''
+    form.name_zh = row.name_zh || ''
     form.code = row.code || ''
     form.phone_code = row.phone_code || ''
     form.currency_uuid = row.currency?.uuid || ''
@@ -317,6 +354,9 @@ const openModal = (row?: CountryRow) => {
         ? Math.max(...rows.value.map((r) => (typeof r.sort_order === 'number' ? r.sort_order : 0))) + 1
         : (meta.total || 0) + 1
     form.label = ''
+    form.name_fr = ''
+    form.name_en = ''
+    form.name_zh = ''
     form.code = ''
     form.phone_code = ''
     form.currency_uuid = ''
@@ -333,6 +373,9 @@ const save = async () => {
     if (editing.value) {
       const payload: Record<string, any> = {
         label: form.label.trim(),
+        name_fr: form.name_fr?.trim() || null,
+        name_en: form.name_en?.trim() || null,
+        name_zh: form.name_zh?.trim() || null,
         code,
         phone_code: form.phone_code?.trim() || null,
         sort_order: form.sort_order,
@@ -343,13 +386,16 @@ const save = async () => {
       }
       const res = await api.put<CountryRow>(`/country/${editing.value.uuid}`, payload)
       if (!res.success) {
-        error(res.message || 'Échec de la mise à jour')
+        error(res.message || t('admin.countries.updateFailed'))
         return
       }
-      success('Pays mis à jour')
+      success(t('admin.countries.updated'))
     } else {
       const payload: Record<string, any> = {
         label: form.label.trim(),
+        name_fr: form.name_fr?.trim() || form.label.trim(),
+        name_en: form.name_en?.trim() || null,
+        name_zh: form.name_zh?.trim() || null,
         code,
         phone_code: form.phone_code?.trim() || null,
         sort_order: form.sort_order,
@@ -360,15 +406,15 @@ const save = async () => {
       }
       const res = await api.post<CountryRow>('/country', payload)
       if (!res.success) {
-        error(res.message || 'Échec de la création')
+        error(res.message || t('admin.countries.createFailed'))
         return
       }
-      success('Pays créé')
+      success(t('admin.countries.created'))
     }
     modalInstance?.hide()
     await fetchList(meta.currentPage)
   } catch (e: any) {
-    error(e.message || 'Erreur')
+    error(e.message || t('admin.messages.genericError'))
   } finally {
     saving.value = false
   }
@@ -376,7 +422,7 @@ const save = async () => {
 
 const confirmDelete = (row: CountryRow) => {
   if (!row?.uuid) return
-  if (!confirm(`Supprimer le pays « ${row.label || row.code} » ?`)) return
+  if (!confirm(t('admin.confirm.deleteCountry', { name: row.label || row.code }))) return
   void doDelete(row.uuid)
 }
 
@@ -387,10 +433,10 @@ const doDelete = async (uuid: string) => {
       error(res.message || 'Suppression impossible')
       return
     }
-    success('Pays supprimé')
+    success(t('admin.countries.deleted'))
     await fetchList(rows.value.length <= 1 && meta.currentPage > 1 ? meta.currentPage - 1 : meta.currentPage)
   } catch (e: any) {
-    error(e.message || 'Erreur')
+    error(e.message || t('admin.messages.genericError'))
   }
 }
 

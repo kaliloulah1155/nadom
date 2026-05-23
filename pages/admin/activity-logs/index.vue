@@ -2,14 +2,14 @@
   <div>
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
       <div class="flex-grow-1" style="min-width: 0;">
-        <h4 class="mb-1">Journal d'activité</h4>
+        <h4 class="mb-1">{{ t('admin.activityLogs.title') }}</h4>
         <p class="text-muted mb-0">
           Historique de toutes les actions menées dans le back-office : qui a fait quoi, depuis quelle adresse IP et avec quel navigateur. Utile pour la sécurité et l'audit.
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
         <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="store.loading" @click="reload(1)">
-          <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+          <i class="bi bi-arrow-clockwise me-1"></i>{{ t('admin.common.refresh') }}
         </button>
       </div>
     </div>
@@ -18,16 +18,16 @@
       <div class="card-body py-3">
         <div class="row g-2 align-items-end">
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Action</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.activityLogs.action') }}</label>
             <select v-model="filters.action" class="form-select form-select-sm" :disabled="store.loading" @change="reload(1)">
-              <option value="">Toutes</option>
-              <option value="create">Création</option>
-              <option value="update">Modification</option>
-              <option value="delete">Suppression</option>
+              <option value="">{{ t('admin.common.allFeminine') }}</option>
+              <option value="create">{{ t('admin.activityLogs.creation') }}</option>
+              <option value="update">{{ t('admin.activityLogs.modification') }}</option>
+              <option value="delete">{{ t('admin.activityLogs.deletion') }}</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Type d'entité</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.activityLogs.entityType') }}</label>
             <input
               v-model="filters.entity_type"
               type="text"
@@ -38,16 +38,16 @@
             />
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Depuis</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.activityLogs.since') }}</label>
             <input v-model="filters.from" type="date" class="form-control form-control-sm" :disabled="store.loading" @change="reload(1)" />
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Jusqu'à</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.activityLogs.until') }}</label>
             <input v-model="filters.to" type="date" class="form-control form-control-sm" :disabled="store.loading" @change="reload(1)" />
           </div>
           <div class="col-md-2">
             <button type="button" class="btn btn-sm btn-outline-secondary w-100" :disabled="store.loading" @click="resetFilters">
-              <i class="bi bi-x-circle me-1"></i>Réinitialiser
+              <i class="bi bi-x-circle me-1"></i>{{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -62,19 +62,19 @@
         <table class="table table-hover mb-0 align-middle">
           <thead class="table-light">
             <tr>
-              <th>Quand</th>
-              <th>Qui</th>
-              <th>Action</th>
-              <th>Cible</th>
+              <th>{{ t('admin.activityLogs.when') }}</th>
+              <th>{{ t('admin.activityLogs.who') }}</th>
+              <th>{{ t('admin.activityLogs.action') }}</th>
+              <th>{{ t('admin.activityLogs.target') }}</th>
               <th>IP</th>
-              <th>Navigateur</th>
-              <th class="text-end">Détails</th>
+              <th>{{ t('admin.activityLogs.browser') }}</th>
+              <th class="text-end">{{ t('admin.activityLogs.details') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="store.items.length === 0">
               <td colspan="7" class="text-center py-5 text-muted">
-                Aucune activité enregistrée pour le moment.
+                {{ t('admin.activityLogs.noActivity') }}
               </td>
             </tr>
             <tr v-for="log in store.items" :key="log.id">
@@ -87,7 +87,7 @@
                   <span class="fw-medium">{{ fullName(log.user) || log.user.email || '—' }}</span>
                   <span v-if="log.user.email" class="text-muted small">{{ log.user.email }}</span>
                 </div>
-                <span v-else class="text-muted">Anonyme</span>
+                <span v-else class="text-muted">{{ t('admin.common.anonymous') }}</span>
               </td>
               <td>
                 <span :class="actionBadgeClass(log.action)">{{ actionLabel(log.action) }}</span>
@@ -127,18 +127,18 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Détail de l'activité</h5>
+            <h5 class="modal-title">{{ t('admin.activityLogs.activityDetail') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
           </div>
           <div v-if="selected" class="modal-body">
             <dl class="row mb-3">
-              <dt class="col-sm-3">Date</dt>
+              <dt class="col-sm-3">{{ t('admin.shipments.date') }}</dt>
               <dd class="col-sm-9">{{ formatWhen(selected.created_at) }}</dd>
-              <dt class="col-sm-3">Utilisateur</dt>
+              <dt class="col-sm-3">{{ t('admin.users.user') }}</dt>
               <dd class="col-sm-9">{{ fullName(selected.user) || selected.user?.email || 'Anonyme' }}</dd>
               <dt class="col-sm-3">Action</dt>
               <dd class="col-sm-9"><span :class="actionBadgeClass(selected.action)">{{ actionLabel(selected.action) }}</span></dd>
-              <dt class="col-sm-3">Entité</dt>
+              <dt class="col-sm-3">{{ t('admin.activityLogs.entity') }}</dt>
               <dd class="col-sm-9">{{ selected.entity_type || '—' }} <span v-if="selected.entity_id" class="text-muted">/ {{ selected.entity_id }}</span></dd>
               <dt class="col-sm-3">IP</dt>
               <dd class="col-sm-9"><code>{{ selected.ip_address || '—' }}</code></dd>
@@ -146,12 +146,12 @@
               <dd class="col-sm-9 small text-muted">{{ selected.user_agent || '—' }}</dd>
             </dl>
             <div v-if="selected.details">
-              <h6 class="mb-2">Données associées</h6>
+              <h6 class="mb-2">{{ t('admin.activityLogs.associatedData') }}</h6>
               <pre class="bg-light p-3 rounded small mb-0" style="max-height: 320px; overflow: auto;">{{ JSON.stringify(selected.details, null, 2) }}</pre>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.close') }}</button>
           </div>
         </div>
       </div>
@@ -160,6 +160,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, onMounted } from 'vue'
 import { useActivityLogsStore, type ActivityLogRow } from '~/stores/activityLogs'
 import { useFormatters } from '~/composables/useFormatters'

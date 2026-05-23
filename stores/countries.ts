@@ -18,6 +18,7 @@ export interface Country {
   code: string
   name_fr?: string
   name_en?: string
+  name_zh?: string
   phone_code?: string
   /** ISO 4217 (colonne DB `currency_code`) */
   currency_code?: string | null

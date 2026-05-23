@@ -18,11 +18,28 @@ export default defineNuxtPlugin((nuxtApp) => {
     return null
   }
 
+  const isSuperAdminUser = () => {
+    try {
+      const authStore = useAuthStore()
+      const role = authStore.currentUser?.role
+      const code = String(typeof role === 'object' ? role?.code : role || '').toLowerCase().trim()
+      return code === 'super-admin'
+    } catch {
+      return false
+    }
+  }
+
   const applyCan = (el: HTMLElement, binding: any) => {
     if (!el || !el.style) return
     const parsed = resolveArgs(binding.value)
     if (!parsed) return
     const [action, subject] = parsed
+
+    if (isSuperAdminUser() || ability.can('manage', 'all')) {
+      el.style.removeProperty('display')
+      return
+    }
+
     const hasRules = (ability as any).rules?.length > 0
     if (!hasRules) {
       el.style.removeProperty('display')

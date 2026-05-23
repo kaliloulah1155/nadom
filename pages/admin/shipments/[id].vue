@@ -1,14 +1,15 @@
 <template>
   <div v-if="loading" class="text-center py-5">
     <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">{{ t('admin.shipments.loadingDetail') }}</p>
   </div>
 
   <div v-else-if="notFound" class="text-center py-5">
     <i class="bi bi-box-seam fs-1 text-muted opacity-25 d-block mb-3"></i>
-    <h5 class="text-muted">Expédition introuvable</h5>
-    <p class="text-muted small">Le numéro de suivi <code>{{ id }}</code> ne correspond à aucun colis.</p>
+    <h5 class="text-muted">{{ t('admin.shipments.notFound') }}</h5>
+    <p class="text-muted small">{{ t('admin.shipments.notFoundHint', { code: id }) }}</p>
     <NuxtLink to="/admin/shipments" class="btn btn-outline-primary btn-sm mt-2">
-      <i class="bi bi-arrow-left me-1"></i>Retour aux expéditions
+      <i class="bi bi-arrow-left me-1"></i>{{ t('admin.shipments.backToList') }}
     </NuxtLink>
   </div>
 
@@ -16,15 +17,15 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><NuxtLink to="/admin/shipments">Expéditions</NuxtLink></li>
-        <li class="breadcrumb-item active" aria-current="page">Suivi #{{ id }}</li>
+        <li class="breadcrumb-item"><NuxtLink to="/admin/shipments">{{ t('admin.nav.shipments') }}</NuxtLink></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ t('admin.shipments.trackingTitle', { id }) }}</li>
       </ol>
     </nav>
 
     <!-- Header Actions -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div class="d-flex align-items-center">
-        <h4 class="mb-0 me-3">Expédition #{{ shipment.tracking_number }}</h4>
+        <h4 class="mb-0 me-3">{{ t('admin.shipments.detailHeading') }} #{{ shipment.tracking_number }}</h4>
         <span
           class="badge"
           :style="{ backgroundColor: formatShipmentStatus(shipment.status).color, color: '#fff' }"
@@ -36,11 +37,11 @@
         <button
           class="btn btn-outline-dark btn-md"
           :disabled="downloadingLabel"
-          title="Étiquette colis (100×50 mm environ), QR vers le suivi"
+          :title="t('admin.shipments.labelHint')"
           @click="downloadShipmentLabel"
         >
           <span v-if="downloadingLabel" class="spinner-border spinner-border-sm me-1"></span>
-          <i v-else class="bi bi-upc-scan me-1"></i>Étiquette colis
+          <i v-else class="bi bi-upc-scan me-1"></i>{{ t('admin.shipments.labelTitle') }}
         </button>
         <button
           class="btn btn-outline-secondary btn-md"
@@ -48,10 +49,10 @@
           @click="downloadShipmentPdf"
         >
           <span v-if="downloadingPdf" class="spinner-border spinner-border-sm me-1"></span>
-          <i v-else class="bi bi-file-earmark-pdf me-1"></i>PDF Récépissé
+          <i v-else class="bi bi-file-earmark-pdf me-1"></i>{{ t('admin.shipments.pdfReceipt') }}
         </button>
         <button class="btn btn-outline-primary btn-md" @click="openUpdateModal">
-          <i class="bi bi-pencil me-2"></i>Mettre à jour
+          <i class="bi bi-pencil me-2"></i>{{ t('admin.shipments.update') }}
         </button>
       </div>
     </div>
@@ -62,46 +63,46 @@
         <!-- Details Card -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3">
-            <h5 class="card-title mb-0">Informations logistiques</h5>
+            <h5 class="card-title mb-0">{{ t('admin.shipments.logisticsInfo') }}</h5>
           </div>
           <div class="card-body">
             <div class="row g-4">
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Destination</label>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.destination') }}</label>
                 <p class="h6 mb-0">{{ shipment.destination_city }}, {{ shipment.destination_country }}</p>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Mode d'expédition</label>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.mode') }}</label>
                 <span class="badge bg-light text-dark">
-                  {{ shipment.shipping_mode === 'air_express' ? 'Air Express' : shipment.shipping_mode === 'sea' ? 'Maritime' : 'Air Normal' }}
+                  {{ shippingModeLabel(shipment.shipping_mode) }}
                 </span>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Poids</label>
-                <p class="mb-0">{{ shipment.weight ? `${shipment.weight} kg` : 'N/A' }}</p>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.weight') }}</label>
+                <p class="mb-0">{{ shipment.weight ? `${shipment.weight} kg` : t('admin.shipments.na') }}</p>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Dimensions (L × l × h)</label>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.dimensions') }}</label>
                 <p class="mb-0">
                   <template v-if="(shipment as any).length || (shipment as any).width || (shipment as any).height">
                     {{ (shipment as any).length || '?' }} × {{ (shipment as any).width || '?' }} × {{ (shipment as any).height || '?' }} cm
                   </template>
                   <template v-else>
-                    {{ shipment.dimensions || 'N/A' }}
+                    {{ shipment.dimensions || t('admin.shipments.na') }}
                   </template>
                 </p>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Valeur déclarée</label>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.declaredValue') }}</label>
                 <p class="mb-0">{{ formatCurrency(shipment.declared_value, requestCurrency) }}</p>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Coût d'expédition</label>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.shippingCost') }}</label>
                 <p class="mb-0 text-success fw-bold">{{ formatCurrency(shipment.shipping_cost, requestCurrency) }}</p>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Position actuelle</label>
-                <p class="mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ shipment.current_location || 'N/A' }}</p>
+                <label class="text-muted small text-uppercase fw-bold d-block mb-1">{{ t('admin.shipments.currentLocation') }}</label>
+                <p class="mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ shipment.current_location || t('admin.shipments.na') }}</p>
               </div>
             </div>
           </div>
@@ -110,14 +111,14 @@
         <!-- Timeline Card -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Historique des étapes</h5>
+            <h5 class="card-title mb-0">{{ t('admin.shipments.timeline') }}</h5>
             <button class="btn btn-sm btn-primary" @click="openUpdateModal">
-              <i class="bi bi-plus-lg me-1"></i>Ajouter une étape
+              <i class="bi bi-plus-lg me-1"></i>{{ t('admin.shipments.addStep') }}
             </button>
           </div>
           <div class="card-body">
             <div v-if="!shipment.timeline?.length" class="text-center text-muted py-3">
-              <small>Aucune étape enregistrée.</small>
+              <small>{{ t('admin.shipments.noSteps') }}</small>
             </div>
             <div v-else class="timeline">
               <div
@@ -130,10 +131,10 @@
                   <div class="d-flex align-items-center gap-2">
                     <h6 class="mb-0">{{ formatShipmentStatus(step.status).label }}</h6>
                     <div class="timeline-actions">
-                      <button class="btn btn-link text-primary p-0 x-small-btn" @click="openEditEventModal(step)" title="Modifier">
+                      <button class="btn btn-link text-primary p-0 x-small-btn" @click="openEditEventModal(step)" :title="t('admin.shipments.edit')">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-link text-danger p-0 x-small-btn" @click="confirmDeleteEvent(step)" title="Supprimer">
+                      <button class="btn btn-link text-danger p-0 x-small-btn" @click="confirmDeleteEvent(step)" :title="t('admin.shipments.remove')">
                         <i class="bi bi-trash"></i>
                       </button>
                     </div>
@@ -159,9 +160,9 @@
                   <i class="bi bi-calendar-event text-primary fs-4"></i>
                 </div>
                 <div>
-                  <small class="text-muted d-block">Livraison estimée</small>
+                  <small class="text-muted d-block">{{ t('admin.shipments.estimatedDelivery') }}</small>
                   <div v-if="!editingDelivery">
-                    <h5 class="mb-0">{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : 'N/A' }}</h5>
+                    <h5 class="mb-0">{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : t('admin.shipments.na') }}</h5>
                   </div>
                   <div v-else class="d-flex align-items-center gap-2 mt-1">
                     <input
@@ -187,7 +188,7 @@
               <button
                 v-if="!editingDelivery"
                 class="btn btn-sm btn-outline-secondary"
-                title="Modifier la date de livraison"
+                :title="t('admin.shipments.editDelivery')"
                 @click="openDeliveryEdit"
               >
                 <i class="bi bi-pencil"></i>
@@ -195,7 +196,7 @@
             </div>
             <div v-if="shipment.actual_delivery" class="d-flex align-items-center text-success">
               <i class="bi bi-check-circle-fill me-2"></i>
-              <small>Livré le {{ formatDateShort(shipment.actual_delivery) }}</small>
+              <small>{{ t('admin.shipments.shippedOn', { date: formatDateShort(shipment.actual_delivery) }) }}</small>
             </div>
           </div>
         </div>
@@ -203,12 +204,12 @@
         <!-- Client & Request -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3">
-            <h5 class="card-title mb-0">Références</h5>
+            <h5 class="card-title mb-0">{{ t('admin.shipments.references') }}</h5>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label class="text-muted small d-block">Client</label>
-              <span class="fw-bold d-block">{{ shipmentClientFullName || 'Client inconnu' }}</span>
+              <label class="text-muted small d-block">{{ t('admin.requests.client') }}</label>
+              <span class="fw-bold d-block">{{ shipmentClientFullName || t('admin.requests.detail.unknownClient') }}</span>
               <small v-if="shipmentClientEmail" class="text-muted d-block">{{ shipmentClientEmail }}</small>
               <a
                 v-if="shipmentClientPhone"
@@ -217,12 +218,12 @@
               >
                 <i class="bi bi-telephone text-primary me-1"></i>{{ shipmentClientPhone }}
               </a>
-              <span v-else class="small text-muted fst-italic">Aucun numéro fourni</span>
+              <span v-else class="small text-muted fst-italic">{{ t('admin.shipments.noPhone') }}</span>
             </div>
             <div v-if="shipment.request_id">
-              <label class="text-muted small d-block">Lien vers la demande</label>
+              <label class="text-muted small d-block">{{ t('admin.shipments.linkToRequest') }}</label>
               <NuxtLink :to="`/admin/requests/${shipment.request_id}`" class="fw-bold">
-                Req #{{ String(shipment.request_id ?? '').slice(-8) }}
+                {{ t('admin.shipments.requestLink', { id: String(shipment.request_id ?? '').slice(-8) }) }}
               </NuxtLink>
             </div>
           </div>
@@ -235,36 +236,36 @@
       <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
           <div class="modal-header">
-            <h5 class="modal-title">Mettre à jour l'expédition</h5>
+            <h5 class="modal-title">{{ t('admin.shipments.updateShipment') }}</h5>
             <button type="button" class="btn-close" @click="showUpdateModal = false"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Nouveau statut</label>
+              <label class="form-label">{{ t('admin.shipments.newStatus') }}</label>
               <select v-model="statusUpdate.status" class="form-select">
-                <option value="order_placed">Commande passée</option>
-                <option value="picked_up">Collecté</option>
-                <option value="in_transit">En transit</option>
-                <option value="in_customs">En douane</option>
-                <option value="out_for_delivery">En cours de livraison</option>
-                <option value="delivered">Livré</option>
-                <option value="returned">Retourné</option>
+                <option value="order_placed">{{ t('admin.shipments.status.order_placed') }}</option>
+                <option value="picked_up">{{ t('admin.shipments.status.picked_up') }}</option>
+                <option value="in_transit">{{ t('admin.shipments.status.in_transit') }}</option>
+                <option value="in_customs">{{ t('admin.shipments.status.in_customs') }}</option>
+                <option value="out_for_delivery">{{ t('admin.shipments.status.out_for_delivery') }}</option>
+                <option value="delivered">{{ t('admin.shipments.status.delivered') }}</option>
+                <option value="returned">{{ t('admin.shipments.status.returned') }}</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Localisation actuelle</label>
+              <label class="form-label">{{ t('admin.shipments.locationCurrent') }}</label>
               <input v-model="statusUpdate.location" type="text" class="form-control" />
             </div>
             <div class="mb-3">
-              <label class="form-label">Commentaire</label>
+              <label class="form-label">{{ t('admin.shipments.comment') }}</label>
               <WysiwygEditor v-model="statusUpdate.description" height="250px" />
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showUpdateModal = false">Annuler</button>
+            <button class="btn btn-secondary" @click="showUpdateModal = false">{{ t('admin.common.cancel') }}</button>
             <button class="btn btn-primary" :disabled="updating" @click="performUpdate">
               <span v-if="updating" class="spinner-border spinner-border-sm me-1"></span>
-              Mettre à jour
+              {{ t('admin.shipments.update') }}
             </button>
           </div>
         </div>
@@ -276,40 +277,40 @@
       <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
           <div class="modal-header">
-            <h5 class="modal-title">Modifier l'étape</h5>
+            <h5 class="modal-title">{{ t('admin.shipments.editStep') }}</h5>
             <button type="button" class="btn-close" @click="showEditEventModal = false"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Statut</label>
+              <label class="form-label">{{ t('admin.dashboard.status') }}</label>
               <select v-model="eventToEdit.status" class="form-select">
-                <option value="order_placed">Commande passée</option>
-                <option value="picked_up">Collecté</option>
-                <option value="in_transit">En transit</option>
-                <option value="in_customs">En douane</option>
-                <option value="out_for_delivery">En cours de livraison</option>
-                <option value="delivered">Livré</option>
-                <option value="returned">Retourné</option>
+                <option value="order_placed">{{ t('admin.shipments.status.order_placed') }}</option>
+                <option value="picked_up">{{ t('admin.shipments.status.picked_up') }}</option>
+                <option value="in_transit">{{ t('admin.shipments.status.in_transit') }}</option>
+                <option value="in_customs">{{ t('admin.shipments.status.in_customs') }}</option>
+                <option value="out_for_delivery">{{ t('admin.shipments.status.out_for_delivery') }}</option>
+                <option value="delivered">{{ t('admin.shipments.status.delivered') }}</option>
+                <option value="returned">{{ t('admin.shipments.status.returned') }}</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Localisation</label>
+              <label class="form-label">{{ t('admin.shipments.location') }}</label>
               <input v-model="eventToEdit.location" type="text" class="form-control" />
             </div>
             <div class="mb-3">
-              <label class="form-label">Date</label>
+              <label class="form-label">{{ t('admin.shipments.date') }}</label>
               <input v-model="eventToEdit.sdate" type="datetime-local" class="form-control" />
             </div>
             <div class="mb-3">
-              <label class="form-label">Commentaire</label>
+              <label class="form-label">{{ t('admin.shipments.comment') }}</label>
               <WysiwygEditor v-model="eventToEdit.description" height="200px" />
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showEditEventModal = false">Annuler</button>
+            <button class="btn btn-secondary" @click="showEditEventModal = false">{{ t('admin.common.cancel') }}</button>
             <button class="btn btn-primary" :disabled="updatingEvent" @click="performEditEvent">
               <span v-if="updatingEvent" class="spinner-border spinner-border-sm me-1"></span>
-              Enregistrer les modifications
+              {{ t('admin.shipments.saveChanges') }}
             </button>
           </div>
         </div>
@@ -319,6 +320,20 @@
 </template>
 
 <script setup lang="ts">
+const { t, locale } = useI18n()
+
+const shippingModeLabel = (mode: string) => {
+  if (mode === 'air_express') return t('admin.shipments.airExpress')
+  if (mode === 'sea') return t('admin.shipments.sea')
+  if (mode === 'air_normal') return t('admin.shipments.airNormal')
+  return mode
+}
+
+const pdfLangQuery = () => {
+  const lang = ['fr', 'en', 'zh'].includes(locale.value) ? locale.value : 'fr'
+  return `?lang=${lang}`
+}
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useShippingStore } from '~/stores/shipping'
@@ -360,14 +375,14 @@ const saveEstimatedDelivery = async () => {
       estimated_delivery: deliveryDateInput.value
     } as any)
     if (updated) {
-      success('Date de livraison mise à jour')
+      success(t('admin.shipments.deliveryDateUpdated'))
       editingDelivery.value = false
       await fetchShipment(false)
     } else {
-      error('Erreur lors de la mise à jour')
+      error(t('admin.shipments.updateError'))
     }
   } catch {
-    error('Erreur lors de la mise à jour')
+    error(t('admin.shipments.updateError'))
   } finally {
     savingDelivery.value = false
   }
@@ -428,14 +443,14 @@ const performEditEvent = async () => {
       sdate: eventToEdit.sdate
     })
     if (res) {
-      success('Étape mise à jour')
+      success(t('admin.shipments.stepUpdated'))
       showEditEventModal.value = false
       await fetchShipment()
     } else {
-      error('Erreur lors de la mise à jour')
+      error(t('admin.shipments.updateError'))
     }
   } catch (err: any) {
-    error('Erreur lors de la mise à jour')
+    error(t('admin.shipments.updateError'))
   } finally {
     updatingEvent.value = false
   }
@@ -443,17 +458,17 @@ const performEditEvent = async () => {
 
 const confirmDeleteEvent = async (event: any) => {
   if (!event.id) return
-  if (confirm('Voulez-vous vraiment supprimer cette étape ?')) {
+  if (confirm(t('admin.confirm.deleteStep'))) {
     try {
       const ok = await shippingStore.deleteTimelineEvent(event.id, String(shipment.value?.id))
       if (ok) {
-        success('Étape supprimée')
+        success(t('admin.shipments.stepDeleted'))
         await fetchShipment()
       } else {
-        error('Erreur lors de la suppression')
+        error(t('admin.shipments.deleteError'))
       }
     } catch (err) {
-      error('Erreur lors de la suppression')
+      error(t('admin.shipments.deleteError'))
     }
   }
 }
@@ -533,7 +548,7 @@ const downloadShipmentLabel = async () => {
   try {
     const config = useRuntimeConfig()
     const token = getToken()
-    const url = `${config.public.apiBase}/shipments/${s.id}/label`
+    const url = `${config.public.apiBase}/shipments/${s.id}/label${pdfLangQuery()}`
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/pdf' } })
     if (!res.ok) throw new Error('Erreur étiquette')
     const blob = await res.blob()
@@ -543,7 +558,7 @@ const downloadShipmentLabel = async () => {
     link.click()
     URL.revokeObjectURL(link.href)
   } catch {
-    error("Impossible de générer l'étiquette")
+    error(t('admin.shipments.labelError'))
   } finally {
     downloadingLabel.value = false
   }
@@ -556,7 +571,7 @@ const downloadShipmentPdf = async () => {
   try {
     const config = useRuntimeConfig()
     const token = getToken()
-    const url = `${config.public.apiBase}/shipments/${s.id}/pdf`
+    const url = `${config.public.apiBase}/shipments/${s.id}/pdf${pdfLangQuery()}`
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/pdf' } })
     if (!res.ok) throw new Error('Erreur PDF')
     const blob = await res.blob()
@@ -566,7 +581,7 @@ const downloadShipmentPdf = async () => {
     link.click()
     URL.revokeObjectURL(link.href)
   } catch {
-    error('Impossible de générer le PDF')
+    error(t('admin.shipments.pdfError'))
   } finally {
     downloadingPdf.value = false
   }
@@ -584,14 +599,14 @@ const performUpdate = async () => {
       statusUpdate.description
     )
     if (updated) {
-      success('Statut mis à jour avec succès')
+      success(t('admin.shipments.statusUpdatedSuccess'))
       showUpdateModal.value = false
       await fetchShipment(false)
     } else {
-      error('Erreur lors de la mise à jour')
+      error(t('admin.shipments.updateError'))
     }
   } catch {
-    error('Erreur lors de la mise à jour')
+    error(t('admin.shipments.updateError'))
   } finally {
     updating.value = false
   }

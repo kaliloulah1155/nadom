@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Gestion des expéditions</h4>
-        <p class="text-muted mb-0">{{ shippingStore.shipmentsMeta.total }} expéditions au total</p>
+        <h4 class="mb-1">{{ t('admin.shipments.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.shipments.totalCount', { n: shippingStore.shipmentsMeta.total }) }}</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouvelle expédition
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.shipments.newShipment') }}
       </button>
     </div>
 
@@ -20,24 +20,24 @@
               v-model="filters.search"
               type="text"
               class="form-control"
-              placeholder="Numéro de suivi..."
+              :placeholder="t('admin.shipments.trackingPlaceholder')"
               @input="debouncedFetch"
             />
           </div>
           <div class="col-md-4">
             <select v-model="filters.status" class="form-select" @change="fetchShipments(1)">
-              <option value="">Tous les statuts</option>
-              <option value="pending">En attente</option>
-              <option value="picked_up">Collecté</option>
-              <option value="in_transit">En transit</option>
-              <option value="in_customs">En douane</option>
-              <option value="out_for_delivery">En cours de livraison</option>
-              <option value="delivered">Livré</option>
+              <option value="">{{ t('admin.shipments.allStatuses') }}</option>
+              <option value="pending">{{ t('admin.shipments.status.pending') }}</option>
+              <option value="picked_up">{{ t('admin.shipments.status.picked_up') }}</option>
+              <option value="in_transit">{{ t('admin.shipments.status.in_transit') }}</option>
+              <option value="in_customs">{{ t('admin.shipments.status.in_customs') }}</option>
+              <option value="out_for_delivery">{{ t('admin.shipments.status.out_for_delivery') }}</option>
+              <option value="delivered">{{ t('admin.shipments.status.delivered') }}</option>
             </select>
           </div>
           <div class="col-md-4">
             <button class="btn btn-outline-secondary w-100" @click="resetFilters">
-              <i class="bi bi-x-circle me-1"></i>Reset
+              <i class="bi bi-x-circle me-1"></i>{{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -48,28 +48,28 @@
     <div class="card border-0 shadow-sm">
       <div v-if="shippingStore.loading" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Chargement des expéditions...</p>
+        <p class="mt-2 text-muted">{{ t('admin.shipments.loading') }}</p>
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Tracking #</th>
-                <th>Client</th>
-                <th>Demande</th>
-                <th>Destination</th>
-                <th>Mode</th>
-                <th>Statut</th>
-                <th>Poids</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>{{ t('admin.shipments.trackingNumber') }}</th>
+                <th>{{ t('admin.requests.client') }}</th>
+                <th>{{ t('admin.shipments.request') }}</th>
+                <th>{{ t('admin.shipments.destination') }}</th>
+                <th>{{ t('admin.shipments.mode') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th>{{ t('admin.shipments.weight') }}</th>
+                <th>{{ t('admin.dashboard.date') }}</th>
+                <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="shippingStore.shipments.length === 0">
                 <td colspan="9" class="text-center py-4 text-muted">
-                  Aucune expédition trouvée
+                  {{ t('admin.shipments.noShipments') }}
                 </td>
               </tr>
               <tr v-for="shipment in shippingStore.shipments" :key="shipment.id">
@@ -100,7 +100,7 @@
                 </td>
                 <td>
                   <span class="badge bg-light text-dark">
-                    {{ shipment.shipping_mode === 'air_express' ? 'Air Express' : shipment.shipping_mode === 'sea' ? 'Maritime' : 'Air Normal' }}
+                    {{ shippingModeLabel(shipment.shipping_mode) }}
                   </span>
                 </td>
                 <td>
@@ -115,10 +115,10 @@
                 <td><small>{{ formatDateShort(shipment.created_at) }}</small></td>
                 <td>
                   <div class="d-flex">
-                    <NuxtLink :to="`/admin/shipments/${shipment.tracking_number}`" class="btn btn-outline-primary btn-sm me-2" title="Voir">
+                    <NuxtLink :to="`/admin/shipments/${shipment.tracking_number}`" class="btn btn-outline-primary btn-sm me-2" :title="t('admin.common.view')">
                       <i class="bi bi-eye"></i>
                     </NuxtLink>
-                    <button class="btn btn-outline-info btn-sm" title="Modifier" @click="openModal(shipment)">
+                    <button class="btn btn-outline-info btn-sm" :title="t('admin.common.edit')" @click="openModal(shipment)">
                       <i class="bi bi-pencil"></i>
                     </button>
                   </div>
@@ -146,61 +146,61 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingShipment ? 'Modifier' : 'Nouvelle' }} expédition</h5>
+            <h5 class="modal-title">{{ editingShipment ? t('admin.shipments.modalEditTitle') : t('admin.shipments.modalNewTitle') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveShipment">
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Numéro de suivi *</label>
+                  <label class="form-label">{{ t('admin.shipments.trackingNumberLabel') }}</label>
                   <input v-model="form.trackingNumber" type="text" class="form-control input-md" required :disabled="!!editingShipment" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Client</label>
+                  <label class="form-label">{{ t('admin.shipments.clientLabel') }}</label>
                   <input
                     :value="form.clientName || (form.userId ? `ID: ${form.userId}` : '')"
                     type="text"
                     class="form-control input-md bg-light"
-                    placeholder="Auto-rempli à la sélection de la demande"
+                    :placeholder="t('admin.shipments.clientAutoPlaceholder')"
                     readonly
                   />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Demande liée *</label>
+                  <label class="form-label">{{ t('admin.shipments.linkedRequestLabel') }}</label>
                   <select v-model="form.requestId" class="form-select input-md" required @change="onRequestChange">
-                    <option value="">Sélectionner une demande avec devis</option>
+                    <option value="">{{ t('admin.shipments.selectRequestPlaceholder') }}</option>
                     <option v-for="req in availableRequests" :key="req.id" :value="req.id">
-                      #{{ String(req.id ?? '').slice(-6) }} — {{ truncate(req.title, 40) }} · Devis {{ formatCurrency(req.quotedPrice ?? 0, (req as any).currency || 'XOF') }}
+                      #{{ String(req.id ?? '').slice(-6) }} — {{ truncate(req.title, 40) }} · {{ t('admin.shipments.requestOptionQuote', { price: formatCurrency(req.quotedPrice ?? 0, (req as any).currency || 'XOF') }) }}
                     </option>
                   </select>
                   <small v-if="availableRequests.length === 0" class="text-warning">
-                    Aucune demande avec devis disponible. Créez d'abord un devis sur la fiche demande.
+                    {{ t('admin.shipments.noRequestsWithQuote') }}
                   </small>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Pays de destination *</label>
+                  <label class="form-label">{{ t('admin.shipments.destinationCountryLabel') }}</label>
                   <select
                     v-model="form.destinationCountry"
                     class="form-select input-md"
                     required
                     @change="onCountryChange"
                   >
-                    <option value="">Sélectionner un pays</option>
+                    <option value="">{{ t('admin.shipments.selectCountry') }}</option>
                     <option v-for="c in countriesList" :key="c.uuid" :value="c.label">
                       {{ c.label }}
                     </option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Ville de destination *</label>
+                  <label class="form-label">{{ t('admin.shipments.destinationCityLabel') }}</label>
                   <select
                     v-if="availableCities.length > 0"
                     v-model="form.destinationCity"
                     class="form-select input-md"
                     required
                   >
-                    <option value="">Sélectionner une ville</option>
+                    <option value="">{{ t('admin.shipments.selectCity') }}</option>
                     <option v-for="city in availableCities" :key="city.uuid" :value="city.label">
                       {{ city.label }}
                     </option>
@@ -210,52 +210,52 @@
                     v-model="form.destinationCity"
                     type="text"
                     class="form-control input-md"
-                    placeholder="Saisir la ville"
+                    :placeholder="t('admin.shipments.enterCityPlaceholder')"
                     required
                   />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Mode d'expédition *</label>
+                  <label class="form-label">{{ t('admin.shipments.shippingModeLabel') }}</label>
                   <select v-model="form.shippingMode" class="form-select input-md" required>
-                    <option value="air_normal">Aérien Normal</option>
-                    <option value="air_express">Aérien Express</option>
-                    <option value="sea">Maritime</option>
+                    <option value="air_normal">{{ t('admin.shipments.airNormal') }}</option>
+                    <option value="air_express">{{ t('admin.shipments.airExpress') }}</option>
+                    <option value="sea">{{ t('admin.shipments.sea') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Statut *</label>
+                  <label class="form-label">{{ t('admin.shipments.statusLabel') }}</label>
                   <select v-model="form.status" class="form-select input-md" required>
-                    <option value="pending">En attente</option>
-                    <option value="picked_up">Collecté</option>
-                    <option value="in_transit">En transit</option>
-                    <option value="in_customs">En douane</option>
-                    <option value="out_for_delivery">En cours de livraison</option>
-                    <option value="delivered">Livré</option>
+                    <option value="pending">{{ t('admin.shipments.status.pending') }}</option>
+                    <option value="picked_up">{{ t('admin.shipments.status.picked_up') }}</option>
+                    <option value="in_transit">{{ t('admin.shipments.status.in_transit') }}</option>
+                    <option value="in_customs">{{ t('admin.shipments.status.in_customs') }}</option>
+                    <option value="out_for_delivery">{{ t('admin.shipments.status.out_for_delivery') }}</option>
+                    <option value="delivered">{{ t('admin.shipments.status.delivered') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Poids (kg)</label>
+                  <label class="form-label">{{ t('admin.shipments.weightKg') }}</label>
                   <input v-model.number="form.weight" type="number" step="0.1" min="0" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Longueur (cm)</label>
+                  <label class="form-label">{{ t('admin.shipments.lengthCm') }}</label>
                   <input v-model.number="form.length" type="number" step="0.1" min="0" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Largeur (cm)</label>
+                  <label class="form-label">{{ t('admin.shipments.widthCm') }}</label>
                   <input v-model.number="form.width" type="number" step="0.1" min="0" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Hauteur (cm)</label>
+                  <label class="form-label">{{ t('admin.shipments.heightCm') }}</label>
                   <input v-model.number="form.height" type="number" step="0.1" min="0" class="form-control" />
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-secondary btn-md me-2" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary btn-md" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                <i v-else class="bi bi-check-lg me-2"></i>{{ editingShipment ? 'Enregistrer' : 'Créer' }}
+                <i v-else class="bi bi-check-lg me-2"></i>{{ editingShipment ? t('admin.common.save') : t('admin.common.create') }}
               </button>
             </div>
           </form>
@@ -266,6 +266,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useShippingStore, type Shipment, type ShippingMode, type ShipmentStatus } from '~/stores/shipping'
 import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalShopping'
@@ -282,6 +284,12 @@ const psStore = usePersonalShoppingStore()
 const countriesStore = useCountriesStore()
 const { formatDateShort, formatShipmentStatus, formatCurrency, truncate } = useFormatters()
 const { success, error: notifyError } = useNotification()
+
+const shippingModeLabel = (mode: string) => {
+  if (mode === 'air_express') return t('admin.shipments.airExpress')
+  if (mode === 'sea') return t('admin.shipments.sea')
+  return t('admin.shipments.airNormal')
+}
 
 const countriesList = computed(() => countriesStore.activeCountries)
 const availableCities = computed(() => {
@@ -383,14 +391,14 @@ const onRequestChange = () => {
     const fullname = u
       ? [u.firstname, u.lastname].filter(Boolean).join(' ').trim()
       : ''
-    form.clientName = fullname || (req as any).contactFullname || (req as any).contact_fullname || (form.userId ? `Client #${form.userId}` : '')
+    form.clientName = fullname || (req as any).contactFullname || (req as any).contact_fullname || (form.userId ? t('admin.shipments.clientFallback', { id: form.userId }) : '')
   }
 }
 
 const getShipmentClientName = (shipment: any): string => {
   const reqUser = shipment.request?.user
   if (reqUser) {
-    return [reqUser.firstname, reqUser.lastname].filter(Boolean).join(' ').trim() || `Client #${reqUser.id}`
+    return [reqUser.firstname, reqUser.lastname].filter(Boolean).join(' ').trim() || t('admin.shipments.clientFallback', { id: reqUser.id })
   }
   return shipment.request?.contact_fullname || shipment.request?.contactFullname || ''
 }
@@ -448,11 +456,11 @@ const saveShipment = async () => {
     if (editingShipment.value) {
       const prevStatus = editingShipment.value.status
       const updated = await shippingStore.updateShipment(String(editingShipment.value.id), payload as Partial<Shipment>)
-      if (!updated) throw new Error('La mise à jour a échoué')
-      success('Expédition mise à jour')
+      if (!updated) throw new Error(t('admin.shipments.updateFailed'))
+      success(t('admin.shipments.updatedSuccess'))
       if (form.status === 'delivered' && prevStatus !== 'delivered' && form.requestId) {
         await psStore.updateRequestStatus(String(form.requestId), 'delivered' as RequestStatus)
-        success('Demande liée marquée comme livrée')
+        success(t('admin.shipments.requestMarkedDelivered'))
       }
     } else {
       payload.tracking_number = form.trackingNumber
@@ -460,12 +468,12 @@ const saveShipment = async () => {
       const cost = shippingStore.calculateShippingCost(form.destinationCountry, form.weight ?? 0, form.shippingMode)
       payload.shipping_cost = cost
       await shippingStore.createShipment(payload as Partial<Shipment>)
-      success('Expédition créée avec succès')
+      success(t('admin.shipments.createdSuccess'))
     }
     modalInstance?.hide()
     await fetchShipments(shippingStore.shipmentsMeta.currentPage)
   } catch (err: any) {
-    notifyError(err?.message || 'Erreur lors de l\'enregistrement')
+    notifyError(err?.message || t('admin.shipments.saveError'))
   } finally {
     saving.value = false
   }

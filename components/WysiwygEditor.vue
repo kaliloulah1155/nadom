@@ -17,14 +17,39 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-const editorRef   = ref<HTMLElement | null>(null)
+const editorRef = ref<HTMLElement | null>(null)
 let quill: Quill | null = null
-let suppressEmit  = false
+let suppressEmit = false
 let _modalEl: Element | null = null
-let _shownHandler: (() => void) | null = null
+let _modalShownHandler: (() => void) | null = null
+let _tabRoot: Element | null = null
+let _tabShownHandler: ((e: Event) => void) | null = null
+
+const isVisible = (el: HTMLElement) => el.offsetParent !== null
+
+const detachDeferredListeners = () => {
+  if (_modalEl && _modalShownHandler) {
+    _modalEl.removeEventListener('shown.bs.modal', _modalShownHandler)
+    _modalShownHandler = null
+    _modalEl = null
+  }
+  if (_tabRoot && _tabShownHandler) {
+    _tabRoot.removeEventListener('shown.bs.tab', _tabShownHandler)
+    _tabShownHandler = null
+    _tabRoot = null
+  }
+}
+
+const tryInitWhenVisible = () => {
+  if (!editorRef.value || quill) return
+  if (!isVisible(editorRef.value as HTMLElement)) return
+  initQuill()
+  detachDeferredListeners()
+}
 
 const initQuill = () => {
   if (!editorRef.value || quill) return
+  if (!isVisible(editorRef.value as HTMLElement)) return
 
   quill = new Quill(editorRef.value, {
     theme: 'snow',
@@ -59,21 +84,36 @@ onMounted(async () => {
   await nextTick()
   if (!editorRef.value) return
 
-  // Si l'éditeur est dans un modal Bootstrap encore fermé (display:none),
-  // on diffère l'init au moment où le modal est pleinement visible.
-  const modal = editorRef.value.closest('.modal')
-  const isHidden = (editorRef.value as HTMLElement).offsetParent === null
+  const el = editorRef.value as HTMLElement
+  const tabPane = el.closest('.tab-pane') as HTMLElement | null
+  const modal = el.closest('.modal')
+  const inInactiveTab = Boolean(tabPane && !tabPane.classList.contains('active'))
 
-  if (modal && isHidden) {
-    _modalEl = modal
-    _shownHandler = () => {
-      nextTick().then(initQuill)
-      _modalEl?.removeEventListener('shown.bs.modal', _shownHandler!)
-      _shownHandler = null
-    }
-    modal.addEventListener('shown.bs.modal', _shownHandler)
-  } else {
+  if (isVisible(el) && !inInactiveTab) {
     initQuill()
+    return
+  }
+
+  // Onglet masqué (EN / 中文) : init uniquement quand l'onglet devient actif.
+  if (inInactiveTab && tabPane?.id) {
+    const tabTarget = `#${tabPane.id}`
+    _tabRoot = modal || tabPane.closest('.tab-content') || document.body
+    _tabShownHandler = (e: Event) => {
+      const target = (e.target as HTMLElement)?.getAttribute?.('data-bs-target')
+      if (target === tabTarget) {
+        nextTick().then(tryInitWhenVisible)
+      }
+    }
+    _tabRoot.addEventListener('shown.bs.tab', _tabShownHandler)
+  }
+
+  // Modal fermé ou onglet actif pas encore peint : attendre shown.bs.modal.
+  if (modal && !inInactiveTab) {
+    _modalEl = modal
+    _modalShownHandler = () => {
+      nextTick().then(tryInitWhenVisible)
+    }
+    modal.addEventListener('shown.bs.modal', _modalShownHandler)
   }
 })
 
@@ -89,10 +129,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (_modalEl && _shownHandler) {
-    _modalEl.removeEventListener('shown.bs.modal', _shownHandler)
-    _shownHandler = null
-  }
+  detachDeferredListeners()
   if (quill) {
     quill.off('text-change')
     quill = null
