@@ -52,21 +52,29 @@
         <div v-show="contactSub === 'hero'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.heroBanner') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
               <input v-model="c.hero.title.fr" type="text" class="form-control" />
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
               <input v-model="c.hero.title.en" type="text" class="form-control" />
             </div>
-            <div class="col-12">
+            <div class="col-md-4">
+              <label class="form-label">{{ t('admin.sitePages.titleZh') }}</label>
+              <input v-model="c.hero.title.zh" type="text" class="form-control" />
+            </div>
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.subtitleFr') }}</label>
               <textarea v-model="c.hero.subtitle.fr" rows="2" class="form-control"></textarea>
             </div>
-            <div class="col-12">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.subtitleEn') }}</label>
               <textarea v-model="c.hero.subtitle.en" rows="2" class="form-control"></textarea>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ t('admin.sitePages.subtitleZh') }}</label>
+              <textarea v-model="c.hero.subtitle.zh" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-12">
               <label class="form-label d-block">{{ t('admin.sitePages.backgroundImage') }}</label>
@@ -103,21 +111,29 @@
                 <label class="form-label">{{ t('admin.sitePages.iconClass') }}</label>
                 <input v-model="card.icon" type="text" class="form-control" placeholder="fa-solid fa-briefcase" />
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
                 <input v-model="card.title.fr" type="text" class="form-control" />
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
                 <input v-model="card.title.en" type="text" class="form-control" />
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <label class="form-label">{{ t('admin.sitePages.titleZh') }}</label>
+                <input v-model="card.title.zh" type="text" class="form-control" />
+              </div>
+              <div class="col-md-4">
                 <label class="form-label">{{ t('admin.sitePages.textFr') }}</label>
                 <textarea v-model="card.body.fr" rows="3" class="form-control"></textarea>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label">{{ t('admin.sitePages.textEn') }}</label>
                 <textarea v-model="card.body.en" rows="3" class="form-control"></textarea>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ t('admin.sitePages.textZh') }}</label>
+                <textarea v-model="card.body.zh" rows="3" class="form-control"></textarea>
               </div>
             </div>
           </div>
@@ -126,21 +142,29 @@
         <div v-show="contactSub === 'form'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.formBlock') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.titleFr') }}</label>
               <input v-model="c.form_block.title.fr" type="text" class="form-control" />
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.titleEn') }}</label>
               <input v-model="c.form_block.title.en" type="text" class="form-control" />
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+              <label class="form-label">{{ t('admin.sitePages.titleZh') }}</label>
+              <input v-model="c.form_block.title.zh" type="text" class="form-control" />
+            </div>
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.introFr') }}</label>
               <textarea v-model="c.form_block.intro.fr" rows="2" class="form-control"></textarea>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label">{{ t('admin.sitePages.introEn') }}</label>
               <textarea v-model="c.form_block.intro.en" rows="2" class="form-control"></textarea>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ t('admin.sitePages.introZh') }}</label>
+              <textarea v-model="c.form_block.intro.zh" rows="2" class="form-control"></textarea>
             </div>
             <div class="col-12">
               <label class="form-label">{{ t('admin.sitePages.mapEmbedUrl') }}</label>
@@ -194,10 +218,12 @@
         <div v-show="aboutSub === 'hero'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.heroBanner') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.hero.title.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.hero.title.en" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.subtitleFr') }}</label><textarea v-model="a.hero.subtitle.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.subtitleEn') }}</label><textarea v-model="a.hero.subtitle.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.hero.title.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.hero.title.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleZh') }}</label><input v-model="a.hero.title.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subtitleFr') }}</label><textarea v-model="a.hero.subtitle.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subtitleEn') }}</label><textarea v-model="a.hero.subtitle.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subtitleZh') }}</label><textarea v-model="a.hero.subtitle.zh" rows="2" class="form-control"></textarea></div>
             <div class="col-12">
               <label class="form-label">{{ t('admin.sitePages.backgroundImage') }}</label>
               <input type="file" accept="image/*" class="form-control mb-2" :disabled="uploadKey === 'a-hero'" @change="onUpload($event, 'about_us', 'hero.background_path')" />
@@ -213,22 +239,27 @@
         <div v-show="aboutSub === 'mission_intro'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.missionIntroTitle') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission_intro.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.mission_intro.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.hookFr') }}</label><textarea v-model="a.mission_intro.lead.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.hookEn') }}</label><textarea v-model="a.mission_intro.lead.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission_intro.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.mission_intro.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.sectionTitleZh') }}</label><input v-model="a.mission_intro.heading.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.hookFr') }}</label><textarea v-model="a.mission_intro.lead.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.hookEn') }}</label><textarea v-model="a.mission_intro.lead.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.hookZh') }}</label><textarea v-model="a.mission_intro.lead.zh" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'mission'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.missionBlock') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.mission.badge.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.mission.badge.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission.title.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.mission.title.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.textFr') }}</label><textarea v-model="a.mission.body_fr" rows="5" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.textEn') }}</label><textarea v-model="a.mission.body_en" rows="5" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.mission.badge.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.mission.badge.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeZh') }}</label><input v-model="a.mission.badge.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="a.mission.title.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="a.mission.title.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleZh') }}</label><input v-model="a.mission.title.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.textFr') }}</label><textarea v-model="a.mission.body_fr" rows="5" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.textEn') }}</label><textarea v-model="a.mission.body_en" rows="5" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.textZh') }}</label><textarea v-model="a.mission.body_zh" rows="5" class="form-control"></textarea></div>
             <div class="col-12">
               <label class="form-label">{{ t('admin.sitePages.illustrativeImage') }}</label>
               <input type="file" accept="image/*" class="form-control mb-2" :disabled="uploadKey === 'a-mission'" @change="onUpload($event, 'about_us', 'mission.image_path')" />
@@ -238,8 +269,9 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.mission.image_path = null">{{ t('admin.sitePages.remove') }}</button>
               </div>
             </div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.buttonFr') }}</label><input v-model="a.mission.cta_label.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.buttonEn') }}</label><input v-model="a.mission.cta_label.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.buttonFr') }}</label><input v-model="a.mission.cta_label.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.buttonEn') }}</label><input v-model="a.mission.cta_label.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.buttonZh') }}</label><input v-model="a.mission.cta_label.zh" type="text" class="form-control" /></div>
             <div class="col-12"><label class="form-label">{{ t('admin.sitePages.buttonLink') }}</label><input v-model="a.mission.cta_href" type="text" class="form-control" placeholder="/contact-us" /></div>
           </div>
         </div>
@@ -250,7 +282,8 @@
             <div class="col-md-3"><label class="form-label">{{ t('admin.sitePages.value') }}</label><input v-model.number="ctr.value" type="number" min="0" step="1" class="form-control" /></div>
             <div class="col-md-3"><label class="form-label">{{ t('admin.sitePages.suffix') }}</label><input v-model="ctr.suffix" type="text" class="form-control" :placeholder="t('admin.sitePages.suffixPlaceholder')" /></div>
             <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.labelFr') }}</label><input v-model="ctr.label.fr" type="text" class="form-control" /></div>
-            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.labelEn') }}</label><input v-model="ctr.label.en" type="text" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.labelEn') }}</label><input v-model="ctr.label.en" type="text" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">{{ t('admin.sitePages.labelZh') }}</label><input v-model="ctr.label.zh" type="text" class="form-control" /></div>
           </div>
         </div>
 
@@ -266,36 +299,44 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="a.promo_banner.background_path = null">{{ t('admin.sitePages.remove') }}</button>
               </div>
             </div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.promo_banner.badge.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.promo_banner.badge.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.headlineFr') }}</label><input v-model="a.promo_banner.headline.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.headlineEn') }}</label><input v-model="a.promo_banner.headline.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.subheadlineFr') }}</label><textarea v-model="a.promo_banner.subheadline.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.subheadlineEn') }}</label><textarea v-model="a.promo_banner.subheadline.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeFr') }}</label><input v-model="a.promo_banner.badge.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeEn') }}</label><input v-model="a.promo_banner.badge.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.badgeZh') }}</label><input v-model="a.promo_banner.badge.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.headlineFr') }}</label><input v-model="a.promo_banner.headline.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.headlineEn') }}</label><input v-model="a.promo_banner.headline.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.headlineZh') }}</label><input v-model="a.promo_banner.headline.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subheadlineFr') }}</label><textarea v-model="a.promo_banner.subheadline.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subheadlineEn') }}</label><textarea v-model="a.promo_banner.subheadline.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.subheadlineZh') }}</label><textarea v-model="a.promo_banner.subheadline.zh" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
         <div v-show="aboutSub === 'process'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.processCols') }}</h5>
           <div class="row g-3 mb-2">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleFr') }}</label><input v-model="a.process_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.process_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.introFr') }}</label><textarea v-model="a.process_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.introEn') }}</label><textarea v-model="a.process_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.sectionTitleFr') }}</label><input v-model="a.process_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.sectionTitleEn') }}</label><input v-model="a.process_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.sectionTitleZh') }}</label><input v-model="a.process_section.heading.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.introFr') }}</label><textarea v-model="a.process_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.introEn') }}</label><textarea v-model="a.process_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.introZh') }}</label><textarea v-model="a.process_section.intro.zh" rows="2" class="form-control"></textarea></div>
           </div>
           <div v-for="(pi, ix) in a.process_section.items" :key="ix" class="border rounded p-3 mb-2">
             <strong>{{ t('admin.sitePages.stepN', { n: ix + 1 }) }}</strong>
             <div class="row g-2 mt-1">
               <div class="col-md-12"><label class="form-label">{{ t('admin.sitePages.bootstrapIcon') }}</label><input v-model="pi.icon" type="text" class="form-control" placeholder="bi bi-pin-map-fill" /></div>
-              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="pi.title.fr" type="text" class="form-control" /></div>
-              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="pi.title.en" type="text" class="form-control" /></div>
-              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.descFr') }}</label><textarea v-model="pi.description.fr" rows="2" class="form-control"></textarea></div>
-              <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.descEn') }}</label><textarea v-model="pi.description.en" rows="2" class="form-control"></textarea></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleFr') }}</label><input v-model="pi.title.fr" type="text" class="form-control" /></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleEn') }}</label><input v-model="pi.title.en" type="text" class="form-control" /></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.titleZh') }}</label><input v-model="pi.title.zh" type="text" class="form-control" /></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.descFr') }}</label><textarea v-model="pi.description.fr" rows="2" class="form-control"></textarea></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.descEn') }}</label><textarea v-model="pi.description.en" rows="2" class="form-control"></textarea></div>
+              <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.descZh') }}</label><textarea v-model="pi.description.zh" rows="2" class="form-control"></textarea></div>
             </div>
           </div>
           <div class="row g-2 mb-2">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.bottomBtnFr') }}</label><input v-model="a.process_section.bottom_cta.label.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.bottomBtnEn') }}</label><input v-model="a.process_section.bottom_cta.label.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.bottomBtnFr') }}</label><input v-model="a.process_section.bottom_cta.label.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.bottomBtnEn') }}</label><input v-model="a.process_section.bottom_cta.label.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.bottomBtnZh') }}</label><input v-model="a.process_section.bottom_cta.label.zh" type="text" class="form-control" /></div>
             <div class="col-12"><label class="form-label">{{ t('admin.sitePages.bottomBtnLink') }}</label><input v-model="a.process_section.bottom_cta.href" type="text" class="form-control" /></div>
           </div>
         </div>
@@ -303,14 +344,18 @@
         <div v-show="aboutSub === 'reviews_team'" class="pt-1">
           <h5 class="mb-3 text-muted small text-uppercase">{{ t('admin.sitePages.reviewsTeamHeadings') }}</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingFr') }}</label><input v-model="a.reviews_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingEn') }}</label><input v-model="a.reviews_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsIntroFr') }}</label><textarea v-model="a.reviews_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.reviewsIntroEn') }}</label><textarea v-model="a.reviews_section.intro.en" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamHeadingFr') }}</label><input v-model="a.team_section.heading.fr" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamHeadingEn') }}</label><input v-model="a.team_section.heading.en" type="text" class="form-control" /></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamIntroFr') }}</label><textarea v-model="a.team_section.intro.fr" rows="2" class="form-control"></textarea></div>
-            <div class="col-md-6"><label class="form-label">{{ t('admin.sitePages.teamIntroEn') }}</label><textarea v-model="a.team_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingFr') }}</label><input v-model="a.reviews_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingEn') }}</label><input v-model="a.reviews_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsHeadingZh') }}</label><input v-model="a.reviews_section.heading.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsIntroFr') }}</label><textarea v-model="a.reviews_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsIntroEn') }}</label><textarea v-model="a.reviews_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.reviewsIntroZh') }}</label><textarea v-model="a.reviews_section.intro.zh" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamHeadingFr') }}</label><input v-model="a.team_section.heading.fr" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamHeadingEn') }}</label><input v-model="a.team_section.heading.en" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamHeadingZh') }}</label><input v-model="a.team_section.heading.zh" type="text" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamIntroFr') }}</label><textarea v-model="a.team_section.intro.fr" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamIntroEn') }}</label><textarea v-model="a.team_section.intro.en" rows="2" class="form-control"></textarea></div>
+            <div class="col-md-4"><label class="form-label">{{ t('admin.sitePages.teamIntroZh') }}</label><textarea v-model="a.team_section.intro.zh" rows="2" class="form-control"></textarea></div>
           </div>
         </div>
 
@@ -362,8 +407,8 @@ function deepClone<T>(x: T): T {
   return JSON.parse(JSON.stringify(x))
 }
 
-function loc(obj: Record<string, string | undefined>): { fr: string; en: string } {
-  return { fr: String(obj?.fr ?? ''), en: String(obj?.en ?? '') }
+function loc(obj: Record<string, string | undefined>): { fr: string; en: string; zh: string } {
+  return { fr: String(obj?.fr ?? ''), en: String(obj?.en ?? ''), zh: String(obj?.zh ?? '') }
 }
 
 function normalizeContact(raw: Record<string, unknown>) {
@@ -407,6 +452,7 @@ function normalizeAbout(raw: Record<string, unknown>) {
   ;(o as any).mission.title = loc((o as any).mission.title || {})
   ;(o as any).mission.body_fr = String((o as any).mission.body_fr ?? '')
   ;(o as any).mission.body_en = String((o as any).mission.body_en ?? '')
+  ;(o as any).mission.body_zh = String((o as any).mission.body_zh ?? '')
   if ((o as any).mission.image_path === undefined) (o as any).mission.image_path = null
   ;(o as any).mission.cta_label = loc((o as any).mission.cta_label || {})
   ;(o as any).mission.cta_href = String((o as any).mission.cta_href ?? '/contact-us')
@@ -444,7 +490,7 @@ function normalizeAbout(raw: Record<string, unknown>) {
   return o as AboutShape
 }
 
-type Loc = { fr: string; en: string }
+type Loc = { fr: string; en: string; zh: string }
 
 interface ContactShape {
   hero: { title: Loc; subtitle: Loc; background_path: string | null }
@@ -462,6 +508,7 @@ interface AboutShape {
     title: Loc
     body_fr: string
     body_en: string
+    body_zh: string
     image_path: string | null
     cta_label: Loc
     cta_href: string

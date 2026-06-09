@@ -239,44 +239,34 @@
         <div class="row">
           <div class="col-lg-6">
             <h3 class="fw-bold mb-4">{{ t('pricing.faq') }}</h3>
-            <div class="accordion" id="pricingFaq">
-              <div class="accordion-item border-0 mb-3 shadow-sm">
+            <div v-if="pricingFaqs.length" class="accordion" id="pricingFaq">
+              <div
+                v-for="(faq, idx) in pricingFaqs"
+                :key="faq.id"
+                class="accordion-item border-0 mb-3 shadow-sm"
+              >
                 <h2 class="accordion-header">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                    {{ t('pricing.faqCommission') }}
+                  <button
+                    class="accordion-button"
+                    :class="{ collapsed: idx !== 0 }"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    :data-bs-target="`#pricingFaq${idx}`"
+                  >
+                    {{ faq[`question_${locale}`] || faq.question_fr }}
                   </button>
                 </h2>
-                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#pricingFaq">
-                  <div class="accordion-body">
-                    {{ t('pricing.faqCommissionAnswer') }}
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item border-0 mb-3 shadow-sm">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                    {{ t('pricing.faqHiddenFees') }}
-                  </button>
-                </h2>
-                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFaq">
-                  <div class="accordion-body">
-                    {{ t('pricing.faqHiddenFeesAnswer') }}
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item border-0 mb-3 shadow-sm">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                    {{ t('pricing.faqPayment') }}
-                  </button>
-                </h2>
-                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFaq">
-                  <div class="accordion-body">
-                    {{ t('pricing.faqPaymentAnswer') }}
-                  </div>
+                <div
+                  :id="`pricingFaq${idx}`"
+                  class="accordion-collapse collapse"
+                  :class="{ show: idx === 0 }"
+                  data-bs-parent="#pricingFaq"
+                >
+                  <div class="accordion-body" v-html="faq[`answer_${locale}`] || faq.answer_fr"></div>
                 </div>
               </div>
             </div>
+            <p v-else class="text-muted">{{ t('faq.noQuestions') }}</p>
           </div>
           <div class="col-lg-6">
             <div class="card border-0 shadow-sm bg-primary text-white h-100">
@@ -303,21 +293,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useCountriesStore } from '~/stores/countries'
 import { useShippingStore } from '~/stores/shipping'
+import { useBlogStore } from '~/stores/blog'
+import type { FAQ } from '~/stores/blog'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { formatCurrency } = useFormatters()
 const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()
+const blogStore = useBlogStore()
 
 const destinations = computed(() => shippingStore.destinations)
+
+// FAQ affichées sur cette page = statut 2, ordonnées par position (côté API).
+const pricingFaqs = ref<FAQ[]>([])
 
 const getCost = (dest: any, mode: string): number => {
   const modes = dest.shipping_modes || dest.shippingModes || []
@@ -333,7 +329,12 @@ const destCurrency = (dest: any): string => {
   return raw && String(raw).trim() ? String(raw).toUpperCase() : 'XOF'
 }
 
-await Promise.all([shippingStore.fetchDestinations(), countriesStore.fetchAll()])
+const [, , faqs] = await Promise.all([
+  shippingStore.fetchDestinations(),
+  countriesStore.fetchAll(),
+  blogStore.fetchFAQByStatut(2),
+])
+pricingFaqs.value = faqs
 </script>
 
 <style scoped>

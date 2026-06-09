@@ -28,9 +28,14 @@ export interface FAQ {
   id: number
   question_fr: string | null
   question_en: string | null
+  question_zh?: string | null
   answer_fr: string | null
   answer_en: string | null
+  answer_zh?: string | null
   category: string | null
+  position?: number
+  // 1 = FAQ générale (/faq), 2 = FAQ affichée sur resources/pricing.
+  statut?: number
   created_at?: string
   updated_at?: string
 }
@@ -165,6 +170,18 @@ export const useBlogStore = defineStore('blog', {
         }
       } catch (err: any) {
         this.error = err.message
+      }
+    },
+
+    /** FAQ d'un statut donné (ex. statut=2 → page resources/pricing), triées par position. */
+    async fetchFAQByStatut(statut: number): Promise<FAQ[]> {
+      try {
+        const api = useApi()
+        const res = await api.get<FAQ[]>(`/faq/all?statut=${statut}`)
+        return res.success ? (res.data || []) : []
+      } catch (err: any) {
+        this.error = err.message
+        return []
       }
     },
 

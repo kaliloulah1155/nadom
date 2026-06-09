@@ -20,12 +20,14 @@
               <tr>
                 <th style="width: 250px;">{{ t('admin.faq.category') }}</th>
                 <th>{{ t('admin.faq.question') }}</th>
+                <th style="width: 130px;">Statut</th>
+                <th style="width: 90px;">Position</th>
                 <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="faqs.length === 0">
-                <td colspan="3" class="text-center py-4 text-muted">
+                <td colspan="5" class="text-center py-4 text-muted">
                   {{ t('admin.faq.noQuestions') }}
                 </td>
               </tr>
@@ -38,6 +40,11 @@
                   <small class="text-muted d-block text-truncate" style="max-width: 500px;" v-html="truncate(faq.answer_fr || '', 100)">
                   </small>
                 </td>
+                <td>
+                  <span v-if="faq.statut === 2" class="badge bg-primary">Page tarifs</span>
+                  <span v-else class="badge bg-light text-dark">Générale</span>
+                </td>
+                <td>{{ faq.position ?? 0 }}</td>
                 <td>
                   <div class="d-flex">
                     <button class="btn btn-outline-primary btn-sm me-2" :title="t('admin.common.edit')" @click="openModal(faq)">
@@ -128,15 +135,31 @@
               </div>
 
               <div class="row g-3">
-                <div class="col-12">
+                <div class="col-md-6">
                   <label class="form-label">Catégorie</label>
                   <input v-model="form.category" type="text" class="form-control" placeholder="Général, Shipping, Visa, etc." />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Position</label>
+                  <input v-model.number="form.position" type="number" min="0" class="form-control" />
+                  <small class="text-muted">Ordre d'affichage (croissant).</small>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Statut</label>
+                  <select v-model.number="form.statut" class="form-select">
+                    <option :value="1">Générale (/faq)</option>
+                    <option :value="2">Page tarifs</option>
+                  </select>
+                  <small class="text-muted">« Page tarifs » s'affiche aussi sur /faq.</small>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ t('admin.common.save') }}
+              </button>
             </div>
           </form>
         </div>
@@ -162,6 +185,7 @@ const { success, error } = useNotification()
 const faqs = computed(() => blogStore.faq)
 
 const editingFaq = ref<any>(null)
+const saving = ref(false)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
@@ -172,7 +196,9 @@ const form = reactive({
   answer_fr: '',
   answer_en: '',
   answer_zh: '',
-  category: ''
+  category: '',
+  position: 0,
+  statut: 1
 })
 
 const fetchFAQ = async (page?: number, limit?: number) => {
@@ -204,6 +230,8 @@ const openModal = (faq?: any) => {
     form.answer_en = faq.answer_en || ''
     form.answer_zh = faq.answer_zh || ''
     form.category = faq.category || ''
+    form.position = faq.position ?? 0
+    form.statut = faq.statut ?? 1
   } else {
     editingFaq.value = null
     form.question_fr = ''
@@ -213,11 +241,16 @@ const openModal = (faq?: any) => {
     form.answer_en = ''
     form.answer_zh = ''
     form.category = ''
+    form.position = 0
+    form.statut = 1
   }
   modalInstance?.show()
 }
 
 const saveFaq = async () => {
+  if (saving.value) return
+  saving.value = true
+
   const data = {
     question_fr: form.question_fr,
     question_en: form.question_en || null,
@@ -225,7 +258,9 @@ const saveFaq = async () => {
     answer_fr: form.answer_fr,
     answer_en: form.answer_en || null,
     answer_zh: form.answer_zh || null,
-    category: form.category || null
+    category: form.category || null,
+    position: form.position ?? 0,
+    statut: form.statut ?? 1
   }
 
   try {
@@ -240,6 +275,8 @@ const saveFaq = async () => {
     await fetchFAQ(blogStore.faqMeta.currentPage)
   } catch (err: any) {
     error(err.message || t('admin.messages.saveError'))
+  } finally {
+    saving.value = false
   }
 }
 

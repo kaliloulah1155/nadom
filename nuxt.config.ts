@@ -20,6 +20,24 @@ export default defineNuxtConfig({
         interval: devWatchInterval,
       },
     },
+    // Pré-bundle les libs importées seulement sur certaines pages. Sinon Vite les
+    // découvre à la navigation → re-optimisation + rechargement complet de la page.
+    optimizeDeps: {
+      include: [
+        'quill',
+        'vue-multiselect',
+        'vue-countup-v3',
+        'vue-chartjs',
+        'chart.js',
+        'vue-easy-lightbox',
+        'multi-range-slider-vue',
+        'vue3-google-map',
+        'laravel-echo',
+        'pusher-js',
+        'swiper',
+        'dropzone',
+      ],
+    },
   },
 
   watchers: {

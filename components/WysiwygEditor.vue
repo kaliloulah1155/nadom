@@ -24,6 +24,7 @@ let _modalEl: Element | null = null
 let _modalShownHandler: (() => void) | null = null
 let _tabRoot: Element | null = null
 let _tabShownHandler: ((e: Event) => void) | null = null
+let _io: IntersectionObserver | null = null
 
 const isVisible = (el: HTMLElement) => el.offsetParent !== null
 
@@ -37,6 +38,10 @@ const detachDeferredListeners = () => {
     _tabRoot.removeEventListener('shown.bs.tab', _tabShownHandler)
     _tabShownHandler = null
     _tabRoot = null
+  }
+  if (_io) {
+    _io.disconnect()
+    _io = null
   }
 }
 
@@ -114,6 +119,17 @@ onMounted(async () => {
       nextTick().then(tryInitWhenVisible)
     }
     modal.addEventListener('shown.bs.modal', _modalShownHandler)
+  }
+
+  // Fallback générique : bascule via v-show (ex. footer FR/EN/中文), accordéon, etc.
+  // L'IntersectionObserver initialise Quill dès que l'élément devient visible.
+  if (!quill && typeof IntersectionObserver !== 'undefined') {
+    _io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        nextTick().then(tryInitWhenVisible)
+      }
+    })
+    _io.observe(el)
   }
 })
 
