@@ -1,8 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-//
-// Copie modele : renommez en nuxt.config.ts ou fusionnez avec votre config locale.
+// Modèle : renommer en nuxt.config.ts ou fusionner avec la config locale.
 
-/** Dev : polling optionnel si erreurs EPERM sur la surveillance des fichiers (CHOKIDAR_USEPOLLING=true). */
 const devWatchUsePolling = process.env.CHOKIDAR_USEPOLLING === 'true'
 const devWatchInterval = Number(process.env.CHOKIDAR_INTERVAL) || 1000
 
@@ -10,13 +8,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
 
-  // App SPA: tout l'etat (auth, panier, settings) vit dans localStorage/Pinia,
-  // donc le SSR ne peut pas produire le meme HTML que le client et provoque
-  // des "Hydration completed but contains mismatches". Mode SPA = un seul rendu.
+  // SPA: l'état (auth, panier, settings) vit dans localStorage/Pinia → pas de SSR.
   ssr: false,
-
-  // Sans SSR, pas besoin du manifest experimental ; sinon Vite peut tenter de
-  // résoudre `#app-manifest` sur le bundle client → erreur "Failed to resolve import".
   experimental: {
     appManifest: false,
   },
@@ -30,7 +23,6 @@ export default defineNuxtConfig({
     },
   },
 
-  /** Watchers Nuxt (chokidar), même bascule que Vite ci‑dessus. */
   watchers: {
     chokidar: {
       usePolling: devWatchUsePolling,
@@ -43,8 +35,9 @@ export default defineNuxtConfig({
 
   i18n: {
     locales: [
-      { code: 'fr', name: 'Francais', file: 'fr.json', iso: 'fr-FR' },
-      { code: 'en', name: 'English', file: 'en.json', iso: 'en-US' }
+      { code: 'fr', name: 'Français', file: 'fr.json', language: 'fr-FR' },
+      { code: 'en', name: 'English', file: 'en.json', language: 'en-US' },
+      { code: 'zh', name: '中文', file: 'zh.json', language: 'zh-CN' }
     ],
     defaultLocale: 'fr',
     langDir: 'locales',
@@ -55,10 +48,13 @@ export default defineNuxtConfig({
       fallbackLocale: 'fr'
     }
   },
+
   runtimeConfig: {
     public: {
       // Surcharge via NUXT_PUBLIC_API_BASE (ex. http://localhost:8000/api en local).
       apiBase: "https://gateway.nadom.co/api",
+      // Backend qui sert /storage. Surcharge via NUXT_PUBLIC_STORAGE_BASE. Vide → fallback apiBase sans /api.
+      storageBase: "",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",
       siteName: "NADOM",
@@ -66,6 +62,7 @@ export default defineNuxtConfig({
       pusherCluster: "ap2"
     }
   },
+
   css: [
     '~/assets/scss/style.scss',
     'flag-icons/css/flag-icons.min.css',
@@ -76,7 +73,6 @@ export default defineNuxtConfig({
       title: 'NADOM - Import-Export Chine | Personal Shopping',
       titleTemplate: '%s | NADOM',
       htmlAttrs: { class: "light scroll-smooth", dir: 'ltr', lang: 'fr' },
-
       meta: [
         { charset: 'utf-8' },
         {
@@ -88,7 +84,6 @@ export default defineNuxtConfig({
         { name: 'keywords', content: 'import export, chine, personal shopping, expedition, visa chine, guide chine, sourcing' },
       ],
       link: [
-
         {
           rel: 'stylesheet',
           href: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css',
@@ -97,10 +92,6 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
         },
-        // {
-        //   rel: 'stylesheet',
-        //   href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css',
-        // },
         {
           rel: 'stylesheet',
           href: 'https://unpkg.com/swiper/swiper-bundle.min.css',
@@ -122,14 +113,10 @@ export default defineNuxtConfig({
           href: 'https://unpkg.com/vue-multiselect/dist/vue-multiselect.min.css',
         }
       ],
-
       script: [
-        // Bootstrap est charge via plugins/bootstrap.client.ts (paquet npm),
-        // pas via CDN, pour eviter la race onMounted vs script-load.
         { src: 'https://cdn.jsdelivr.net/npm/apexcharts' },
         { src: 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js' },
       ],
-
     },
   },
 })

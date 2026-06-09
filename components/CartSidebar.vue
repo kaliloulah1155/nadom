@@ -52,7 +52,7 @@
           >
             <div class="d-flex gap-3">
               <img
-                :src="item.product.image || 'https://placehold.co/80?text=?'"
+                :src="resolveStorageAssetUrl(item.product.image) || 'https://placehold.co/80?text=?'"
                 class="cart-item-img rounded-3"
                 width="72" height="72"
                 loading="lazy"
@@ -212,7 +212,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCartStore } from '~/stores/cart'
-import { usePersonalShoppingStore } from '~/stores/personalShopping'
+import { usePersonalShoppingStore, DEFAULT_CART_CURRENCIES } from '~/stores/personalShopping'
 import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 import { useFormatters } from '~/composables/useFormatters'
@@ -244,20 +244,27 @@ const cartCurrency = computed(() => {
   return 'XOF'
 })
 
-/** Liste des devises disponibles (catégories slug DVS). */
+/** Devises : cache DVS du store, sinon liste par défaut (affichage immédiat). */
 const currencies = computed(() => {
-  const fromStore = (psStore.categories || [])
+  const mapRow = (c: any) => ({
+    id: String(c.uuid || c.id || c.code),
+    code: (c.code || c.label || '').toString().toUpperCase(),
+    label: c.uuid ? categoryLabel(c) : String(c.label || c.code || ''),
+  })
+
+  const fromCache = (psStore.currencies || []).map(mapRow).filter((c) => c.code)
+  if (fromCache.length > 0) return fromCache
+
+  const fromCategories = (psStore.categories || [])
     .filter((c: any) => {
-      const slug = (c.slug || '').toString()
+      const slug = (c.slug || '').toString().toUpperCase()
       return slug === 'DVS' || slug.startsWith('DVS-')
     })
-    .map((c: any) => ({
-      id: c.uuid || c.id,
-      code: (c.code || c.label || '').toString().toUpperCase(),
-      label: categoryLabel(c),
-    }))
-    .filter((c: any) => c.code)
-  return fromStore.length > 0 ? fromStore : [{ id: 'xof', code: 'XOF', label: 'CFA (FCFA)' }]
+    .map(mapRow)
+    .filter((c) => c.code)
+  if (fromCategories.length > 0) return fromCategories
+
+  return DEFAULT_CART_CURRENCIES
 })
 
 const selectedCurrency = ref<string>('XOF')
@@ -289,10 +296,7 @@ onMounted(async () => {
     }
   }
 
-  const hasDvs = (psStore.categories || []).some((c: any) => String(c.slug || '').toUpperCase() === 'DVS')
-  if (!psStore.categories?.length || !hasDvs) {
-    await psStore.fetchCategories()
-  }
+  void psStore.fetchCurrencies()
 
   if (typeof window !== 'undefined' && (window as any).bootstrap) {
     cartOffcanvas = new (window as any).bootstrap.Offcanvas(cartRef.value)
@@ -301,6 +305,9 @@ onMounted(async () => {
 })
 
 watch(() => cartStore.isOpen, (val) => {
+  if (val && !psStore.currenciesFetched) {
+    void psStore.fetchCurrencies()
+  }
   val ? cartOffcanvas?.show() : cartOffcanvas?.hide()
 })
 

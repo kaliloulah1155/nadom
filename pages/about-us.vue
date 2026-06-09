@@ -194,7 +194,7 @@ import { computed, onMounted } from 'vue'
 import { useSiteStaticPagesStore } from '~/stores/siteStaticPages'
 import { resolveStorageAssetUrl } from '~/composables/useStorageAssetUrl'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const store = useSiteStaticPagesStore()
 
 onMounted(() => {
@@ -203,10 +203,19 @@ onMounted(() => {
 
 const payload = computed(() => store.aboutPayload as Record<string, any>)
 
-function loc(obj?: { fr?: string | null; en?: string | null }): string {
+function loc(
+  obj?: { fr?: string | null; en?: string | null; zh?: string | null },
+  zhFallback = ''
+): string {
   if (!obj) return ''
-  const fr = String(locale.value || '').startsWith('fr')
-  return String(fr ? (obj.fr ?? obj.en) : (obj.en ?? obj.fr) ?? '').trim()
+  const current = String(locale.value || '')
+  if (current.startsWith('zh')) {
+    return String(obj.zh ?? zhFallback ?? obj.en ?? obj.fr ?? '').trim()
+  }
+  if (current.startsWith('en')) {
+    return String(obj.en ?? obj.fr ?? obj.zh ?? '').trim()
+  }
+  return String(obj.fr ?? obj.en ?? obj.zh ?? '').trim()
 }
 
 function paragraphsFrom(text: string): string[] {
@@ -222,19 +231,28 @@ const heroBg = computed(() => {
   return u || fallbackHero
 })
 
-const heroTitle = computed(() => loc(payload.value.hero?.title))
-const heroLead = computed(() => loc(payload.value.hero?.subtitle))
+const heroTitle = computed(() => loc(payload.value.hero?.title, '关于 NADOM'))
+const heroLead = computed(() => loc(payload.value.hero?.subtitle, '中国进出口、代购与物流解决方案。'))
 
 const breadcrumbs = computed(() => {
   const bc = payload.value.breadcrumbs || {}
-  const key = locale.value.startsWith('fr') ? 'fr' : 'en'
+  const current = String(locale.value || '')
+  const key = current.startsWith('zh') ? 'zh' : (current.startsWith('en') ? 'en' : 'fr')
   const list = bc[key]
-  return Array.isArray(list) ? list : bc.fr || bc.en || []
+  if (Array.isArray(list) && list.length) return list
+  if (current.startsWith('zh')) {
+    return [
+      { label: '首页', href: '/' },
+      { label: '页面', href: null },
+      { label: '关于我们', href: null }
+    ]
+  }
+  return bc.zh || bc.fr || bc.en || []
 })
 
-const missionIntroHeading = computed(() => loc(payload.value.mission_intro?.heading))
+const missionIntroHeading = computed(() => loc(payload.value.mission_intro?.heading, '我们的使命'))
 
-const missionIntroLead = computed(() => loc(payload.value.mission_intro?.lead))
+const missionIntroLead = computed(() => loc(payload.value.mission_intro?.lead, '我们为您提供从采购到交付的一站式支持。'))
 
 const missionImg = computed(() => {
   const p = payload.value.mission?.image_path
@@ -242,17 +260,26 @@ const missionImg = computed(() => {
   return u || fallbackMission
 })
 
-const missionBadge = computed(() => loc(payload.value.mission?.badge))
-const missionTitle = computed(() => loc(payload.value.mission?.title))
+const missionBadge = computed(() => loc(payload.value.mission?.badge, '我们的使命'))
+const missionTitle = computed(() => loc(payload.value.mission?.title, '我们的定位'))
 const missionParagraphs = computed(() => {
   const frBody = payload.value.mission?.body_fr
   const enBody = payload.value.mission?.body_en
-  const raw = String(locale.value.startsWith('fr') ? frBody ?? enBody : enBody ?? frBody ?? '')
+  const zhBody = payload.value.mission?.body_zh
+  const current = String(locale.value || '')
+  const raw = String(
+    current.startsWith('zh')
+      ? (zhBody ?? enBody ?? frBody)
+      : current.startsWith('en')
+        ? (enBody ?? frBody ?? zhBody)
+        : (frBody ?? enBody ?? zhBody)
+      ?? ''
+  )
   const pars = paragraphsFrom(raw)
   return pars.length ? pars : []
 })
 
-const missionCtaLabel = computed(() => loc(payload.value.mission?.cta_label))
+const missionCtaLabel = computed(() => loc(payload.value.mission?.cta_label, '联系我们'))
 const missionCtaHref = computed(() => String(payload.value.mission?.cta_href || '/contact-us'))
 
 const counters = computed(() => {
@@ -270,12 +297,12 @@ const promoBg = computed(() => {
   return u || fallbackPromo
 })
 
-const promoBadge = computed(() => loc(payload.value.promo_banner?.badge))
-const promoHead = computed(() => loc(payload.value.promo_banner?.headline))
-const promoSub = computed(() => loc(payload.value.promo_banner?.subheadline))
+const promoBadge = computed(() => loc(payload.value.promo_banner?.badge, 'NADOM'))
+const promoHead = computed(() => loc(payload.value.promo_banner?.headline, '让您的中非贸易更简单'))
+const promoSub = computed(() => loc(payload.value.promo_banner?.subheadline, '专业团队，透明流程，可靠交付'))
 
-const processHeading = computed(() => loc(payload.value.process_section?.heading))
-const processIntro = computed(() => loc(payload.value.process_section?.intro))
+const processHeading = computed(() => loc(payload.value.process_section?.heading, '我们的流程'))
+const processIntro = computed(() => loc(payload.value.process_section?.intro, '清晰步骤，快速执行。'))
 
 const processItems = computed(() => {
   const items = Array.isArray(payload.value.process_section?.items) ? payload.value.process_section.items : []
@@ -286,11 +313,11 @@ const processItems = computed(() => {
   }))
 })
 
-const processBtnLabel = computed(() => loc(payload.value.process_section?.bottom_cta?.label))
+const processBtnLabel = computed(() => loc(payload.value.process_section?.bottom_cta?.label, '开始您的项目'))
 const processBtnHref = computed(() => String(payload.value.process_section?.bottom_cta?.href || '/contact-us'))
 
-const reviewsHeading = computed(() => loc(payload.value.reviews_section?.heading))
-const reviewsIntro = computed(() => loc(payload.value.reviews_section?.intro))
-const teamHeading = computed(() => loc(payload.value.team_section?.heading))
-const teamIntro = computed(() => loc(payload.value.team_section?.intro))
+const reviewsHeading = computed(() => loc(payload.value.reviews_section?.heading, '客户评价'))
+const reviewsIntro = computed(() => loc(payload.value.reviews_section?.intro, '客户对我们的信任是我们前进的动力。'))
+const teamHeading = computed(() => loc(payload.value.team_section?.heading, '我们的团队'))
+const teamIntro = computed(() => loc(payload.value.team_section?.intro, '在每一步为您提供专业支持。'))
 </script>

@@ -53,7 +53,7 @@
                         <td>
                           <div class="d-flex align-items-center">
                             <img
-                              :src="item.image || 'https://placehold.co/40?text=?'"
+                              :src="resolveStorageAssetUrl(item.image) || 'https://placehold.co/40?text=?'"
                               class="rounded me-2" width="40" height="40"
                               style="object-fit: cover;"
                             />

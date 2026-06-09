@@ -88,7 +88,7 @@
             <div v-for="prod in filteredProducts" :key="prod.id" class="col-md-6 col-lg-4 col-xl-3">
               <div class="card h-100 border-0 shadow-sm product-card">
                     <div class="product-img-wrapper mb-3">
-                      <img :src="prod.image || 'https://placehold.co/400x400?text=No+Img'" :alt="prod[`name_${locale}`] || prod.name_fr" class="img-fluid rounded" />
+                      <img :src="resolveStorageAssetUrl(prod.image) || 'https://placehold.co/400x400?text=No+Img'" :alt="prod[`name_${locale}`] || prod.name_fr" class="img-fluid rounded" />
                       <div class="product-actions">
                         <button class="btn btn-light btn-sm rounded-circle shadow-sm" @click="openZoom(prod)" title="Zoom">
                           <i class="bi bi-search"></i>
@@ -128,7 +128,7 @@
           <div class="modal-content bg-transparent border-0">
             <div class="modal-body p-0 position-relative text-center">
               <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 1060;"></button>
-              <img v-if="zoomedProduct" :src="zoomedProduct.image" class="img-fluid rounded shadow-lg" style="max-height: 90vh; cursor: pointer;" @click="zoomModal?.hide()" />
+              <img v-if="zoomedProduct" :src="resolveStorageAssetUrl(zoomedProduct.image)" class="img-fluid rounded shadow-lg" style="max-height: 90vh; cursor: pointer;" @click="zoomModal?.hide()" />
             </div>
           </div>
         </div>

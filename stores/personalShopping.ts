@@ -106,11 +106,25 @@ interface PersonalShoppingState {
   requestsMeta: Meta
   categories: Category[]
   categoriesMeta: Meta
+  /** Devises (catégories slug DVS) — cache dédié, chargement léger. */
+  currencies: Category[]
+  currenciesFetched: boolean
+  currenciesLoading: boolean
   products: Product[]
   productsMeta: Meta
   loading: boolean
   error: string | null
 }
+
+/** Évite les appels API en double si le panier et le plugin préchargent en même temps. */
+let currenciesFetchInFlight: Promise<Category[]> | null = null
+
+export const DEFAULT_CART_CURRENCIES: { id: string; code: string; label: string }[] = [
+  { id: 'xof', code: 'XOF', label: 'CFA (FCFA)' },
+  { id: 'usd', code: 'USD', label: 'USD' },
+  { id: 'eur', code: 'EUR', label: 'EUR' },
+  { id: 'cny', code: 'CNY', label: 'CNY' },
+]
 
 function applyPaginator<T>(res: any, items: T[], meta: Meta) {
   const d = res.data
@@ -201,6 +215,9 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
     requestsMeta: newMeta(15),
     categories: [],
     categoriesMeta: newMeta(10),
+    currencies: [],
+    currenciesFetched: false,
+    currenciesLoading: false,
     products: [],
     productsMeta: newMeta(12),
     loading: false,
@@ -305,6 +322,36 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         this.error = err.message
       }
       return this.categories
+    },
+
+    /** Devises uniquement (GET /category/slug/DVS) — rapide, mis en cache. */
+    async fetchCurrencies(force = false): Promise<Category[]> {
+      if (!force && this.currenciesFetched && this.currencies.length > 0) {
+        return this.currencies
+      }
+      if (currenciesFetchInFlight) {
+        return currenciesFetchInFlight
+      }
+
+      this.currenciesLoading = true
+      currenciesFetchInFlight = (async () => {
+        try {
+          const api = usePublicApi()
+          const res = await api.get<Category[]>('/category/slug/DVS')
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            this.currencies = res.data
+            this.currenciesFetched = true
+          }
+          return this.currencies
+        } catch {
+          return this.currencies
+        } finally {
+          this.currenciesLoading = false
+          currenciesFetchInFlight = null
+        }
+      })()
+
+      return currenciesFetchInFlight
     },
 
     async addCategory(category: Partial<Category>) {

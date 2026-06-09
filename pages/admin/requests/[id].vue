@@ -62,7 +62,7 @@
                     <tr v-for="item in request.items" :key="item.productId">
                       <td>
                         <div class="d-flex align-items-center">
-                          <img :src="item.image || 'https://via.placeholder.com/40'" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
+                          <img :src="resolveStorageAssetUrl(item.image) || 'https://via.placeholder.com/40'" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
                           <span>{{ itemDisplayName(item) }}</span>
                         </div>
                       </td>

@@ -69,7 +69,7 @@
 <tr v-for="prod in products" :key="prod.id">
               <td class="px-4">
                 <div class="d-flex align-items-center gap-3">
-                  <img :src="prod.image || 'https://placehold.co/50x50?text=No+Img'" class="rounded border" width="45" height="45" style="object-fit: cover;" />
+                  <img :src="resolveStorageAssetUrl(prod.image) || 'https://placehold.co/50x50?text=No+Img'" class="rounded border" width="45" height="45" style="object-fit: cover;" />
                   <div class="fw-bold">{{ prod.name_fr || prod.name_en }}</div>
                 </div>
               </td>
@@ -203,7 +203,7 @@
                   <label class="form-label">Image du produit</label>
                   <div class="d-flex gap-3 align-items-start">
                     <div class="image-upload-wrapper border rounded-3 overflow-hidden bg-light" style="width: 120px; height: 120px; flex-shrink: 0;">
-                      <img v-if="form.image" :src="form.image" class="w-100 h-100 object-fit-cover" />
+                      <img v-if="form.image" :src="resolveStorageAssetUrl(form.image)" class="w-100 h-100 object-fit-cover" />
                       <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
                         <i class="bi bi-image fs-1"></i>
                       </div>
@@ -361,8 +361,10 @@ const handleImageUpload = async (event: any) => {
     formData.append('image', file)
     formData.append('folder', 'products')
     const res = await api.post<{ url: string; path: string }>('/upload/image', formData)
-    if (res.success && res.data?.url) {
-      form.image = res.data.url
+    if (res.success && res.data?.path) {
+      // On stocke le chemin relatif (ex. "products/xxx.jpg") et on résout l'URL à
+      // l'affichage via resolveStorageAssetUrl → indépendant du host du backend.
+      form.image = res.data.path
     } else {
       error(res.message || t('admin.products.uploadError'))
     }
