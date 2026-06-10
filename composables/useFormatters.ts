@@ -214,17 +214,18 @@ export const useFormatters = () => {
     if (Array.isArray(items)) {
       for (const it of items) {
         const u = (it?.image && String(it.image).trim()) || ''
-        if (u) return u
+        // resolveStorageAssetUrl : préfixe /storage + rebase sur le bon host (VPS).
+        if (u) return resolveStorageAssetUrl(u)
       }
     }
     const imgs = request.images
     if (Array.isArray(imgs)) {
       for (const u of imgs) {
         const s = typeof u === 'string' ? u.trim() : ''
-        if (s) return s
+        if (s) return resolveStorageAssetUrl(s)
       }
     }
-    return `https://via.placeholder.com/${placeholderPx}?text=%3F`
+    return `https://placehold.co/${placeholderPx}?text=%3F`
   }
 
   return {

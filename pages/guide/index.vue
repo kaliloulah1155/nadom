@@ -145,7 +145,7 @@
               <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                   <img
-                    :src="guide.avatar"
+                    :src="resolveStorageAssetUrl(guide.avatar) || guide.avatar"
                     class="rounded-circle me-3"
                     width="70"
                     height="70"
@@ -418,11 +418,12 @@ const bookingStatusClass = (status: string) => {
 
 const formatBookingDay = (d?: string) => {
   if (!d) return '—'
-  try {
-    return new Date(`${d}T12:00:00`).toLocaleDateString(locale.value === 'zh' ? 'zh-CN' : locale.value === 'en' ? 'en-GB' : 'fr-FR')
-  } catch {
-    return d
-  }
+  // L'API peut renvoyer soit "YYYY-MM-DD" soit un ISO complet ("YYYY-MM-DDTHH:mm:ss.uuuuuuZ").
+  // On ne garde que la partie date pour éviter "Invalid Date".
+  const day = String(d).slice(0, 10)
+  const dt = new Date(`${day}T12:00:00`)
+  if (Number.isNaN(dt.getTime())) return '—'
+  return dt.toLocaleDateString(locale.value === 'zh' ? 'zh-CN' : locale.value === 'en' ? 'en-GB' : 'fr-FR')
 }
 
 const bookingForm = reactive({

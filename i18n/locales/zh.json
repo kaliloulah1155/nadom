@@ -298,7 +298,12 @@
     "whatsappQuoteGreeting": "您好 NADOM，",
     "whatsappQuoteIntro": "我在运费计算器上估算后，希望获得精确报价：",
     "whatsappQuoteBullet": "-",
-    "whatsappQuoteClosing": "期待您的回复，谢谢。"
+    "whatsappQuoteClosing": "期待您的回复，谢谢。",
+    "totalVolume": "总体积 (m³) *",
+    "volume": "体积",
+    "volumeHint": "总体积（立方米 m³）。",
+    "ratePerUnit": "每{unit}费率",
+    "rateDetailUnit": "明细：{rate} / {unit} × {qty} {unit}（服务器端四舍五入）"
   },
   "tracking": {
     "title": "包裹跟踪",
@@ -957,7 +962,10 @@
         "quotationCreated": "报价已创建",
         "quotationUpdated": "报价已修改",
         "requestDeleted": "请求已删除",
-        "pdfError": "无法生成 PDF"
+        "pdfError": "无法生成 PDF",
+        "statusLocked": "最终状态：该申请不可再更改。",
+        "statusShipmentDriven": "状态由物流自动驱动。",
+        "photos": "照片"
       }
     },
     "shipments": {
@@ -1556,7 +1564,10 @@
       "destinationCountryLabel": "目的地国家 *",
       "cannotChangeCountryHint": "要更改国家，请删除此费率并新建。",
       "cannotChangeModeHint": "运输方式无法修改。",
-      "loadingCountriesEllipsis": "正在加载国家…"
+      "loadingCountriesEllipsis": "正在加载国家…",
+      "rate": "费率",
+      "costPerUnit": "每{unit}费用",
+      "cbmHint": "海运按每立方米（m³ / CBM）计费。"
     },
     "settings": {
       "title": "全局设置",

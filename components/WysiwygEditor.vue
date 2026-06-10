@@ -8,6 +8,7 @@
 import { ref, onMounted, watch, onBeforeUnmount, nextTick } from 'vue'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
+import { youtubeEmbedSrc } from '~/composables/useBlogBodyHtml'
 
 const props = defineProps<{
   modelValue: string
@@ -60,15 +61,30 @@ const initQuill = () => {
     theme: 'snow',
     placeholder: props.placeholder || 'Saisissez votre texte...',
     modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ color: [] }, { background: [] }],
-        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-        [{ align: [] }],
-        ['blockquote', 'link'],
-        ['clean'],
-      ],
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ color: [] }, { background: [] }],
+          [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+          [{ align: [] }],
+          ['blockquote', 'link', 'video'],
+          ['clean'],
+        ],
+        handlers: {
+          // Insertion d'une vidéo : on accepte une URL YouTube (watch, youtu.be,
+          // shorts) et on la normalise en /embed/ pour un rendu fiable.
+          video() {
+            const input = window.prompt('URL de la vidéo (YouTube)')
+            if (!input) return
+            const src = youtubeEmbedSrc(input) || input.trim()
+            const range = quill?.getSelection(true)
+            const index = range ? range.index : (quill?.getLength() ?? 1) - 1
+            quill?.insertEmbed(index, 'video', src, 'user')
+            quill?.setSelection(index + 1, 0, 'silent')
+          },
+        },
+      },
     },
   })
 
@@ -184,6 +200,19 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   margin: 8px 0;
   display: block;
+}
+
+/* Vidéos insérées via le bouton vidéo (Quill) : rendu responsive 16/9 */
+.wysiwyg-editor .ql-editor iframe.ql-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 180px;
+  max-height: 420px;
+  border: 0;
+  border-radius: 8px;
+  display: block;
+  margin: 12px 0;
 }
 
 .wysiwyg-editor .ql-editor.ql-blank::before {

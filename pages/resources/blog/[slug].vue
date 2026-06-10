@@ -151,15 +151,11 @@ const enrichedBody = computed(() => {
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/1200x600?text=NADOM'
-  if (/^https?:\/\//i.test(img)) return img
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(img) || 'https://placehold.co/1200x600?text=NADOM'
 }
 
 const resolveAvatar = (avatar: string | null, name: string | null) => {
-  if (avatar) {
-    if (/^https?:\/\//i.test(avatar)) return avatar
-    return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(avatar).replace(/^\/+/, '')
-  }
+  if (avatar) return resolveStorageAssetUrl(avatar)
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Author')}&background=random&color=fff`
 }
 

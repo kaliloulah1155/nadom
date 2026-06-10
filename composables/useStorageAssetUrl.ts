@@ -15,16 +15,12 @@ export function resolveStorageAssetUrl(path: string | null | undefined): string 
   if (path == null || path === '') return ''
   const s = String(path).trim()
 
-  const config = useRuntimeConfig()
-  const storageBase = String(config.public.storageBase ?? '').trim()
-  const base = (storageBase !== ''
-    ? storageBase
-    : String(config.public.apiBase ?? '').replace(/\/api\/?$/i, '')
-  ).replace(/\/+$/, '')
+  const base = storageBaseUrl()
 
   if (/^https?:\/\//i.test(s)) {
-    // URL absolue : si elle contient un segment /storage/, on la rebase sur la
-    // base courante (corrige les URLs enregistrées avec un mauvais host).
+    // URL absolue : si elle contient un segment /storage/, on la rebase sur le
+    // host fichiers courant (corrige les URLs enregistrées avec un mauvais host
+    // et les doubles slashes `//storage`).
     const m = s.match(/\/storage\/(.*)$/i)
     if (m) {
       return `${base}/storage/${m[1].replace(/^\/+/, '')}`
@@ -35,4 +31,16 @@ export function resolveStorageAssetUrl(path: string | null | undefined): string 
 
   const normalized = s.replace(/^\/+/, '').replace(/^storage\/+/i, '')
   return `${base}/storage/${normalized}`
+}
+
+/**
+ * Host du backend qui sert les fichiers publics (sans slash final).
+ * Priorité : `storageBase` (override explicite) → `apiFile` → `apiBase` sans `/api`.
+ */
+export function storageBaseUrl(): string {
+  const config = useRuntimeConfig()
+  const storageBase = String(config.public.storageBase ?? '').trim()
+  const apiFile = String(config.public.apiFile ?? '').trim()
+  const fromApi = String(config.public.apiBase ?? '').replace(/\/api\/?$/i, '')
+  return (storageBase || apiFile || fromApi).replace(/\/+$/, '')
 }

@@ -498,11 +498,13 @@ const formatRelativeTime = (iso: string) => {
 }
 
 const onBellOpen = () => {
-  if (notifStore.items.length === 0) notifStore.fetch(1, 20)
+  // Toujours recharger depuis la BD : remplace les notifications temps réel (id « live-… »,
+  // non persistées) par les vraies lignes BD, dont le marquage « lu » est durable.
+  notifStore.fetch(1, 20)
 }
 
 const onNotifClick = (n: any) => {
-  if (!n.is_read && !String(n.id).startsWith('live-')) notifStore.markRead(n.id)
+  if (!n.is_read) notifStore.markRead(n.id)
   if (n.link) router.push(n.link)
 }
 

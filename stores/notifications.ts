@@ -50,14 +50,24 @@ export const useNotificationsStore = defineStore('notifications', {
     },
 
     async markRead(id: string) {
+      // Notifications temps réel (Pusher) : id "live-…" sans ligne en BD.
+      // On marque lu localement et on décrémente le compteur sans appel API.
+      if (String(id).startsWith('live-')) {
+        this.markReadLocal(id)
+        return
+      }
       const api = useApi()
       const res = await api.put(`/notifications/${id}/read`, {})
       if (res.success) {
-        const n = this.items.find(i => i.id === id)
-        if (n && !n.is_read) {
-          n.is_read = true
-          this.unread = Math.max(0, this.unread - 1)
-        }
+        this.markReadLocal(id)
+      }
+    },
+
+    markReadLocal(id: string) {
+      const n = this.items.find(i => i.id === id)
+      if (n && !n.is_read) {
+        n.is_read = true
+        this.unread = Math.max(0, this.unread - 1)
       }
     },
 

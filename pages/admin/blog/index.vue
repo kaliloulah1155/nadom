@@ -274,8 +274,7 @@ const uploading = ref(false)
 
 const resolveImage = (path: string) => {
   if (!path) return ''
-  if (/^https?:\/\//i.test(path)) return path
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(path).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(path)
 }
 
 const onImageSelected = async (e: Event) => {

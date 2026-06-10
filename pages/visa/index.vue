@@ -209,7 +209,13 @@ const processSteps = computed(() =>
   })),
 )
 
-const faqs = computed(() => resolveList('visa.faqItems', ['question', 'answer'] as const))
+// FAQ page visa = statut 3 (BD), repli sur les libellés i18n si la BD est vide.
+const { locale } = useI18n()
+const blogStore = useBlogStore()
+const dbFaqs = ref<{ question: string; answer: string }[]>([])
+const faqFallback = computed(() => resolveList('visa.faqItems', ['question', 'answer'] as const))
+const faqs = computed(() => (dbFaqs.value.length ? dbFaqs.value : faqFallback.value))
+
 const visasStore = useVisasStore()
 const { formatCurrency } = useFormatters()
 const config = useRuntimeConfig()
@@ -219,12 +225,21 @@ const loading = ref(false)
 const resolvePdf = (url: string | null) => {
   if (!url) return '#'
   if (/^https?:\/\//i.test(url)) return url
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(url).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(url)
 }
 
 onMounted(async () => {
   loading.value = true
   await visasStore.fetchVisaTypes()
+  try {
+    const rows = await blogStore.fetchFAQByStatut(3)
+    dbFaqs.value = rows.map((f: any) => ({
+      question: f[`question_${locale.value}`] || f.question_fr || '',
+      answer: f[`answer_${locale.value}`] || f.answer_fr || '',
+    }))
+  } catch {
+    dbFaqs.value = []
+  }
   loading.value = false
 })
 

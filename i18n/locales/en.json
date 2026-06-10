@@ -298,7 +298,12 @@
     "whatsappQuoteGreeting": "Hello NADOM,",
     "whatsappQuoteIntro": "I would like a precise quote following my estimate from the shipping calculator:",
     "whatsappQuoteBullet": "-",
-    "whatsappQuoteClosing": "Thank you for getting back to me."
+    "whatsappQuoteClosing": "Thank you for getting back to me.",
+    "totalVolume": "Total volume (m³) *",
+    "volume": "Volume",
+    "volumeHint": "Total volume in cubic meters (m³).",
+    "ratePerUnit": "Rate per {unit}",
+    "rateDetailUnit": "Breakdown: {rate} / {unit} × {qty} {unit} (rounded on server)"
   },
   "tracking": {
     "title": "Package Tracking",
@@ -957,7 +962,10 @@
         "quotationCreated": "Quote created",
         "quotationUpdated": "Quote updated",
         "requestDeleted": "Request deleted",
-        "pdfError": "Could not generate PDF"
+        "pdfError": "Could not generate PDF",
+        "statusLocked": "Final status: the request can no longer be changed.",
+        "statusShipmentDriven": "Status driven by the shipment.",
+        "photos": "Photos"
       }
     },
     "shipments": {
@@ -1556,7 +1564,10 @@
       "destinationCountryLabel": "Destination country *",
       "cannotChangeCountryHint": "To change country, delete this rate and create a new one.",
       "cannotChangeModeHint": "Shipping mode cannot be changed.",
-      "loadingCountriesEllipsis": "Loading countries…"
+      "loadingCountriesEllipsis": "Loading countries…",
+      "rate": "Rate",
+      "costPerUnit": "Cost per {unit}",
+      "cbmHint": "Rate per cubic meter (m³ / CBM) for sea freight."
     },
     "settings": {
       "title": "Global settings",

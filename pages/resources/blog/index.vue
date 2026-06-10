@@ -72,8 +72,7 @@ const blogPosts = computed(() => blogStore.posts)
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/600x400?text=No+Image'
-  if (/^https?:\/\//i.test(img)) return img
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(img) || 'https://placehold.co/600x400?text=No+Image'
 }
 
 await blogStore.fetchPosts({ page: 1, limit: 24, is_published: true })

@@ -218,7 +218,7 @@
                 </td>
                 <td class="text-center">
                   <strong v-if="getCost(dest, 'sea')">{{ formatCurrency(getCost(dest, 'sea'), destCurrency(dest)) }}</strong>
-                  <span v-else class="text-muted">-</span>/kg
+                  <span v-else class="text-muted">-</span>/m³
                 </td>
               </tr>
             </tbody>

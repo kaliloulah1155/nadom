@@ -282,8 +282,7 @@ const uploadingPdf = ref(false)
 
 const resolveAsset = (path: string) => {
   if (!path) return ''
-  if (/^https?:\/\//i.test(path)) return path
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(path).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(path)
 }
 
 const onVisaPdfSelected = async (e: Event) => {

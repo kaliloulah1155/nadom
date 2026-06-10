@@ -73,7 +73,7 @@
                           ></i>
                           <h6 class="mb-1">{{ (mode as any).label || getModeLabel(mode.mode) }}</h6>
                           <small v-if="mode.duration" class="text-muted d-block">{{ mode.duration }}</small>
-                          <strong v-if="modeCostPerKg(mode) > 0" class="text-primary">{{ fmtMoney(modeCostPerKg(mode)) }}/kg</strong>
+                          <strong v-if="modeCostPerKg(mode) > 0" class="text-primary">{{ fmtMoney(modeCostPerKg(mode)) }}/{{ unitForMode(mode.mode) }}</strong>
                           <small v-else-if="form.destinationId" class="text-muted d-block">{{ t('calculator.rateNotConfigured') }}</small>
                           <small v-else class="text-muted d-block">{{ t('calculator.selectCountry') }}</small>
                         </div>
@@ -82,19 +82,19 @@
                   </div>
                 </div>
 
-                <!-- Weight -->
+                <!-- Quantité : poids (kg) en aérien, volume (m³) en maritime -->
                 <div class="mb-4">
-                  <label class="form-label fw-medium">{{ t('calculator.totalWeight') }}</label>
+                  <label class="form-label fw-medium">{{ measureLabel }}</label>
                   <input
                     v-model.number="form.weight"
                     type="number"
                     class="form-control form-control-lg"
-                    placeholder="Ex: 10"
+                    :placeholder="isVolumetric(form.shippingMode) ? 'Ex: 1.5' : 'Ex: 10'"
                     min="0.1"
                     step="0.1"
                     required
                   />
-                  <small class="text-muted">{{ t('calculator.weightHint') }}</small>
+                  <small class="text-muted">{{ isVolumetric(form.shippingMode) ? t('calculator.volumeHint') : t('calculator.weightHint') }}</small>
                 </div>
 
                 <div v-if="calcError" class="alert alert-danger mb-4" role="alert">{{ calcError }}</div>
@@ -138,8 +138,8 @@
                         <strong>{{ getModeLabel(form.shippingMode!) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">{{ t('calculator.weight') }}</small>
-                        <strong>{{ form.weight }} kg</strong>
+                        <small class="text-muted d-block">{{ isVolumetric(form.shippingMode) ? t('calculator.volume') : t('calculator.weight') }}</small>
+                        <strong>{{ form.weight }} {{ currentUnit }}</strong>
                       </div>
                     </div>
                   </div>
@@ -152,7 +152,7 @@
                       <td class="text-end">{{ result.duration }}</td>
                     </tr>
                     <tr>
-                      <td>{{ t('calculator.ratePerKg') }}</td>
+                      <td>{{ t('calculator.ratePerUnit', { unit: currentUnit }) }}</td>
                       <td class="text-end">{{ fmtMoney(result.cost_per_kg, result.currency_code) }}</td>
                     </tr>
                     <tr>
@@ -160,7 +160,7 @@
                       <td class="text-end">{{ fmtMoney(result.cost, result.currency_code) }}</td>
                     </tr>
                     <tr class="text-muted small">
-                      <td colspan="2">{{ t('calculator.rateDetail', { rate: fmtMoney(result.cost_per_kg, result.currency_code), weight: result.weight }) }}</td>
+                      <td colspan="2">{{ t('calculator.rateDetailUnit', { rate: fmtMoney(result.cost_per_kg, result.currency_code), qty: result.weight, unit: currentUnit }) }}</td>
                     </tr>
                     <tr class="border-top fw-bold fs-5">
                       <td>{{ t('calculator.totalEstimate') }}</td>
@@ -211,6 +211,13 @@ const runtimeConfig = useRuntimeConfig()
 const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()
 const { formatCurrency } = useFormatters()
+const { unitForMode, isVolumetric } = useShippingUnit()
+
+/** Unité courante (kg en aérien, m³ en maritime). */
+const currentUnit = computed(() => unitForMode(form.shippingMode))
+const measureLabel = computed(() =>
+  isVolumetric(form.shippingMode) ? t('calculator.totalVolume') : t('calculator.totalWeight')
+)
 
 const intlLocale = computed(() => {
   if (locale.value === 'en') return 'en-US'
@@ -270,8 +277,8 @@ const whatsappQuoteHref = computed(() => {
     '',
     `${t('calculator.whatsappQuoteBullet')} ${t('calculator.destination')}: ${selectedDestinationLabel.value}`,
     `${t('calculator.whatsappQuoteBullet')} ${t('calculator.mode')}: ${getModeLabel(form.shippingMode!)}`,
-    `${t('calculator.whatsappQuoteBullet')} ${t('calculator.weight')}: ${r.weight} kg`,
-    `${t('calculator.whatsappQuoteBullet')} ${t('calculator.ratePerKg')}: ${fmtMoney(r.cost_per_kg, r.currency_code)}`,
+    `${t('calculator.whatsappQuoteBullet')} ${isVolumetric(form.shippingMode) ? t('calculator.volume') : t('calculator.weight')}: ${r.weight} ${currentUnit.value}`,
+    `${t('calculator.whatsappQuoteBullet')} ${t('calculator.ratePerUnit', { unit: currentUnit.value })}: ${fmtMoney(r.cost_per_kg, r.currency_code)}`,
     `${t('calculator.whatsappQuoteBullet')} ${t('calculator.totalEstimate')}: ${fmtMoney(r.cost, r.currency_code)} (${(r.currency_code || quoteCurrencyDisplay.value).toUpperCase()})`,
   ]
 

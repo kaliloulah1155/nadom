@@ -150,10 +150,10 @@
                           class="project-image-thumb"
                         >
                           <img
-                            :src="image"
+                            :src="resolveStorageAssetUrl(image)"
                             :alt="`Image ${Number(idx) + 1}`"
                             class="img-thumbnail"
-                            @click="openZoom(image)"
+                            @click="openZoom(resolveStorageAssetUrl(image))"
                           />
                         </div>
                       </div>

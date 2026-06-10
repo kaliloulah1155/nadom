@@ -398,10 +398,10 @@ const resolveAvatar = (user: any) => {
   if (user.picture_url) {
     return /^https?:\/\//i.test(user.picture_url)
       ? user.picture_url
-      : `${(config.public.apiBase as string).replace('/api', '')}${user.picture_url}`
+      : `${storageBaseUrl()}${user.picture_url}`
   }
   if (user.picture) {
-    return `${(config.public.apiBase as string).replace('/api', '')}/storage/${user.picture}`
+    return resolveStorageAssetUrl(user.picture)
   }
   const name = `${user.firstname || ''}+${user.lastname || ''}`.trim() || 'U'
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`

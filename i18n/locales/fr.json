@@ -299,7 +299,12 @@
     "whatsappQuoteGreeting": "Bonjour NADOM,",
     "whatsappQuoteIntro": "Je souhaite un devis precis suite a mon estimation sur le calculateur :",
     "whatsappQuoteBullet": "-",
-    "whatsappQuoteClosing": "Merci de me recontacter."
+    "whatsappQuoteClosing": "Merci de me recontacter.",
+    "totalVolume": "Volume total (m³) *",
+    "volume": "Volume",
+    "volumeHint": "Volume total en mètres cubes (m³).",
+    "ratePerUnit": "Tarif au {unit}",
+    "rateDetailUnit": "Detail : {rate} / {unit} × {qty} {unit} (arrondi coté serveur)"
   },
   "tracking": {
     "title": "Suivi de colis",
@@ -951,7 +956,10 @@
         "quotationCreated": "Devis créé",
         "quotationUpdated": "Devis modifié",
         "requestDeleted": "Demande supprimée",
-        "pdfError": "Impossible de générer le PDF"
+        "pdfError": "Impossible de générer le PDF",
+        "statusLocked": "Statut final : la demande ne peut plus être modifiée.",
+        "statusShipmentDriven": "Statut piloté par l'expédition.",
+        "photos": "Photos"
       }
     },
     "shipments": {
@@ -1553,7 +1561,10 @@
       "destinationCountryLabel": "Pays de destination *",
       "cannotChangeCountryHint": "Pour changer de pays, supprimez ce tarif et recréez-en un nouveau.",
       "cannotChangeModeHint": "Le mode d'expédition ne peut pas être modifié.",
-      "loadingCountriesEllipsis": "Chargement des pays…"
+      "loadingCountriesEllipsis": "Chargement des pays…",
+      "rate": "Tarif",
+      "costPerUnit": "Coût par {unit}",
+      "cbmHint": "Tarif par mètre cube (m³ / CBM) pour le maritime."
     },
     "settings": {
       "title": "Paramètres globaux",

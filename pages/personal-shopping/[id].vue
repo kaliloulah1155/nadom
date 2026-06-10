@@ -81,7 +81,7 @@
               <div class="card-body p-4">
                 <div v-if="request.images && request.images.length > 0">
                   <img
-                    :src="selectedImage || request.images[0]"
+                    :src="resolveStorageAssetUrl(selectedImage || request.images[0])"
                     class="img-fluid rounded mb-3 w-100"
                     style="max-height: 400px; object-fit: contain;"
                     alt="Product"
@@ -90,7 +90,7 @@
                     <img
                       v-for="(img, index) in request.images"
                       :key="index"
-                      :src="img"
+                      :src="resolveStorageAssetUrl(img)"
                       class="rounded cursor-pointer"
                       :class="{ 'border border-primary border-2': selectedImage === img }"
                       style="width: 80px; height: 80px; object-fit: cover;"

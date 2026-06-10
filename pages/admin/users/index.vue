@@ -414,9 +414,9 @@ const getUserAvatar = (user: any) => {
   if (user?.picture_url) {
     return /^https?:\/\//i.test(user.picture_url)
       ? user.picture_url
-      : `${config.public.apiBase.replace('/api', '')}${user.picture_url}`
+      : `${storageBaseUrl()}${user.picture_url}`
   }
-  if (user?.picture) return `${config.public.apiBase.replace('/api', '')}/storage/${user.picture}`
+  if (user?.picture) return resolveStorageAssetUrl(user.picture)
   return `https://ui-avatars.com/api/?name=${user?.firstname || 'U'}+${user?.lastname || 'U'}&background=random&color=fff`
 }
 

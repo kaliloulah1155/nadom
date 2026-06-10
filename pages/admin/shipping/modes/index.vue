@@ -56,7 +56,7 @@
               <th>{{ t('admin.shippingModes.destinationCol') }}</th>
               <th>{{ t('admin.shipments.mode') }}</th>
               <th>{{ t('admin.shippingModes.indicativeDelay') }}</th>
-              <th>{{ t('admin.shippingModes.ratePerKg') }}</th>
+              <th>{{ t('admin.shippingModes.rate') }}</th>
               <th class="text-end">Actions</th>
             </tr>
           </thead>
@@ -80,7 +80,7 @@
               </td>
               <td><span class="badge bg-dark-subtle text-dark">{{ modeLabel(m.mode) }}</span></td>
               <td>{{ m.duration || '—' }}</td>
-              <td class="fw-medium">{{ formatModeMoney(m) }}</td>
+              <td class="fw-medium">{{ formatModeMoney(m) }} <small class="text-muted">/ {{ unitForMode(m.mode) }}</small></td>
               <td class="text-end">
                 <button v-can="['update', 'shipping-modes']" type="button" class="btn btn-sm btn-outline-primary me-1" @click="openModal(m)">
                   <i class="bi bi-pencil"></i>
@@ -141,8 +141,9 @@
                 <input v-model="form.duration" type="text" class="form-control" :placeholder="t('admin.shippingModes.delayExample')" />
               </div>
               <div class="mb-0">
-                <label class="form-label">{{ t('admin.shippingModes.costPerKg') }} *</label>
+                <label class="form-label">{{ t('admin.shippingModes.costPerUnit', { unit: unitForMode(form.mode) }) }} *</label>
                 <input v-model.number="form.cost_per_kg" type="number" class="form-control" min="0" step="0.01" required />
+                <small v-if="isVolumetric(form.mode)" class="text-muted">{{ t('admin.shippingModes.cbmHint') }}</small>
               </div>
             </div>
             <div class="modal-footer">
@@ -177,6 +178,7 @@ const cfg = useShippingConfigStore()
 const countriesStore = useCountriesStore()
 const { success, error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
+const { unitForMode, isVolumetric } = useShippingUnit()
 
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null

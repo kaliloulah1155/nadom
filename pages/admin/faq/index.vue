@@ -42,6 +42,7 @@
                 </td>
                 <td>
                   <span v-if="faq.statut === 2" class="badge bg-primary">Page tarifs</span>
+                  <span v-else-if="faq.statut === 3" class="badge bg-info text-dark">Page visa</span>
                   <span v-else class="badge bg-light text-dark">Générale</span>
                 </td>
                 <td>{{ faq.position ?? 0 }}</td>
@@ -149,8 +150,9 @@
                   <select v-model.number="form.statut" class="form-select">
                     <option :value="1">Générale (/faq)</option>
                     <option :value="2">Page tarifs</option>
+                    <option :value="3">Page visa</option>
                   </select>
-                  <small class="text-muted">« Page tarifs » s'affiche aussi sur /faq.</small>
+                  <small class="text-muted">« Page tarifs » et « Page visa » s'affichent aussi sur /faq.</small>
                 </div>
               </div>
             </div>

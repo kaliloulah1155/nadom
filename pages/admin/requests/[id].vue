@@ -21,10 +21,11 @@
           </NuxtLink>
           <h4 class="mb-0">{{ t('admin.requests.detail.title', { id: String(request.id ?? '').slice(-6) }) }}</h4>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-column align-items-end gap-1">
           <select
             :value="request.status"
             class="form-select"
+            :disabled="isStatusLocked"
             @change="updateStatus(($event.target as HTMLSelectElement).value)"
           >
             <option value="pending">{{ t('admin.requests.status.pending') }}</option>
@@ -32,10 +33,13 @@
             <option value="negotiating">{{ t('admin.requests.status.negotiating') }}</option>
             <option value="confirmed">{{ t('admin.requests.status.confirmed') }}</option>
             <option value="preparing">{{ t('admin.requests.status.preparing') }}</option>
-            <option value="shipped">{{ t('admin.requests.status.shipped') }}</option>
-            <option value="delivered">{{ t('admin.requests.status.delivered') }}</option>
+            <!-- « Expédié » et « Livré » sont pilotés par l'expédition, non sélectionnables à la main. -->
+            <option value="shipped" disabled>{{ t('admin.requests.status.shipped') }}</option>
+            <option value="delivered" disabled>{{ t('admin.requests.status.delivered') }}</option>
             <option value="cancelled">{{ t('admin.requests.status.cancelled') }}</option>
           </select>
+          <small v-if="isStatusLocked" class="text-muted">{{ t('admin.requests.detail.statusLocked') }}</small>
+          <small v-else-if="request.status === 'shipped'" class="text-muted">{{ t('admin.requests.detail.statusShipmentDriven') }}</small>
         </div>
       </div>
 
@@ -62,7 +66,7 @@
                     <tr v-for="item in request.items" :key="item.productId">
                       <td>
                         <div class="d-flex align-items-center">
-                          <img :src="resolveStorageAssetUrl(item.image) || 'https://via.placeholder.com/40'" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
+                          <img :src="resolveStorageAssetUrl(item.image) || 'https://placehold.co/40?text=%3F'" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
                           <span>{{ itemDisplayName(item) }}</span>
                         </div>
                       </td>
@@ -89,17 +93,23 @@
                     class="img-fluid rounded"
                     alt=""
                   />
-                  <div v-if="(request.images?.length ?? 0) > 1" class="d-flex gap-2 mt-2">
-                    <img
-                      v-for="(img, i) in request.images.slice(1, 4)"
+                  <div v-if="(request.images?.length ?? 0) > 1" class="d-flex gap-2 mt-2 flex-wrap">
+                    <a
+                      v-for="(img, i) in request.images.slice(1)"
                       :key="i"
-                      :src="img"
-                      class="rounded"
-                      width="50"
-                      height="50"
-                      style="object-fit: cover;"
-                      alt=""
-                    />
+                      :href="resolveStorageAssetUrl(img)"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <img
+                        :src="resolveStorageAssetUrl(img)"
+                        class="rounded border"
+                        width="50"
+                        height="50"
+                        style="object-fit: cover;"
+                        alt=""
+                      />
+                    </a>
                   </div>
                 </div>
                 <div class="col-md-8">
@@ -117,6 +127,33 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photos de la demande (plusieurs images) -->
+          <div v-if="(request.images?.length ?? 0) > 0" class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0">{{ t('admin.requests.detail.photos') }}</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2">
+                <a
+                  v-for="(img, i) in request.images"
+                  :key="i"
+                  :href="resolveStorageAssetUrl(img)"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <img
+                    :src="resolveStorageAssetUrl(img)"
+                    class="rounded border"
+                    width="110"
+                    height="110"
+                    style="object-fit: cover;"
+                    alt=""
+                  />
+                </a>
               </div>
             </div>
           </div>
@@ -443,11 +480,28 @@ const requestCurrency = computed(() => {
   return (c || 'XOF').toString().toUpperCase()
 })
 
+/** Montant produit déduit de la demande : total des articles, ou budget estimé. */
+const requestProductTotal = computed(() => {
+  const items = request.value?.items
+  if (Array.isArray(items) && items.length) {
+    return items.reduce((sum: number, it: any) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 0), 0)
+  }
+  return Number((request.value as any)?.budgetEstimated) || 0
+})
+
 const EDITABLE_QUOTATION_STATUSES: RequestStatus[] = ['pending', 'searching', 'negotiating']
 const canEditQuotation = computed(() => {
   const status = request.value?.status as RequestStatus | undefined
   return !!status && EDITABLE_QUOTATION_STATUSES.includes(status)
 })
+
+// États finaux : statut verrouillé. « shipped »/« delivered » ne sont jamais
+// modifiables à la main (pilotés par l'expédition).
+const FINAL_STATUSES = ['delivered', 'cancelled']
+const SHIPMENT_DRIVEN_STATUSES = ['shipped', 'delivered']
+const isStatusLocked = computed(() =>
+  FINAL_STATUSES.includes(String(request.value?.status))
+)
 
 const openQuotationForm = () => {
   const d = request.value?.quotedDetails
@@ -457,7 +511,8 @@ const openQuotationForm = () => {
     quotation.packagingFee = Number(d.packagingFee) || 0
     quotation.shippingCost = Number(d.shippingCost) || 0
   } else {
-    quotation.productCost = 0
+    // Pré-rempli avec le montant produit de la demande (reste modifiable).
+    quotation.productCost = requestProductTotal.value
     quotation.inspectionFee = 5000
     quotation.packagingFee = 3000
     quotation.shippingCost = 0
@@ -472,6 +527,16 @@ const quotationTotal = computed(() => {
 })
 
 const updateStatus = async (status: string) => {
+  // Garde-fous : pas de retour sur un état final, pas de passage manuel à « expédié »/« livré ».
+  if (status === request.value?.status) return
+  if (isStatusLocked.value) {
+    notifyError(t('admin.requests.detail.statusLocked'))
+    return
+  }
+  if (SHIPMENT_DRIVEN_STATUSES.includes(status)) {
+    notifyError(t('admin.requests.detail.statusShipmentDriven'))
+    return
+  }
   try {
     await psStore.updateRequestStatus(requestId, status as RequestStatus)
     success(t('admin.requests.detail.statusUpdated'))

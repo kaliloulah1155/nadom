@@ -71,6 +71,7 @@ export default defineNuxtConfig({
     public: {
       // Surcharge via NUXT_PUBLIC_API_BASE (ex. http://localhost:8000/api en local).
       apiBase: "https://gateway.nadom.co/api",
+      apiFile:"https://gateway.nadom.co",
       // Backend qui sert /storage. Surcharge via NUXT_PUBLIC_STORAGE_BASE. Vide → fallback apiBase sans /api.
       storageBase: "",
       whatsapp: "+2250714158172",

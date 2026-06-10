@@ -328,8 +328,7 @@ const homePodCategories = computed(() => {
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/400x200?text=NADOM'
-  if (/^https?:\/\//i.test(img)) return img
-  return (config.public.apiBase as string).replace('/api', '') + '/storage/' + String(img).replace(/^\/+/, '')
+  return resolveStorageAssetUrl(img) || 'https://placehold.co/400x200?text=NADOM'
 }
 
 const steps = computed(() => [
