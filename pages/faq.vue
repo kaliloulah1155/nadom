@@ -35,14 +35,14 @@
 
         <div v-else class="row align-items-start">
           <div class="col-xl-12 col-lg-12 col-md-12">
-            <div class="d-flex align-items-start flex-column gap-xl-5 gap-4">
+            <div class="d-flex align-items-start flex-column gap-3">
               <div
                 v-for="(group, gIdx) in faqsByCategory"
                 :key="group.category"
                 class="faqsWraps w-100"
               >
-                <div class="fasqHeads mb-3">
-                  <h4>{{ group.category }}</h4>
+                <div class="fasqHeads mb-2">
+                  <h4 class="mb-0">{{ group.category }}</h4>
                 </div>
                 <div class="faqsCaps">
                   <div class="accordion accordion-flush" :id="`faqGroup${gIdx}`">
@@ -113,4 +113,12 @@ onMounted(async () => {
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+/* Espacement plus serré entre les questions d'un groupe FAQ */
+.faqsWraps :deep(.accordion-item) {
+  margin-bottom: 0.5rem;
+}
+.faqsWraps :deep(.accordion-item:last-child) {
+  margin-bottom: 0;
+}
+</style>

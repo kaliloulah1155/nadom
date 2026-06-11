@@ -72,7 +72,10 @@
           <!-- Expedition -->
           <div class="col-lg-4 col-md-6">
             <div class="card h-100 border-primary border-2 shadow pricing-card featured">
-              <div class="badge bg-primary position-absolute top-0 start-50 translate-middle">
+              <div
+                class="badge bg-primary text-white rounded-pill px-3 py-2 position-absolute top-0 start-50 translate-middle text-uppercase fw-semibold"
+                style="font-size: 0.78rem; letter-spacing: .5px; z-index: 3; box-shadow: 0 2px 8px rgba(0,0,0,.15);"
+              >
                 {{ t('pricing.popular') }}
               </div>
               <div class="card-header bg-transparent text-center py-4">

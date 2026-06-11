@@ -91,7 +91,7 @@
               </li>
 
               <!-- Resources -->
-              <li class="lh-nav-item lh-dropdown" :class="{ active: isActive('/resources') }">
+              <li class="lh-nav-item lh-dropdown" :class="{ active: isActiveAny(['/resources', '/visa', '/guide', '/faq']) }">
                 <a class="lh-link" href="#" @click.prevent="toggleDropdown('resources')">
                   {{ t('nav.resources') }}
                   <i class="bi bi-chevron-down"></i>
@@ -131,7 +131,7 @@
               </li>
 
               <!-- Pages -->
-              <li class="lh-nav-item lh-dropdown">
+              <li class="lh-nav-item lh-dropdown" :class="{ active: isActiveAny(['/about-us', '/contact-us']) }">
                 <a class="lh-link" href="#" @click.prevent="toggleDropdown('pages')">
                   {{ t('nav.pages') }}
                   <i class="bi bi-chevron-down"></i>
@@ -459,6 +459,9 @@ const isActive = (path: string) => {
   return route.path.startsWith(path)
 }
 
+// Parent de dropdown actif si la route courante correspond à l'un de ses sous-liens.
+const isActiveAny = (paths: string[]) => paths.some((p) => isActive(p))
+
 const handleScroll = () => {
   isScrolled.value = window.scrollY >= 50
 }
@@ -755,9 +758,20 @@ main {
   color: #dc3545;
 }
 
+/* Enfant correspondant à la page courante */
+.lh-dropdown-item.router-link-exact-active {
+  background: #fdf0f1;
+  color: #dc3545;
+  font-weight: 600;
+}
+
 .lh-dropdown-item i {
   color: #999;
   width: 20px;
+}
+
+.lh-dropdown-item.router-link-exact-active i {
+  color: #dc3545;
 }
 
 .lh-divider {
