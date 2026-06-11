@@ -229,7 +229,8 @@
       "contactHint": "代理将通过此号码与您联系",
       "infoTitle": "接下来会怎样？",
       "infoBody": "提交后，代理将在 24-48 小时内通过 WhatsApp 与您联系，讨论细节并发送报价。",
-      "noCategoriesAvailable": "暂无产品分类（请联系客服）"
+      "noCategoriesAvailable": "暂无产品分类（请联系客服）",
+      "uploadFailed": "图片上传失败：文件可能过大。请尝试更小的图片（已自动压缩）。"
     },
     "procedurePdfNew": "新申请流程 (PDF)",
     "procedurePdfCart": "购物车下单流程 (PDF)"

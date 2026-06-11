@@ -229,7 +229,8 @@
       "contactHint": "Un agent vous contactera via ce numéro",
       "infoTitle": "Comment ça se passe ?",
       "infoBody": "Après envoi, un agent vous contactera via WhatsApp sous 24-48 h pour préciser les détails et vous envoyer un devis.",
-      "noCategoriesAvailable": "Aucune catégorie produit disponible (contactez le support)"
+      "noCategoriesAvailable": "Aucune catégorie produit disponible (contactez le support)",
+      "uploadFailed": "Échec du téléversement de l'image : le fichier est probablement trop volumineux. Réessayez avec une image plus légère (compressée automatiquement)."
     },
     "procedurePdfNew": "Procédure nouvelle demande (PDF)",
     "procedurePdfCart": "Procédure commande panier (PDF)"

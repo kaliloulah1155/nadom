@@ -34,11 +34,11 @@
                 <div class="visa-type-icon">
                   <i :class="getVisaIcon(visa.type)" class="fs-4"></i>
                 </div>
-                <span class="badge bg-primary fs-6">{{ formatCurrency(visa.cost) }}</span>
+                <span class="badge bg-primary fs-6">{{ formatCurrency(Number(visa.cost) || 0, visa.currency || 'XOF') }}</span>
               </div>
 
               <h5 class="card-title fw-bold mb-2">{{ visa[`name_${locale}`] || visa.name_fr || visa.type }}</h5>
-              <p class="text-muted small mb-3">{{ visa[`description_${locale}`] || visa.description_fr }}</p>
+              <div class="text-muted small mb-3 visa-desc" v-html="visa[`description_${locale}`] || visa.description_fr || ''"></div>
 
               <!-- Info Grid -->
               <div class="row g-2 mb-3">
@@ -88,8 +88,9 @@
 
             <div class="card-footer bg-transparent border-0 p-4 pt-0">
               <a
-                :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`"
+                :href="visaWhatsAppHref(visa)"
                 target="_blank"
+                rel="noopener"
                 class="btn btn-primary w-100"
               >
                 <i class="bi bi-whatsapp me-2"></i>{{ t('visa.requestQuote') }}
@@ -226,6 +227,20 @@ const resolvePdf = (url: string | null) => {
   if (!url) return '#'
   if (/^https?:\/\//i.test(url)) return url
   return resolveStorageAssetUrl(url)
+}
+
+// Lien WhatsApp « Demander un devis » avec un message pré-rempli reprenant le visa.
+const whatsappDigits = computed(() => String(config.public.whatsapp ?? '').replace(/\D/g, ''))
+const visaWhatsAppHref = (visa: any): string => {
+  const raw = whatsappDigits.value
+  if (!raw) return '#'
+  const name = visa[`name_${locale.value}`] || visa.name_fr || visa.type || ''
+  const price = formatCurrency(Number(visa.cost) || 0, visa.currency || 'XOF')
+  const fr = String(locale.value).startsWith('fr')
+  const lines = fr
+    ? [`Bonjour, je souhaite un devis pour le visa : ${name}.`, `Tarif indicatif : ${price}.`, 'Merci de me recontacter.']
+    : [`Hello, I would like a quote for the visa: ${name}.`, `Indicative price: ${price}.`, 'Please get back to me.']
+  return `https://wa.me/${raw}?text=${encodeURIComponent(lines.join('\n'))}`
 }
 
 onMounted(async () => {

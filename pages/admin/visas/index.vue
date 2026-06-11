@@ -25,7 +25,7 @@
               </span>
             </div>
             <h5 class="card-title">{{ visa.name_fr }}</h5>
-            <p class="text-muted small mb-3">{{ truncate(visa.description_fr || '', 100) }}</p>
+            <p class="text-muted small mb-3">{{ truncate(stripHtml(visa.description_fr || ''), 100) }}</p>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
@@ -34,7 +34,7 @@
               </div>
               <div class="col-6">
                 <small class="text-muted d-block">Prix</small>
-                <strong class="text-primary">{{ visa.cost?.toLocaleString() }} FCAF</strong>
+                <strong class="text-primary">{{ formatPrice(visa.cost, visa.currency) }}</strong>
               </div>
             </div>
 
@@ -134,7 +134,7 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Validité</label>
-                      <input v-model="form.validity_fr" type="text" class="form-label" placeholder="1 an" />
+                      <input v-model="form.validity_fr" type="text" class="form-control" placeholder="1 an" />
                     </div>
                     <div class="col-12">
                       <label class="form-label">Temps de traitement</label>
@@ -210,8 +210,13 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Prix (FCFA)</label>
-                  <input v-model.number="form.cost" type="number" class="form-control" min="0" />
+                  <label class="form-label">Prix</label>
+                  <div class="input-group">
+                    <input v-model.number="form.cost" type="number" class="form-control" min="0" placeholder="0" />
+                    <select v-model="form.currency" class="form-select" style="max-width: 120px;">
+                      <option v-for="c in currencyOptions" :key="c.code" :value="c.code">{{ c.label }}</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div class="col-12">
@@ -343,6 +348,7 @@ const form = reactive({
   processing_time_en: '',
   processing_time_zh: '',
   cost: 0,
+  currency: 'XOF',
   requirementsInput: '',
   description_fr: '',
   description_en: '',
@@ -382,6 +388,7 @@ const openModal = (visa?: any) => {
     form.processing_time_en = visa.processing_time_en || ''
     form.processing_time_zh = visa.processing_time_zh || ''
     form.cost = visa.cost || 0
+    form.currency = visa.currency || 'XOF'
     form.requirementsInput = (visa.requirements_fr || []).join(', ')
     form.description_fr = visa.description_fr || ''
     form.description_en = visa.description_en || ''
@@ -404,6 +411,7 @@ const openModal = (visa?: any) => {
     form.processing_time_en = ''
     form.processing_time_zh = ''
     form.cost = 0
+    form.currency = 'XOF'
     form.requirementsInput = ''
     form.description_fr = ''
     form.description_en = ''
@@ -419,9 +427,29 @@ const truncate = (str: string, len: number) => {
   return str.length > len ? str.slice(0, len) + '...' : str
 }
 
+// Texte brut depuis le HTML de l'éditeur (pour l'aperçu des cartes).
+const stripHtml = (html: string) =>
+  String(html || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+
+// Prix formaté avec sa devise (3 000 020 FCFA, 1 200 € …).
+const formatPrice = (cost: any, currency?: string) => {
+  const n = Number(cost) || 0
+  const cur = (currency || 'XOF').toUpperCase()
+  const symbol = cur === 'XOF' ? 'FCFA' : cur
+  return `${n.toLocaleString('fr-FR')} ${symbol}`
+}
+
 const parseRequirements = (input: string): string[] => {
   return input.split(',').map(s => s.trim()).filter(s => s)
 }
+
+// Devises proposées dans le formulaire (select à côté du prix).
+const currencyOptions = [
+  { code: 'XOF', label: 'FCFA' },
+  { code: 'EUR', label: 'EUR' },
+  { code: 'USD', label: 'USD' },
+  { code: 'CNY', label: 'CNY (¥)' },
+]
 
 const saveVisa = async () => {
   if (saving.value) return
@@ -441,6 +469,7 @@ const saveVisa = async () => {
     processing_time_en: form.processing_time_en || null,
     processing_time_zh: form.processing_time_zh || null,
     cost: form.cost,
+    currency: form.currency || 'XOF',
     requirements_fr: parseRequirements(form.requirementsInput),
     requirements_en: parseRequirements(form.requirementsInput),
     requirements_zh: parseRequirements(form.requirementsInput),

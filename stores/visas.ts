@@ -13,6 +13,7 @@ export interface Visa {
   processing_time_fr: string | null
   processing_time_en: string | null
   cost: number | null
+  currency: string | null
   requirements_fr: string[] | null
   requirements_en: string[] | null
   description_fr: string | null

@@ -118,7 +118,13 @@
                   {{ t('admin.shippingModes.destinationCountryLabel') }}
                   <span v-if="countriesStore.loading" class="spinner-border spinner-border-sm text-primary" style="width: .85rem; height: .85rem;" role="status" aria-hidden="true"></span>
                 </label>
-                <select v-model="form.country_uuid" class="form-select" required :disabled="Boolean(editing) || countriesStore.loading">
+                <input
+                  v-if="editing"
+                  class="form-control"
+                  :value="`${destinationEmojiPlain(editing) ? destinationEmojiPlain(editing) + ' ' : ''}${destinationPlainLabel(editing)}`"
+                  readonly
+                />
+                <select v-else v-model="form.country_uuid" class="form-select" required :disabled="countriesStore.loading">
                   <option value="" disabled>{{ countriesStore.loading ? t('admin.shippingModes.loadingCountriesEllipsis') : t('admin.shippingModes.chooseCountry') }}</option>
                   <option v-for="opt in destinationChoices" :key="opt.id" :value="opt.id">
                     {{ opt.flag ? `${opt.flag} ` : '' }}{{ opt.country }}
@@ -128,7 +134,8 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">{{ t('admin.shipments.mode') }} *</label>
-                <select v-model="form.mode" class="form-select" required :disabled="Boolean(editing)">
+                <input v-if="editing" class="form-control" :value="modeLabel(form.mode)" readonly />
+                <select v-else v-model="form.mode" class="form-select" required>
                   <option value="" disabled>{{ t('admin.shippingModes.chooseMode') }}</option>
                   <option value="air_express">{{ t('admin.shippingModes.airExpress') }}</option>
                   <option value="air_normal">{{ t('admin.shippingModes.airStandard') }}</option>

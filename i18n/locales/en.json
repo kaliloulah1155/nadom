@@ -229,7 +229,8 @@
       "contactHint": "An agent will contact you via this number",
       "infoTitle": "What happens next?",
       "infoBody": "After submission, an agent will contact you via WhatsApp within 24-48h to discuss details and send you a quote.",
-      "noCategoriesAvailable": "No product categories available (contact support)"
+      "noCategoriesAvailable": "No product categories available (contact support)",
+      "uploadFailed": "Image upload failed: the file is probably too large. Try a lighter image (auto-compressed)."
     },
     "procedurePdfNew": "New request procedure (PDF)",
     "procedurePdfCart": "Cart order procedure (PDF)"

@@ -526,7 +526,9 @@ async function resolveImagesForSubmit(): Promise<string[]> {
     // On stocke le CHEMIN relatif (servi via l'API / apiFile), jamais de base64 en base.
     const stored = res.success ? (res.data?.path || res.data?.url) : null;
     if (!stored) {
-      throw new Error(res.message || t('personalShopping.formExtra.submitError'));
+      // Message explicite : l'échec vient quasi toujours d'un fichier trop lourd
+      // rejeté par le serveur AVANT Laravel (rien dans laravel.log).
+      throw new Error(t('personalShopping.formExtra.uploadFailed'));
     }
     out.push(stored);
   }
