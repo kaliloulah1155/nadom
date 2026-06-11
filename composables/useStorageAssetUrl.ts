@@ -16,6 +16,11 @@ export function resolveStorageAssetUrl(path: string | null | undefined): string 
   if (path == null || path === '') return ''
   const s = String(path).trim()
 
+  // Image inline (base64) ou blob : on la renvoie telle quelle (legacy / aperçu).
+  if (/^(data:|blob:)/i.test(s)) {
+    return s
+  }
+
   const base = storageBaseUrl()
 
   if (/^https?:\/\//i.test(s)) {

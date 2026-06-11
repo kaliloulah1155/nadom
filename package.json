@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "build:vercel": "nuxt build",
+    "config:prod": "node -e \"require('fs').copyFileSync('nuxt.config.example.ts','nuxt.config.ts')\"",
+    "clean": "node -e \"for(const d of ['.nuxt','.output']){try{require('fs').rmSync(d,{recursive:true,force:true,maxRetries:5,retryDelay:300})}catch(e){console.warn('clean skip',d,e.code)}}\"",
+    "build:vercel": "npm run config:prod && npm run clean && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",

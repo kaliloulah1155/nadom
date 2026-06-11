@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// Modèle : renommer en nuxt.config.ts ou fusionner avec la config locale.
 
 const devWatchUsePolling = process.env.CHOKIDAR_USEPOLLING === 'true'
 const devWatchInterval = Number(process.env.CHOKIDAR_INTERVAL) || 1000
@@ -68,10 +69,11 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // API Laravel (avec /api). Local: http://localhost:8000/api · Prod: https://gateway.nadom.co/api
-      apiBase: "http://localhost:8000/api",
+      // API Laravel (avec /api). Prod: https://gateway.nadom.co/api · Local: http://localhost:8000/api
+      apiBase: "https://gateway.nadom.co/api",
       // Host du backend qui sert les fichiers /storage (images, PDF…), SANS /api.
-      apiFile: "http://localhost:8000",
+      // DOIT pointer vers le host qui héberge réellement /storage en prod.
+      apiFile: "https://gateway.nadom.co",
       // Override optionnel du host fichiers. Vide → on utilise apiFile (puis apiBase sans /api).
       storageBase: "",
       whatsapp: "+2250714158172",

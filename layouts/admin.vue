@@ -595,6 +595,12 @@ const currentUser = computed(() => authStore.currentUser)
 const userFullName = computed(() => authStore.userFullName)
 const pendingRequestsCount = computed(() => psStore.getPendingRequests.length)
 
+// Badge sidebar « Demandes » : à chaque notification temps réel reçue (le compteur
+// de non-lues augmente), on rafraîchit les demandes pour mettre le badge à jour.
+watch(() => notifStore.unread, (n, prev) => {
+  if (n > prev) psStore.fetchRequests().catch(() => {})
+})
+
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
     '/admin/dashboard': t('admin.pages.dashboard'),

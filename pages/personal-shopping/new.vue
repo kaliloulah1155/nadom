@@ -356,7 +356,7 @@ definePageMeta({
 const { t } = useI18n();
 const { label: podCategoryLabel } = usePodCategoryLabel()
 const { categoryLabel } = useCategoryLabel()
-const { compressMany } = useImageCompress();
+const { fileToCompressedBlob } = useImageCompress();
 const router = useRouter();
 const authStore = useAuthStore();
 const psStore = usePersonalShoppingStore();
@@ -517,22 +517,18 @@ async function resolveImagesForSubmit(): Promise<string[]> {
   const api = usePublicApi();
   const out: string[] = [];
   for (const file of imageFiles.value) {
-    let added = false;
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const res = await api.post<{ url?: string; path?: string }>('/upload/public-image', fd);
-      if (res.success && res.data?.url) {
-        out.push(res.data.url);
-        added = true;
-      }
-    } catch {
-      /* fallback compression */
+    // Compression/redimensionnement avant envoi → petits fichiers (évite 413).
+    const blob = await fileToCompressedBlob(file);
+    const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    const fd = new FormData();
+    fd.append('image', blob, name);
+    const res = await api.post<{ url?: string; path?: string }>('/upload/public-image', fd);
+    // On stocke le CHEMIN relatif (servi via l'API / apiFile), jamais de base64 en base.
+    const stored = res.success ? (res.data?.path || res.data?.url) : null;
+    if (!stored) {
+      throw new Error(res.message || t('personalShopping.formExtra.submitError'));
     }
-    if (!added) {
-      const compressed = await compressMany([file]);
-      if (compressed[0]) out.push(compressed[0]);
-    }
+    out.push(stored);
   }
   return out;
 }
