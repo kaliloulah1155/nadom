@@ -90,6 +90,9 @@
                   <a :href="shareUrl('linkedin')" target="_blank" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-linkedin"></i>
                   </a>
+                  <a :href="shareUrl('tiktok')" target="_blank" rel="noopener" class="btn btn-outline-dark btn-sm" title="TikTok">
+                    <i class="bi bi-tiktok"></i>
+                  </a>
                 </div>
               </div>
 
@@ -168,7 +171,9 @@ const shareUrl = (platform: string) => {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
     twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
     whatsapp: `https://wa.me/?text=${t}%20${u}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
+    // TikTok n'a pas d'URL de partage de page → on renvoie vers le profil NADOM.
+    tiktok: 'https://www.tiktok.com/@nadom225'
   }
   return map[platform] || '#'
 }
