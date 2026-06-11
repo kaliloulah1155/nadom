@@ -215,14 +215,14 @@
 
     <!-- Modal -->
     <div id="ticketModal" ref="modalRef" class="modal fade" tabindex="-1">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ editingTicket ? t('admin.support.modalEdit') : t('admin.support.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveTicket">
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
               <!-- ── Bloc client / expédition / contacts (unifié création + édition) ── -->
               <div class="row g-3 mb-3 pb-3 border-bottom">
 

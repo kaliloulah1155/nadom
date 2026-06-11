@@ -72,7 +72,7 @@
                 </td>
                 <td>
                   <div class="d-flex align-items-center">
-                    <img :src="guide.avatar || 'https://placehold.co/50x50?text=G'" class="rounded-circle me-3" width="45" height="45" style="object-fit: cover;" />
+                    <img :src="resolveStorageAssetUrl(guide.avatar) || 'https://placehold.co/50x50?text=G'" class="rounded-circle me-3" width="45" height="45" style="object-fit: cover;" />
                     <div>
                       <div class="fw-medium">{{ guide.name }}</div>
                       <small class="text-muted">{{ guide.specializations_fr?.slice(0, 2).join(', ') }}</small>
@@ -97,8 +97,9 @@
                     <button class="btn btn-outline-primary btn-sm me-2" @click="openModal(guide)">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" @click="deleteGuide(guide.id)">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn btn-outline-danger btn-sm" :disabled="deletingId === guide.id" @click="deleteGuide(guide.id)">
+                      <span v-if="deletingId === guide.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      <i v-else class="bi bi-trash"></i>
                     </button>
                   </div>
                 </td>
@@ -257,7 +258,10 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ t('admin.common.save') }}
+              </button>
             </div>
           </form>
         </div>
@@ -294,6 +298,8 @@ const filterKind = ref('')
 const gdcCategories = ref<any[]>([])
 
 const editingGuide = ref<any>(null)
+const saving = ref(false)
+const deletingId = ref<string | null>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
@@ -400,10 +406,12 @@ const parseArrayInput = (input: string): string[] => {
 }
 
 const saveGuide = async () => {
+  if (saving.value) return
   if (form.kind === 'documentation' && (!form.category_id || form.category_id === 0)) {
     error('Choisissez une catégorie GDC pour une fiche documentation.')
     return
   }
+  saving.value = true
 
   const data: Record<string, any> = {
     kind: form.kind,
@@ -438,14 +446,23 @@ const saveGuide = async () => {
     await fetchGuides(guidesStore.guidesMeta.currentPage)
   } catch (err: any) {
     error(err.message || 'Erreur lors de l\'enregistrement')
+  } finally {
+    saving.value = false
   }
 }
 
 const deleteGuide = async (id: string) => {
-  if (confirm(t('admin.confirm.deleteGuide'))) {
+  if (deletingId.value) return
+  if (!confirm(t('admin.confirm.deleteGuide'))) return
+  deletingId.value = id
+  try {
     await guidesStore.deleteGuide(id)
     success('Guide supprimé')
     await fetchGuides(guidesStore.guidesMeta.currentPage)
+  } catch (err: any) {
+    error(err.message || t('admin.messages.deleteError'))
+  } finally {
+    deletingId.value = null
   }
 }
 </script>

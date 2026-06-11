@@ -230,7 +230,9 @@
       "infoTitle": "What happens next?",
       "infoBody": "After submission, an agent will contact you via WhatsApp within 24-48h to discuss details and send you a quote.",
       "noCategoriesAvailable": "No product categories available (contact support)"
-    }
+    },
+    "procedurePdfNew": "New request procedure (PDF)",
+    "procedurePdfCart": "Cart order procedure (PDF)"
   },
   "importExport": {
     "title": "Import-Export",
@@ -732,7 +734,8 @@
       "noUnreadNotifications": "No unread notifications",
       "viewAllNotifications": "View all",
       "myProfile": "My profile",
-      "logout": "Log out"
+      "logout": "Log out",
+      "homeSlides": "Home carousel"
     },
     "pages": {
       "dashboard": "Dashboard",
@@ -761,7 +764,8 @@
       "categories": "Categories",
       "products": "Products",
       "personalShopping": "Personal Shopping",
-      "contactLeads": "Contact requests (site)"
+      "contactLeads": "Contact requests (site)",
+      "homeSlides": "Home carousel"
     },
     "time": {
       "justNow": "just now",

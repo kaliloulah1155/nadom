@@ -115,14 +115,14 @@
     </div>
 
     <div id="countryModal" class="modal fade" tabindex="-1" ref="modalRef">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ editing ? t('admin.countries.modalEdit') : t('admin.countries.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
               <div class="row g-3">
                 <div class="col-md-8">
                   <label class="form-label">{{ t('admin.countries.countryLabel') }} *</label>

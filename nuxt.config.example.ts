@@ -69,10 +69,12 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // Surcharge via NUXT_PUBLIC_API_BASE (ex. http://localhost:8000/api en local).
+      // API Laravel (avec /api). Prod: https://gateway.nadom.co/api · Local: http://localhost:8000/api
       apiBase: "https://gateway.nadom.co/api",
-      apiFile:"https://gateway.nadom.co",
-      // Backend qui sert /storage. Surcharge via NUXT_PUBLIC_STORAGE_BASE. Vide → fallback apiBase sans /api.
+      // Host du backend qui sert les fichiers /storage (images, PDF…), SANS /api.
+      // DOIT pointer vers le host qui héberge réellement /storage en prod.
+      apiFile: "https://gateway.nadom.co",
+      // Override optionnel du host fichiers. Vide → on utilise apiFile (puis apiBase sans /api).
       storageBase: "",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",

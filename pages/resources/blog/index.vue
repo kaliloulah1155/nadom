@@ -32,7 +32,7 @@
                   <small class="text-muted">{{ post.readTime }}</small>
                 </div>
                 <h5 class="card-title">{{ post[`title_${locale}`] || post.title_fr }}</h5>
-                <p class="card-text text-muted small">{{ post[`excerpt_${locale}`] || post.excerpt_fr }}</p>
+                <p class="card-text text-muted small">{{ excerptText(post) }}</p>
               </div>
               <div class="card-footer bg-transparent border-0">
                 <div class="d-flex justify-content-between align-items-center">
@@ -64,11 +64,19 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
-const { formatDate } = useFormatters()
+const { formatDate, truncate } = useFormatters()
 const blogStore = useBlogStore()
 const config = useRuntimeConfig()
 
 const blogPosts = computed(() => blogStore.posts)
+
+/** Extrait nettoyé du HTML et coupé à un nombre de caractères pour la liste. */
+const EXCERPT_MAX = 160
+const excerptText = (post: any) => {
+  const raw = post[`excerpt_${locale.value}`] || post.excerpt_fr || ''
+  const text = String(raw).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  return truncate(text, EXCERPT_MAX)
+}
 
 const resolveImage = (img: string | null) => {
   if (!img) return 'https://placehold.co/600x400?text=No+Image'

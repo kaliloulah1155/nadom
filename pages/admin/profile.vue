@@ -11,7 +11,7 @@
           <div class="card-body">
             <div class="position-relative d-inline-block mb-3">
               <img
-                :src="authStore.currentUser?.avatar || 'https://ui-avatars.com/api/?name=Admin'"
+                :src="resolveStorageAssetUrl(authStore.currentUser?.avatar) || 'https://ui-avatars.com/api/?name=Admin'"
                 class="rounded-circle"
                 width="120"
                 height="120"

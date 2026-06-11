@@ -3,8 +3,63 @@
     <!-- Marquee -->
     <Marquee v-if="marqueeText" :text="marqueeText" />
 
-    <!-- Hero Section -->
-    <section class="hero-section position-relative overflow-hidden">
+    <!-- Hero Carousel (paramétré depuis le back-office) -->
+    <section v-if="heroSlides.length" class="hero-carousel">
+      <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+        <div v-if="heroSlides.length > 1" class="carousel-indicators">
+          <button
+            v-for="(slide, i) in heroSlides"
+            :key="'ind-' + slide.id"
+            type="button"
+            data-bs-target="#heroCarousel"
+            :data-bs-slide-to="i"
+            :class="{ active: i === 0 }"
+            :aria-current="i === 0 ? 'true' : undefined"
+            :aria-label="`Slide ${i + 1}`"
+          ></button>
+        </div>
+        <div class="carousel-inner">
+          <div
+            v-for="(slide, i) in heroSlides"
+            :key="slide.id"
+            class="carousel-item"
+            :class="{ active: i === 0 }"
+          >
+            <div class="hero-slide" :style="{ backgroundImage: `url(${slide.image})` }">
+              <div class="hero-slide-overlay"></div>
+              <div class="container position-relative">
+                <div class="row">
+                  <div class="col-lg-7 text-white py-5">
+                    <h1 v-if="slide.title" class="display-4 fw-bold mb-3 text-white">{{ slide.title }}</h1>
+                    <p v-if="slide.subtitle" class="lead opacity-90 mb-4 text-white">{{ slide.subtitle }}</p>
+                    <NuxtLink
+                      v-if="slide.ctaUrl && slide.ctaLabel"
+                      :to="slide.ctaUrl"
+                      class="btn btn-primary btn-lg"
+                    >
+                      {{ slide.ctaLabel }} <i class="bi bi-arrow-right ms-2"></i>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <template v-if="heroSlides.length > 1">
+          <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Précédent</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Suivant</span>
+          </button>
+        </template>
+      </div>
+    </section>
+
+    <!-- Hero Section (repli si aucun slide) -->
+    <section v-else class="hero-section position-relative overflow-hidden">
       <div class="hero-bg"></div>
       <div class="container position-relative py-5">
         <div class="row align-items-center min-vh-75">
@@ -218,6 +273,8 @@ import { useBlogStore } from '~/stores/blog'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useGlobalSettingsStore } from '~/stores/globalSettings'
 import { useHomeServicesStore } from '~/stores/homeServices'
+import { useHomeSlidesStore } from '~/stores/homeSlides'
+import { resolveStorageAssetUrl } from '~/composables/useStorageAssetUrl'
 import { useFormatters } from '~/composables/useFormatters'
 import { POD_CATEGORY_COLORS, resolvePodCategoryIcon } from '~/composables/usePodCategoryDisplay'
 
@@ -243,10 +300,23 @@ const blogStore = useBlogStore()
 const psStore = usePersonalShoppingStore()
 const settingsStore = useGlobalSettingsStore()
 const homeServicesStore = useHomeServicesStore()
+const homeSlidesStore = useHomeSlidesStore()
 const { truncate } = useFormatters()
 const config = useRuntimeConfig()
 
 const marqueeText = computed(() => settingsStore.getValue('home_marquee', ''))
+
+// Slides du carousel d'accueil (paramétrés depuis le back-office), localisés.
+const heroSlides = computed(() =>
+  homeSlidesStore.publicItems.map((s: any) => ({
+    id: s.id,
+    image: resolveStorageAssetUrl(s.image_path),
+    title: s[`title_${locale.value}`] || s.title_fr || '',
+    subtitle: s[`subtitle_${locale.value}`] || s.subtitle_fr || '',
+    ctaLabel: s[`cta_label_${locale.value}`] || s.cta_label_fr || '',
+    ctaUrl: s.cta_url || ''
+  }))
+)
 
 const escapePlain = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -344,12 +414,38 @@ await Promise.all([
   psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' }),
   settingsStore.fetchAll(),
   homeServicesStore.fetchPublic(),
+  homeSlidesStore.fetchPublic(),
 ])
 
 const recentPosts = computed(() => blogStore.getRecentPosts(4))
 </script>
 
 <style scoped>
+/* Annule le padding global `section { padding: 80px 0 }` qui créait une bande blanche. */
+.hero-carousel {
+  padding: 0;
+}
+.hero-slide {
+  position: relative;
+  min-height: 460px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(15, 23, 42, 0.45) 55%, rgba(15, 23, 42, 0.15) 100%);
+}
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+  width: 6%;
+}
+@media (max-width: 768px) {
+  .hero-slide { min-height: 360px; }
+}
+
 .hero-section {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   min-height: 80vh;

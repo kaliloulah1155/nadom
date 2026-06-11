@@ -1,14 +1,15 @@
 /**
  * URLs des fichiers publics Laravel (`storage/app/public/...`).
  *
- * Base utilisée, dans l'ordre :
- *  1. `storageBase` (NUXT_PUBLIC_STORAGE_BASE) — l'URL du BACKEND qui sert /storage.
- *  2. fallback : `apiBase` sans le suffixe `/api`.
+ * Host utilisé (cf. `storageBaseUrl`), dans l'ordre :
+ *  1. `storageBase` — override explicite (généralement vide).
+ *  2. `apiFile` — host du backend qui sert /storage, défini dans nuxt.config(.example).ts.
+ *  3. fallback : `apiBase` sans le suffixe `/api`.
  * On ajoute ensuite `/storage/{path}`.
  *
  * Les URLs absolues qui pointent vers un `/storage/...` (ex. images uploadées et
  * enregistrées en base avec un mauvais host comme `https://www.nadom.co/storage/...`)
- * sont automatiquement « rebasées » sur la bonne base. Les autres URLs absolues
+ * sont automatiquement « rebasées » sur le host courant. Les autres URLs absolues
  * (placehold.co, loremflickr, etc.) sont renvoyées telles quelles.
  */
 export function resolveStorageAssetUrl(path: string | null | undefined): string {

@@ -230,7 +230,9 @@
       "infoTitle": "接下来会怎样？",
       "infoBody": "提交后，代理将在 24-48 小时内通过 WhatsApp 与您联系，讨论细节并发送报价。",
       "noCategoriesAvailable": "暂无产品分类（请联系客服）"
-    }
+    },
+    "procedurePdfNew": "新申请流程 (PDF)",
+    "procedurePdfCart": "购物车下单流程 (PDF)"
   },
   "importExport": {
     "title": "进出口",
@@ -732,7 +734,8 @@
       "noUnreadNotifications": "没有未读通知",
       "viewAllNotifications": "查看全部",
       "myProfile": "我的资料",
-      "logout": "退出登录"
+      "logout": "退出登录",
+      "homeSlides": "首页轮播"
     },
     "pages": {
       "dashboard": "仪表板",
@@ -761,7 +764,8 @@
       "categories": "分类",
       "products": "产品",
       "personalShopping": "代购服务",
-      "contactLeads": "联系请求（网站）"
+      "contactLeads": "联系请求（网站）",
+      "homeSlides": "首页轮播"
     },
     "time": {
       "justNow": "刚刚",

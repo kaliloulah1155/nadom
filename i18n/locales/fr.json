@@ -230,7 +230,9 @@
       "infoTitle": "Comment ça se passe ?",
       "infoBody": "Après envoi, un agent vous contactera via WhatsApp sous 24-48 h pour préciser les détails et vous envoyer un devis.",
       "noCategoriesAvailable": "Aucune catégorie produit disponible (contactez le support)"
-    }
+    },
+    "procedurePdfNew": "Procédure nouvelle demande (PDF)",
+    "procedurePdfCart": "Procédure commande panier (PDF)"
   },
   "importExport": {
     "title": "Import-Export",
@@ -726,7 +728,8 @@
       "noUnreadNotifications": "Aucune notification non lue",
       "viewAllNotifications": "Voir toutes",
       "myProfile": "Mon profil",
-      "logout": "Déconnexion"
+      "logout": "Déconnexion",
+      "homeSlides": "Carousel accueil"
     },
     "pages": {
       "dashboard": "Tableau de bord",
@@ -755,7 +758,8 @@
       "categories": "Catégories",
       "products": "Produits",
       "personalShopping": "Personal Shopping",
-      "contactLeads": "Demandes contact (site)"
+      "contactLeads": "Demandes contact (site)",
+      "homeSlides": "Carousel accueil"
     },
     "time": {
       "justNow": "à l'instant",

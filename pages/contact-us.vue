@@ -42,6 +42,10 @@
         <div class="row align-items-center justify-content-between g-4">
           <div class="col-xl-7 col-lg-7 col-md-12">
             <div class="contactForm pe-xl-5 pe-lg-4">
+              <div v-if="submitted" class="alert alert-success d-flex align-items-center gap-2 rounded-4 mb-4" role="alert">
+                <i class="fa-solid fa-circle-check fs-5"></i>
+                <span>{{ submittedMessage }}</span>
+              </div>
               <form @submit.prevent="submitForm">
                 <div class="row align-items-center">
                   <div class="col-xl-12 col-lg-12 col-md-12">
@@ -193,6 +197,9 @@ const { success, error } = useNotification()
 
 const sending = ref(false)
 const attempted = ref(false)
+// Retour visible après soumission (le toast n'est pas rendu sur le layout public).
+const submitted = ref(false)
+const submittedMessage = ref('')
 
 const form = reactive({
   name: '',
@@ -227,6 +234,8 @@ function onInput(key: keyof typeof form, raw: string) {
     v = v.toLowerCase()
   }
   form[key] = v
+  // L'utilisateur recommence à écrire → on masque l'ancien message de succès.
+  if (submitted.value) submitted.value = false
 }
 
 function resetForm(): void {
@@ -360,7 +369,10 @@ async function submitForm() {
     if (!res.success) {
       throw new Error(res.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))
     }
-    success(String(res.message || (isFrLang() ? 'Message envoyé.' : 'Message sent.')))
+    const msg = String(res.message || (isFrLang() ? 'Votre message a bien été reçu. Nous vous répondrons rapidement.' : 'Your message has been received. We will reply shortly.'))
+    success(msg)
+    submittedMessage.value = msg
+    submitted.value = true
     resetForm()
   } catch (e: any) {
     error(e?.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))

@@ -64,8 +64,9 @@
               <button class="btn btn-sm btn-outline-primary me-2" @click="openModal(post)">
                 <i class="bi bi-pencil"></i> {{ t('admin.common.edit') }}
               </button>
-              <button class="btn btn-sm btn-outline-danger" @click="deletePost(post.id)">
-                <i class="bi bi-trash"></i>
+              <button class="btn btn-sm btn-outline-danger" :disabled="deletingId === post.id" @click="deletePost(post.id)">
+                <span v-if="deletingId === post.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <i v-else class="bi bi-trash"></i>
               </button>
             </div>
           </div>
@@ -245,8 +246,11 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving || uploading">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ t('admin.common.save') }}
+              </button>
             </div>
           </form>
         </div>
@@ -261,6 +265,7 @@ const { t } = useI18n()
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useBlogStore } from '~/stores/blog'
 import { useNotification } from '~/composables/useNotification'
+import { getToken } from '~/composables/useApi'
 
 definePageMeta({
   layout: 'admin'
@@ -285,7 +290,7 @@ const onImageSelected = async (e: Event) => {
   try {
     const fd = new FormData()
     fd.append('image', file)
-    const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('auth_token') : null
+    const token = getToken()
     const res = await fetch((config.public.apiBase as string).replace(/\/$/, '') + '/upload/image', {
       method: 'POST',
       headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -311,6 +316,8 @@ const posts = computed(() => blogStore.posts)
 const searchQuery = ref('')
 const isPublished = ref<boolean | undefined>(undefined)
 const editingPost = ref<any>(null)
+const saving = ref(false)
+const deletingId = ref<number | string | null>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
@@ -409,6 +416,8 @@ const openModal = (post?: any) => {
 }
 
 const savePost = async () => {
+  if (saving.value) return
+  saving.value = true
   const data = {
     slug: form.slug,
     title_fr: form.title_fr,
@@ -441,14 +450,23 @@ const savePost = async () => {
     await fetchPosts(blogStore.postsMeta.currentPage)
   } catch (err: any) {
     error(err.message || t('admin.messages.saveError'))
+  } finally {
+    saving.value = false
   }
 }
 
 const deletePost = async (id: number) => {
-  if (confirm(t('admin.confirm.deleteArticle'))) {
+  if (deletingId.value) return
+  if (!confirm(t('admin.confirm.deleteArticle'))) return
+  deletingId.value = id
+  try {
     await blogStore.deletePost(id)
     success(t('admin.blog.deleted'))
     await fetchPosts(blogStore.postsMeta.currentPage)
+  } catch (err: any) {
+    error(err.message || t('admin.messages.deleteError'))
+  } finally {
+    deletingId.value = null
   }
 }
 </script>

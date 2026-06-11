@@ -50,6 +50,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Procédures en PDF (nouvelle demande / panier), localisées -->
+        <div class="text-center mt-4 d-flex flex-wrap gap-2 justify-content-center">
+          <a :href="procedurePdfUrl('new')" target="_blank" rel="noopener" class="btn btn-outline-primary">
+            <i class="bi bi-file-earmark-pdf me-2"></i>{{ t('personalShopping.procedurePdfNew') }}
+          </a>
+          <a :href="procedurePdfUrl('cart')" target="_blank" rel="noopener" class="btn btn-outline-primary">
+            <i class="bi bi-file-earmark-pdf me-2"></i>{{ t('personalShopping.procedurePdfCart') }}
+          </a>
+        </div>
       </section>
 
       <!-- Categories -->
@@ -243,7 +253,7 @@ definePageMeta({
   layout: 'default'
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { label: podCategoryLabel } = usePodCategoryLabel()
 const { resolveList } = useI18nResolved()
 
@@ -252,6 +262,10 @@ const PS_ADV_ICONS = ['bi bi-shield-check', 'bi bi-cash-stack', 'bi bi-chat-dots
 const steps = computed(() =>
   resolveList('personalShopping.psSteps', ['title', 'description'] as const),
 )
+
+// PDF des procédures (généré par le backend, localisé selon la langue courante).
+const procedurePdfUrl = (kind: 'new' | 'cart') =>
+  `${(config.public.apiBase as string).replace(/\/$/, '')}/personal-shopping/procedure/${kind}/pdf?lang=${locale.value}`
 
 const advantages = computed(() =>
   resolveList('personalShopping.advantagesList', ['title', 'description'] as const).map((item, i) => ({

@@ -179,6 +179,12 @@
                   <span>{{ t('admin.nav.homeBlock') }}</span>
                 </NuxtLink>
               </li>
+              <li v-can="['list', 'home-slides']" class="nav-item">
+                <NuxtLink to="/admin/home-slides" class="nav-link py-1" :class="{ 'active': isActive('/admin/home-slides') }">
+                  <i class="bi bi-images"></i>
+                  <span>{{ t('admin.nav.homeSlides') }}</span>
+                </NuxtLink>
+              </li>
               <li v-can="['list', 'site-static-pages']" class="nav-item">
                 <NuxtLink to="/admin/site-pages" class="nav-link py-1" :class="{ 'active': isActive('/admin/site-pages') }">
                   <i class="bi bi-file-earmark-richtext"></i>
@@ -549,6 +555,7 @@ const isContenuSectionActive = computed(
     isActive('/admin/blog') ||
     isActive('/admin/faq') ||
     isActive('/admin/home-services') ||
+    isActive('/admin/home-slides') ||
     isActive('/admin/site-pages') ||
     isActive('/admin/footer') ||
     isActive('/admin/contact-leads')
@@ -605,6 +612,7 @@ const pageTitle = computed(() => {
     '/admin/blog': t('admin.pages.blog'),
     '/admin/faq': t('admin.pages.faq'),
     '/admin/home-services': t('admin.pages.homeServices'),
+    '/admin/home-slides': t('admin.pages.homeSlides'),
     '/admin/site-pages': t('admin.pages.sitePages'),
     '/admin/footer': t('admin.pages.footer'),
     '/admin/support': t('admin.pages.support'),
@@ -672,7 +680,7 @@ watch(
       psMenuOpen.value = true
     } else if (path.startsWith('/admin/guides') || path.startsWith('/admin/guide-accompaniment') || path.startsWith('/admin/guide-bookings') || path.startsWith('/admin/visas') || path.startsWith('/admin/pricing')) {
       voyagesMenuOpen.value = true
-    } else if (path.startsWith('/admin/blog') || path.startsWith('/admin/faq') || path.startsWith('/admin/home-services') || path.startsWith('/admin/site-pages') || path.startsWith('/admin/footer') || path.startsWith('/admin/contact-leads')) {
+    } else if (path.startsWith('/admin/blog') || path.startsWith('/admin/faq') || path.startsWith('/admin/home-services') || path.startsWith('/admin/home-slides') || path.startsWith('/admin/site-pages') || path.startsWith('/admin/footer') || path.startsWith('/admin/contact-leads')) {
       contenuMenuOpen.value = true
     } else if (path.startsWith('/admin/support') || path.startsWith('/admin/reports') || path.startsWith('/admin/settings')) {
       supportMenuOpen.value = true

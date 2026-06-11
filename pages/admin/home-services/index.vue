@@ -53,9 +53,11 @@
                     type="button"
                     class="btn btn-outline-danger btn-sm"
                     :title="t('admin.common.delete')"
+                    :disabled="deletingId === row.id"
                     @click="remove(row)"
                   >
-                    <i class="bi bi-trash"></i>
+                    <span v-if="deletingId === row.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <i v-else class="bi bi-trash"></i>
                   </button>
                 </td>
               </tr>
@@ -66,14 +68,14 @@
     </div>
 
     <div id="homeServiceModal" class="modal fade" tabindex="-1" ref="modalRef">
-      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ editing ? t('admin.homeServices.editCard') : t('admin.homeServices.newCard') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label class="form-label">Slug * <small class="text-muted">(unique, non modifiable après création)</small></label>
@@ -190,8 +192,11 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ t('admin.common.save') }}
+              </button>
             </div>
           </form>
         </div>
@@ -220,6 +225,8 @@ const rows = computed(() =>
 
 const editing = ref<HomeServiceRow | null>(null)
 const modalRef = ref<HTMLElement | null>(null)
+const saving = ref(false)
+const deletingId = ref<string | null>(null)
 let modalInstance: any = null
 
 const emptyForm = () => ({
@@ -321,6 +328,8 @@ const removeFeatureRow = (idx: number) => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
   const { features_fr, features_en, features_zh } = packFeatures()
   try {
     if (editing.value) {
@@ -361,17 +370,23 @@ const save = async () => {
     await store.fetchAdmin()
   } catch (e: any) {
     error(e?.message || t('admin.messages.saveError'))
+  } finally {
+    saving.value = false
   }
 }
 
 const remove = async (row: HomeServiceRow) => {
+  if (deletingId.value) return
   if (!confirm(t('admin.confirm.deleteHomeServiceCard', { slug: row.slug }))) return
+  deletingId.value = row.id
   try {
     await store.remove(row.id)
     success(t('admin.homeServices.deleted'))
     await store.fetchAdmin()
   } catch (e: any) {
     error(e?.message || t('admin.messages.deleteError'))
+  } finally {
+    deletingId.value = null
   }
 }
 </script>

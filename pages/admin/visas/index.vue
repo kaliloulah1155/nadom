@@ -61,8 +61,9 @@
               <button class="btn btn-sm btn-outline-primary me-2" @click="openModal(visa)">
                 <i class="bi bi-pencil me-1"></i>{{ t('admin.common.edit') }}
               </button>
-              <button class="btn btn-sm btn-outline-danger" @click="deleteVisa(visa.id)">
-                <i class="bi bi-trash"></i>
+              <button class="btn btn-sm btn-outline-danger" :disabled="deletingId === visa.id" @click="deleteVisa(visa.id)">
+                <span v-if="deletingId === visa.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <i v-else class="bi bi-trash"></i>
               </button>
             </div>
           </div>
@@ -254,7 +255,10 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('admin.common.save') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ t('admin.common.save') }}
+              </button>
             </div>
           </form>
         </div>
@@ -269,6 +273,7 @@ const { t } = useI18n()
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useVisasStore } from '~/stores/visas'
 import { useNotification } from '~/composables/useNotification'
+import { getToken } from '~/composables/useApi'
 
 definePageMeta({
   layout: 'admin'
@@ -294,7 +299,7 @@ const onVisaPdfSelected = async (e: Event) => {
     const fd = new FormData()
     fd.append('file', file)
     fd.append('folder', 'visas')
-    const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('auth_token') : null
+    const token = getToken()
     const res = await fetch((config.public.apiBase as string).replace(/\/$/, '') + '/upload/file', {
       method: 'POST',
       headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -318,6 +323,8 @@ const onVisaPdfSelected = async (e: Event) => {
 const visaTypes = computed(() => visasStore.visaTypes)
 
 const editingVisa = ref<any>(null)
+const saving = ref(false)
+const deletingId = ref<number | string | null>(null)
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null
 
@@ -417,6 +424,8 @@ const parseRequirements = (input: string): string[] => {
 }
 
 const saveVisa = async () => {
+  if (saving.value) return
+  saving.value = true
   const data = {
     type: form.type,
     name_fr: form.name_fr,
@@ -454,14 +463,23 @@ const saveVisa = async () => {
     await fetchVisaTypes(visasStore.visaTypesMeta.currentPage)
   } catch (err: any) {
     error(err.message || 'Erreur lors de l\'enregistrement')
+  } finally {
+    saving.value = false
   }
 }
 
 const deleteVisa = async (id: number) => {
-  if (confirm(t('admin.confirm.deleteGuide'))) {
+  if (deletingId.value) return
+  if (!confirm(t('admin.confirm.deleteGuide'))) return
+  deletingId.value = id
+  try {
     await visasStore.deleteVisaType(id)
     success('Visa supprimé')
     await fetchVisaTypes(visasStore.visaTypesMeta.currentPage)
+  } catch (err: any) {
+    error(err.message || t('admin.messages.deleteError'))
+  } finally {
+    deletingId.value = null
   }
 }
 </script>
