@@ -118,8 +118,18 @@
                     <NuxtLink :to="`/admin/shipments/${shipment.tracking_number}`" class="btn btn-outline-primary btn-sm me-2" :title="t('admin.common.view')">
                       <i class="bi bi-eye"></i>
                     </NuxtLink>
-                    <button class="btn btn-outline-info btn-sm" :title="t('admin.common.edit')" @click="openModal(shipment)">
+                    <button class="btn btn-outline-info btn-sm me-2" :title="t('admin.common.edit')" @click="openModal(shipment)">
                       <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      v-if="Number(shipment.shipping_cost) > 0 && shipment.status === 'pending'"
+                      class="btn btn-outline-primary btn-sm"
+                      title="Générer un lien de paiement"
+                      :disabled="payProcessing === String(shipment.id)"
+                      @click="generatePaymentLink(shipment.id)"
+                    >
+                      <span v-if="payProcessing === String(shipment.id)" class="spinner-border spinner-border-sm"></span>
+                      <i v-else class="bi bi-link-45deg"></i>
                     </button>
                   </div>
                 </td>
@@ -284,6 +294,16 @@ const psStore = usePersonalShoppingStore()
 const countriesStore = useCountriesStore()
 const { formatDateShort, formatShipmentStatus, formatCurrency, truncate } = useFormatters()
 const { success, error: notifyError } = useNotification()
+const { createPaymentLink, processing: payProcessing } = usePayment()
+
+/** Génère un lien de paiement pour une expédition et ouvre WhatsApp pré-rempli. */
+const generatePaymentLink = async (id: string) => {
+  const data = await createPaymentLink('shipment', String(id))
+  if (!data) return
+  try { await navigator.clipboard?.writeText(data.checkout_url) } catch {}
+  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
+  if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank')
+}
 
 const shippingModeLabel = (mode: string) => {
   if (mode === 'air_express') return t('admin.shipments.airExpress')

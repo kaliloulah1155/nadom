@@ -142,6 +142,21 @@ export const useVisasStore = defineStore('visas', {
       }
     },
 
+    async fetchMyApplications() {
+      this.loading = true
+      try {
+        const api = useApi()
+        const res = await api.get<VisaApplication[]>('/visa-applications/mine')
+        if (res.success) {
+          this.applications = res.data || []
+        }
+      } catch (err: any) {
+        this.error = err.message
+      } finally {
+        this.loading = false
+      }
+    },
+
     async createApplication(applicationData: Partial<VisaApplication>) {
       this.loading = true
       try {

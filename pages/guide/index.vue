@@ -305,6 +305,7 @@
                 <th>{{ t('admin.guideBookings.period') }}</th>
                 <th>{{ t('admin.dashboard.status') }}</th>
                 <th class="text-end">{{ t('admin.guideBookings.amount') }}</th>
+                <th class="text-end"></th>
               </tr>
             </thead>
             <tbody>
@@ -312,7 +313,21 @@
                 <td class="fw-medium">{{ b.guide?.name || '—' }}</td>
                 <td><small>{{ formatBookingDay(b.start_date) }} → {{ formatBookingDay(b.end_date) }}</small></td>
                 <td><span class="badge" :class="bookingStatusClass(b.status)">{{ bookingStatusLabel(b.status) }}</span></td>
-                <td class="text-end small">{{ formatCurrency(b.total_price, b.guide?.currency || 'XOF') }}</td>
+                <td class="text-end small">
+                  <div class="fw-semibold">{{ formatCurrency(publicPrice(Number(b.total_price)), b.guide?.currency || 'XOF') }}</div>
+                  <div class="text-muted" style="font-size:.72rem;">frais inclus</div>
+                </td>
+                <td class="text-end">
+                  <button
+                    v-if="(Number(b.total_price) || 0) > 0 && b.status !== 'paid' && b.status !== 'cancelled'"
+                    class="btn btn-sm btn-primary"
+                    :disabled="payProcessing !== null"
+                    @click="pay('guide_booking', String(b.id))"
+                  >
+                    <span v-if="payProcessing === String(b.id)" class="spinner-border spinner-border-sm"></span>
+                    <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -386,6 +401,7 @@ const GUIDE_FB_ICONS = [
 const { formatCurrency } = useFormatters()
 const pub = usePublicApi()
 const guidesStore = useGuidesStore()
+const { pay, publicPrice, processing: payProcessing } = usePayment()
 const gasStore = useGuideAccompanimentServicesStore()
 const { success, error, warning } = useNotification()
 

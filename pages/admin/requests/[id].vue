@@ -190,6 +190,15 @@
                   <i v-else class="bi bi-file-earmark-pdf me-1"></i>{{ t('admin.requests.detail.pdfQuote') }}
                 </button>
                 <button
+                  v-if="request.quotedPrice"
+                  class="btn btn-sm btn-primary"
+                  :disabled="generatingLink"
+                  @click="generatePaymentLink"
+                >
+                  <span v-if="generatingLink" class="spinner-border spinner-border-sm me-1"></span>
+                  <i v-else class="bi bi-link-45deg me-1"></i>Générer lien de paiement
+                </button>
+                <button
                   v-if="request.status === 'confirmed' || request.status === 'preparing'"
                   class="btn btn-sm btn-success"
                   @click="openShipmentModal"
@@ -448,11 +457,35 @@ const itemDisplayName = (item: Record<string, unknown>) =>
 const { success, error: notifyError } = useNotification()
 const { contactClientForRequest, generateLink, buildClientRequestMessage } = useWhatsApp()
 
+const { createPaymentLink } = usePayment()
+
 const loading = ref(true)
 const showQuotationForm = ref(false)
 const showShipmentModal = ref(false)
 const creatingShipment = ref(false)
 const downloadingPdf = ref(false)
+const generatingLink = ref(false)
+
+/**
+ * Génère un lien de paiement GeniusPay pour la demande validée et l'envoie au
+ * client (copie + ouverture WhatsApp pré-rempli).
+ */
+const generatePaymentLink = async () => {
+  if (!request.value) return
+  generatingLink.value = true
+  const data = await createPaymentLink('personal_shopping', String(request.value.id))
+  generatingLink.value = false
+  if (!data) return
+
+  try {
+    await navigator.clipboard?.writeText(data.checkout_url)
+  } catch {}
+  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
+
+  if (data.whatsapp_url) {
+    window.open(data.whatsapp_url, '_blank')
+  }
+}
 
 const quotation = reactive({
   productCost: 0,

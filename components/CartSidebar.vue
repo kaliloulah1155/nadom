@@ -88,13 +88,13 @@
                       <i class="bi bi-plus"></i>
                     </button>
                   </div>
-                  <!-- Sous-total ligne -->
+                  <!-- Sous-total ligne (prix client tout compris) -->
                   <span class="item-subtotal fw-bold text-primary">
-                    {{ formatCurrency(item.product.price * item.quantity, (item.product as any).currency || selectedCurrency) }}
+                    {{ formatCurrency(publicPrice(Number(item.product.price) || 0) * item.quantity, (item.product as any).currency || selectedCurrency) }}
                   </span>
                 </div>
                 <span class="text-muted mt-1" style="font-size:0.72rem;">
-                  {{ formatCurrency(item.product.price, (item.product as any).currency || selectedCurrency) }} / unité
+                  {{ formatCurrency(publicPrice(Number(item.product.price) || 0), (item.product as any).currency || selectedCurrency) }} / unité
                 </span>
               </div>
             </div>
@@ -118,9 +118,9 @@
             </select>
           </div>
           <div class="total-row d-flex justify-content-between align-items-center">
-            <span class="fw-semibold">Total estimé</span>
+            <span class="fw-semibold">Total à payer</span>
             <span class="total-amount fw-bold text-primary fs-5">
-              {{ formatCurrency(cartStore.totalPrice, selectedCurrency) }}
+              {{ formatCurrency(payPublicTotal, selectedCurrency) }}
             </span>
           </div>
         </div>
@@ -176,7 +176,7 @@
                     type="email"
                     class="form-control"
                     :class="{ 'is-invalid': errors.email }"
-                    placeholder="Email * (optionnel)"
+                    placeholder="Email *"
                   />
                 </div>
                 <div v-if="errors.email" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.email }}</div>
@@ -187,7 +187,12 @@
 
         <!-- Actions -->
         <div class="cart-actions px-4 pb-3 d-grid gap-2">
-          <button class="btn btn-primary btn-checkout" :disabled="submitting" @click="checkout">
+          <button class="btn btn-primary btn-checkout" :disabled="payProcessing !== null" @click="payNow">
+            <span v-if="payProcessing !== null" class="spinner-border spinner-border-sm me-2"></span>
+            <i v-else class="bi bi-credit-card me-2"></i>
+            {{ payProcessing !== null ? 'Redirection…' : 'Payer maintenant' }}
+          </button>
+          <button class="btn btn-outline-primary btn-checkout" :disabled="submitting" @click="checkout">
             <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
             <i v-else class="bi bi-bag-check me-2"></i>
             {{ submitting ? 'Envoi en cours…' : 'Valider ma demande' }}
@@ -226,6 +231,43 @@ const { success, error: notifyError } = useNotification()
 const { formatCurrency } = useFormatters()
 const { categoryLabel } = useCategoryLabel()
 const config = useRuntimeConfig()
+const { pay, payGuest, publicPrice, processing: payProcessing } = usePayment()
+
+/** Total à payer = somme des prix publics par ligne (cohérent avec l'affichage et le débit). */
+const payPublicTotal = computed(() =>
+  cartStore.items.reduce((sum, i) => sum + publicPrice(Number(i.product.price) || 0) * i.quantity, 0)
+)
+
+/**
+ * Paiement direct du panier via GeniusPay.
+ * Aucune connexion requise : le client renseigne ses références (nom, WhatsApp, email)
+ * puis est redirigé vers la page de paiement. S'il est connecté, le paiement est
+ * rattaché à son compte.
+ */
+const payNow = async () => {
+  if (cartStore.isEmpty) {
+    notifyError('Votre panier est vide.')
+    return
+  }
+  if (!validate()) {
+    showContactForm.value = true
+    return
+  }
+
+  if (authStore.isAuthenticated) {
+    await pay('cart')
+    return
+  }
+
+  const items = cartStore.items.map(item => ({
+    product_id: String(item.product.id),
+    quantity: item.quantity,
+  }))
+  await payGuest(
+    { name: contactName.value.trim(), phone: contactNumber.value.trim(), email: contactEmail.value.trim() || undefined },
+    items,
+  )
+}
 
 const showContactForm = ref(false)
 

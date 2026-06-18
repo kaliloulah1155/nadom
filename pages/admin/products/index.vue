@@ -78,7 +78,10 @@
                   {{ getCategoryName(prod.category_id) }}
                 </span>
               </td>
-              <td class="fw-bold text-primary">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</td>
+              <td>
+                <div class="fw-bold text-primary">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</div>
+                <div class="text-muted" style="font-size:.72rem;">client paie {{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</div>
+              </td>
               <td>
                 <div class="text-muted small text-truncate" style="max-width: 250px;" v-html="prod.description_fr || prod.description_en || ''"></div>
               </td>
@@ -187,8 +190,12 @@
                   </select>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Prix *</label>
+                  <label class="form-label">Prix de vente (ce que vous percevez) *</label>
                   <input v-model.number="form.price" type="number" class="form-control" required min="0" step="any" />
+                  <small v-if="form.price > 0" class="text-muted d-block mt-1">
+                    Le client paiera <strong class="text-primary">{{ formatCurrency(publicPrice(Number(form.price) || 0), form.currency || 'XOF') }}</strong>
+                    (commission + frais inclus). Vous percevez {{ formatCurrency(Number(form.price) || 0, form.currency || 'XOF') }}.
+                  </small>
                 </div>
                 <div class="col-md-2">
                   <label class="form-label">Devise *</label>
@@ -255,6 +262,7 @@ definePageMeta({
 const psStore = usePersonalShoppingStore()
 const { success, error } = useNotification()
 const { formatCurrency } = useFormatters()
+const { publicPrice } = usePayment()
 
 const products = computed(() => psStore.products)
 // Filtre catégories produits = slug POD (insensible à la casse)

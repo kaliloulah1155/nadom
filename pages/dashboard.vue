@@ -137,7 +137,16 @@
                         </span>
                       </td>
                       <td><small class="text-muted">{{ formatDateShort(request.createdAt) }}</small></td>
-                      <td>
+                      <td class="text-nowrap">
+                        <button
+                          v-if="(request.quotedPrice || 0) > 0 && request.status !== 'delivered'"
+                          class="btn btn-sm btn-primary me-1"
+                          :disabled="payProcessing !== null"
+                          @click="pay('personal_shopping', String(request.id))"
+                        >
+                          <span v-if="payProcessing === String(request.id)" class="spinner-border spinner-border-sm"></span>
+                          <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                        </button>
                         <NuxtLink :to="`/personal-shopping/${request.id}`" class="btn btn-sm btn-link">
                           <i class="bi bi-eye"></i>
                         </NuxtLink>
@@ -177,6 +186,33 @@
                     {{ formatShipmentStatus(shipment.status).label }}
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expéditions à régler -->
+          <div v-if="payableShipments.length" class="card border-0 shadow-sm mb-4 border-warning">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0"><i class="bi bi-cash-coin text-warning me-2"></i>Expéditions à régler</h5>
+            </div>
+            <div class="card-body">
+              <div
+                v-for="shipment in payableShipments.slice(0, 5)"
+                :key="shipment.id"
+                class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom"
+              >
+                <div>
+                  <div class="fw-medium">{{ shipment.trackingNumber }}</div>
+                  <small class="text-muted">{{ formatCurrency(publicPrice(Number((shipment as any).shipping_cost) || 0), 'XOF') }} <span class="text-muted">(frais inclus)</span></small>
+                </div>
+                <button
+                  class="btn btn-sm btn-primary"
+                  :disabled="payProcessing !== null"
+                  @click="pay('shipment', String(shipment.id))"
+                >
+                  <span v-if="payProcessing === String(shipment.id)" class="spinner-border spinner-border-sm"></span>
+                  <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                </button>
               </div>
             </div>
           </div>
@@ -224,7 +260,8 @@ const router = useRouter()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl } = useFormatters()
+const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl, formatCurrency } = useFormatters()
+const { pay, publicPrice, processing: payProcessing } = usePayment()
 
 // Auth check
 onMounted(async () => {
@@ -253,6 +290,9 @@ const pendingRequests = computed(() =>
 const userShipments = computed(() => shippingStore.getShipmentsByUser(userId.value))
 const inTransitShipments = computed(() =>
   userShipments.value.filter(s => ['in_transit', 'in_customs', 'out_for_delivery'].includes(s.status))
+)
+const payableShipments = computed(() =>
+  userShipments.value.filter(s => Number((s as any).shipping_cost) > 0 && s.status === 'pending')
 )
 const deliveredShipments = computed(() =>
   userShipments.value.filter(s => s.status === 'delivered')

@@ -70,27 +70,78 @@
           <p class="text-muted">{{ t('personalShopping.categoriesSubtitle') }}</p>
         </div>
 
-        <div class="row g-3">
-          <div v-for="category in categories" :key="category.id" class="col-6 col-md-4 col-lg-3">
-            <div
-              class="card h-100 border-0 shadow-sm text-center category-card"
-              :class="{ 'selected': selectedCategory === category.id }"
-              @click="selectCategory(category.id)"
-            >
-              <div class="card-body py-4">
-                <div class="category-icon mx-auto mb-3" :style="{ background: category.color + '20', color: category.color }">
-                  <i :class="category.icon"></i>
-                </div>
-                <h6 class="mb-0">{{ category.displayLabel }}</h6>
-              </div>
+        <!-- Barre de recherche produit -->
+        <div class="row justify-content-center mb-4">
+          <div class="col-md-8 col-lg-6">
+            <div class="input-group input-group-lg shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input
+                v-model="productSearch"
+                type="search"
+                class="form-control border-start-0"
+                :placeholder="t('personalShopping.searchPlaceholder') || 'Rechercher un produit…'"
+              />
             </div>
           </div>
         </div>
 
+        <!-- Méga-menu catégories (style Jumia) : parents à gauche, sous-catégories à droite -->
+        <div class="row g-0 mega-cats shadow-sm rounded overflow-hidden border">
+          <!-- Colonne gauche : catégories parentes -->
+          <div class="col-12 col-md-4 col-lg-3 mega-cats-parents">
+            <button
+              v-for="category in categories"
+              :key="category.id"
+              type="button"
+              class="mega-parent"
+              :class="{ active: activeCategory === category.id }"
+              @mouseenter="hoveredCategory = category.id"
+              @click="selectParent(category.id)"
+            >
+              <span class="mega-ic" :style="{ background: category.color + '20', color: category.color }">
+                <i :class="category.icon"></i>
+              </span>
+              <span class="flex-grow-1 text-start">{{ category.displayLabel }}</span>
+              <i v-if="hasChildren(category.id)" class="bi bi-chevron-right text-muted"></i>
+            </button>
+          </div>
+
+          <!-- Colonne droite : sous-catégories de la catégorie active -->
+          <div class="col-12 col-md-8 col-lg-9 mega-cats-panel p-4" @mouseleave="hoveredCategory = null">
+            <template v-if="activeCategory">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">{{ getCategoryName(activeCategory) }}</h5>
+                <button class="btn btn-sm btn-primary" @click="selectParent(activeCategory)">
+                  Voir les produits
+                </button>
+              </div>
+
+              <div v-if="activeSubCategories.length" class="row g-2">
+                <div v-for="sub in activeSubCategories" :key="sub.id" class="col-6 col-md-4">
+                  <a
+                    href="#"
+                    class="mega-subcat"
+                    :class="{ active: selectedCategory === activeCategory && selectedSubCategory === sub.id }"
+                    @click.prevent="pickSubCategory(activeCategory, sub.id)"
+                  >
+                    <i class="bi bi-dot"></i>{{ sub.displayLabel }}
+                  </a>
+                </div>
+              </div>
+              <p v-else class="text-muted mb-0">
+                <i class="bi bi-info-circle me-1"></i>Aucune sous-catégorie pour « {{ getCategoryName(activeCategory) }} ». Cliquez sur « Voir les produits ».
+              </p>
+            </template>
+            <p v-else class="text-muted mb-0 d-none d-md-block">
+              <i class="bi bi-arrow-left me-1"></i>Survolez une catégorie pour afficher ses sous-catégories.
+            </p>
+          </div>
+        </div>
+
         <!-- Products Listing -->
-        <div v-if="selectedCategory" class="mt-5">
+        <div v-if="selectedCategory || productSearch.trim()" class="mt-5">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">{{ getCategoryName(selectedCategory) }}</h3>
+            <h3 class="fw-bold mb-0">{{ selectedCategory ? getCategoryName(selectedCategory) : (t('personalShopping.searchResults') || 'Résultats de recherche') }}</h3>
             <span class="text-muted">{{ filteredProducts.length }} produits</span>
           </div>
           
@@ -110,7 +161,7 @@
                     </div>
                 <div class="card-body">
                   <h6 class="fw-bold mb-1">{{ prod[`name_${locale}`] || prod.name_fr }}</h6>
-                  <p class="text-primary fw-bold mb-2">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</p>
+                  <p class="text-primary fw-bold mb-2">{{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</p>
                   <p class="text-muted small mb-0" v-html="prod[`description_${locale}`] || prod.description_fr || ''"></p>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0">
@@ -280,6 +331,7 @@ const cartStore = useCartStore()
 const pricingStore = usePricingStore()
 const { success } = useNotification()
 const { formatCurrency } = useFormatters()
+const { publicPrice } = usePayment()
 const config = useRuntimeConfig()
 
 const pricingServices = computed(() =>
@@ -353,7 +405,7 @@ const serviceIcon = (slug: string) => {
 
 const categories = computed(() =>
   [...(psStore.categories || [])]
-    .filter((c: any) => (c.slug || '').toUpperCase() === 'POD')
+    .filter((c: any) => (c.slug || '').toUpperCase() === 'POD' && !c.parent_id)
     .sort((a: any, b: any) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0))
     .map((c: any, i: number) => ({
       id: String(c.id),
@@ -412,14 +464,91 @@ watch(
   () => applyCategoryQuery(),
 )
 
+// Recherche texte sur le nom du produit
+const productSearch = ref('')
+// Sous-catégorie sélectionnée (enfant de la catégorie courante)
+const selectedSubCategory = ref<string | null>(null)
+// Catégorie survolée dans le méga-menu (panneau de droite)
+const hoveredCategory = ref<string | null>(null)
+
+/** Enfants (sous-catégories) d'une catégorie donnée. */
+const childrenOf = (catId: string | null) => {
+  if (!catId) return []
+  return [...(psStore.categories || [])]
+    .filter((c: any) => String(c.parent_id ?? '') === String(catId))
+    .sort((a: any, b: any) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0))
+    .map((c: any) => ({ id: String(c.id), displayLabel: podCategoryLabel(c) }))
+}
+
+const hasChildren = (catId: string) => childrenOf(catId).length > 0
+
+/** Catégorie active du panneau de droite : survolée, sinon sélectionnée. */
+const activeCategory = computed(() => hoveredCategory.value || selectedCategory.value)
+const activeSubCategories = computed(() => childrenOf(activeCategory.value))
+
+/** Sous-catégories de la catégorie sélectionnée. */
+const subCategories = computed(() => childrenOf(selectedCategory.value))
+
+/** Identifiants de la catégorie + toutes ses sous-catégories (récursif). */
+const descendantCategoryIds = (catId: string): string[] => {
+  const ids = [String(catId)]
+  const children = (psStore.categories || []).filter(
+    (c: any) => String(c.parent_id ?? '') === String(catId),
+  )
+  for (const ch of children) ids.push(...descendantCategoryIds(String(ch.id)))
+  return ids
+}
+
 const filteredProducts = computed(() => {
-  if (!selectedCategory.value) return []
-  return psStore.getProductsByCategory(selectedCategory.value)
+  const term = productSearch.value.trim().toLowerCase()
+  let list: any[] = psStore.products || []
+
+  if (selectedCategory.value) {
+    const ids = selectedSubCategory.value
+      ? [String(selectedSubCategory.value)]
+      : descendantCategoryIds(selectedCategory.value)
+    const idSet = new Set(ids)
+    list = list.filter((p: any) => idSet.has(String(p.category_id ?? p.categoryId ?? '')))
+  } else if (!term) {
+    // Sans catégorie ni recherche : rien (on affiche les cartes de catégories)
+    return []
+  }
+
+  if (term) {
+    list = list.filter((p: any) => {
+      const names = [p.name_fr, p.name_en, p.name_zh, p[`name_${locale.value}`]]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return names.includes(term)
+    })
+  }
+
+  return list
 })
 
 const selectCategory = (id: string) => {
   const sid = String(id)
   selectedCategory.value = selectedCategory.value === sid ? null : sid
+  selectedSubCategory.value = null
+  syncCategoryUrl()
+}
+
+const selectSubCategory = (id: string | null) => {
+  selectedSubCategory.value = id ? (selectedSubCategory.value === id ? null : id) : null
+}
+
+/** Sélectionne une catégorie parente (méga-menu) et affiche ses produits. */
+const selectParent = (id: string) => {
+  selectedCategory.value = String(id)
+  selectedSubCategory.value = null
+  syncCategoryUrl()
+}
+
+/** Sélectionne une sous-catégorie depuis le panneau de droite. */
+const pickSubCategory = (parentId: string, subId: string) => {
+  selectedCategory.value = String(parentId)
+  selectedSubCategory.value = String(subId)
   syncCategoryUrl()
 }
 
@@ -551,6 +680,58 @@ const openZoom = (product: any) => {
 
 .pricing-card {
   border-radius: 16px;
+}
+
+/* ---- Méga-menu catégories (style Jumia) ---- */
+.mega-cats { background: #fff; min-height: 320px; }
+.mega-cats-parents {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  padding: 6px 0;
+}
+.mega-parent {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: none;
+  padding: 11px 16px;
+  font-size: .92rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.mega-parent:hover,
+.mega-parent.active {
+  background: rgba(var(--bs-primary-rgb), 0.06);
+  color: var(--bs-primary);
+}
+.mega-parent.active { font-weight: 600; }
+.mega-ic {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.mega-cats-panel { background: #fcfcfd; }
+.mega-subcat {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: .88rem;
+  transition: background .15s, color .15s;
+}
+.mega-subcat:hover,
+.mega-subcat.active {
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  color: var(--bs-primary);
+}
+@media (max-width: 767.98px) {
+  .mega-cats-parents { border-right: none; border-bottom: 1px solid #f0f0f0; }
 }
 
 .pricing-item {

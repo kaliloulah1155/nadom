@@ -24,6 +24,46 @@
     </section>
 
     <div class="container mt-2">
+      <!-- Mes demandes de visa (client connecté) -->
+      <div v-if="isAuthenticated && myApplications.length" class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0"><i class="bi bi-passport me-2"></i>Mes demandes de visa</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Type</th>
+                <th>Statut</th>
+                <th class="text-end">Montant</th>
+                <th class="text-end"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="app in myApplications" :key="app.id">
+                <td class="fw-medium">{{ app.visaType?.name_fr || app.visa_type || '—' }}</td>
+                <td><span class="badge bg-secondary-subtle text-secondary">{{ app.status }}</span></td>
+                <td class="text-end">
+                  <div class="fw-semibold">{{ formatCurrency(publicPrice(Number(app.total_cost) || 0), 'XOF') }}</div>
+                  <div class="text-muted" style="font-size:.72rem;">frais inclus</div>
+                </td>
+                <td class="text-end">
+                  <button
+                    v-if="(Number(app.total_cost) || 0) > 0 && ['pending', 'processing'].includes(app.status)"
+                    class="btn btn-sm btn-primary"
+                    :disabled="payProcessing !== null"
+                    @click="pay('visa', String(app.id))"
+                  >
+                    <span v-if="payProcessing === String(app.id)" class="spinner-border spinner-border-sm"></span>
+                    <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Visa Types -->
       <div class="row g-4 mb-5">
         <div v-for="visa in visaTypes" :key="visa.id" class="col-md-6 col-lg-4">
@@ -218,8 +258,13 @@ const faqFallback = computed(() => resolveList('visa.faqItems', ['question', 'an
 const faqs = computed(() => (dbFaqs.value.length ? dbFaqs.value : faqFallback.value))
 
 const visasStore = useVisasStore()
+const authStore = useAuthStore()
 const { formatCurrency } = useFormatters()
+const { pay, publicPrice, processing: payProcessing } = usePayment()
 const config = useRuntimeConfig()
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+const myApplications = computed(() => visasStore.applications)
 
 const loading = ref(false)
 
@@ -246,6 +291,9 @@ const visaWhatsAppHref = (visa: any): string => {
 onMounted(async () => {
   loading.value = true
   await visasStore.fetchVisaTypes()
+  if (authStore.isAuthenticated) {
+    visasStore.fetchMyApplications()
+  }
   try {
     const rows = await blogStore.fetchFAQByStatut(3)
     dbFaqs.value = rows.map((f: any) => ({

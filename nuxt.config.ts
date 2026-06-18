@@ -69,18 +69,25 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // API Laravel (avec /api). Prod: https://gateway.nadom.co/api · Local: http://localhost:8000/api
-      apiBase: "https://gateway.nadom.co/api",
+      // API Laravel (avec /api). DEV local ici · la version PROD (gateway.nadom.co)
+      // est dans nuxt.config.example.ts, copiée au déploiement via `npm run config:prod`.
+      apiBase: "http://localhost:8000/api",
       // Host du backend qui sert les fichiers /storage (images, PDF…), SANS /api.
-      // DOIT pointer vers le host qui héberge réellement /storage en prod.
-      apiFile: "https://gateway.nadom.co",
+      apiFile: "http://localhost:8000",
       // Override optionnel du host fichiers. Vide → on utilise apiFile (puis apiBase sans /api).
       storageBase: "",
       whatsapp: "+2250714158172",
       logo: "/logo_nadom.png",
       siteName: "NADOM",
       pusherKey: "a01268b9f632bda2891d",
-      pusherCluster: "ap2"
+      pusherCluster: "ap2",
+      // Frais de traitement GeniusPay (doivent refléter le backend) pour afficher
+      // le Prix public (frais inclus) au client — Prix public = arrondi_100(net*(1+taux)+fixe).
+      geniuspayFeeRate: 0.064,
+      geniuspayFixedFee: 100,
+      geniuspayCommissionRate: 0.10,
+      geniuspayPayoutFeeFixed: 1000,
+      geniuspayPayoutFeeRate: 0
     }
   },
 

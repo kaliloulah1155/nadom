@@ -233,6 +233,12 @@
                   <span>{{ t('admin.nav.reports') }}</span>
                 </NuxtLink>
               </li>
+              <li v-can="['list', 'transactions']" class="nav-item">
+                <NuxtLink to="/admin/transactions" class="nav-link py-1" :class="{ 'active': isActive('/admin/transactions') }">
+                  <i class="bi bi-cash-coin"></i>
+                  <span>{{ t('admin.nav.transactions') }}</span>
+                </NuxtLink>
+              </li>
               <li v-can="['list', 'global-settings']" class="nav-item">
                 <NuxtLink to="/admin/settings" class="nav-link py-1" :class="{ 'active': isActive('/admin/settings') }">
                   <i class="bi bi-gear"></i>
@@ -565,6 +571,7 @@ const isSupportSectionActive = computed(
   () =>
     isActive('/admin/support') ||
     isActive('/admin/reports') ||
+    isActive('/admin/transactions') ||
     isActive('/admin/settings')
 )
 
@@ -625,6 +632,7 @@ const pageTitle = computed(() => {
     '/admin/activity-logs': t('admin.pages.activityLogs'),
     '/admin/countries': t('admin.pages.countries'),
     '/admin/reports': t('admin.pages.reports'),
+    '/admin/transactions': t('admin.pages.transactions'),
     '/admin/notifications': t('admin.pages.notifications'),
     '/admin/settings': t('admin.pages.settings'),
     '/admin/categories': t('admin.pages.categories'),

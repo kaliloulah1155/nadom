@@ -201,6 +201,20 @@
                     <i class="bi bi-whatsapp me-2"></i>Negocier
                   </button>
                 </div>
+
+                <div v-if="(request.quotedPrice || 0) > 0 && ['negotiating', 'confirmed'].includes(request.status)" class="mt-3">
+                  <div class="d-flex justify-content-between align-items-center bg-light rounded p-2 mb-2 small">
+                    <span class="text-muted">Total à payer <span class="text-muted">(frais inclus)</span></span>
+                    <strong class="text-primary">{{ formatCurrency(publicPrice(Number(request.quotedPrice)), requestCurrency) }}</strong>
+                  </div>
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" :disabled="payProcessing !== null" @click="pay('personal_shopping', String(request.id))">
+                      <span v-if="payProcessing !== null" class="spinner-border spinner-border-sm me-2"></span>
+                      <i v-else class="bi bi-credit-card me-2"></i>
+                      {{ payProcessing !== null ? 'Redirection…' : 'Payer maintenant' }}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -303,6 +317,7 @@ const { formatCurrency, formatDateShort, formatRequestStatus } = useFormatters()
 const { contactForRequest } = useWhatsApp()
 const { success } = useNotification()
 const { t, locale } = useI18n()
+const { pay, publicPrice, processing: payProcessing } = usePayment()
 
 const loading = ref(true)
 const selectedImage = ref<string | null>(null)

@@ -289,7 +289,11 @@ const saving = ref(false)
 let modalInstance: any = null
 
 const parentOptions = computed(() => {
-  return categories.value.filter((c: any) => c.uuid !== editingCategory.value?.uuid)
+  // Parents possibles : même type (slug) que la catégorie en cours, hors elle-même.
+  return categories.value.filter((c: any) =>
+    c.uuid !== editingCategory.value?.uuid
+    && (!form.slug || String(c.slug || '').toUpperCase() === String(form.slug).toUpperCase())
+  )
 })
 
 const form = reactive({

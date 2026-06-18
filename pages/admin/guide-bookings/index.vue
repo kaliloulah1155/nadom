@@ -113,6 +113,17 @@
                     {{ t('admin.guideBookings.detailBtn') }}
                   </button>
                   <button
+                    v-if="canUpdate && Number(row.total_price) > 0 && row.status !== 'cancelled'"
+                    type="button"
+                    class="btn btn-sm btn-outline-primary me-1"
+                    title="Générer un lien de paiement"
+                    :disabled="payProcessing === String(row.id)"
+                    @click="generatePaymentLink(row.id)"
+                  >
+                    <span v-if="payProcessing === String(row.id)" class="spinner-border spinner-border-sm"></span>
+                    <i v-else class="bi bi-link-45deg"></i>
+                  </button>
+                  <button
                     v-if="canUpdate"
                     type="button"
                     class="btn btn-sm btn-outline-secondary me-1"
@@ -347,6 +358,16 @@ const { can } = useAdminAbility()
 const api = useApi()
 const { success, error } = useNotification()
 const { formatDateTime, formatDateShort, formatCurrency } = useFormatters()
+const { createPaymentLink, processing: payProcessing } = usePayment()
+
+/** Génère un lien de paiement pour une réservation et ouvre WhatsApp pré-rempli. */
+const generatePaymentLink = async (id: string) => {
+  const data = await createPaymentLink('guide_booking', String(id))
+  if (!data) return
+  try { await navigator.clipboard?.writeText(data.checkout_url) } catch {}
+  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
+  if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank')
+}
 
 const canCreate = computed(() => can('create', 'guide-bookings'))
 const canView = computed(() => can('view', 'guide-bookings'))
