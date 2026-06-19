@@ -499,7 +499,7 @@ const saveVisa = async () => {
 
 const deleteVisa = async (id: number) => {
   if (deletingId.value) return
-  if (!confirm(t('admin.confirm.deleteGuide'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteGuide'))) return
   deletingId.value = id
   try {
     await visasStore.deleteVisaType(id)

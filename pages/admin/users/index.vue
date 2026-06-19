@@ -399,7 +399,7 @@ const handleSave = async () => {
 }
 
 const handleDelete = async (user: any) => {
-  if (confirm(t('admin.users.confirmDeleteUser', { name: `${user.firstname} ${user.lastname}` }))) {
+  if (await useSwal().confirmDelete(t('admin.users.confirmDeleteUser', { name: `${user.firstname} ${user.lastname}` }))) {
     try {
       await usersStore.deleteUser(user.uuid)
       success(t('admin.users.deletedSuccess'))

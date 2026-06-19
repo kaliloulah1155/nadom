@@ -420,9 +420,9 @@ const save = async () => {
   }
 }
 
-const confirmDelete = (row: CountryRow) => {
+const confirmDelete = async (row: CountryRow) => {
   if (!row?.uuid) return
-  if (!confirm(t('admin.confirm.deleteCountry', { name: row.label || row.code }))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteCountry', { name: row.label || row.code }))) return
   void doDelete(row.uuid)
 }
 

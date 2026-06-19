@@ -230,8 +230,39 @@
             </div>
           </div>
 
+          <!-- Suivi générique (réservation guide, visa, …) -->
+          <div v-else-if="genericResult" class="card border-0 shadow">
+            <div class="card-header bg-transparent py-3">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <span class="badge bg-secondary mb-2">{{ genericResult.type_label }}</span>
+                  <h5 class="mb-1">{{ genericResult.reference }}</h5>
+                </div>
+                <span class="badge fs-6" :class="getRequestStatusClass(genericResult.status)">
+                  {{ getRequestStatusLabel(genericResult.status) }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-3">
+                <template v-for="(d, i) in (genericResult.details || [])" :key="i">
+                  <dt v-if="d.value" class="col-sm-4 text-muted">{{ d.label }}</dt>
+                  <dd v-if="d.value" class="col-sm-8">{{ d.value }}</dd>
+                </template>
+              </dl>
+              <div class="d-flex flex-wrap gap-2">
+                <a :href="`https://wa.me/${runtimeCfg.public.whatsapp}`" target="_blank" class="btn btn-success btn-sm">
+                  <i class="bi bi-whatsapp me-1"></i>{{ t('common.contactUs') }}
+                </a>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @click="resetSearch">
+                  {{ t('tracking.newSearch') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- No Result -->
-          <div v-else-if="searched && !shipment && !psPublicOnly && !loading" class="card border-0 shadow">
+          <div v-else-if="searched && !shipment && !psPublicOnly && !genericResult && !loading" class="card border-0 shadow">
             <div class="card-body text-center py-5">
               <i class="bi bi-box-seam display-1 text-muted"></i>
               <h4 class="mt-3">{{ t('tracking.packageNotFound') }}</h4>
@@ -317,6 +348,7 @@ const { formatShipmentStatus, formatDateShort, formatCurrency } = useFormatters(
 const trackingNumber = ref('')
 const shipment = ref<any>(null)
 const psPublicOnly = ref<any>(null)
+const genericResult = ref<any>(null)
 const zoomedImage = ref<string | null>(null)
 
 const openZoom = (image: string) => {
@@ -353,6 +385,7 @@ async function searchTracking() {
   searched.value = true
   shipment.value = null
   psPublicOnly.value = null
+  genericResult.value = null
 
   try {
     const shipRes = await pub.get<any>(`/shipments/track/${encodeURIComponent(code)}`)
@@ -373,6 +406,14 @@ async function searchTracking() {
       syncTrackingQuery(code)
       return
     }
+
+    // Suivi unifié : réservation guide, visa, ou autre type
+    const genRes = await pub.get<any>(`/track/${encodeURIComponent(code)}`)
+    if (genRes.success && genRes.data) {
+      genericResult.value = genRes.data
+      syncTrackingQuery(code)
+      return
+    }
   } catch (err) {
     error.value = (err as Error).message || 'Erreur lors de la recherche'
   } finally {
@@ -384,6 +425,7 @@ function resetSearch() {
   trackingNumber.value = ''
   shipment.value = null
   psPublicOnly.value = null
+  genericResult.value = null
   error.value = ''
   searched.value = false
   router.replace({ path: '/import-export/tracking' })
@@ -395,16 +437,17 @@ watch(
     const raw = typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
     const v = raw ? String(raw).trim() : ''
     if (!v) {
-      if (searched.value && (shipment.value || psPublicOnly.value || trackingNumber.value)) {
+      if (searched.value && (shipment.value || psPublicOnly.value || genericResult.value || trackingNumber.value)) {
         trackingNumber.value = ''
         shipment.value = null
         psPublicOnly.value = null
+        genericResult.value = null
         error.value = ''
         searched.value = false
       }
       return
     }
-    if (trackingNumber.value === v && (shipment.value || psPublicOnly.value)) {
+    if (trackingNumber.value === v && (shipment.value || psPublicOnly.value || genericResult.value)) {
       return
     }
     trackingNumber.value = v

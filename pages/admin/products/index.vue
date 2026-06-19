@@ -447,7 +447,7 @@ const saveProduct = async () => {
 }
 
 const confirmDelete = async (id: string) => {
-  if (confirm(t('admin.confirm.deleteProduct'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteProduct'))) {
     await psStore.deleteProduct(id)
     success(t('admin.products.deleted'))
     await fetchProducts(psStore.productsMeta.currentPage)

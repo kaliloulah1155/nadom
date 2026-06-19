@@ -271,6 +271,23 @@
                     <label class="form-label">{{ t('guide.bookingNotes') }}</label>
                     <textarea v-model="bookingForm.notes" class="form-control" rows="3"></textarea>
                   </div>
+
+                  <!-- Coordonnées du client (réservation sans connexion) -->
+                  <template v-if="!isLoggedIn">
+                    <div class="col-12"><hr class="my-1" /><small class="text-muted">Vos coordonnées</small></div>
+                    <div class="col-md-6">
+                      <label class="form-label">Nom complet *</label>
+                      <input v-model="bookingForm.contact_name" type="text" class="form-control" placeholder="Nom et prénom" required />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">WhatsApp *</label>
+                      <input v-model="bookingForm.contact_phone" type="tel" class="form-control" placeholder="+225 07 XX XX XX XX" required />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Email</label>
+                      <input v-model="bookingForm.contact_email" type="email" class="form-control" placeholder="email@exemple.com (optionnel)" />
+                    </div>
+                  </template>
                 </div>
               </div>
               <div class="modal-footer">
@@ -401,7 +418,8 @@ const GUIDE_FB_ICONS = [
 const { formatCurrency } = useFormatters()
 const pub = usePublicApi()
 const guidesStore = useGuidesStore()
-const { pay, publicPrice, processing: payProcessing } = usePayment()
+const { pay, payGuestEntity, publicPrice, processing: payProcessing } = usePayment()
+const authStore = useAuthStore()
 const gasStore = useGuideAccompanimentServicesStore()
 const { success, error, warning } = useNotification()
 
@@ -449,7 +467,11 @@ const bookingForm = reactive({
   end_date: '',
   hours: 4,
   people_count: 1,
-  notes: ''
+  notes: '',
+  // Coordonnées du client (réservation sans connexion)
+  contact_name: '',
+  contact_phone: '',
+  contact_email: ''
 })
 
 function isoToday(): string {
@@ -471,15 +493,16 @@ function resetBookingForm() {
   bookingForm.hours = 4
   bookingForm.people_count = 1
   bookingForm.notes = ''
+  // Préremplit avec le compte si connecté (sinon vide pour saisie invité)
+  const u: any = authStore.currentUser
+  bookingForm.contact_name = u ? [u.firstname, u.lastname].filter(Boolean).join(' ').trim() : ''
+  bookingForm.contact_phone = u?.phone || ''
+  bookingForm.contact_email = u?.email || ''
 }
 
 function openBookingModal(guide: any) {
   if (!guide?.available) return
-  if (!getToken()) {
-    warning(t('guide.bookingNeedLogin'))
-    navigateTo('/login')
-    return
-  }
+  // Le client n'a pas besoin de se connecter : il saisit ses coordonnées dans le formulaire.
   bookingGuide.value = guide
   resetBookingForm()
   bookingBsModal?.show()
@@ -493,6 +516,13 @@ async function submitBooking() {
       return
     }
   }
+  // Coordonnées requises (le client ne se connecte pas)
+  if (!isLoggedIn.value) {
+    if (bookingForm.contact_name.trim().length < 2 || !/^[\+]?[0-9\s\-]{8,20}$/.test(bookingForm.contact_phone)) {
+      error('Veuillez renseigner votre nom et un numéro WhatsApp valide.')
+      return
+    }
+  }
   try {
     bookingSubmitting.value = true
     const payload: Record<string, unknown> = {
@@ -500,7 +530,10 @@ async function submitBooking() {
       start_date: bookingForm.start_date,
       service_type: bookingForm.service_type,
       people_count: Math.min(100, Math.max(1, Math.floor(Number(bookingForm.people_count)) || 1)),
-      notes: bookingForm.notes?.trim() || undefined
+      notes: bookingForm.notes?.trim() || undefined,
+      contact_name: bookingForm.contact_name?.trim() || undefined,
+      contact_phone: bookingForm.contact_phone?.trim() || undefined,
+      contact_email: bookingForm.contact_email?.trim() || undefined
     }
     if (bookingForm.documentation_category_id > 0) {
       payload.documentation_category_id = bookingForm.documentation_category_id
@@ -515,10 +548,22 @@ async function submitBooking() {
       payload.end_date = bookingForm.start_date
       payload.hours = bookingForm.hours
     }
-    await guidesStore.createBooking(payload as any)
-    await guidesStore.fetchMyBookings()
-    success(t('guide.bookingSuccess'))
+    const created: any = await guidesStore.createBooking(payload as any)
     bookingBsModal?.hide()
+
+    const bookingId = created?.id || created?.data?.id
+    if (!isLoggedIn.value && bookingId) {
+      // Client invité : paiement immédiat (redirection wallet)
+      success(t('guide.bookingSuccess'))
+      await payGuestEntity('guide_booking', String(bookingId), {
+        name: bookingForm.contact_name.trim(),
+        phone: bookingForm.contact_phone.trim(),
+        email: bookingForm.contact_email.trim() || undefined,
+      })
+    } else {
+      await guidesStore.fetchMyBookings()
+      success(t('guide.bookingSuccess'))
+    }
   } catch (e: any) {
     error(e?.message || 'Erreur')
   } finally {

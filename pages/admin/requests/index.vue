@@ -326,7 +326,7 @@ const updateStatus = async (id: string, status: string) => {
 }
 
 const deleteRequest = async (id: string) => {
-  if (!confirm(t('admin.confirm.deleteRequest'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteRequest'))) return
 
   try {
     await psStore.deleteRequest(id)

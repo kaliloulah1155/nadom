@@ -728,7 +728,7 @@ const saveTicket = async () => {
 }
 
 const deleteTicket = async (id: number) => {
-  if (confirm(t('admin.confirm.deleteTicket'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteTicket'))) {
     await ticketsStore.deleteTicket(id)
     success(t('admin.support.ticketDeleted'))
     await Promise.all([fetchTickets(ticketsStore.currentPage), ticketsStore.fetchTicketStats()])

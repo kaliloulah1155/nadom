@@ -600,12 +600,13 @@ const toggleSidebar = () => {
 // Computed
 const currentUser = computed(() => authStore.currentUser)
 const userFullName = computed(() => authStore.userFullName)
-const pendingRequestsCount = computed(() => psStore.getPendingRequests.length)
+const pendingRequestsCount = computed(() => psStore.pendingCount)
 
 // Badge sidebar « Demandes » : à chaque notification temps réel reçue (le compteur
-// de non-lues augmente), on rafraîchit les demandes pour mettre le badge à jour.
+// de non-lues augmente), on rafraîchit UNIQUEMENT le compteur (sans écraser la
+// liste paginée affichée dans le tableau des demandes).
 watch(() => notifStore.unread, (n, prev) => {
-  if (n > prev) psStore.fetchRequests().catch(() => {})
+  if (n > prev) psStore.fetchPendingCount().catch(() => {})
 })
 
 const pageTitle = computed(() => {
@@ -722,8 +723,8 @@ onMounted(async () => {
       return
     }
 
-    // Load data
-    await psStore.fetchRequests()
+    // Load data — badge « Demandes » seulement (sans écraser la liste paginée)
+    await psStore.fetchPendingCount()
     await notifStore.fetch(1, 20)
 
     // Pusher: ping de connexion + bind realtime

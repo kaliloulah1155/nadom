@@ -301,7 +301,7 @@ function openDetail(row: any) {
 }
 
 async function remove(id: number) {
-  if (!confirm(t('admin.confirm.deleteContactLead'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteContactLead'))) return
   try {
     const res = await api.delete(`/contact-leads/${id}`)
     if (res.success) {

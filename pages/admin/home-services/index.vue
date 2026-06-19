@@ -377,7 +377,7 @@ const save = async () => {
 
 const remove = async (row: HomeServiceRow) => {
   if (deletingId.value) return
-  if (!confirm(t('admin.confirm.deleteHomeServiceCard', { slug: row.slug }))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteHomeServiceCard', { slug: row.slug }))) return
   deletingId.value = row.id
   try {
     await store.remove(row.id)

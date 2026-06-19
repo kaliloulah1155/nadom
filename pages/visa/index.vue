@@ -126,12 +126,15 @@
               </div>
             </div>
 
-            <div class="card-footer bg-transparent border-0 p-4 pt-0">
+            <div class="card-footer bg-transparent border-0 p-4 pt-0 d-grid gap-2">
+              <button type="button" class="btn btn-primary" @click="openVisaRequest(visa)">
+                <i class="bi bi-passport me-2"></i>Demander ce visa
+              </button>
               <a
                 :href="visaWhatsAppHref(visa)"
                 target="_blank"
                 rel="noopener"
-                class="btn btn-primary w-100"
+                class="btn btn-outline-success"
               >
                 <i class="bi bi-whatsapp me-2"></i>{{ t('visa.requestQuote') }}
               </a>
@@ -221,6 +224,73 @@
         </div>
       </div>
     </section>
+
+    <!-- Modal demande de visa (invité, sans connexion) -->
+    <div v-if="showVisaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);" @click.self="showVisaModal = false">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              Demande de visa<span v-if="visaForm.visaLabel"> — {{ visaForm.visaLabel }}</span>
+            </h5>
+            <button type="button" class="btn-close" @click="showVisaModal = false"></button>
+          </div>
+          <form @submit.prevent="submitVisaRequest">
+            <div class="modal-body">
+              <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                <span class="text-muted">Montant à payer (tout compris)</span>
+                <strong class="text-primary fs-5">{{ formatCurrency(publicPrice(Number(visaForm.cost) || 0), 'XOF') }}</strong>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Prénom *</label>
+                  <input v-model="visaForm.first_name" type="text" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nom *</label>
+                  <input v-model="visaForm.last_name" type="text" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">WhatsApp *</label>
+                  <input v-model="visaForm.phone" type="tel" class="form-control" placeholder="+225 07 XX XX XX XX" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input v-model="visaForm.email" type="email" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nationalité</label>
+                  <input v-model="visaForm.nationality" type="text" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">N° de passeport</label>
+                  <input v-model="visaForm.passport_number" type="text" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date de départ</label>
+                  <input v-model="visaForm.departure_date" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date de retour</label>
+                  <input v-model="visaForm.return_date" type="date" class="form-control" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Notes</label>
+                  <textarea v-model="visaForm.notes" class="form-control" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" @click="showVisaModal = false">{{ t('common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="visaSubmitting">
+                <span v-if="visaSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                Soumettre &amp; payer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -260,7 +330,69 @@ const faqs = computed(() => (dbFaqs.value.length ? dbFaqs.value : faqFallback.va
 const visasStore = useVisasStore()
 const authStore = useAuthStore()
 const { formatCurrency } = useFormatters()
-const { pay, publicPrice, processing: payProcessing } = usePayment()
+const { pay, payGuestEntity, publicPrice, processing: payProcessing } = usePayment()
+const { error: notifyVisaError } = useNotification()
+
+// Demande de visa (invité)
+const showVisaModal = ref(false)
+const visaSubmitting = ref(false)
+const visaForm = reactive({
+  visa_type: '', visaLabel: '', cost: 0,
+  first_name: '', last_name: '', phone: '', email: '',
+  nationality: '', passport_number: '', departure_date: '', return_date: '', notes: ''
+})
+
+function openVisaRequest(visa: any) {
+  visaForm.visa_type = visa.type
+  visaForm.visaLabel = visa[`name_${locale.value}`] || visa.name_fr || visa.type
+  visaForm.cost = Number(visa.cost) || 0
+  const u: any = authStore.currentUser
+  visaForm.first_name = u?.firstname || ''
+  visaForm.last_name = u?.lastname || ''
+  visaForm.phone = u?.phone || ''
+  visaForm.email = u?.email || ''
+  visaForm.nationality = ''
+  visaForm.passport_number = ''
+  visaForm.departure_date = ''
+  visaForm.return_date = ''
+  visaForm.notes = ''
+  showVisaModal.value = true
+}
+
+async function submitVisaRequest() {
+  if (visaForm.first_name.trim().length < 2 || !/^[\+]?[0-9\s\-]{8,20}$/.test(visaForm.phone)) {
+    notifyVisaError('Veuillez renseigner votre prénom et un numéro WhatsApp valide.')
+    return
+  }
+  try {
+    visaSubmitting.value = true
+    const created: any = await visasStore.createApplication({
+      visa_type: visaForm.visa_type,
+      first_name: visaForm.first_name.trim(),
+      last_name: visaForm.last_name.trim(),
+      phone: visaForm.phone.trim(),
+      email: visaForm.email.trim() || undefined,
+      nationality: visaForm.nationality.trim() || undefined,
+      passport_number: visaForm.passport_number.trim() || undefined,
+      departure_date: visaForm.departure_date || undefined,
+      return_date: visaForm.return_date || undefined,
+      notes: visaForm.notes.trim() || undefined,
+    } as any)
+    showVisaModal.value = false
+    const id = created?.id || created?.data?.id
+    if (id) {
+      await payGuestEntity('visa', String(id), {
+        name: `${visaForm.first_name} ${visaForm.last_name}`.trim(),
+        phone: visaForm.phone.trim(),
+        email: visaForm.email.trim() || undefined,
+      })
+    }
+  } catch (e: any) {
+    notifyVisaError(e?.message || 'Erreur lors de la demande.')
+  } finally {
+    visaSubmitting.value = false
+  }
+}
 const config = useRuntimeConfig()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)

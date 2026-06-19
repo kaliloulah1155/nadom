@@ -311,7 +311,7 @@ const savePermissions = async () => {
 }
 
 const handleDelete = async (role: any) => {
-  if (confirm(t('admin.users.confirmDeleteRole', { name: role.libelle }))) {
+  if (await useSwal().confirmDelete(t('admin.users.confirmDeleteRole', { name: role.libelle }))) {
     try {
       await rolesStore.deleteRole(role.uuid)
       success(t('admin.users.roleDeleted'))

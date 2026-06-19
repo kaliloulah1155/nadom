@@ -465,7 +465,7 @@ const saveCategory = async () => {
 }
 
 const confirmDelete = async (uuid: string) => {
-  if (confirm(t('admin.confirm.deleteCategory'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteCategory'))) {
     await psStore.deleteCategory(uuid)
     success(t('admin.categories.deleted'))
   }

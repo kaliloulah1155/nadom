@@ -104,6 +104,8 @@ const newMeta = (perPage = 15): Meta => ({ total: 0, currentPage: 1, perPage, la
 interface PersonalShoppingState {
   requests: PersonalShoppingRequest[]
   requestsMeta: Meta
+  /** Nombre de demandes « en attente » (badge sidebar) — indépendant de la liste paginée. */
+  pendingCount: number
   categories: Category[]
   categoriesMeta: Meta
   /** Devises (catégories slug DVS) — cache dédié, chargement léger. */
@@ -212,7 +214,8 @@ function normalizeRequests(list: any[]) {
 export const usePersonalShoppingStore = defineStore('personalShopping', {
   state: (): PersonalShoppingState => ({
     requests: [],
-    requestsMeta: newMeta(15),
+    requestsMeta: newMeta(10),
+    pendingCount: 0,
     categories: [],
     categoriesMeta: newMeta(10),
     currencies: [],
@@ -290,6 +293,30 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         this.error = err.message || 'Erreur lors du chargement des demandes'
       } finally {
         this.loading = false
+      }
+    },
+
+    /**
+     * Compte les demandes « en attente » pour le badge sidebar SANS charger
+     * la liste complète (évite d'écraser la liste paginée du tableau).
+     * Lit uniquement le `total` du paginator filtré par statut.
+     */
+    async fetchPendingCount() {
+      try {
+        const api = useApi()
+        const res = await api.post<any>(
+          '/personal-shopping-requests/all',
+          { page: 1, limit: 1, status: 'pending' },
+          { query: { page: 1, limit: 1 } },
+        )
+        if (res.success) {
+          const d = res.data
+          this.pendingCount = (d && typeof d === 'object' && typeof d.total === 'number')
+            ? d.total
+            : (Array.isArray(d) ? d.length : 0)
+        }
+      } catch {
+        /* badge non critique : on ignore les erreurs */
       }
     },
 
@@ -615,13 +642,17 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         // Listen for new personal shopping requests via the admin public channel
         $echo.channel('admin-notifications').listen('.notification', (e: any) => {
           if (e.type === 'request.created' || e.meta?.request_id) {
-            this.fetchRequests()
+            // Rafraîchit la page courante paginée (sans charger toute la liste)
+            this.fetchRequests({ page: this.requestsMeta.currentPage, limit: this.requestsMeta.perPage })
+            this.fetchPendingCount()
           }
         })
         // Also listen on public channel
         $echo.channel('public-notifications').listen('.notification', (e: any) => {
           if (e.type === 'request.created' || e.meta?.request_id) {
-            this.fetchRequests()
+            // Rafraîchit la page courante paginée (sans charger toute la liste)
+            this.fetchRequests({ page: this.requestsMeta.currentPage, limit: this.requestsMeta.perPage })
+            this.fetchPendingCount()
           }
         })
       } catch (_) {

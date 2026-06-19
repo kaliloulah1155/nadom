@@ -517,7 +517,7 @@ async function saveSocial() {
 }
 
 async function delSocial(row: FooterSocialDto) {
-  if (!confirm(t('admin.confirm.deleteSocialLink'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteSocialLink'))) return
   deletingSocialId.value = row.id
   try {
     await store.deleteSocial(row.id)
@@ -596,7 +596,7 @@ async function saveContact() {
 }
 
 async function delContact(row: FooterContactDto) {
-  if (!confirm(t('admin.confirm.deleteContactBlock'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteContactBlock'))) return
   deletingContactId.value = row.id
   try {
     await store.deleteContact(row.id)

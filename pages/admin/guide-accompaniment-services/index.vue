@@ -391,7 +391,7 @@ const save = async () => {
 
 const remove = async (row: GuideAccompanimentServiceRow) => {
   if (deletingId.value) return
-  if (!confirm(`Supprimer la carte « ${row.slug} » ?`)) return
+  if (!await useSwal().confirmDelete(`Supprimer la carte « ${row.slug} » ?`)) return
   deletingId.value = row.id
   try {
     await store.remove(row.id)

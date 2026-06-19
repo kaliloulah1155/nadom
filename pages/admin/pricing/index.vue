@@ -275,7 +275,7 @@ const saveService = async () => {
 }
 
 const deleteService = async (id: number) => {
-  if (confirm(t('admin.confirm.deleteProduct'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteProduct'))) {
     await pricingStore.deleteService(id)
     success('Service supprimé')
     await fetchServices(pricingStore.servicesMeta.currentPage)

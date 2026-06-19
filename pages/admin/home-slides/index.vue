@@ -276,7 +276,7 @@ const save = async () => {
 
 const remove = async (row: HomeSlideRow) => {
   if (deletingId.value) return
-  if (!confirm('Supprimer ce slide ?')) return
+  if (!await useSwal().confirmDelete('Supprimer ce slide ?')) return
   deletingId.value = row.id
   try {
     await store.remove(row.id)

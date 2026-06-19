@@ -457,7 +457,7 @@ const savePost = async () => {
 
 const deletePost = async (id: number) => {
   if (deletingId.value) return
-  if (!confirm(t('admin.confirm.deleteArticle'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteArticle'))) return
   deletingId.value = id
   try {
     await blogStore.deletePost(id)

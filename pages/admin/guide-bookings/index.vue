@@ -364,9 +364,7 @@ const { createPaymentLink, processing: payProcessing } = usePayment()
 const generatePaymentLink = async (id: string) => {
   const data = await createPaymentLink('guide_booking', String(id))
   if (!data) return
-  try { await navigator.clipboard?.writeText(data.checkout_url) } catch {}
-  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
-  if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank')
+  await useSwal().paymentLink({ url: data.checkout_url, whatsappUrl: data.whatsapp_url })
 }
 
 const canCreate = computed(() => can('create', 'guide-bookings'))
@@ -736,7 +734,7 @@ async function onStatusChange(row: GuideBooking, e: Event) {
 }
 
 async function remove(id: string) {
-  if (!confirm(t('admin.confirm.deleteBooking'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteBooking'))) return
   try {
     await guidesStore.deleteBooking(id)
     success(t('admin.guideBookings.deleted'))

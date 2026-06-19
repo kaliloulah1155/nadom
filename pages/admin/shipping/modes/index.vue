@@ -367,7 +367,7 @@ const save = async () => {
 }
 
 const onDelete = async (m: AdminShippingModeRow) => {
-  if (!confirm(t('admin.confirm.deleteRate'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteRate'))) return
   try {
     await cfg.deleteMode(m.id)
     success(t('admin.shippingModes.deleted'))

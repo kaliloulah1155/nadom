@@ -108,7 +108,7 @@ function applyPaginator<T>(res: any, items: T[], meta: Meta) {
 export const useShippingStore = defineStore('shipping', {
   state: (): ShippingState => ({
     shipments: [],
-    shipmentsMeta: newMeta(15),
+    shipmentsMeta: newMeta(10),
     destinations: [],
     loading: false,
     loadingDestinations: false,

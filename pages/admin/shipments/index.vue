@@ -300,9 +300,7 @@ const { createPaymentLink, processing: payProcessing } = usePayment()
 const generatePaymentLink = async (id: string) => {
   const data = await createPaymentLink('shipment', String(id))
   if (!data) return
-  try { await navigator.clipboard?.writeText(data.checkout_url) } catch {}
-  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
-  if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank')
+  await useSwal().paymentLink({ url: data.checkout_url, whatsappUrl: data.whatsapp_url })
 }
 
 const shippingModeLabel = (mode: string) => {

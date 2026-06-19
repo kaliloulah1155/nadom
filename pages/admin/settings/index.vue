@@ -286,7 +286,7 @@ const save = async () => {
 }
 
 const confirmDelete = async (s: any) => {
-  if (!confirm(`Supprimer le paramètre "${s.kkey}" ?`)) return
+  if (!await useSwal().confirmDelete(`Supprimer le paramètre "${s.kkey}" ?`)) return
   try {
     await settingsStore.remove(s.uuid)
     success('Paramètre supprimé')

@@ -630,7 +630,7 @@ const save = async () => {
 }
 
 const onDelete = async (d: any) => {
-  if (!confirm(t('admin.confirm.deleteDestinationModes', { name: d.country || String(d.id) }))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteDestinationModes', { name: d.country || String(d.id) }))) return
   try {
     await cfg.deleteDestination(d.id)
     success(t('admin.destinations.deleted'))

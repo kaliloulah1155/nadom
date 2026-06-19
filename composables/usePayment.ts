@@ -77,6 +77,36 @@ export function usePayment() {
   }
 
   /**
+   * Paiement INVITÉ d'une entité (réservation guide, visa, …) sans connexion.
+   * Le client fournit ses références ; redirige vers la page de paiement.
+   */
+  async function payGuestEntity(
+    payableType: PayableType,
+    payableId: string,
+    customer: { name: string; phone: string; email?: string },
+  ): Promise<boolean> {
+    processing.value = payableId
+    try {
+      const res = await api.post<CheckoutResult>('/payments/guest-checkout', {
+        payable_type: payableType,
+        payable_id: payableId,
+        customer,
+      })
+      if (res.success && res.data?.checkout_url) {
+        if (typeof window !== 'undefined') window.location.href = res.data.checkout_url
+        return true
+      }
+      notifyError(res.message || 'Impossible de démarrer le paiement.')
+      return false
+    } catch (e: any) {
+      notifyError(e?.message || 'Erreur lors du démarrage du paiement.')
+      return false
+    } finally {
+      processing.value = null
+    }
+  }
+
+  /**
    * (Admin) Génère un lien de paiement pour une demande validée.
    * Renvoie { checkout_url, whatsapp_url?, whatsapp_message? } ou null.
    */
@@ -122,6 +152,30 @@ export function usePayment() {
     return Math.ceil(gross / 100) * 100
   }
 
+  /**
+   * Détail du passage Net (Marchand) → Prix client (payé via wallet).
+   * Renvoie chaque composante pour affichage admin.
+   */
+  function priceBreakdown(net: number) {
+    const cfg = useRuntimeConfig()
+    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0.10)
+    const payoutFeeFixed = Number(cfg.public.geniuspayPayoutFeeFixed ?? 1000)
+    const payoutFeeRate = Number(cfg.public.geniuspayPayoutFeeRate ?? 0)
+    const commission = Math.round(net * commissionRate)
+    const payoutFee = Math.round(payoutFeeFixed + net * payoutFeeRate)
+    const total = publicPrice(net)
+    // Le reste couvre les frais wallet + l'arrondi au 100 supérieur.
+    const walletFees = Math.max(0, total - net - commission - payoutFee)
+    return {
+      net,
+      commission,
+      commissionRate,
+      payoutFee,
+      walletFees,
+      total,
+    }
+  }
+
   const isProcessing = (id: string) => processing.value === id
 
   /** Télécharge le reçu de paiement (PDF) d'une transaction (authentifié). */
@@ -153,5 +207,5 @@ export function usePayment() {
     }
   }
 
-  return { pay, payGuest, createPaymentLink, publicPrice, processing, isProcessing, downloadReceipt }
+  return { pay, payGuest, payGuestEntity, createPaymentLink, publicPrice, priceBreakdown, processing, isProcessing, downloadReceipt }
 }

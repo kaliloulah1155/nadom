@@ -458,7 +458,7 @@ const performEditEvent = async () => {
 
 const confirmDeleteEvent = async (event: any) => {
   if (!event.id) return
-  if (confirm(t('admin.confirm.deleteStep'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteStep'))) {
     try {
       const ok = await shippingStore.deleteTimelineEvent(event.id, String(shipment.value?.id))
       if (ok) {

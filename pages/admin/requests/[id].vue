@@ -160,12 +160,12 @@
 
           <!-- Quotation -->
           <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
               <h5 class="mb-0">
                 {{ t('admin.requests.detail.quoteTitle') }}
                 <small class="text-muted fs-6 ms-2">— {{ t('admin.requests.detail.currencyLabel') }} : <strong>{{ requestCurrency }}</strong></small>
               </h5>
-              <div class="d-flex gap-2">
+              <div class="d-flex flex-wrap gap-2">
                 <button
                   v-if="!showQuotationForm && !request.quotedPrice && canEditQuotation"
                   class="btn btn-sm btn-primary"
@@ -239,12 +239,39 @@
                       <td>{{ t('admin.requests.detail.shippingLine') }}</td>
                       <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
                     </tr>
-                    <tr class="fw-bold border-top">
-                      <td>{{ t('admin.requests.detail.total') }}</td>
-                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
+                    <tr class="fw-bold border-top border-2">
+                      <td>{{ t('admin.requests.detail.total') }} <span class="badge bg-success-subtle text-success">net NADOM</span></td>
+                      <td class="text-end text-success fs-6">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
                     </tr>
                   </tbody>
                 </table>
+
+                <!-- Décomposition Net → Prix client (payé via wallet) -->
+                <div class="border rounded p-3 bg-light mt-3">
+                  <div class="text-uppercase small fw-bold text-muted mb-2">
+                    <i class="bi bi-wallet2 me-1"></i>Détail du prix client (payé via wallet)
+                  </div>
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">Net Marchand (NADOM perçoit)</span>
+                    <span>{{ formatCurrency(qBreakdown.net, requestCurrency) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">Commission Consultant ({{ Math.round(qBreakdown.commissionRate * 100) }} %)</span>
+                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.commission, requestCurrency) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">Frais de reversement</span>
+                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.payoutFee, requestCurrency) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">Frais de traitement wallet</span>
+                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.walletFees, requestCurrency) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5">
+                    <span>Prix client</span>
+                    <span>{{ formatCurrency(qBreakdown.total, requestCurrency) }}</span>
+                  </div>
+                </div>
               </div>
 
               <!-- Quotation Form -->
@@ -268,9 +295,17 @@
                   </div>
                 </div>
 
-                <div class="alert alert-info mt-3">
-                  <strong>{{ t('admin.requests.detail.estimatedTotal') }} :</strong> {{ formatCurrency(quotationTotal, requestCurrency) }}
-                  <small class="d-block">{{ t('admin.requests.detail.commissionHint', { currency: requestCurrency }) }}</small>
+                <div class="alert alert-info mt-3 mb-0 d-flex justify-content-between align-items-center">
+                  <span><strong>{{ t('admin.requests.detail.estimatedTotal') }}</strong> <span class="badge bg-success-subtle text-success">net NADOM</span></span>
+                  <strong>{{ formatCurrency(quotationTotal, requestCurrency) }}</strong>
+                </div>
+                <div class="border rounded p-3 bg-light mt-2">
+                  <div class="text-uppercase small fw-bold text-muted mb-2"><i class="bi bi-wallet2 me-1"></i>Détail du prix client (payé via wallet)</div>
+                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Net Marchand</span><span>{{ formatCurrency(formBreakdown.net, requestCurrency) }}</span></div>
+                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Commission Consultant ({{ Math.round(formBreakdown.commissionRate * 100) }} %)</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.commission, requestCurrency) }}</span></div>
+                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Frais de reversement</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.payoutFee, requestCurrency) }}</span></div>
+                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Frais de traitement wallet</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.walletFees, requestCurrency) }}</span></div>
+                  <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5"><span>Prix client</span><span>{{ formatCurrency(formBreakdown.total, requestCurrency) }}</span></div>
                 </div>
 
                 <div class="d-flex gap-2">
@@ -457,7 +492,11 @@ const itemDisplayName = (item: Record<string, unknown>) =>
 const { success, error: notifyError } = useNotification()
 const { contactClientForRequest, generateLink, buildClientRequestMessage } = useWhatsApp()
 
-const { createPaymentLink } = usePayment()
+const { createPaymentLink, publicPrice, priceBreakdown } = usePayment()
+
+// Décomposition net → prix client (devis enregistré et formulaire)
+const qBreakdown = computed(() => priceBreakdown(Number(request.value?.quotedPrice) || 0))
+const formBreakdown = computed(() => priceBreakdown(Number(quotationTotal.value) || 0))
 
 const loading = ref(true)
 const showQuotationForm = ref(false)
@@ -476,15 +515,7 @@ const generatePaymentLink = async () => {
   const data = await createPaymentLink('personal_shopping', String(request.value.id))
   generatingLink.value = false
   if (!data) return
-
-  try {
-    await navigator.clipboard?.writeText(data.checkout_url)
-  } catch {}
-  useSwal().success('Lien de paiement généré', 'Lien copié. WhatsApp ouvert pour envoi au client.')
-
-  if (data.whatsapp_url) {
-    window.open(data.whatsapp_url, '_blank')
-  }
+  await useSwal().paymentLink({ url: data.checkout_url, whatsappUrl: data.whatsapp_url })
 }
 
 const quotation = reactive({
@@ -614,6 +645,17 @@ const createShipment = async () => {
 }
 
 const submitQuotation = async () => {
+  // Le coût produit est obligatoire (> 0) — sinon le devis partirait sans le produit,
+  // et la commission (5 %) + le prix client seraient faussés.
+  if (!quotation.productCost || quotation.productCost <= 0) {
+    notifyError(
+      requestProductTotal.value > 0
+        ? `Le coût produit est requis (articles commandés : ${formatCurrency(requestProductTotal.value, requestCurrency.value)}).`
+        : 'Le coût produit doit être supérieur à 0.'
+    )
+    return
+  }
+
   const serviceFee = quotation.productCost * 0.05
   const isUpdate = !!request.value?.quotedPrice
 
@@ -750,7 +792,7 @@ const downloadQuotationPdf = async () => {
 }
 
 const deleteRequest = async () => {
-  if (!confirm(t('admin.confirm.deleteRequest'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteRequest'))) return
 
   try {
     await psStore.deleteRequest(requestId)

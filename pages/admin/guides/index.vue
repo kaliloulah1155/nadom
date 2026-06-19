@@ -453,7 +453,7 @@ const saveGuide = async () => {
 
 const deleteGuide = async (id: string) => {
   if (deletingId.value) return
-  if (!confirm(t('admin.confirm.deleteGuide'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteGuide'))) return
   deletingId.value = id
   try {
     await guidesStore.deleteGuide(id)

@@ -283,7 +283,7 @@ const saveFaq = async () => {
 }
 
 const deleteFaq = async (id: number) => {
-  if (confirm(t('admin.confirm.deleteQuestion'))) {
+  if (await useSwal().confirmDelete(t('admin.confirm.deleteQuestion'))) {
     await blogStore.deleteFAQ(id)
     success(t('admin.faq.deleted'))
     await fetchFAQ(blogStore.faqMeta.currentPage)
