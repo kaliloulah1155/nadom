@@ -884,6 +884,7 @@
     "requests": {
       "title": "Gestion des demandes",
       "newRequest": "Nouvelle demande",
+      "backToList": "Retour à la liste des demandes",
       "searchPlaceholder": "Rechercher...",
       "allStatuses": "Tous les statuts",
       "allCategories": "Toutes catégories",

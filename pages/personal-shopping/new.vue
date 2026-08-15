@@ -19,6 +19,11 @@
           <!-- Form Card -->
           <div class="card border-0 shadow-lg">
             <div class="card-body p-4 p-lg-5">
+              <div v-if="isAdminFlow" class="mb-4">
+                <NuxtLink to="/admin/requests" class="btn btn-link p-0">
+                  <i class="bi bi-arrow-left me-1"></i>{{ t("admin.requests.backToList") }}
+                </NuxtLink>
+              </div>
               <form @submit.prevent="handleSubmit">
                 <!-- Category -->
                 <div class="mb-4">
@@ -318,10 +323,10 @@
                     }}
                   </button>
                   <NuxtLink
-                    to="/personal-shopping"
+                    :to="isAdminFlow ? '/admin/requests' : '/personal-shopping'"
                     class="btn btn-outline-secondary"
                   >
-                    {{ t("common.cancel") }}
+                    {{ isAdminFlow ? t("admin.requests.backToList") : t("common.cancel") }}
                   </NuxtLink>
                 </div>
               </form>
@@ -358,7 +363,11 @@ const { label: podCategoryLabel } = usePodCategoryLabel()
 const { categoryLabel } = useCategoryLabel()
 const { fileToCompressedBlob } = useImageCompress();
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+const isAdminFlow = computed(
+  () => route.query.for === 'admin' || authStore.hasBackofficeAccess,
+);
 const psStore = usePersonalShoppingStore();
 const { success, error: notifyError } = useNotification();
 
@@ -562,7 +571,11 @@ const handleSubmit = async () => {
       notifyError(t('personalShopping.formExtra.submitError'));
       return;
     }
-    router.push(`/personal-shopping/${requestId}`);
+    if (authStore.isAuthenticated && authStore.hasBackofficeAccess) {
+      router.push(`/admin/requests/${requestId}`);
+    } else {
+      router.push(`/personal-shopping/${requestId}`);
+    }
   } catch (err: any) {
     const msg =
       psStore.error ||

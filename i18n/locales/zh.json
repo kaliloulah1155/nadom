@@ -890,6 +890,7 @@
     "requests": {
       "title": "请求管理",
       "newRequest": "新建请求",
+      "backToList": "返回请求列表",
       "searchPlaceholder": "搜索...",
       "allStatuses": "全部状态",
       "allCategories": "全部分类",

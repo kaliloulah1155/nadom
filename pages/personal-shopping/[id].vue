@@ -29,6 +29,12 @@
           </ol>
         </nav>
 
+        <div v-if="canGoToAdminRequests" class="mb-4">
+          <NuxtLink to="/admin/requests" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i>{{ t('admin.requests.backToList') }}
+          </NuxtLink>
+        </div>
+
         <div class="row g-4">
           <!-- Main Content -->
           <div class="col-lg-8">
@@ -275,6 +281,9 @@
                   <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary">
                     <i class="bi bi-plus-circle me-2"></i>Nouvelle demande
                   </NuxtLink>
+                  <NuxtLink v-if="canGoToAdminRequests" to="/admin/requests" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>{{ t('admin.requests.backToList') }}
+                  </NuxtLink>
                 </div>
               </div>
             </div>
@@ -300,6 +309,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useCartStore } from '~/stores/cart'
 import { useFormatters } from '~/composables/useFormatters'
@@ -311,7 +321,11 @@ definePageMeta({
 })
 
 const route = useRoute()
+const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
+const canGoToAdminRequests = computed(
+  () => authStore.isAuthenticated && authStore.hasBackofficeAccess,
+)
 const cartStore = useCartStore()
 const { formatCurrency, formatDateShort, formatRequestStatus } = useFormatters()
 const { contactForRequest } = useWhatsApp()

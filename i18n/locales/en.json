@@ -890,6 +890,7 @@
     "requests": {
       "title": "Request management",
       "newRequest": "New request",
+      "backToList": "Back to requests",
       "searchPlaceholder": "Search...",
       "allStatuses": "All statuses",
       "allCategories": "All categories",

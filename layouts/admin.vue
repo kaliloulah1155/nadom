@@ -654,7 +654,13 @@ const pageTitle = computed(() => {
 
 const handleLogout = async () => {
   await authStore.logout()
-  router.push('/login')
+  // Redirection « dure » : indépendante de l'API et du router Nuxt (payload).
+  // Garantit un retour propre sur /login même si le backend est injoignable.
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login'
+  } else {
+    router.push('/login')
+  }
 }
 
 /** Ferme tous les menus puis ouvre celui demandé (accordéon).

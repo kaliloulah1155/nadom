@@ -17,7 +17,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <NuxtLink to="/admin/requests" class="btn btn-link p-0 mb-2">
-            <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+            <i class="bi bi-arrow-left me-1"></i>{{ t('admin.requests.backToList') }}
           </NuxtLink>
           <h4 class="mb-0">{{ t('admin.requests.detail.title', { id: String(request.id ?? '').slice(-6) }) }}</h4>
         </div>
