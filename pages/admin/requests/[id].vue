@@ -246,26 +246,13 @@
                   </tbody>
                 </table>
 
-                <!-- Décomposition Net → Prix client (payé via wallet) -->
                 <div class="border rounded p-3 bg-light mt-3">
                   <div class="text-uppercase small fw-bold text-muted mb-2">
-                    <i class="bi bi-wallet2 me-1"></i>Détail du prix client (payé via wallet)
+                    <i class="bi bi-receipt me-1"></i>Détail du prix client
                   </div>
                   <div class="d-flex justify-content-between py-1">
                     <span class="text-muted">Net Marchand (NADOM perçoit)</span>
                     <span>{{ formatCurrency(qBreakdown.net, requestCurrency) }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between py-1">
-                    <span class="text-muted">Commission Consultant ({{ Math.round(qBreakdown.commissionRate * 100) }} %)</span>
-                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.commission, requestCurrency) }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between py-1">
-                    <span class="text-muted">Frais de reversement</span>
-                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.payoutFee, requestCurrency) }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between py-1">
-                    <span class="text-muted">Frais de traitement wallet</span>
-                    <span class="text-secondary">+ {{ formatCurrency(qBreakdown.walletFees, requestCurrency) }}</span>
                   </div>
                   <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5">
                     <span>Prix client</span>
@@ -300,11 +287,8 @@
                   <strong>{{ formatCurrency(quotationTotal, requestCurrency) }}</strong>
                 </div>
                 <div class="border rounded p-3 bg-light mt-2">
-                  <div class="text-uppercase small fw-bold text-muted mb-2"><i class="bi bi-wallet2 me-1"></i>Détail du prix client (payé via wallet)</div>
+                  <div class="text-uppercase small fw-bold text-muted mb-2"><i class="bi bi-receipt me-1"></i>Détail du prix client</div>
                   <div class="d-flex justify-content-between py-1"><span class="text-muted">Net Marchand</span><span>{{ formatCurrency(formBreakdown.net, requestCurrency) }}</span></div>
-                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Commission Consultant ({{ Math.round(formBreakdown.commissionRate * 100) }} %)</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.commission, requestCurrency) }}</span></div>
-                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Frais de reversement</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.payoutFee, requestCurrency) }}</span></div>
-                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Frais de traitement wallet</span><span class="text-secondary">+ {{ formatCurrency(formBreakdown.walletFees, requestCurrency) }}</span></div>
                   <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5"><span>Prix client</span><span>{{ formatCurrency(formBreakdown.total, requestCurrency) }}</span></div>
                 </div>
 

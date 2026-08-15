@@ -135,43 +135,23 @@ export function usePayment() {
   }
 
   /**
-   * Calcule le Prix public (frais GeniusPay inclus) à partir du Prix de vente (net).
-   * Doit refléter le calcul backend : arrondi_100_sup( net*(1+taux) + frais_fixe ).
+   * Prix client = net NADOM (plus de frais GeniusPay).
    */
   function publicPrice(net: number): number {
-    const cfg = useRuntimeConfig()
-    const rate = Number(cfg.public.geniuspayFeeRate ?? 0.064)
-    const fixed = Number(cfg.public.geniuspayFixedFee ?? 100)
-    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0)
-    const payoutFeeFixed = Number(cfg.public.geniuspayPayoutFeeFixed ?? 1000)
-    const payoutFeeRate = Number(cfg.public.geniuspayPayoutFeeRate ?? 0)
-    // Le client paie : net + commission + frais de reversement + frais wallet.
-    // Le Marchand touche le net entier ; le Consultant garde sa commission.
-    const base = net + Math.round(net * commissionRate) + Math.round(payoutFeeFixed + net * payoutFeeRate)
-    const gross = Math.max(0, base * (1 + rate) + fixed)
-    return Math.ceil(gross / 100) * 100
+    return Math.max(0, Math.round(Number(net) || 0))
   }
 
   /**
-   * Détail du passage Net (Marchand) → Prix client (payé via wallet).
-   * Renvoie chaque composante pour affichage admin.
+   * Détail Net → Prix client. Les frais GeniusPay sont à 0.
    */
   function priceBreakdown(net: number) {
-    const cfg = useRuntimeConfig()
-    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0)
-    const payoutFeeFixed = Number(cfg.public.geniuspayPayoutFeeFixed ?? 1000)
-    const payoutFeeRate = Number(cfg.public.geniuspayPayoutFeeRate ?? 0)
-    const commission = Math.round(net * commissionRate)
-    const payoutFee = Math.round(payoutFeeFixed + net * payoutFeeRate)
     const total = publicPrice(net)
-    // Le reste couvre les frais wallet + l'arrondi au 100 supérieur.
-    const walletFees = Math.max(0, total - net - commission - payoutFee)
     return {
-      net,
-      commission,
-      commissionRate,
-      payoutFee,
-      walletFees,
+      net: total,
+      commission: 0,
+      commissionRate: 0,
+      payoutFee: 0,
+      walletFees: 0,
       total,
     }
   }

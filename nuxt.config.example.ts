@@ -81,12 +81,11 @@ export default defineNuxtConfig({
       siteName: "NADOM",
       pusherKey: "a01268b9f632bda2891d",
       pusherCluster: "ap2",
-      // Frais de traitement GeniusPay (doivent refléter le backend) pour afficher
-      // le Prix public (frais inclus) au client — Prix public = arrondi_100(net*(1+taux)+fixe).
-      geniuspayFeeRate: 0.064,
-      geniuspayFixedFee: 100,
+      // Frais GeniusPay désactivés : prix client = net NADOM.
+      geniuspayFeeRate: 0,
+      geniuspayFixedFee: 0,
       geniuspayCommissionRate: 0,
-      geniuspayPayoutFeeFixed: 1000,
+      geniuspayPayoutFeeFixed: 0,
       geniuspayPayoutFeeRate: 0
     }
   },
