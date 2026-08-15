@@ -142,7 +142,7 @@ export function usePayment() {
     const cfg = useRuntimeConfig()
     const rate = Number(cfg.public.geniuspayFeeRate ?? 0.064)
     const fixed = Number(cfg.public.geniuspayFixedFee ?? 100)
-    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0.10)
+    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0)
     const payoutFeeFixed = Number(cfg.public.geniuspayPayoutFeeFixed ?? 1000)
     const payoutFeeRate = Number(cfg.public.geniuspayPayoutFeeRate ?? 0)
     // Le client paie : net + commission + frais de reversement + frais wallet.
@@ -158,7 +158,7 @@ export function usePayment() {
    */
   function priceBreakdown(net: number) {
     const cfg = useRuntimeConfig()
-    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0.10)
+    const commissionRate = Number(cfg.public.geniuspayCommissionRate ?? 0)
     const payoutFeeFixed = Number(cfg.public.geniuspayPayoutFeeFixed ?? 1000)
     const payoutFeeRate = Number(cfg.public.geniuspayPayoutFeeRate ?? 0)
     const commission = Math.round(net * commissionRate)

@@ -85,7 +85,7 @@ export default defineNuxtConfig({
       // le Prix public (frais inclus) au client — Prix public = arrondi_100(net*(1+taux)+fixe).
       geniuspayFeeRate: 0.064,
       geniuspayFixedFee: 100,
-      geniuspayCommissionRate: 0.10,
+      geniuspayCommissionRate: 0,
       geniuspayPayoutFeeFixed: 1000,
       geniuspayPayoutFeeRate: 0
     }
