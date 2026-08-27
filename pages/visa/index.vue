@@ -27,15 +27,15 @@
       <!-- Mes demandes de visa (client connecté) -->
       <div v-if="isAuthenticated && myApplications.length" class="card border-0 shadow-sm mb-5">
         <div class="card-header bg-transparent">
-          <h5 class="mb-0"><i class="bi bi-passport me-2"></i>Mes demandes de visa</h5>
+          <h5 class="mb-0"><i class="bi bi-passport me-2"></i>{{ t('clientForms.myVisaRequests') }}</h5>
         </div>
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
                 <th>Type</th>
-                <th>Statut</th>
-                <th class="text-end">Montant</th>
+                <th>{{ t('clientForms.status') }}</th>
+                <th class="text-end">{{ t('clientForms.amount') }}</th>
                 <th class="text-end"></th>
               </tr>
             </thead>
@@ -55,7 +55,7 @@
                     @click="pay('visa', String(app.id))"
                   >
                     <span v-if="payProcessing === String(app.id)" class="spinner-border spinner-border-sm"></span>
-                    <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                    <template v-else><i class="bi bi-credit-card me-1"></i>{{ t('clientForms.pay') }}</template>
                   </button>
                 </td>
               </tr>
@@ -238,44 +238,44 @@
           <form @submit.prevent="submitVisaRequest">
             <div class="modal-body">
               <div class="alert alert-light border d-flex justify-content-between align-items-center">
-                <span class="text-muted">Montant à payer (tout compris)</span>
+                <span class="text-muted">{{ t('clientForms.amountToPay') }}</span>
                 <strong class="text-primary fs-5">{{ formatCurrency(publicPrice(Number(visaForm.cost) || 0), 'XOF') }}</strong>
               </div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Prénom *</label>
+                  <label class="form-label">{{ t('clientForms.firstName') }} *</label>
                   <input v-model="visaForm.first_name" type="text" class="form-control" required />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Nom *</label>
+                  <label class="form-label">{{ t('clientForms.lastName') }} *</label>
                   <input v-model="visaForm.last_name" type="text" class="form-control" required />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">WhatsApp *</label>
+                  <label class="form-label">{{ t('clientForms.whatsapp') }} *</label>
                   <input v-model="visaForm.phone" type="tel" class="form-control" placeholder="+225 07 XX XX XX XX" required />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ t('clientForms.email') }}</label>
                   <input v-model="visaForm.email" type="email" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Nationalité</label>
+                  <label class="form-label">{{ t('clientForms.nationality') }}</label>
                   <input v-model="visaForm.nationality" type="text" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">N° de passeport</label>
+                  <label class="form-label">{{ t('clientForms.passportNumber') }}</label>
                   <input v-model="visaForm.passport_number" type="text" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Date de départ</label>
+                  <label class="form-label">{{ t('clientForms.departureDate') }}</label>
                   <input v-model="visaForm.departure_date" type="date" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Date de retour</label>
+                  <label class="form-label">{{ t('clientForms.returnDate') }}</label>
                   <input v-model="visaForm.return_date" type="date" class="form-control" />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Notes</label>
+                  <label class="form-label">{{ t('clientForms.notes') }}</label>
                   <textarea v-model="visaForm.notes" class="form-control" rows="2"></textarea>
                 </div>
               </div>
@@ -300,7 +300,8 @@ import { useVisasStore } from '~/stores/visas'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'client',
+  middleware: 'client-only'
 })
 
 const { t } = useI18n()

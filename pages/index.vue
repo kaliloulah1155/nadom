@@ -425,9 +425,20 @@ const recentPosts = computed(() => blogStore.getRecentPosts(4))
 .hero-carousel {
   padding: 0;
 }
+/* Le thème applique `.carousel-inner .carousel-item { padding: 6rem 0; height: 100vh }`
+   au-delà de 1500px de large (style.scss). Ce carrousel-ci porte sa hauteur sur
+   `.hero-slide`, donc ce padding créait des bandes blanches au-dessus et en dessous
+   de l'image dès que la page était dézoomée (le viewport CSS dépasse alors 1500px). */
+.hero-carousel .carousel-inner .carousel-item {
+  padding: 0;
+  height: auto;
+  min-height: 0;
+}
 .hero-slide {
   position: relative;
-  min-height: 460px;
+  /* Hauteur fluide : suit la fenêtre au lieu d'être figée, pour rester pleine
+     à tous les niveaux de zoom sans jamais devenir démesurée. */
+  min-height: clamp(360px, 55vh, 640px);
   background-size: cover;
   background-position: center;
   display: flex;

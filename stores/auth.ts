@@ -178,20 +178,35 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async updateProfile(updates: Partial<User>) {
+    async updateProfile(updates: { firstname?: string; lastname?: string; sex?: string; phone?: string; country?: string; city?: string }) {
       if (!this.currentUser) return
 
       this.loading = true
       try {
         const api = useApi()
-        const uuid = this.currentUser.uuid || this.currentUser.id
-        const res = await api.post<User>(`/user/${uuid}`, { ...updates, _method: 'PUT' })
+        const res = await api.put<User>('/auth/profile', updates)
 
         if (res.success && res.data) {
           this.currentUser = { ...this.currentUser, ...res.data }
+        } else {
+          throw new Error(res.message || 'Erreur lors de la mise à jour du profil')
         }
 
         return this.currentUser
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async changePassword(payload: { current_password: string; new_password: string }) {
+      this.loading = true
+      try {
+        const api = useApi()
+        const res = await api.put('/auth/password', payload)
+        if (!res.success) {
+          throw new Error(res.message || 'Erreur lors du changement de mot de passe')
+        }
+        return true
       } finally {
         this.loading = false
       }

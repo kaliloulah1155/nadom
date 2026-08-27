@@ -130,11 +130,53 @@ export function useSwal() {
     await Swal.fire({ icon: 'success', title, text, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false, timerProgressBar: true })
   }
 
+  /**
+   * Fenêtre de succès centrée (et non un toast) : à utiliser quand le message
+   * doit être lu et acquitté, par exemple après l'envoi d'une demande.
+   */
+  async function successModal(options: {
+    title: string
+    text?: string
+    html?: string
+    confirmButtonText?: string
+  }) {
+    const Swal = await load()
+    await Swal.fire({
+      icon: 'success',
+      title: options.title,
+      text: options.text,
+      html: options.html,
+      confirmButtonText: options.confirmButtonText ?? 'OK',
+      ...baseButtons,
+    })
+  }
+
+  /**
+   * Fenêtre d'erreur centrée (et non un toast) : à utiliser quand l'échec doit
+   * être acquitté, pour qu'il ne passe pas inaperçu.
+   */
+  async function errorModal(options: {
+    title: string
+    text?: string
+    html?: string
+    confirmButtonText?: string
+  }) {
+    const Swal = await load()
+    await Swal.fire({
+      icon: 'error',
+      title: options.title,
+      text: options.text,
+      html: options.html,
+      confirmButtonText: options.confirmButtonText ?? 'OK',
+      ...baseButtons,
+    })
+  }
+
   /** Toast d'erreur. */
   async function error(title: string, text?: string) {
     const Swal = await load()
     await Swal.fire({ icon: 'error', title, text, toast: true, position: 'top-end', timer: 4500, showConfirmButton: false, timerProgressBar: true })
   }
 
-  return { confirm, confirmDelete, prompt, paymentLink, success, error, load }
+  return { confirm, confirmDelete, prompt, paymentLink, success, successModal, error, errorModal, load }
 }

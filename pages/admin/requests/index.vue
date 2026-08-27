@@ -6,10 +6,55 @@
         <h4 class="mb-1">{{ t('admin.requests.title') }}</h4>
         <p class="text-muted mb-0">{{ t('admin.requests.totalCount', { n: psStore.requestsMeta.total }) }}</p>
       </div>
-      <NuxtLink to="/personal-shopping/new?for=admin" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.requests.newRequest') }}
-      </NuxtLink>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-plus-lg me-2"></i>{{ t('admin.requests.newRequest') }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button type="button" class="dropdown-item" @click="openShoppingModal">
+              <i class="bi bi-bag-heart me-2"></i>{{ t('admin.requests.typePersonalShopping') }}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item" @click="openPackageModal">
+              <i class="bi bi-box-seam me-2"></i>{{ t('admin.requests.typePackageSending') }}
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
+
+    <!-- Type tabs -->
+    <ul class="nav nav-pills mb-4">
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          :class="{ active: filters.requestType === '' }"
+          @click="setTypeFilter('')"
+        >
+          {{ t('admin.requests.typeAll') }}
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          :class="{ active: filters.requestType === 'personal_shopping' }"
+          @click="setTypeFilter('personal_shopping')"
+        >
+          <i class="bi bi-bag-heart me-1"></i>{{ t('admin.requests.typePersonalShopping') }}
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          :class="{ active: filters.requestType === 'package_sending' }"
+          @click="setTypeFilter('package_sending')"
+        >
+          <i class="bi bi-box-seam me-1"></i>{{ t('admin.requests.typePackageSending') }}
+        </button>
+      </li>
+    </ul>
 
     <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
@@ -89,7 +134,18 @@
               <tr v-for="request in psStore.requests" :key="request.id">
                 <td><code>{{ String(request.id).slice(-6) }}</code></td>
                 <td>
-                  <div class="d-flex align-items-center">
+                  <div v-if="request.requestType === 'package_sending'" class="d-flex align-items-center">
+                    <span class="badge bg-warning-subtle text-warning me-2">
+                      <i class="bi bi-box-seam"></i>
+                    </span>
+                    <div>
+                      <div class="fw-medium">
+                        {{ t('admin.requests.ctnCount', { n: request.ctnCount ?? '?' }) }}
+                      </div>
+                      <small class="text-muted">{{ request.destination?.country || '—' }}</small>
+                    </div>
+                  </div>
+                  <div v-else class="d-flex align-items-center">
                     <img
                       :src="requestThumbnailUrl(request, 40)"
                       class="rounded me-2"
@@ -233,17 +289,69 @@
         </div>
       </div>
     </div>
+
+    <!-- Nouvelle demande "Envoi de colis" — même formulaire que la page publique
+         (composant partagé), ouvert en modale pour ne pas quitter la liste. -->
+    <div id="packageRequestModal" ref="packageModalRef" class="modal fade" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-box-seam me-2"></i>{{ t('admin.requests.typePackageSending') }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <!-- `v-if` : on remonte le formulaire à neuf à chaque ouverture, pour ne
+                 pas retrouver la saisie précédente ni une étape déjà avancée. -->
+            <EnvoiColisForm
+              v-if="packageModalOpen"
+              embedded
+              admin
+              @submitted="onPackageRequestCreated"
+              @close="closePackageModal"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nouvelle demande "Personal Shopping" — même formulaire que la page
+         publique (composant partagé), ouvert en modale. -->
+    <div id="shoppingRequestModal" ref="shoppingModalRef" class="modal fade" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-bag-heart me-2"></i>{{ t('admin.requests.typePersonalShopping') }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <PersonalShoppingForm
+              v-if="shoppingModalOpen"
+              embedded
+              admin
+              @submitted="onShoppingRequestCreated"
+              @close="closeShoppingModal"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const { t } = useI18n()
 
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
+import EnvoiColisForm from '~/components/envoiColis/EnvoiColisForm.vue'
+import PersonalShoppingForm from '~/components/personalShopping/PersonalShoppingForm.vue'
 
 definePageMeta({
   layout: 'admin'
@@ -290,7 +398,8 @@ const confirmLinkShipment = async () => {
 const filters = reactive({
   search: '',
   status: '',
-  category: ''
+  category: '',
+  requestType: '' as '' | 'personal_shopping' | 'package_sending'
 })
 
 const fetchRequests = async (page?: number, limit?: number) => {
@@ -299,8 +408,14 @@ const fetchRequests = async (page?: number, limit?: number) => {
     limit: limit ?? psStore.requestsMeta.perPage,
     search: filters.search || undefined,
     status: filters.status || undefined,
-    category: filters.category || undefined
+    category: filters.category || undefined,
+    request_type: filters.requestType || undefined
   })
+}
+
+const setTypeFilter = (type: '' | 'personal_shopping' | 'package_sending') => {
+  filters.requestType = type
+  fetchRequests(1)
 }
 
 let debounceTimer: any = null
@@ -313,6 +428,7 @@ const resetFilters = () => {
   filters.search = ''
   filters.status = ''
   filters.category = ''
+  filters.requestType = ''
   fetchRequests(1)
 }
 
@@ -336,9 +452,69 @@ const deleteRequest = async (id: string) => {
   }
 }
 
+// --- Modale "Nouvelle demande — Envoi de colis" ---------------------------------
+const packageModalRef = ref<HTMLElement | null>(null)
+const packageModalOpen = ref(false)
+let packageModalInstance: any = null
+
+const openPackageModal = async () => {
+  packageModalOpen.value = true
+  await nextTick()
+  packageModalInstance?.show()
+}
+
+const closePackageModal = () => {
+  packageModalInstance?.hide()
+}
+
+const onPackageRequestCreated = async (ids: string[]) => {
+  closePackageModal()
+  // La demande vient d'être créée : on recharge la liste pour qu'elle y figure.
+  await fetchRequests(1)
+  success(
+    ids.length > 1
+      ? t('envoiColis.form.multiSubmitSuccess', { n: ids.length })
+      : t('envoiColis.submitSuccess'),
+  )
+}
+
+// --- Modale "Nouvelle demande — Personal Shopping" ------------------------------
+const shoppingModalRef = ref<HTMLElement | null>(null)
+const shoppingModalOpen = ref(false)
+let shoppingModalInstance: any = null
+
+const openShoppingModal = async () => {
+  shoppingModalOpen.value = true
+  await nextTick()
+  shoppingModalInstance?.show()
+}
+
+const closeShoppingModal = () => {
+  shoppingModalInstance?.hide()
+}
+
+const onShoppingRequestCreated = async () => {
+  closeShoppingModal()
+  await fetchRequests(1)
+  success(t('personalShopping.formExtra.submitSuccess'))
+}
+
 onMounted(async () => {
   if (typeof window !== 'undefined' && (window as any).bootstrap && linkModalRef.value) {
     linkModalInstance = new (window as any).bootstrap.Modal(linkModalRef.value)
+  }
+  if (typeof window !== 'undefined' && (window as any).bootstrap && packageModalRef.value) {
+    packageModalInstance = new (window as any).bootstrap.Modal(packageModalRef.value)
+    // Vider le formulaire quand la modale est fermée (croix, Échap, clic dehors).
+    packageModalRef.value.addEventListener('hidden.bs.modal', () => {
+      packageModalOpen.value = false
+    })
+  }
+  if (typeof window !== 'undefined' && (window as any).bootstrap && shoppingModalRef.value) {
+    shoppingModalInstance = new (window as any).bootstrap.Modal(shoppingModalRef.value)
+    shoppingModalRef.value.addEventListener('hidden.bs.modal', () => {
+      shoppingModalOpen.value = false
+    })
   }
   await psStore.fetchCategories({ page: 1, limit: 100, slug: 'POD' })
   await fetchRequests(1)

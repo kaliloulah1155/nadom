@@ -268,7 +268,34 @@ export const useShippingStore = defineStore('shipping', {
       this.loading = true
       try {
         const api = useApi()
-        const res = await api.post<Shipment>('/shipments', shipmentData)
+
+        // Le payload partait tel quel, en camelCase, alors que l'API attend du
+        // snake_case : TOUS les champs arrivaient donc nuls côté serveur, et
+        // l'insertion échouait sur la contrainte NOT NULL de `status` (erreur 500
+        // « Erreur lors de la création de l'expédition », sans rien dans le journal
+        // puisque le contrôleur renvoie l'exception dans la réponse).
+        const map: Record<string, string> = {
+          userId: 'user_id',
+          requestId: 'request_id',
+          destinationCountry: 'destination_country',
+          destinationCity: 'destination_city',
+          shippingMode: 'shipping_mode',
+          declaredValue: 'declared_value',
+          shippingCost: 'shipping_cost',
+          currentLocation: 'current_location',
+          estimatedDelivery: 'estimated_delivery',
+          trackingNumber: 'tracking_number',
+          packageId: 'package_id',
+        }
+        const payload: Record<string, any> = {}
+        for (const [k, v] of Object.entries(shipmentData)) {
+          if (v === undefined) continue
+          payload[map[k] ?? k] = v
+        }
+        // `status` est obligatoire en base : une expédition naît « en attente ».
+        if (!payload.status) payload.status = 'pending'
+
+        const res = await api.post<Shipment>('/shipments', payload)
         if (res.success && res.data) {
           this.shipments.unshift(res.data)
           this.shipmentsMeta.total++
@@ -353,6 +380,18 @@ export const useShippingStore = defineStore('shipping', {
       const res = await api.delete(`/shipment-timeline/${id}`)
       if (res.success) {
         await this.fetchShipmentById(shipmentId)
+        return true
+      }
+      return false
+    },
+
+    async deleteShipment(id: string) {
+      const api = useApi()
+      const res = await api.delete(`/shipments/${id}`)
+      if (res.success) {
+        const idx = this.shipments.findIndex(s => String(s.id) === String(id))
+        if (idx !== -1) this.shipments.splice(idx, 1)
+        this.shipmentsMeta.total = Math.max(0, this.shipmentsMeta.total - 1)
         return true
       }
       return false

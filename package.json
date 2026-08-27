@@ -23,6 +23,7 @@
     "bootstrap": "^5.3.7",
     "dropzone": "^6.0.0-beta.2",
     "flag-icons": "^7.5.0",
+    "intl-tel-input": "^25.15.1",
     "laravel-echo": "^2.2.0",
     "multi-range-slider-vue": "^1.1.4",
     "nuxt": "^3.17.7",

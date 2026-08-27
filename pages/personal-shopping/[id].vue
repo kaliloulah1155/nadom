@@ -135,7 +135,7 @@
                 <h6 class="fw-medium">Description</h6>
                 <div class="text-muted request-description" v-html="request.description"></div>
 
-                <div class="row g-3 mt-3">
+                <div class="row g-3 mt-3 stat-row">
                   <div class="col-6 col-md-3">
                     <div class="p-3 bg-light rounded">
                       <small class="text-muted d-block">Quantite</small>
@@ -317,7 +317,9 @@ import { useWhatsApp } from '~/composables/useWhatsApp'
 import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'client',
+  // Les utilisateurs back-office sont renvoyés vers leur équivalent admin.
+  middleware: 'client-only',
 })
 
 const route = useRoute()
@@ -338,10 +340,13 @@ const selectedImage = ref<string | null>(null)
 
 const requestId = route.params.id as string
 
-// Load request — skip API call if already in store (e.g., just submitted from cart)
+// Récupération ciblée de la demande. Se rabattre sur `fetchRequests()` ne
+// fonctionnait que si la demande figurait dans la page de liste chargée : depuis
+// un lien direct, un signet ou un rafraîchissement, la page affichait à tort
+// « Demande non trouvée ».
 onMounted(async () => {
   if (!psStore.getRequestById(requestId)) {
-    await psStore.fetchRequests()
+    await psStore.fetchRequestById(requestId)
   }
   loading.value = false
 })
@@ -402,6 +407,18 @@ const addRequestToCart = () => {
 </script>
 
 <style scoped>
+.stat-row .p-3 {
+  padding: 0.75rem !important;
+}
+.stat-row small {
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+.stat-row strong {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }

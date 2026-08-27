@@ -228,6 +228,37 @@
             </div>
           </div>
         </div>
+
+        <!-- Traçabilité (Phase 2 — Package / Conteneur) -->
+        <div v-if="(shipment as any).package" class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-transparent py-3">
+            <h5 class="card-title mb-0">{{ t('admin.shipments.traceability') }}</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="text-muted small d-block">{{ t('admin.shipments.package') }}</label>
+              <code>{{ (shipment as any).package.code }}</code>
+            </div>
+            <div v-if="(shipment as any).package.container">
+              <label class="text-muted small d-block">{{ t('admin.shipments.container') }}</label>
+              <code class="fw-bold">{{ (shipment as any).package.container.code }}</code>
+              <div class="small text-muted mt-1">
+                {{ t('admin.shipments.containerLot', {
+                  n: (shipment as any).package.container.container_number,
+                  lot: (shipment as any).package.container.lot_number
+                }) }}
+              </div>
+            </div>
+            <div v-else class="small text-muted fst-italic">{{ t('admin.shipments.noContainer') }}</div>
+          </div>
+        </div>
+
+        <!-- Encaissement (Phase 4) -->
+        <AdminPaymentBlock
+          payable-type="shipment"
+          :payable-id="String(shipment.id)"
+          :amount-due="shipment.shipping_cost ? Number(shipment.shipping_cost) : null"
+        />
       </div>
     </div>
 
@@ -404,8 +435,15 @@ const fetchShipment = async (showLoading = true) => {
     const existing = shippingStore.shipments.find(s => s.tracking_number === id || String(s.id) === id)
     if (existing) {
       await shippingStore.fetchShipmentById(String(existing.id))
+    } else if (id.startsWith('ship_')) {
+      // Identifiant technique : récupération directe.
+      await shippingStore.fetchShipmentById(id)
     } else {
-      await shippingStore.fetchShipments()
+      // Numéro de suivi (`TRK-…` ou nomenclature `AAAAMMJJ…`) : recherche ciblée
+      // côté serveur. On chargeait auparavant TOUTES les expéditions pour en
+      // retrouver une seule — coûteux et fragile sur cette base distante, où un
+      // appel massif est le premier à expirer (§27.3).
+      await shippingStore.fetchShipments({ tracking_number: id, limit: 1 })
     }
   } finally {
     if (showLoading) loading.value = false

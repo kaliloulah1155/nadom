@@ -43,142 +43,78 @@
                     </NuxtLink>
                   </div>
 
-                  <!-- Tabs -->
-                  <ul class="nav nav-pills nav-fill mb-4" role="tablist">
-                    <li class="nav-item me-2">
-                      <button
-                        class="nav-link"
-                        :class="{ active: activeTab === 'client' }"
-                        @click="activeTab = 'client'"
-                      >
-                        <i class="bi bi-person me-2"></i>{{ t('auth.clientAccess') }}
-                      </button>
-                    </li>
-                    <li class="nav-item">
-                      <button
-                        class="nav-link"
-                        :class="{ active: activeTab === 'admin' }"
-                        @click="activeTab = 'admin'"
-                      >
-                        <i class="bi bi-shield-lock me-2"></i>{{ t('auth.adminLogin') }}
-                      </button>
-                    </li>
-                  </ul>
-
-                  <!-- Client Access Tab -->
-                  <div v-if="activeTab === 'client'">
-                    <div class="text-center mb-4">
-                      <div class="client-icon mb-3">
-                        <i class="bi bi-box-seam"></i>
-                      </div>
-                      <h5>{{ t('auth.trackOrder') }}</h5>
-                      <p class="text-muted small">
-                        {{ t('auth.trackOrderHint') }}
-                      </p>
-                    </div>
-
-                    <form @submit.prevent="handleClientAccess">
-                      <div class="mb-4">
-                        <label class="form-label">{{ t('auth.trackingCode') }}</label>
-                        <div class="input-group input-group-lg">
-                          <span class="input-group-text bg-light">
-                            <i class="bi bi-upc-scan"></i>
-                          </span>
-                          <input
-                            v-model="clientCode"
-                            type="text"
-                            class="form-control"
-                            :placeholder="t('auth.trackingPlaceholder')"
-                            required
-                          />
-                        </div>
-                        <small class="text-muted">
-                          {{ t('auth.trackingHint') }}
-                        </small>
-                      </div>
-
-                      <button
-                        type="submit"
-                        class="btn btn-primary btn-lg w-100"
-                        :disabled="clientLoading"
-                      >
-                        <span v-if="clientLoading" class="spinner-border spinner-border-sm me-2"></span>
-                        {{ t('auth.accessMyRequests') }}
-                      </button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                      <p class="text-muted small mb-2">{{ t('auth.noCode') }}</p>
-                      <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i>{{ t('personalShopping.newRequest') }}
-                      </NuxtLink>
-                    </div>
+                  <div class="text-center mb-4">
+                    <h5>{{ t('auth.login') }}</h5>
+                    <p class="text-muted small">
+                      {{ t('auth.loginHint') }}
+                    </p>
                   </div>
 
-                  <!-- Admin Login Tab -->
-                  <div v-if="activeTab === 'admin'">
-                    <div class="alert alert-warning border-0 mb-4">
-                      <div class="d-flex">
-                        <i class="bi bi-shield-exclamation me-2"></i>
-                        <small>{{ t('auth.adminOnly') }}</small>
-                      </div>
+                  <!-- Error Alert -->
+                  <div v-if="error" class="alert alert-danger" role="alert">
+                    {{ error }}
+                  </div>
+
+                  <!-- Login Form -->
+                  <form @submit.prevent="handleLogin">
+                    <div class="mb-3">
+                      <label class="form-label">{{ t('auth.emailOrPhone') }}</label>
+                      <input
+                        v-model="form.identifier"
+                        type="text"
+                        class="form-control form-control-lg"
+                        :class="{ 'is-invalid': errors.identifier }"
+                        :placeholder="t('auth.emailOrPhonePlaceholder')"
+                        required
+                        autocomplete="username"
+                      />
+                      <div v-if="errors.identifier" class="invalid-feedback">{{ errors.identifier }}</div>
                     </div>
 
-                    <!-- Error Alert -->
-                    <div v-if="error" class="alert alert-danger" role="alert">
-                      {{ error }}
-                    </div>
-
-                    <!-- Admin Login Form -->
-                    <form @submit.prevent="handleAdminLogin">
-                      <div class="mb-3">
-                        <label class="form-label">{{ t('auth.email') }}</label>
+                    <div class="mb-4">
+                      <label class="form-label">{{ t('auth.password') }}</label>
+                      <div class="input-group input-group-lg has-validation">
                         <input
-                          v-model="form.email"
-                          type="email"
-                          class="form-control form-control-lg"
-                          :class="{ 'is-invalid': errors.email }"
-                          placeholder="admin@nadom.com"
+                          v-model="form.password"
+                          :type="showPassword ? 'text' : 'password'"
+                          class="form-control"
+                          :class="{ 'is-invalid': errors.password }"
+                          :placeholder="t('auth.passwordPlaceholder')"
                           required
+                          autocomplete="current-password"
                         />
-                        <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary password-toggle-btn"
+                          :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                          :title="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                          @click="showPassword = !showPassword"
+                        >
+                          <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" aria-hidden="true"></i>
+                        </button>
+                        <div v-if="errors.password" class="invalid-feedback d-block">{{ errors.password }}</div>
                       </div>
+                    </div>
 
-                      <div class="mb-4">
-                        <label class="form-label">{{ t('auth.password') }}</label>
-                        <div class="input-group input-group-lg has-validation">
-                          <input
-                            v-model="form.password"
-                            :type="showPassword ? 'text' : 'password'"
-                            class="form-control"
-                            :class="{ 'is-invalid': errors.password }"
-                            :placeholder="t('auth.passwordPlaceholder')"
-                            required
-                            autocomplete="current-password"
-                          />
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary password-toggle-btn"
-                            :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
-                            :title="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
-                            @click="showPassword = !showPassword"
-                          >
-                            <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" aria-hidden="true"></i>
-                          </button>
-                          <div v-if="errors.password" class="invalid-feedback d-block">{{ errors.password }}</div>
-                        </div>
-                      </div>
+                    <button
+                      type="submit"
+                      class="btn btn-dark btn-lg w-100"
+                      :disabled="loading"
+                    >
+                      <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                      {{ loading ? t('common.loading') : t('auth.login') }}
+                    </button>
+                  </form>
 
-                      <button
-                        type="submit"
-                        class="btn btn-dark btn-lg w-100"
-                        :disabled="loading"
-                      >
-                        <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                        {{ loading ? t('common.loading') : t('auth.login') }}
-                      </button>
-                    </form>
-
+                  <div class="text-center mt-4">
+                    <p class="text-muted small mb-2">{{ t('auth.noAccountYet') }}</p>
+                    <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm">
+                      <i class="bi bi-plus-circle me-1"></i>{{ t('personalShopping.newRequest') }}
+                    </NuxtLink>
+                    <span class="mx-2 text-muted">·</span>
+                    <NuxtLink to="/import-export/tracking" class="btn btn-outline-secondary btn-sm">
+                      <i class="bi bi-upc-scan me-1"></i>{{ t('auth.trackWithoutAccount') }}
+                    </NuxtLink>
                   </div>
 
                   <!-- Back to Home -->
@@ -203,7 +139,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  middleware: ['guest']
 })
 
 const { t, locale } = useI18n()
@@ -212,17 +149,13 @@ const authStore = useAuthStore()
 const { success, error: notifyError } = useNotification()
 const config = useRuntimeConfig()
 // State
-const activeTab = ref<'client' | 'admin'>('client')
-const clientCode = ref('')
-const clientLoading = ref(false)
-
 const form = reactive({
-  email: '',
+  identifier: '',
   password: ''
 })
 
 const errors = reactive({
-  email: '',
+  identifier: '',
   password: ''
 })
 
@@ -230,80 +163,40 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
-// Client Access
-const handleClientAccess = () => {
-  if (!clientCode.value.trim()) return
-
-  clientLoading.value = true
-
-  // Check if it's a tracking number or request ID
-  const code = clientCode.value.trim()
-
-  setTimeout(() => {
-    clientLoading.value = false
-
-    if (code.startsWith('TRK-')) {
-      router.push(`/import-export/tracking?tracking=${code}`)
-    } else if (code.startsWith('REQ-') || code.startsWith('req_')) {
-      router.push(`/personal-shopping/${code}`)
-    } else {
-      // Try tracking first
-      router.push(`/import-export/tracking?tracking=${code}`)
-    }
-  }, 500)
-}
-
-// Admin Login
 const validateForm = () => {
-  errors.email = ''
+  errors.identifier = ''
   errors.password = ''
 
-  if (!form.email) {
-    errors.email = t('auth.emailRequired')
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = t('auth.emailInvalid')
+  if (!form.identifier.trim()) {
+    errors.identifier = t('auth.emailOrPhoneRequired')
   }
 
   if (!form.password) {
     errors.password = t('auth.passwordRequired')
-  } else if (form.password.length < 6) {
+  } else if (form.password.length < 8) {
     errors.password = t('auth.passwordShort')
   }
 
-  return !errors.email && !errors.password
+  return !errors.identifier && !errors.password
 }
 
-const handleAdminLogin = async () => {
-  console.log('[DEBUG] handleAdminLogin started')
-  if (!validateForm()) {
-    console.log('[DEBUG] Validation failed')
-    return
-  }
+const handleLogin = async () => {
+  if (!validateForm()) return
 
   loading.value = true
   error.value = ''
 
-  console.log('[DEBUG] Attempting login for:', form.email)
+  const identifier = form.identifier.trim()
+  const credentials = identifier.includes('@')
+    ? { email: identifier, password: form.password }
+    : { phone: identifier, password: form.password }
 
   try {
-    const user = await authStore.login({ email: form.email, password: form.password })
-
-    // Debugging backoffice access
-    console.log('[Login] User Data:', user)
-    console.log('[Login] Store CurrentUser Role:', authStore.currentUser?.role)
-    console.log('[Login] Has Backoffice Access:', authStore.hasBackofficeAccess)
-
-    // Determine if user has backoffice access (admin or agent)
-    if (!authStore.hasBackofficeAccess) {
-      error.value = t('auth.staffOnly')
-      await authStore.logout()
-      return
-    }
-
+    await authStore.login(credentials)
     success(t('auth.loginSuccess'))
-    router.push('/admin/dashboard')
+    router.push(authStore.hasBackofficeAccess ? '/admin/dashboard' : '/dashboard')
   } catch (err: any) {
-    error.value = err.message || (t('auth.loginError'))
+    error.value = err.message || t('auth.loginError')
     notifyError(error.value)
   } finally {
     loading.value = false
@@ -341,30 +234,6 @@ const handleAdminLogin = async () => {
   padding: 40px;
   width: 100%;
   max-width: 400px;
-}
-
-.client-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, var(--bs-primary) 0%, #0056b3 100%);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  margin: 0 auto;
-}
-
-.nav-pills .nav-link {
-  color: #64748b;
-  border-radius: 8px;
-  padding: 12px 20px;
-}
-
-.nav-pills .nav-link.active {
-  background: var(--bs-primary);
-  color: white;
 }
 
 .password-toggle-btn {

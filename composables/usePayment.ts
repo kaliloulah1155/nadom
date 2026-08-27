@@ -4,6 +4,19 @@ import { useSwal } from '~/composables/useSwal'
 
 export type PayableType = 'cart' | 'guide_booking' | 'shipment' | 'personal_shopping' | 'visa'
 
+export interface ManualPaymentMethod {
+  value: 'cash' | 'wave_manual' | 'orange_money_manual' | 'moov_manual' | 'bank_transfer'
+  label: string
+}
+
+export const MANUAL_PAYMENT_METHODS: ManualPaymentMethod[] = [
+  { value: 'cash', label: 'Espèces' },
+  { value: 'wave_manual', label: 'Wave (confirmé de visu)' },
+  { value: 'orange_money_manual', label: 'Orange Money (confirmé de visu)' },
+  { value: 'moov_manual', label: 'Moov Money (confirmé de visu)' },
+  { value: 'bank_transfer', label: 'Virement bancaire' },
+]
+
 export interface CheckoutResult {
   transaction_id: string
   reference: string
@@ -135,6 +148,50 @@ export function usePayment() {
   }
 
   /**
+   * (Admin, Phase 4) Enregistre un encaissement manuel (espèces / Wave / Orange
+   * Money / Moov confirmé de visu, sans passerelle) sur une Envoi de colis ou
+   * une demande Personal Shopping.
+   */
+  async function recordManualPayment(payload: {
+    payable_type: 'shipment' | 'personal_shopping'
+    payable_id: string
+    amount: number
+    payment_method: ManualPaymentMethod['value']
+    note?: string
+  }): Promise<boolean> {
+    processing.value = payload.payable_id
+    try {
+      const res = await api.post('/payments/manual', payload)
+      if (res.success) {
+        return true
+      }
+      notifyError(res.message || "Impossible d'enregistrer l'encaissement.")
+      return false
+    } catch (e: any) {
+      notifyError(e?.message || "Erreur lors de l'enregistrement de l'encaissement.")
+      return false
+    } finally {
+      processing.value = null
+    }
+  }
+
+  /** (Admin) Historique des encaissements (manuels + GeniusPay) d'un élément payable. */
+  async function fetchPayablePayments(
+    payableType: 'shipment' | 'personal_shopping',
+    payableId: string,
+  ): Promise<{ transactions: any[]; total_collected: number }> {
+    try {
+      const res = await api.get<{ transactions: any[]; total_collected: number }>(
+        `/payments/for/${payableType}/${payableId}`,
+      )
+      if (res.success && res.data) return res.data
+      return { transactions: [], total_collected: 0 }
+    } catch {
+      return { transactions: [], total_collected: 0 }
+    }
+  }
+
+  /**
    * Prix client = net NADOM (plus de frais GeniusPay).
    */
   function publicPrice(net: number): number {
@@ -187,5 +244,5 @@ export function usePayment() {
     }
   }
 
-  return { pay, payGuest, payGuestEntity, createPaymentLink, publicPrice, priceBreakdown, processing, isProcessing, downloadReceipt }
+  return { pay, payGuest, payGuestEntity, createPaymentLink, publicPrice, priceBreakdown, processing, isProcessing, downloadReceipt, recordManualPayment, fetchPayablePayments }
 }

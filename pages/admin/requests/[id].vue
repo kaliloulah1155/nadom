@@ -46,8 +46,215 @@
       <div class="row g-4">
         <!-- Main Content -->
         <div class="col-lg-8">
+          <!-- Envoi de colis : infos déclarées (CTN/CBM/poids/valeur/destination) -->
+          <div v-if="request.requestType === 'package_sending'" class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>{{ t('admin.requests.detail.packageInfo') }}</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <small class="text-muted d-block">{{ t('admin.requests.ctnCountLabel') }}</small>
+                  <strong>{{ request.ctnCount ?? t('admin.shipments.na') }}</strong>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted d-block">{{ t('admin.requests.declaredWeightLabel') }}</small>
+                  <strong>{{ request.declaredWeight != null ? `${request.declaredWeight} kg` : t('admin.shipments.na') }}</strong>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted d-block">{{ t('admin.requests.cbmLabel') }}</small>
+                  <strong>{{ request.cbm != null ? `${request.cbm} m³` : t('admin.shipments.na') }}</strong>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted d-block">{{ t('admin.requests.declaredValueLabel') }}</small>
+                  <strong>{{ request.declaredValue != null ? formatCurrency(request.declaredValue, requestCurrency) : t('admin.shipments.na') }}</strong>
+                </div>
+                <div class="col-md-6">
+                  <small class="text-muted d-block">{{ t('admin.shipments.destination') }}</small>
+                  <strong>{{ (request as any).destination?.country || t('admin.shipments.na') }}</strong>
+                </div>
+                <div class="col-md-6">
+                  <small class="text-muted d-block">{{ t('admin.shipments.mode') }}</small>
+                  <strong>{{ shippingModeLabel((request as any).shippingMode?.mode) }}</strong>
+                </div>
+                <div v-if="(request as any).originCountry || (request as any).originCity" class="col-md-6">
+                  <small class="text-muted d-block">{{ t('envoiColis.form.originSection') }}</small>
+                  <strong>{{ [(request as any).originCity, (request as any).originCountry].filter(Boolean).join(', ') }}</strong>
+                </div>
+                <div v-if="(request as any).destinationAddress" class="col-md-6">
+                  <small class="text-muted d-block">{{ t('envoiColis.form.destinationAddress') }}</small>
+                  <strong>{{ (request as any).destinationAddress }}</strong>
+                </div>
+                <div v-if="(request as any).senderFullname || (request as any).senderCompany" class="col-md-6">
+                  <small class="text-muted d-block">{{ t('envoiColis.form.senderSection') }}</small>
+                  <strong>{{ (request as any).senderFullname }}<template v-if="(request as any).senderNumber"> — {{ (request as any).senderNumber }}</template></strong>
+                  <div v-if="(request as any).senderEmail" class="small text-muted">{{ (request as any).senderEmail }}</div>
+                  <div v-if="(request as any).senderType === 'company' && (request as any).senderCompany" class="small">
+                    <span class="badge bg-secondary-subtle text-secondary">
+                      <i class="bi bi-building me-1"></i>{{ (request as any).senderCompany }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="(request as any).contactFullname || (request as any).contactCompany" class="col-md-6">
+                  <small class="text-muted d-block">{{ t('envoiColis.form.recipientSection') }}</small>
+                  <strong>{{ (request as any).contactFullname }}<template v-if="(request as any).contactNumber"> — {{ (request as any).contactNumber }}</template></strong>
+                  <div v-if="(request as any).contactEmail" class="small text-muted">{{ (request as any).contactEmail }}</div>
+                  <div v-if="(request as any).contactType === 'company' && (request as any).contactCompany" class="small">
+                    <span class="badge bg-secondary-subtle text-secondary">
+                      <i class="bi bi-building me-1"></i>{{ (request as any).contactCompany }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="request.description" class="col-12">
+                  <small class="text-muted d-block">{{ t('envoiColis.form.description') }}</small>
+                  <span>{{ request.description }}</span>
+                </div>
+                <div v-if="(request as any).packageItems?.length" class="col-12">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">{{ t('envoiColis.form.addPackage') }}</small>
+                    <!-- L'agent ajuste les valeurs déclarées par le client (poids,
+                         dimensions, photos) avant d'établir le devis. -->
+                    <div v-if="canEditQuotation" class="d-flex gap-2">
+                      <template v-if="editPackages">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" :disabled="savingPackages" @click="cancelPackageEdit">
+                          {{ t('admin.common.cancel') }}
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" :disabled="savingPackages" @click="savePackages">
+                          <span v-if="savingPackages" class="spinner-border spinner-border-sm me-1"></span>
+                          {{ t('admin.requests.detail.savePackages') }}
+                        </button>
+                      </template>
+                      <button v-else type="button" class="btn btn-sm btn-outline-primary" @click="startPackageEdit">
+                        <i class="bi bi-pencil me-1"></i>{{ t('admin.requests.detail.editPackages') }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Mode édition -->
+                  <div v-if="editPackages">
+                    <div v-for="(pi, idx) in packageDraft" :key="idx" class="border rounded p-3 mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="small">{{ t('envoiColis.form.packageN', { n: idx + 1 }) }}</strong>
+                        <button v-if="packageDraft.length > 1" type="button" class="btn btn-sm btn-outline-danger" @click="packageDraft.splice(idx, 1)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                      <div class="row g-2">
+                        <div class="col-6 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.quantity') }}</label>
+                          <input v-model.number="pi.quantity" type="number" min="1" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-6 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.declaredWeight') }}</label>
+                          <input v-model.number="pi.weight" type="number" min="0" step="any" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-4 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.dimLengthShort') }}</label>
+                          <input v-model.number="pi.length" type="number" min="0" step="any" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-4 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.dimWidthShort') }}</label>
+                          <input v-model.number="pi.width" type="number" min="0" step="any" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-4 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.dimHeightShort') }}</label>
+                          <input v-model.number="pi.height" type="number" min="0" step="any" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-12 col-lg-2">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.itemNote') }}</label>
+                          <input v-model="pi.description" type="text" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label small mb-1">{{ t('envoiColis.form.itemDescription') }}</label>
+                          <div class="d-flex flex-wrap gap-2">
+                            <button
+                              v-for="c in packageCategories"
+                              :key="c.uuid"
+                              type="button"
+                              class="btn btn-sm rounded-pill px-3"
+                              :class="(pi.categories || []).includes(c.label) ? 'btn-primary' : 'btn-outline-secondary'"
+                              @click="toggleDraftCategory(pi, c.label)"
+                            >
+                              {{ c.label }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <label class="form-label small mb-1">{{ t('envoiColis.form.photos') }}</label>
+                        <div class="d-flex gap-2 flex-wrap align-items-center">
+                          <div v-for="(img, i) in pi.images" :key="i" class="position-relative">
+                            <img :src="resolveStorageAssetUrl(img)" class="rounded border pkg-thumb" width="56" height="56" alt="" />
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-danger pkg-thumb-remove"
+                              :title="t('admin.requests.detail.removePhoto')"
+                              @click="pi.images.splice(i, 1)"
+                            >
+                              <i class="bi bi-x"></i>
+                            </button>
+                          </div>
+                          <label class="btn btn-sm btn-outline-secondary mb-0">
+                            <i class="bi bi-plus-lg me-1"></i>{{ t('admin.requests.detail.addPhoto') }}
+                            <input type="file" accept="image/*" multiple hidden @change="onPackagePhotos(idx, $event)" />
+                          </label>
+                          <span v-if="uploadingPhotos" class="spinner-border spinner-border-sm text-primary"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="alert alert-info py-2 small mb-0">
+                      {{ t('admin.requests.detail.packagesRecomputed') }}
+                    </div>
+                  </div>
+
+                  <table v-else class="table table-sm mb-0 pkg-table align-middle">
+                    <thead>
+                      <tr>
+                        <th>{{ t('envoiColis.form.quantity') }}</th>
+                        <th>{{ t('envoiColis.form.declaredWeight') }}</th>
+                        <th>{{ t('envoiColis.form.dimLength') }}×{{ t('envoiColis.form.dimWidth') }}×{{ t('envoiColis.form.dimHeight') }}</th>
+                        <th>{{ t('envoiColis.form.itemDescription') }}</th>
+                        <th>{{ t('envoiColis.form.photos') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(pi, idx) in (request as any).packageItems" :key="idx">
+                        <td>{{ pi.quantity }}</td>
+                        <td>{{ pi.weight != null ? `${pi.weight} kg` : '—' }}</td>
+                        <td>{{ pi.length && pi.width && pi.height ? `${pi.length}×${pi.width}×${pi.height} cm` : '—' }}</td>
+                        <td>
+                          <span v-if="pi.categories?.length" class="d-flex flex-wrap gap-1">
+                            <span v-for="(c, ci) in pi.categories" :key="ci" class="badge bg-secondary-subtle text-secondary">{{ c }}</span>
+                          </span>
+                          <span v-else class="text-muted">—</span>
+                          <div v-if="pi.description" class="small text-muted mt-1">{{ pi.description }}</div>
+                        </td>
+                        <td>
+                          <div v-if="pi.images?.length" class="d-flex gap-1 flex-wrap">
+                            <img
+                              v-for="(img, i) in pi.images"
+                              :key="i"
+                              :src="resolveStorageAssetUrl(img)"
+                              class="rounded border pkg-thumb"
+                              width="56"
+                              height="56"
+                              :alt="`${t('envoiColis.form.photos')} ${i + 1}`"
+                              @click="openZoom(img)"
+                            />
+                          </div>
+                          <span v-else class="text-muted">—</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Ordered Items (from Catalog) -->
-          <div v-if="request.items && request.items.length > 0" class="card border-0 shadow-sm mb-4">
+          <div v-else-if="request.items && request.items.length > 0" class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-transparent">
               <h5 class="mb-0">{{ t('admin.requests.detail.orderedProducts') }}</h5>
             </div>
@@ -94,22 +301,16 @@
                     alt=""
                   />
                   <div v-if="(request.images?.length ?? 0) > 1" class="d-flex gap-2 mt-2 flex-wrap">
-                    <a
+                    <img
                       v-for="(img, i) in request.images.slice(1)"
                       :key="i"
-                      :href="resolveStorageAssetUrl(img)"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      <img
-                        :src="resolveStorageAssetUrl(img)"
-                        class="rounded border"
-                        width="50"
-                        height="50"
-                        style="object-fit: cover;"
-                        alt=""
-                      />
-                    </a>
+                      :src="resolveStorageAssetUrl(img)"
+                      class="rounded border pkg-thumb"
+                      width="50"
+                      height="50"
+                      :alt="`${t('admin.requests.detail.photos')} ${i + 2}`"
+                      @click="openZoom(img)"
+                    />
                   </div>
                 </div>
                 <div class="col-md-8">
@@ -138,22 +339,16 @@
             </div>
             <div class="card-body">
               <div class="d-flex flex-wrap gap-2">
-                <a
+                <img
                   v-for="(img, i) in request.images"
                   :key="i"
-                  :href="resolveStorageAssetUrl(img)"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <img
-                    :src="resolveStorageAssetUrl(img)"
-                    class="rounded border"
-                    width="110"
-                    height="110"
-                    style="object-fit: cover;"
-                    alt=""
-                  />
-                </a>
+                  :src="resolveStorageAssetUrl(img)"
+                  class="rounded border pkg-thumb"
+                  width="110"
+                  height="110"
+                  :alt="`${t('admin.requests.detail.photos')} ${i + 1}`"
+                  @click="openZoom(img)"
+                />
               </div>
             </div>
           </div>
@@ -196,7 +391,7 @@
                   @click="generatePaymentLink"
                 >
                   <span v-if="generatingLink" class="spinner-border spinner-border-sm me-1"></span>
-                  <i v-else class="bi bi-link-45deg me-1"></i>Générer lien de paiement
+                  <i v-else class="bi bi-link-45deg me-1"></i>{{ t('admin.requests.detail.generatePaymentLink') }}
                 </button>
                 <button
                   v-if="request.status === 'confirmed' || request.status === 'preparing'"
@@ -206,8 +401,8 @@
                   <i class="bi bi-box-seam me-1"></i>{{ t('admin.requests.detail.createShipment') }}
                 </button>
                 <NuxtLink
-                  v-if="request.shipmentId || request.trackingNumber"
-                  :to="`/admin/shipments/${request.trackingNumber || request.shipmentId}`"
+                  v-if="request.shipmentId"
+                  :to="`/admin/shipments/${request.shipmentId}`"
                   class="btn btn-sm btn-info text-white"
                 >
                   <i class="bi bi-box-seam me-1"></i>{{ t('admin.requests.detail.viewShipment') }}
@@ -219,26 +414,46 @@
               <div v-if="request.quotedPrice && request.quotedDetails && !showQuotationForm">
                 <table class="table table-sm">
                   <tbody>
-                    <tr>
-                      <td>{{ t('admin.requests.detail.productCost') }}</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('admin.requests.detail.commission') }}</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('admin.requests.detail.inspection') }}</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('admin.requests.detail.packaging') }}</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('admin.requests.detail.shippingLine') }}</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
-                    </tr>
+                    <template v-if="isPackageSending">
+                      <tr>
+                        <td>{{ t('admin.requests.detail.transport') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.packaging') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.customs') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.customsFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.localDelivery') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.localDeliveryFee, requestCurrency) }}</td>
+                      </tr>
+                    </template>
+                    <template v-else>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.productCost') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.commission') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.inspection') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.packaging') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('admin.requests.detail.shippingLine') }}</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                      </tr>
+                    </template>
                     <tr class="fw-bold border-top border-2">
                       <td>{{ t('admin.requests.detail.total') }} <span class="badge bg-success-subtle text-success">net NADOM</span></td>
                       <td class="text-end text-success fs-6">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
@@ -248,14 +463,14 @@
 
                 <div class="border rounded p-3 bg-light mt-3">
                   <div class="text-uppercase small fw-bold text-muted mb-2">
-                    <i class="bi bi-receipt me-1"></i>Détail du prix client
+                    <i class="bi bi-receipt me-1"></i>{{ t('admin.requests.detail.priceDetailTitle') }}
                   </div>
                   <div class="d-flex justify-content-between py-1">
-                    <span class="text-muted">Net Marchand (NADOM perçoit)</span>
+                    <span class="text-muted">{{ t('admin.requests.detail.netMerchantNadom') }}</span>
                     <span>{{ formatCurrency(qBreakdown.net, requestCurrency) }}</span>
                   </div>
                   <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5">
-                    <span>Prix client</span>
+                    <span>{{ t('admin.requests.detail.clientPrice') }}</span>
                     <span>{{ formatCurrency(qBreakdown.total, requestCurrency) }}</span>
                   </div>
                 </div>
@@ -263,7 +478,48 @@
 
               <!-- Quotation Form -->
               <form v-else-if="showQuotationForm" @submit.prevent="submitQuotation">
-                <div class="row g-3">
+                <!-- Envoi de colis : le client possède déjà sa marchandise. Le devis
+                     part donc du fret (pays de destination + mode), sans coût produit,
+                     inspection d'achat ni commission sur achat. -->
+                <div v-if="isPackageSending" class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label">{{ t('admin.requests.detail.transport') }} ({{ requestCurrency }})</label>
+                    <div class="input-group">
+                      <input v-model.number="quotation.shippingCost" type="number" min="0" step="any" class="form-control" required />
+                      <button
+                        v-if="transportEstimate"
+                        type="button"
+                        class="btn btn-outline-primary"
+                        :title="t('admin.requests.detail.applyTariff')"
+                        @click="applyTransportEstimate"
+                      >
+                        <i class="bi bi-calculator me-1"></i>{{ formatCurrency(transportEstimate.amount, requestCurrency) }}
+                      </button>
+                    </div>
+                    <small v-if="transportEstimate" class="text-muted">
+                      {{ t('admin.requests.detail.tariffBasis', {
+                        qty: transportEstimate.qty,
+                        unit: transportEstimate.unit,
+                        rate: formatCurrency(transportEstimate.rate, requestCurrency),
+                      }) }}
+                    </small>
+                    <small v-else class="text-muted">{{ t('admin.requests.detail.noTariff') }}</small>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label quote-label">{{ t('admin.requests.detail.packaging') }} ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.packagingFee" type="number" min="0" step="any" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label quote-label">{{ t('admin.requests.detail.customs') }} ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.customsFee" type="number" min="0" step="any" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label quote-label">{{ t('admin.requests.detail.localDelivery') }} ({{ requestCurrency }})</label>
+                    <input v-model.number="quotation.localDeliveryFee" type="number" min="0" step="any" class="form-control" />
+                  </div>
+                </div>
+
+                <div v-else class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label">{{ t('admin.requests.detail.productCost') }} ({{ requestCurrency }})</label>
                     <input v-model.number="quotation.productCost" type="number" min="0" step="any" class="form-control" required />
@@ -273,7 +529,7 @@
                     <input v-model.number="quotation.inspectionFee" type="number" min="0" step="any" class="form-control" required />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">{{ t('admin.requests.detail.packaging') }} ({{ requestCurrency }})</label>
+                    <label class="form-label quote-label">{{ t('admin.requests.detail.packaging') }} ({{ requestCurrency }})</label>
                     <input v-model.number="quotation.packagingFee" type="number" min="0" step="any" class="form-control" required />
                   </div>
                   <div class="col-md-6">
@@ -287,9 +543,9 @@
                   <strong>{{ formatCurrency(quotationTotal, requestCurrency) }}</strong>
                 </div>
                 <div class="border rounded p-3 bg-light mt-2">
-                  <div class="text-uppercase small fw-bold text-muted mb-2"><i class="bi bi-receipt me-1"></i>Détail du prix client</div>
-                  <div class="d-flex justify-content-between py-1"><span class="text-muted">Net Marchand</span><span>{{ formatCurrency(formBreakdown.net, requestCurrency) }}</span></div>
-                  <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5"><span>Prix client</span><span>{{ formatCurrency(formBreakdown.total, requestCurrency) }}</span></div>
+                  <div class="text-uppercase small fw-bold text-muted mb-2"><i class="bi bi-receipt me-1"></i>{{ t('admin.requests.detail.priceDetailTitle') }}</div>
+                  <div class="d-flex justify-content-between py-1"><span class="text-muted">{{ t('admin.requests.detail.netMerchant') }}</span><span>{{ formatCurrency(formBreakdown.net, requestCurrency) }}</span></div>
+                  <div class="d-flex justify-content-between pt-2 mt-1 border-top fw-bold text-primary fs-5"><span>{{ t('admin.requests.detail.clientPrice') }}</span><span>{{ formatCurrency(formBreakdown.total, requestCurrency) }}</span></div>
                 </div>
 
                 <div class="d-flex gap-2">
@@ -379,6 +635,13 @@
             </div>
           </div>
 
+          <!-- Encaissement (Phase 4) -->
+          <AdminPaymentBlock
+            payable-type="personal_shopping"
+            :payable-id="String(request.id)"
+            :amount-due="request.quotedPrice ? Number(request.quotedPrice) : null"
+          />
+
           <!-- Actions -->
           <div class="card border-0 shadow-sm">
             <div class="card-body">
@@ -441,6 +704,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Visionneuse plein écran, partagée par les photos de la demande et
+         celles de chaque colis. -->
+    <div v-if="zoomedImage" class="zoom-modal" @click="closeZoom">
+      <div class="zoom-content" @click.stop>
+        <button type="button" class="zoom-close" :aria-label="t('common.close')" @click="closeZoom">
+          <i class="bi bi-x-lg"></i>
+        </button>
+        <img :src="zoomedImage" :alt="t('admin.requests.detail.photos')" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -452,11 +726,12 @@ const pdfLangQuery = () => {
   return `?lang=${lang}`
 }
 
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { usePersonalShoppingStore, type RequestStatus } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 import { useNotification } from '~/composables/useNotification'
+import { useImageCompress } from '~/composables/useImageCompress'
 import { useWhatsApp } from '~/composables/useWhatsApp'
 import { getToken } from '~/composables/useApi'
 
@@ -470,6 +745,122 @@ const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
 const { field } = useLocaleField()
 const { formatCurrency, formatDate, formatRequestStatus, requestThumbnailUrl } = useFormatters()
+
+// --- Édition des colis par l'agent -------------------------------------------
+// Le client déclare poids, dimensions et photos ; l'agent les corrige au besoin
+// (pesée réelle, photo floue…) AVANT d'établir le devis, puisque le transport se
+// calcule sur ces valeurs.
+const editPackages = ref(false)
+const savingPackages = ref(false)
+const uploadingPhotos = ref(false)
+const packageDraft = ref<any[]>([])
+
+const packageCategories = computed(() =>
+  (psStore.categories || []).filter((c: any) => {
+    const slug = (c.slug || '').toString()
+    return slug !== 'DVS' && !slug.startsWith('DVS-')
+  }),
+)
+
+const toggleDraftCategory = (item: any, label: string) => {
+  if (!Array.isArray(item.categories)) item.categories = []
+  const i = item.categories.indexOf(label)
+  if (i === -1) item.categories.push(label)
+  else item.categories.splice(i, 1)
+}
+
+const startPackageEdit = () => {
+  // Copie profonde : annuler doit vraiment tout restaurer.
+  packageDraft.value = JSON.parse(JSON.stringify((request.value as any)?.packageItems ?? []))
+    .map((i: any) => ({ ...i, images: Array.isArray(i.images) ? i.images : [], categories: Array.isArray(i.categories) ? i.categories : [] }))
+  editPackages.value = true
+}
+
+const cancelPackageEdit = () => {
+  editPackages.value = false
+  packageDraft.value = []
+}
+
+const onPackagePhotos = async (idx: number, e: Event) => {
+  const input = e.target as HTMLInputElement
+  const files = Array.from(input.files || [])
+  if (files.length === 0) return
+  uploadingPhotos.value = true
+  try {
+    const { fileToCompressedBlob } = useImageCompress()
+    for (const file of files) {
+      const blob = await fileToCompressedBlob(file)
+      const fd = new FormData()
+      fd.append('image', blob, file.name.replace(/\.[^.]+$/, '') + '.jpg')
+      const res = await useApi().post<{ url?: string; path?: string }>('/upload/public-image', fd)
+      const stored = res.success ? (res.data?.path || res.data?.url) : null
+      if (!stored) throw new Error('upload')
+      packageDraft.value[idx].images.push(stored)
+    }
+  } catch {
+    notifyError(t('admin.requests.detail.photoUploadFailed'))
+  } finally {
+    uploadingPhotos.value = false
+    input.value = ''
+  }
+}
+
+const savePackages = async () => {
+  savingPackages.value = true
+  try {
+    const items = packageDraft.value.map((i: any) => ({
+      quantity: Number(i.quantity) || 1,
+      weight: i.weight != null && i.weight !== '' ? Number(i.weight) : null,
+      length: i.length != null && i.length !== '' ? Number(i.length) : null,
+      width: i.width != null && i.width !== '' ? Number(i.width) : null,
+      height: i.height != null && i.height !== '' ? Number(i.height) : null,
+      categories: i.categories ?? [],
+      description: i.description || null,
+      images: i.images ?? [],
+    }))
+
+    // Les totaux de l'en-tête découlent des colis : les recalculer évite qu'ils
+    // contredisent le détail après correction (et le devis s'appuie dessus).
+    const ctn = items.reduce((n, i) => n + (i.quantity || 0), 0)
+    const poids = items.reduce((n, i) => n + (i.weight || 0) * (i.quantity || 1), 0)
+    const volume = items.reduce((n, i) => {
+      if (!i.length || !i.width || !i.height) return n
+      return n + (i.length * i.width * i.height) / 1_000_000 * (i.quantity || 1)
+    }, 0)
+
+    await psStore.updateRequest(requestId, {
+      packageItems: items,
+      ctnCount: ctn || null,
+      declaredWeight: Math.round(poids * 100) / 100 || null,
+      cbm: Math.round(volume * 1_000_000) / 1_000_000 || null,
+      images: items.flatMap((i) => i.images),
+    } as any)
+
+    await psStore.fetchRequestById(requestId)
+    editPackages.value = false
+    packageDraft.value = []
+    success(t('admin.requests.detail.packagesSaved'))
+  } catch {
+    notifyError(t('common.error'))
+  } finally {
+    savingPackages.value = false
+  }
+}
+
+// --- Visionneuse d'image -------------------------------------------------------
+const zoomedImage = ref<string | null>(null)
+
+const openZoom = (img: string) => {
+  zoomedImage.value = resolveStorageAssetUrl(img)
+}
+const closeZoom = () => {
+  zoomedImage.value = null
+}
+const onZoomKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') closeZoom()
+}
+onMounted(() => window.addEventListener('keydown', onZoomKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onZoomKeydown))
 
 const itemDisplayName = (item: Record<string, unknown>) =>
   field(item, 'name') || String(item.name_fr || item.name_en || '')
@@ -503,11 +894,46 @@ const generatePaymentLink = async () => {
 }
 
 const quotation = reactive({
+  // Lignes « Personal Shopping » (Nadom achète pour le client)
   productCost: 0,
   inspectionFee: 5000,
   packagingFee: 3000,
-  shippingCost: 0
+  shippingCost: 0,
+  // Lignes propres à l'envoi de colis (le client possède déjà sa marchandise)
+  customsFee: 0,
+  localDeliveryFee: 0,
 })
+
+// Un envoi de colis ne se chiffre pas comme un achat pour compte de tiers : pas de
+// coût produit, pas d'inspection d'achat, pas de commission de 5 % sur l'achat.
+const isPackageSending = computed(
+  () => (request.value as any)?.requestType === 'package_sending',
+)
+
+// Transport estimé depuis la grille tarifaire (poids × tarif/kg, ou CBM × tarif/m³
+// pour le maritime) de la destination et du mode choisis sur la demande.
+const transportEstimate = computed(() => {
+  const r: any = request.value
+  if (!r) return null
+  const mode = r.shippingMode
+  const rate = Number(mode?.cost_per_kg ?? mode?.costPerKg)
+  if (!rate || Number.isNaN(rate)) return null
+
+  const isSea = (mode?.mode || '') === 'sea'
+  const qty = isSea ? Number(r.cbm) : Number(r.declaredWeight)
+  if (!qty || Number.isNaN(qty)) return null
+
+  return {
+    amount: Math.round(qty * rate * 100) / 100,
+    qty,
+    rate,
+    unit: isSea ? 'm³' : 'kg',
+  }
+})
+
+const applyTransportEstimate = () => {
+  if (transportEstimate.value) quotation.shippingCost = transportEstimate.value.amount
+}
 
 const shipmentForm = reactive({
   shippingMode: 'air_normal' as any,
@@ -517,7 +943,10 @@ const shipmentForm = reactive({
 const requestId = route.params.id as string
 
 onMounted(async () => {
-  await psStore.fetchRequests()
+  // Récupération ciblée : chercher la demande dans la page de liste chargée
+  // affichait « Demande non trouvée » dès qu'elle se trouvait sur une autre page,
+  // qu'un filtre était actif, ou en accès direct à l'URL (rafraîchissement).
+  await psStore.fetchRequestById(requestId)
   loading.value = false
 })
 
@@ -527,6 +956,12 @@ const requestCurrency = computed(() => {
   const c = (request.value as any)?.currency
   return (c || 'XOF').toString().toUpperCase()
 })
+
+const shippingModeLabel = (mode?: string) => {
+  if (mode === 'air_express') return t('admin.shipments.airExpress')
+  if (mode === 'sea') return t('admin.shipments.sea')
+  return t('admin.shipments.airNormal')
+}
 
 /** Montant produit déduit de la demande : total des articles, ou budget estimé. */
 const requestProductTotal = computed(() => {
@@ -554,21 +989,46 @@ const isStatusLocked = computed(() =>
 const openQuotationForm = () => {
   const d = request.value?.quotedDetails
   if (d) {
+    // Toutes les lignes sont restaurées, y compris celles propres à l'envoi de
+    // colis : sans cela, rouvrir un devis existant remettrait silencieusement la
+    // douane et la livraison locale à zéro.
     quotation.productCost = Number(d.productCost) || 0
     quotation.inspectionFee = Number(d.inspectionFee) || 0
     quotation.packagingFee = Number(d.packagingFee) || 0
     quotation.shippingCost = Number(d.shippingCost) || 0
+    quotation.customsFee = Number(d.customsFee) || 0
+    quotation.localDeliveryFee = Number(d.localDeliveryFee) || 0
+  } else if (isPackageSending.value) {
+    // Le client possède déjà sa marchandise : pas de coût produit ni d'inspection.
+    // Le transport est pré-rempli depuis la grille tarifaire quand elle s'applique.
+    quotation.productCost = 0
+    quotation.inspectionFee = 0
+    quotation.packagingFee = 3000
+    quotation.shippingCost = transportEstimate.value?.amount ?? 0
+    quotation.customsFee = 0
+    quotation.localDeliveryFee = 0
   } else {
     // Pré-rempli avec le montant produit de la demande (reste modifiable).
     quotation.productCost = requestProductTotal.value
     quotation.inspectionFee = 5000
     quotation.packagingFee = 3000
     quotation.shippingCost = 0
+    quotation.customsFee = 0
+    quotation.localDeliveryFee = 0
   }
   showQuotationForm.value = true
 }
 
 const quotationTotal = computed(() => {
+  if (isPackageSending.value) {
+    // Transport + emballage/manutention + douane + livraison locale.
+    return (
+      (quotation.shippingCost || 0) +
+      (quotation.packagingFee || 0) +
+      (quotation.customsFee || 0) +
+      (quotation.localDeliveryFee || 0)
+    )
+  }
   const subtotal = quotation.productCost + quotation.inspectionFee + quotation.packagingFee + quotation.shippingCost
   const serviceFee = quotation.productCost * 0.05
   return subtotal + serviceFee
@@ -617,10 +1077,14 @@ const createShipment = async () => {
     showShipmentModal.value = false
     
     // Refresh to show new status
-    await psStore.fetchRequests()
-    
-    // Redirect to shipment
-    router.push(`/admin/shipments/${newShipment.trackingNumber}`)
+    await psStore.fetchRequestById(requestId)
+
+    // Redirect to shipment. L'API renvoie `tracking_number` (snake_case) : lire
+    // uniquement `trackingNumber` menait à /admin/shipments/undefined.
+    const created: any = newShipment
+    const ref = created?.tracking_number ?? created?.trackingNumber ?? created?.id
+    if (ref) router.push(`/admin/shipments/${ref}`)
+    else router.push('/admin/shipments')
   } catch (err) {
     notifyError(t('admin.requests.detail.shipmentCreateError'))
   } finally {
@@ -629,27 +1093,41 @@ const createShipment = async () => {
 }
 
 const submitQuotation = async () => {
-  // Le coût produit est obligatoire (> 0) — sinon le devis partirait sans le produit,
-  // et la commission (5 %) + le prix client seraient faussés.
-  if (!quotation.productCost || quotation.productCost <= 0) {
-    notifyError(
-      requestProductTotal.value > 0
-        ? `Le coût produit est requis (articles commandés : ${formatCurrency(requestProductTotal.value, requestCurrency.value)}).`
-        : 'Le coût produit doit être supérieur à 0.'
-    )
-    return
-  }
-
-  const serviceFee = quotation.productCost * 0.05
   const isUpdate = !!request.value?.quotedPrice
+  let quotedDetails: Record<string, number>
 
-  const quotedDetails = {
-    productCost: quotation.productCost,
-    serviceFee,
-    inspectionFee: quotation.inspectionFee,
-    packagingFee: quotation.packagingFee,
-    shippingCost: quotation.shippingCost,
-    totalPrice: quotationTotal.value
+  if (isPackageSending.value) {
+    // Le transport est la seule ligne indispensable : sans lui, l'envoi n'est pas chiffré.
+    if (!quotation.shippingCost || quotation.shippingCost <= 0) {
+      notifyError(t('admin.requests.detail.transportRequired'))
+      return
+    }
+    quotedDetails = {
+      shippingCost: quotation.shippingCost,
+      packagingFee: quotation.packagingFee || 0,
+      customsFee: quotation.customsFee || 0,
+      localDeliveryFee: quotation.localDeliveryFee || 0,
+      totalPrice: quotationTotal.value,
+    }
+  } else {
+    // Le coût produit est obligatoire (> 0) — sinon le devis partirait sans le produit,
+    // et la commission (5 %) + le prix client seraient faussés.
+    if (!quotation.productCost || quotation.productCost <= 0) {
+      notifyError(
+        requestProductTotal.value > 0
+          ? `Le coût produit est requis (articles commandés : ${formatCurrency(requestProductTotal.value, requestCurrency.value)}).`
+          : 'Le coût produit doit être supérieur à 0.'
+      )
+      return
+    }
+    quotedDetails = {
+      productCost: quotation.productCost,
+      serviceFee: quotation.productCost * 0.05,
+      inspectionFee: quotation.inspectionFee,
+      packagingFee: quotation.packagingFee,
+      shippingCost: quotation.shippingCost,
+      totalPrice: quotationTotal.value,
+    }
   }
 
   try {
@@ -788,6 +1266,94 @@ const deleteRequest = async () => {
 }
 </script>
 <style scoped>
+/* Chaque colis est une ligne à part entière : un trait franc les sépare, sinon
+   deux colis successifs se lisent comme un seul bloc. */
+.pkg-table > :not(caption) > * > * {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.pkg-table tbody tr + tr {
+  border-top: 2px solid #dee2e6;
+}
+
+/* Les libellés du devis passent sur deux lignes quand ils sont longs
+   (« Douane / dédouanement (XOF) ») : une hauteur minimale commune garde les
+   champs de la rangée alignés entre eux. */
+.quote-label {
+  display: flex;
+  align-items: flex-end;
+  min-height: 3em;
+  margin-bottom: 0.25rem;
+}
+
+/* Vignettes de photos (demande et colis) : cliquables, agrandies au survol.
+   La taille reste portée par les attributs width/height de chaque image, pour
+   que la même classe serve aux grandes vignettes comme aux petites. */
+.pkg-thumb {
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform 0.15s ease;
+}
+.pkg-thumb:hover {
+  transform: scale(1.08);
+}
+
+/* Croix de suppression posée sur la vignette, en mode édition. */
+.pkg-thumb-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: zoom-out;
+}
+.zoom-content {
+  position: relative;
+  max-width: 92vw;
+  max-height: 92vh;
+  cursor: default;
+}
+.zoom-content img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.zoom-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #212529;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
 .request-description :deep(img),
 .request-description img {
   max-width: 100% !important;

@@ -274,17 +274,17 @@
 
                   <!-- Coordonnées du client (réservation sans connexion) -->
                   <template v-if="!isLoggedIn">
-                    <div class="col-12"><hr class="my-1" /><small class="text-muted">Vos coordonnées</small></div>
+                    <div class="col-12"><hr class="my-1" /><small class="text-muted">{{ t('clientForms.yourDetails') }}</small></div>
                     <div class="col-md-6">
-                      <label class="form-label">Nom complet *</label>
+                      <label class="form-label">{{ t('clientForms.fullName') }} *</label>
                       <input v-model="bookingForm.contact_name" type="text" class="form-control" placeholder="Nom et prénom" required />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label">WhatsApp *</label>
+                      <label class="form-label">{{ t('clientForms.whatsapp') }} *</label>
                       <input v-model="bookingForm.contact_phone" type="tel" class="form-control" placeholder="+225 07 XX XX XX XX" required />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Email</label>
+                      <label class="form-label">{{ t('clientForms.email') }}</label>
                       <input v-model="bookingForm.contact_email" type="email" class="form-control" placeholder="email@exemple.com (optionnel)" />
                     </div>
                   </template>
@@ -342,7 +342,7 @@
                     @click="pay('guide_booking', String(b.id))"
                   >
                     <span v-if="payProcessing === String(b.id)" class="spinner-border spinner-border-sm"></span>
-                    <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                    <template v-else><i class="bi bi-credit-card me-1"></i>{{ t('clientForms.pay') }}</template>
                   </button>
                 </td>
               </tr>
@@ -399,7 +399,8 @@ import { useGuideAccompanimentServicesStore } from '~/stores/guideAccompanimentS
 import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'client',
+  middleware: 'client-only'
 })
 
 const { t, te, locale } = useI18n()

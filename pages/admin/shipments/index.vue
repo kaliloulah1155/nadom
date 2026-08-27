@@ -85,13 +85,20 @@
                   </div>
                 </td>
                 <td>
-                  <NuxtLink
-                    v-if="(shipment as any).request_id"
-                    :to="`/admin/requests/${(shipment as any).request_id}`"
-                    class="badge bg-primary-subtle text-primary text-decoration-none"
-                  >
-                    <i class="bi bi-bag-check me-1"></i>{{ String((shipment as any).request_id).slice(-6) }}
-                  </NuxtLink>
+                  <div v-if="(shipment as any).request_id" class="d-flex flex-column align-items-start gap-1">
+                    <NuxtLink
+                      :to="`/admin/requests/${(shipment as any).request_id}`"
+                      class="badge bg-primary-subtle text-primary text-decoration-none"
+                    >
+                      <i class="bi bi-bag-check me-1"></i>{{ String((shipment as any).request_id).slice(-6) }}
+                    </NuxtLink>
+                    <span
+                      class="badge"
+                      :class="requestOriginBadgeClass(shipment)"
+                    >
+                      <i :class="requestOriginIcon(shipment)" class="me-1"></i>{{ requestOriginLabel(shipment) }}
+                    </span>
+                  </div>
                   <span v-else class="text-muted small">—</span>
                 </td>
                 <td>
@@ -123,13 +130,23 @@
                     </button>
                     <button
                       v-if="Number(shipment.shipping_cost) > 0 && shipment.status === 'pending'"
-                      class="btn btn-outline-primary btn-sm"
+                      class="btn btn-outline-primary btn-sm me-2"
                       title="Générer un lien de paiement"
                       :disabled="payProcessing === String(shipment.id)"
                       @click="generatePaymentLink(shipment.id)"
                     >
                       <span v-if="payProcessing === String(shipment.id)" class="spinner-border spinner-border-sm"></span>
                       <i v-else class="bi bi-link-45deg"></i>
+                    </button>
+                    <button
+                      v-if="canDelete"
+                      class="btn btn-outline-danger btn-sm"
+                      :title="t('admin.common.delete')"
+                      :disabled="deleting === String(shipment.id)"
+                      @click="confirmDeleteShipment(shipment.id)"
+                    >
+                      <span v-if="deleting === String(shipment.id)" class="spinner-border spinner-border-sm"></span>
+                      <i v-else class="bi bi-trash"></i>
                     </button>
                   </div>
                 </td>
@@ -295,12 +312,46 @@ const countriesStore = useCountriesStore()
 const { formatDateShort, formatShipmentStatus, formatCurrency, truncate } = useFormatters()
 const { success, error: notifyError } = useNotification()
 const { createPaymentLink, processing: payProcessing } = usePayment()
+const { can } = useAdminAbility()
+
+const canDelete = computed(() => can('delete', 'shipments'))
+const deleting = ref<string | null>(null)
+
+const confirmDeleteShipment = async (id: string | number) => {
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteShipment'))) return
+  deleting.value = String(id)
+  try {
+    const ok = await shippingStore.deleteShipment(String(id))
+    if (ok) {
+      success(t('admin.shipments.deletedSuccess'))
+    } else {
+      notifyError(t('admin.shipments.deleteError'))
+    }
+  } catch (err: any) {
+    notifyError(err?.message || t('admin.shipments.deleteError'))
+  } finally {
+    deleting.value = null
+  }
+}
 
 /** Génère un lien de paiement pour une expédition et ouvre WhatsApp pré-rempli. */
 const generatePaymentLink = async (id: string) => {
   const data = await createPaymentLink('shipment', String(id))
   if (!data) return
   await useSwal().paymentLink({ url: data.checkout_url, whatsappUrl: data.whatsapp_url })
+}
+
+const requestOriginLabel = (shipment: any): string => {
+  const type = shipment.request?.request_type ?? shipment.request?.requestType
+  return type === 'package_sending' ? t('admin.requests.typePackageSending') : t('admin.requests.typePersonalShopping')
+}
+const requestOriginIcon = (shipment: any): string => {
+  const type = shipment.request?.request_type ?? shipment.request?.requestType
+  return type === 'package_sending' ? 'bi bi-box-seam' : 'bi bi-bag-heart'
+}
+const requestOriginBadgeClass = (shipment: any): string => {
+  const type = shipment.request?.request_type ?? shipment.request?.requestType
+  return type === 'package_sending' ? 'bg-warning-subtle text-warning' : 'bg-info-subtle text-info'
 }
 
 const shippingModeLabel = (mode: string) => {

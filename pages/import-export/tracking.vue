@@ -82,19 +82,19 @@
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
-                    <small class="text-muted d-block">Poids</small>
+                    <small class="text-muted d-block">{{ t('clientForms.weight') }}</small>
                     <strong>{{ shipment.weight ?? '-' }} kg</strong>
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
-                    <small class="text-muted d-block">Expedition</small>
+                    <small class="text-muted d-block">{{ t('clientForms.shipping') }}</small>
                     <strong>{{ formatDateShort(shipment.created_at) }}</strong>
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
                   <div class="p-3 bg-light rounded text-center">
-                    <small class="text-muted d-block">Livraison estimée</small>
+                    <small class="text-muted d-block">{{ t('clientForms.estimatedDelivery') }}</small>
                     <strong>{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : '-' }}</strong>
                   </div>
                 </div>
@@ -334,7 +334,8 @@ import { useShippingStore } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'client',
+  middleware: 'client-only'
 })
 
 const { t, locale } = useI18n()

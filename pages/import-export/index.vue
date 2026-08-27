@@ -11,6 +11,9 @@
             </p>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+            <NuxtLink to="/import-export/envoi-colis" class="btn btn-light btn-md me-2">
+              <i class="bi bi-box-seam"></i>{{ t('nav.sendPackage') }}
+            </NuxtLink>
             <NuxtLink to="/import-export/calculator" class="btn btn-light btn-md me-2">
               <i class="bi bi-calculator "></i>{{ t('nav.calculator') }}
             </NuxtLink>

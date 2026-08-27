@@ -49,5 +49,15 @@
   margin-bottom: 0.5rem;
 }
 
+// SweetAlert2 au-dessus des modales.
+// Le thème monte les modales Bootstrap à z-index 9999 (au lieu de 1055), alors que
+// SweetAlert2 s'arrête à 1060 : une confirmation ou une erreur ouverte depuis une
+// modale s'affichait donc DERRIÈRE elle — visible dans le DOM, mais impossible à
+// cliquer. Vaut pour toutes les SweetAlert du back-office, pas seulement celles du
+// formulaire d'envoi de colis.
+.swal2-container {
+  z-index: 20000 !important;
+}
+
 // Import Font Family
 @import url('https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700;800&display=swap');

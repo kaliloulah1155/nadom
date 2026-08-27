@@ -10,6 +10,10 @@ export interface QuotedDetails {
   inspectionFee: number
   packagingFee: number
   shippingCost: number
+  /** Envoi de colis uniquement : dédouanement à destination. */
+  customsFee?: number
+  /** Envoi de colis uniquement : acheminement local jusqu'au destinataire. */
+  localDeliveryFee?: number
   totalPrice: number
 }
 
@@ -21,6 +25,8 @@ export interface RequestItem {
   quantity: number
   image: string
 }
+
+export type RequestType = 'personal_shopping' | 'package_sending'
 
 export interface PersonalShoppingRequest {
   id: string
@@ -36,6 +42,7 @@ export interface PersonalShoppingRequest {
   contactFullname?: string
   contactEmail?: string
   status: RequestStatus
+  requestType: RequestType
   category: string
   title: string
   description: string
@@ -50,6 +57,27 @@ export interface PersonalShoppingRequest {
   whatsappMessages: number
   trackingNumber?: string
   shipmentId?: string
+  /** Envoi de colis (Phase 1) */
+  ctnCount?: number | null
+  cbm?: number | null
+  declaredWeight?: number | null
+  declaredValue?: number | null
+  destinationId?: string | null
+  shippingModeId?: string | null
+  destination?: Record<string, any> | null
+  shippingMode?: Record<string, any> | null
+  originCountry?: string | null
+  originCity?: string | null
+  originAddress?: string | null
+  destinationAddress?: string | null
+  senderFullname?: string | null
+  senderNumber?: string | null
+  senderEmail?: string | null
+  senderType?: 'individual' | 'company' | null
+  senderCompany?: string | null
+  contactType?: 'individual' | 'company' | null
+  contactCompany?: string | null
+  packageItems?: Array<{ quantity: number; weight: number | null; length: number | null; width: number | null; height: number | null; description?: string | null; images?: string[] }> | null
   createdAt: string
   updatedAt: string
 }
@@ -178,9 +206,30 @@ function normalizeRequest(r: any) {
   const rawDetails = r.quoted_details ?? r.quotedDetails
   return Object.assign(r, {
     userId: r.userId ?? r.user_id,
+    requestType: r.requestType ?? r.request_type ?? 'personal_shopping',
     contactNumber: r.contactNumber ?? r.contact_number,
     contactFullname: r.contactFullname ?? r.contact_fullname,
     contactEmail: r.contactEmail ?? r.contact_email,
+    ctnCount: r.ctnCount ?? r.ctn_count ?? null,
+    cbm: r.cbm != null ? toNum(r.cbm) : null,
+    declaredWeight: r.declaredWeight ?? (r.declared_weight != null ? toNum(r.declared_weight) : null),
+    declaredValue: r.declaredValue ?? (r.declared_value != null ? toNum(r.declared_value) : null),
+    destinationId: r.destinationId ?? r.destination_id ?? null,
+    shippingModeId: r.shippingModeId ?? r.shipping_mode_id ?? null,
+    destination: r.destination ?? null,
+    shippingMode: r.shippingMode ?? r.shipping_mode ?? null,
+    originCountry: r.originCountry ?? r.origin_country ?? null,
+    originCity: r.originCity ?? r.origin_city ?? null,
+    originAddress: r.originAddress ?? r.origin_address ?? null,
+    destinationAddress: r.destinationAddress ?? r.destination_address ?? null,
+    senderFullname: r.senderFullname ?? r.sender_fullname ?? null,
+    senderNumber: r.senderNumber ?? r.sender_number ?? null,
+    senderEmail: r.senderEmail ?? r.sender_email ?? null,
+    senderType: r.senderType ?? r.sender_type ?? null,
+    senderCompany: r.senderCompany ?? r.sender_company ?? null,
+    contactType: r.contactType ?? r.contact_type ?? null,
+    contactCompany: r.contactCompany ?? r.contact_company ?? null,
+    packageItems: r.packageItems ?? r.package_items ?? null,
     budgetEstimated: toNum(r.budget_estimated ?? r.budgetEstimated),
     quotedPrice: r.quoted_price != null || r.quotedPrice != null
       ? toNum(r.quoted_price ?? r.quotedPrice)
@@ -192,6 +241,8 @@ function normalizeRequest(r: any) {
           inspectionFee: toNum(rawDetails.inspection_fee ?? rawDetails.inspectionFee),
           packagingFee: toNum(rawDetails.packaging_fee ?? rawDetails.packagingFee),
           shippingCost: toNum(rawDetails.shipping_cost ?? rawDetails.shippingCost),
+          customsFee: toNum(rawDetails.customs_fee ?? rawDetails.customsFee),
+          localDeliveryFee: toNum(rawDetails.local_delivery_fee ?? rawDetails.localDeliveryFee),
           totalPrice: toNum(rawDetails.total_price ?? rawDetails.totalPrice),
         }
       : undefined,
@@ -255,12 +306,13 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
       category?: string
       user_id?: string
       assigned_agent_id?: string
+      request_type?: RequestType
     } = {}) {
       this.loading = true
       this.error = null
       try {
         const api = useApi()
-        const hasPaging = params.page !== undefined || params.limit !== undefined || params.search || params.status || params.category || params.user_id || params.assigned_agent_id
+        const hasPaging = params.page !== undefined || params.limit !== undefined || params.search || params.status || params.category || params.user_id || params.assigned_agent_id || params.request_type
         if (hasPaging) {
           const page = params.page ?? this.requestsMeta.currentPage
           const limit = params.limit ?? this.requestsMeta.perPage
@@ -270,6 +322,7 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
           if (params.category) body.category = params.category
           if (params.user_id) body.user_id = params.user_id
           if (params.assigned_agent_id) body.assigned_agent_id = params.assigned_agent_id
+          if (params.request_type) body.request_type = params.request_type
 
           const res = await api.post<any>('/personal-shopping-requests/all', body, { query: { page, limit } })
           if (res.success) {
@@ -291,6 +344,41 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         }
       } catch (err: any) {
         this.error = err.message || 'Erreur lors du chargement des demandes'
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * Récupère UNE demande par son identifiant, directement auprès de l'API.
+     *
+     * Indispensable pour la fiche de détail : se contenter de chercher la demande
+     * dans `this.requests` ne fonctionne que si elle figure dans la page de liste
+     * actuellement chargée. Dès qu'elle est sur une autre page, qu'un filtre est
+     * actif, ou que la liste n'a pas encore été chargée (accès direct à l'URL,
+     * rafraîchissement), la recherche échoue et la fiche affiche à tort
+     * « Demande non trouvée ».
+     *
+     * La demande récupérée est fusionnée dans `this.requests` pour que les vues
+     * qui lisent le store y trouvent la version à jour.
+     */
+    async fetchRequestById(id: string) {
+      this.loading = true
+      this.error = null
+      try {
+        const api = useApi()
+        const res = await api.get<PersonalShoppingRequest>(`/personal-shopping-requests/${id}`)
+        if (res.success && res.data) {
+          const normalized = normalizeRequest(res.data) as PersonalShoppingRequest
+          const idx = this.requests.findIndex((r) => r.id === id)
+          if (idx !== -1) this.requests[idx] = normalized
+          else this.requests.push(normalized)
+          return normalized
+        }
+        return null
+      } catch (err: any) {
+        this.error = err.message || 'Erreur lors du chargement de la demande'
+        return null
       } finally {
         this.loading = false
       }
@@ -493,7 +581,26 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
           shipmentId: 'shipment_id',
           assignedAgentId: 'assigned_agent_id',
           quotedPrice: 'quoted_price',
-          currency: 'currency'
+          currency: 'currency',
+          requestType: 'request_type',
+          ctnCount: 'ctn_count',
+          cbm: 'cbm',
+          declaredWeight: 'declared_weight',
+          declaredValue: 'declared_value',
+          destinationId: 'destination_id',
+          shippingModeId: 'shipping_mode_id',
+          originCountry: 'origin_country',
+          originCity: 'origin_city',
+          originAddress: 'origin_address',
+          destinationAddress: 'destination_address',
+          senderFullname: 'sender_fullname',
+          senderNumber: 'sender_number',
+          senderEmail: 'sender_email',
+          senderType: 'sender_type',
+          senderCompany: 'sender_company',
+          contactType: 'contact_type',
+          contactCompany: 'contact_company',
+          packageItems: 'package_items',
         }
         const payload: Record<string, any> = {}
         for (const [k, v] of Object.entries(requestData)) {
@@ -527,7 +634,29 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         contactNumber: 'contact_number',
         contactFullname: 'contact_fullname',
         contactEmail: 'contact_email',
-        trackingNumber: 'tracking_number'
+        trackingNumber: 'tracking_number',
+        originCountry: 'origin_country',
+        originCity: 'origin_city',
+        originAddress: 'origin_address',
+        destinationAddress: 'destination_address',
+        senderFullname: 'sender_fullname',
+        senderNumber: 'sender_number',
+        senderEmail: 'sender_email',
+        senderType: 'sender_type',
+        senderCompany: 'sender_company',
+        contactType: 'contact_type',
+        contactCompany: 'contact_company',
+        // Champs « Envoi de colis » : absents de cette table, ils partaient en
+        // camelCase et étaient silencieusement ignorés par l'API (le DTO attend du
+        // snake_case). Une correction des colis par l'agent semblait alors
+        // enregistrée sans que rien ne change en base.
+        requestType: 'request_type',
+        ctnCount: 'ctn_count',
+        declaredWeight: 'declared_weight',
+        declaredValue: 'declared_value',
+        destinationId: 'destination_id',
+        shippingModeId: 'shipping_mode_id',
+        packageItems: 'package_items',
       }
       const payload: Record<string, any> = {}
       for (const [k, v] of Object.entries(updates as Record<string, any>)) {
@@ -550,6 +679,8 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         const normalized = normalizeRequest(res.data) as PersonalShoppingRequest
         const idx = this.requests.findIndex(r => r.id === id)
         if (idx !== -1) this.requests[idx] = normalized
+        // Entrer ou sortir de « en attente » change le badge de la barre latérale.
+        this.fetchPendingCount().catch(() => {})
         return normalized
       }
       return null
@@ -563,7 +694,9 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         service_fee: quotedDetails.serviceFee,
         inspection_fee: quotedDetails.inspectionFee,
         packaging_fee: quotedDetails.packagingFee,
-        shipping_cost: quotedDetails.shippingCost
+        shipping_cost: quotedDetails.shippingCost,
+        customs_fee: quotedDetails.customsFee,
+        local_delivery_fee: quotedDetails.localDeliveryFee,
       }
       const res = await api.put<PersonalShoppingRequest>(`/personal-shopping-requests/${id}/quotation`, payload)
       if (res.success && res.data) {
@@ -592,6 +725,9 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
       if (res.success) {
         this.requests = this.requests.filter(r => r.id !== id)
         this.requestsMeta.total = Math.max(0, this.requestsMeta.total - 1)
+        // Le badge « en attente » de la barre latérale vit sur un compteur distinct :
+        // sans ce rafraîchissement, il continuait d'annoncer des demandes supprimées.
+        this.fetchPendingCount().catch(() => {})
       }
     },
 

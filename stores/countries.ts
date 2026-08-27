@@ -53,7 +53,10 @@ export const useCountriesStore = defineStore('countries', {
           const s = c.status
           return s == null || s === 1 || s === '1' || Number(s) === 1
         })
-        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || (a.label || '').localeCompare(b.label || '')),
+        // Tri alphabétique demandé par la cliente, à la place de l'ordre curaté
+        // `sort_order`. `localeCompare` en français pour que les accents se classent
+        // correctement (Bénin avant Burkina Faso, Égypte parmi les E).
+        .sort((a, b) => (a.label || '').localeCompare(b.label || '', 'fr', { sensitivity: 'base' })),
 
     getByUuid: (state) => (uuid: string) =>
       state.countries.find(c => c.uuid === uuid),

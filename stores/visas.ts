@@ -146,9 +146,14 @@ export const useVisasStore = defineStore('visas', {
       this.loading = true
       try {
         const api = useApi()
-        const res = await api.get<VisaApplication[]>('/visa-applications/mine')
+        const res = await api.get<any>('/visa-applications/mine')
         if (res.success) {
-          this.applications = res.data || []
+          // L'endpoint renvoie désormais un paginateur (il retournait auparavant
+          // toutes les demandes d'un coup). On accepte les deux formes : sans cela
+          // `applications` recevait l'objet paginateur au lieu du tableau, et le
+          // compteur du tableau de bord comme la liste des visas se vidaient.
+          const d: any = res.data
+          this.applications = Array.isArray(d) ? d : (d?.data ?? [])
         }
       } catch (err: any) {
         this.error = err.message

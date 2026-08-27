@@ -5,8 +5,8 @@
     <section class="page-hero">
       <div class="container">
         <div class="row justify-content-center">
-          <h1 class="fw-bold text-white text-center">{{ t('personalShopping.newRequest') }}</h1>
-          <p class="opacity-75 text-white text-center">{{ t('personalShopping.newRequestSubtitle') }}</p>
+          <h1 class="fw-bold text-white text-center">{{ t('envoiColis.title') }}</h1>
+          <p class="opacity-75 text-white text-center">{{ t('envoiColis.subtitle') }}</p>
         </div>
       </div>
     </section>
@@ -17,7 +17,7 @@
             <div class="card-body p-4 p-lg-5">
               <!-- Tout le formulaire vit dans ce composant, partagé avec la modale
                    "Nouvelle demande" du back-office (pages/admin/requests/index.vue). -->
-              <PersonalShoppingForm />
+              <EnvoiColisForm />
             </div>
           </div>
         </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import PersonalShoppingForm from '~/components/personalShopping/PersonalShoppingForm.vue'
+import EnvoiColisForm from '~/components/envoiColis/EnvoiColisForm.vue'
 
 definePageMeta({
   layout: 'client',

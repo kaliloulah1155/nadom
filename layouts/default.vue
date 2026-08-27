@@ -76,6 +76,12 @@
                     </NuxtLink>
                   </li>
                   <li>
+                    <NuxtLink class="lh-dropdown-item" to="/import-export/envoi-colis">
+                      <i class="bi bi-send-plus me-2"></i>
+                      {{ t('nav.sendPackage') }}
+                    </NuxtLink>
+                  </li>
+                  <li>
                     <NuxtLink class="lh-dropdown-item" to="/import-export/calculator">
                       <i class="bi bi-calculator me-2"></i>
                       {{ t('nav.calculator') }}
@@ -187,6 +193,23 @@
                     </a>
                   </li>
                 </ul>
+              </li>
+
+              <!-- Auth: Se connecter / Mon compte -->
+              <li v-if="!isAuthenticated" class="lh-nav-item">
+                <NuxtLink to="/login" class="lh-link lh-link-signin">
+                  <i class="bi bi-person me-1"></i>{{ t('nav.login') }}
+                </NuxtLink>
+              </li>
+              <li v-else class="lh-nav-item lh-user-pill">
+                <NuxtLink to="/dashboard" class="lh-link lh-link-user" :title="t('nav.myAccount')">
+                  <span class="lh-avatar-circle"><i class="bi bi-person-fill"></i></span>
+                  <span class="lh-user-greeting d-none d-xl-inline">{{ t('nav.greeting', { name: greetingName }) }}</span>
+                </NuxtLink>
+                <button type="button" class="lh-logout-btn" :disabled="loggingOut" :title="t('nav.logout')" :aria-label="t('nav.logout')" @click="handleLogout">
+                  <span v-if="loggingOut" class="spinner-border spinner-border-sm"></span>
+                  <i v-else class="bi bi-box-arrow-right"></i>
+                </button>
               </li>
             </ul>
           </div>
@@ -445,12 +468,28 @@ const switchLanguage = (lang: 'fr' | 'en' | 'zh') => {
   setLocale(lang)
 }
 
+const loggingOut = ref(false)
+const handleLogout = async () => {
+  if (loggingOut.value) return
+  loggingOut.value = true
+  try {
+    await authStore.logout()
+    await navigateTo('/')
+  } finally {
+    loggingOut.value = false
+  }
+}
+
 const toggleDropdown = (name: string) => {
   activeDropdown.value = activeDropdown.value === name ? null : name
 }
 
 // Computed
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+const greetingName = computed(() => {
+  const u: any = authStore.currentUser
+  return (u?.firstname || '').trim() || authStore.userFullName || ''
+})
 
 
 // Methods
@@ -838,6 +877,68 @@ main {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+/* Pastille utilisateur connecté : avatar + salutation + déconnexion visible */
+.lh-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+  background: #fdf0f1;
+  border-radius: 999px;
+  margin-left: 0.25rem;
+}
+
+.lh-user-pill .lh-link-user {
+  padding: 0.2rem 0.3rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.lh-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dc3545 0%, #a8202f 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.lh-user-greeting {
+  white-space: nowrap;
+}
+
+.lh-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #dc3545;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lh-logout-btn:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+@media (max-width: 991px) {
+  .lh-user-pill {
+    background: transparent;
+    padding: 0.5rem 0;
+    justify-content: space-between;
+  }
 }
 
 /* CTA Button */

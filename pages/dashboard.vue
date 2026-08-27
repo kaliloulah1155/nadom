@@ -1,16 +1,15 @@
 <template>
-  <div class="dashboard-page py-5">
-    <div class="container">
+  <div class="dashboard-page">
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-              <h2 class="mb-1">Bonjour, {{ userFullName }} !</h2>
-              <p class="text-muted mb-0">Bienvenue sur votre tableau de bord</p>
+              <h2 class="mb-1">{{ t('clientArea.greeting', { name: userFullName }) }}</h2>
+              <p class="text-muted mb-0">{{ t('clientArea.welcome') }}</p>
             </div>
             <NuxtLink to="/personal-shopping/new" class="btn btn-primary">
-              <i class="bi bi-plus-circle me-2"></i>Nouvelle demande
+              <i class="bi bi-plus-circle me-2"></i>{{ t('clientArea.newRequest') }}
             </NuxtLink>
           </div>
         </div>
@@ -27,7 +26,7 @@
                 </div>
                 <div>
                   <h3 class="mb-0">{{ userRequests.length }}</h3>
-                  <small class="text-muted">Demandes</small>
+                  <small class="text-muted">{{ t('clientArea.statRequests') }}</small>
                 </div>
               </div>
             </div>
@@ -42,7 +41,7 @@
                 </div>
                 <div>
                   <h3 class="mb-0">{{ pendingRequests.length }}</h3>
-                  <small class="text-muted">En cours</small>
+                  <small class="text-muted">{{ t('clientArea.statInProgress') }}</small>
                 </div>
               </div>
             </div>
@@ -57,7 +56,7 @@
                 </div>
                 <div>
                   <h3 class="mb-0">{{ userShipments.length }}</h3>
-                  <small class="text-muted">Colis</small>
+                  <small class="text-muted">{{ t('clientArea.statParcels') }}</small>
                 </div>
               </div>
             </div>
@@ -72,11 +71,45 @@
                 </div>
                 <div>
                   <h3 class="mb-0">{{ deliveredShipments.length }}</h3>
-                  <small class="text-muted">Livres</small>
+                  <small class="text-muted">{{ t('clientArea.statDelivered') }}</small>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <NuxtLink to="/guide" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="stats-icon bg-primary-subtle text-primary me-3">
+                    <i class="bi bi-person-badge"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0 text-dark">{{ guidesStore.myBookings.length }}</h3>
+                    <small class="text-muted">{{ t('clientArea.statGuide') }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+        <div class="col-6 col-lg-3">
+          <NuxtLink to="/visa" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="stats-icon bg-warning-subtle text-warning me-3">
+                    <i class="bi bi-passport"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0 text-dark">{{ visasStore.applications.length }}</h3>
+                    <small class="text-muted">{{ t('clientArea.statVisa') }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </NuxtLink>
         </div>
       </div>
 
@@ -85,27 +118,27 @@
         <div class="col-lg-8">
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Mes demandes recentes</h5>
+              <h5 class="mb-0">{{ t('clientArea.recentRequests') }}</h5>
               <NuxtLink to="/personal-shopping/my-requests" class="btn btn-sm btn-link">
-                Voir tout <i class="bi bi-arrow-right"></i>
+                {{ t('clientArea.seeAll') }} <i class="bi bi-arrow-right"></i>
               </NuxtLink>
             </div>
             <div class="card-body p-0">
               <div v-if="userRequests.length === 0" class="text-center py-5">
                 <i class="bi bi-inbox display-4 text-muted"></i>
-                <p class="text-muted mt-3">Aucune demande pour le moment</p>
+                <p class="text-muted mt-3">{{ t('clientArea.noRequests') }}</p>
                 <NuxtLink to="/personal-shopping/new" class="btn btn-primary">
-                  Creer ma premiere demande
+                  {{ t('clientArea.firstRequest') }}
                 </NuxtLink>
               </div>
               <div v-else class="table-responsive">
                 <table class="table table-hover mb-0">
                   <thead class="table-light">
                     <tr>
-                      <th>Produit</th>
-                      <th>Categorie</th>
-                      <th>Statut</th>
-                      <th>Date</th>
+                      <th>{{ t('clientArea.colProduct') }}</th>
+                      <th>{{ t('clientArea.colCategory') }}</th>
+                      <th>{{ t('clientArea.colStatus') }}</th>
+                      <th>{{ t('clientArea.colDate') }}</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -145,7 +178,7 @@
                           @click="pay('personal_shopping', String(request.id))"
                         >
                           <span v-if="payProcessing === String(request.id)" class="spinner-border spinner-border-sm"></span>
-                          <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                          <template v-else><i class="bi bi-credit-card me-1"></i>{{ t('clientArea.pay') }}</template>
                         </button>
                         <NuxtLink :to="`/personal-shopping/${request.id}`" class="btn btn-sm btn-link">
                           <i class="bi bi-eye"></i>
@@ -164,12 +197,12 @@
           <!-- Active Shipments -->
           <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-transparent">
-              <h5 class="mb-0">Colis en transit</h5>
+              <h5 class="mb-0">{{ t('clientArea.parcelsInTransit') }}</h5>
             </div>
             <div class="card-body">
               <div v-if="inTransitShipments.length === 0" class="text-center py-3">
                 <i class="bi bi-truck text-muted fs-2"></i>
-                <p class="text-muted small mt-2 mb-0">Aucun colis en transit</p>
+                <p class="text-muted small mt-2 mb-0">{{ t('clientArea.noParcels') }}</p>
               </div>
               <div v-else>
                 <div
@@ -193,7 +226,7 @@
           <!-- Expéditions à régler -->
           <div v-if="payableShipments.length" class="card border-0 shadow-sm mb-4 border-warning">
             <div class="card-header bg-transparent">
-              <h5 class="mb-0"><i class="bi bi-cash-coin text-warning me-2"></i>Expéditions à régler</h5>
+              <h5 class="mb-0"><i class="bi bi-cash-coin text-warning me-2"></i>{{ t('clientArea.shipmentsToPay') }}</h5>
             </div>
             <div class="card-body">
               <div
@@ -211,7 +244,7 @@
                   @click="pay('shipment', String(shipment.id))"
                 >
                   <span v-if="payProcessing === String(shipment.id)" class="spinner-border spinner-border-sm"></span>
-                  <template v-else><i class="bi bi-credit-card me-1"></i>Payer</template>
+                  <template v-else><i class="bi bi-credit-card me-1"></i>{{ t('clientArea.pay') }}</template>
                 </button>
               </div>
             </div>
@@ -220,28 +253,27 @@
           <!-- Quick Actions -->
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent">
-              <h5 class="mb-0">Actions rapides</h5>
+              <h5 class="mb-0">{{ t('clientArea.quickActions') }}</h5>
             </div>
             <div class="card-body">
               <div class="d-grid gap-2">
                 <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary">
-                  <i class="bi bi-plus-circle me-2"></i>Nouvelle demande
+                  <i class="bi bi-plus-circle me-2"></i>{{ t('clientArea.newRequest') }}
                 </NuxtLink>
                 <NuxtLink to="/import-export/tracking" class="btn btn-outline-secondary">
-                  <i class="bi bi-search me-2"></i>Suivre un colis
+                  <i class="bi bi-search me-2"></i>{{ t('clientArea.trackParcel') }}
                 </NuxtLink>
                 <NuxtLink to="/import-export/calculator" class="btn btn-outline-secondary">
-                  <i class="bi bi-calculator me-2"></i>Calculer tarifs
+                  <i class="bi bi-calculator me-2"></i>{{ t('clientArea.calcRates') }}
                 </NuxtLink>
                 <a :href="`https://wa.me/${useRuntimeConfig().public.whatsapp}`" target="_blank" class="btn btn-outline-success">
-                  <i class="bi bi-whatsapp me-2"></i>Contacter support
+                  <i class="bi bi-whatsapp me-2"></i>{{ t('clientArea.contactSupport') }}
                 </a>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   </div>
 </template>
 
@@ -250,31 +282,30 @@ import { computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
+import { useGuidesStore } from '~/stores/guides'
+import { useVisasStore } from '~/stores/visas'
 import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'client',
+  middleware: ['auth', 'client-only']
 })
 
-const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
+const guidesStore = useGuidesStore()
+const visasStore = useVisasStore()
 const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl, formatCurrency } = useFormatters()
 const { pay, publicPrice, processing: payProcessing } = usePayment()
 
-// Auth check
 onMounted(async () => {
-  authStore.initializeAuth()
-
-  if (!authStore.isAuthenticated) {
-    router.push('/login')
-    return
-  }
-
   await Promise.all([
     psStore.fetchRequests(),
-    shippingStore.fetchShipments()
+    shippingStore.fetchShipments(),
+    guidesStore.fetchMyBookings(),
+    visasStore.fetchMyApplications()
   ])
 })
 
