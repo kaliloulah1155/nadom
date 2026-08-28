@@ -114,7 +114,7 @@
                           alt=""
                         />
                         <div>
-                          <div class="fw-medium small">{{ truncate(request.title, 26) }}</div>
+                          <div class="fw-medium small">{{ truncate(requestTitle(request), 26) }}</div>
                           <code class="text-muted" style="font-size: 0.7rem;">#{{ String(request.id ?? '').slice(-6) }}</code>
                         </div>
                       </div>
@@ -268,7 +268,7 @@ definePageMeta({
 
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatCurrency, formatDateShort, formatRequestStatus, formatShipmentStatus, truncate, requestThumbnailUrl } = useFormatters()
+const { formatCurrency, formatDateShort, formatRequestStatus, formatShipmentStatus, truncate, requestThumbnailUrl, requestTitle } = useFormatters()
 
 onMounted(async () => {
   await Promise.all([psStore.fetchRequests(), shippingStore.fetchShipments()])

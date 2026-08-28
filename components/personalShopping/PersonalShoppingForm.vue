@@ -252,20 +252,12 @@
           <label class="form-label fw-medium"
             >{{ t('personalShopping.formExtra.whatsappContact') }} *</label
           >
-          <div class="input-group">
-            <span class="input-group-text">
-              <i class="bi bi-whatsapp text-success"></i>
-            </span>
-            <input
-              v-model="form.contactNumber"
-              type="tel"
-              class="form-control form-control-lg"
-              :class="{ 'is-invalid': errors.contactNumber }"
-              placeholder="+225 07 XX XX XX XX"
-              pattern="^[\+]?[0-9\s\-]{8,20}$"
-              required
-            />
-          </div>
+          <PhoneInput
+            v-model="form.contactNumber"
+            country="ci"
+            size="lg"
+            required
+          />
           <div v-if="errors.contactNumber" class="invalid-feedback d-block">
             {{ errors.contactNumber }}
           </div>
@@ -334,6 +326,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 import { ref, reactive, onMounted, computed } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { usePersonalShoppingStore } from "~/stores/personalShopping";

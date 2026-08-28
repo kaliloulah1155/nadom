@@ -47,7 +47,7 @@
                                                     
                                                     <div class="form-group form-border mb-3">
                                                         <label class="form-label">Phone</label>
-                                                        <input v-model="form.phone" type="tel" class="form-control" placeholder="+2250714158172" />
+                                                        <PhoneInput v-model="form.phone" country="ci" />
                                                     </div>
 
                                                     <div class="row">
@@ -111,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useRouter } from 'vue-router'

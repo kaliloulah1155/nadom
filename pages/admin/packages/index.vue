@@ -141,7 +141,10 @@
             <select v-model="selectedContainerId" class="form-select mb-3">
               <option value="">{{ t('admin.packages.selectContainerPlaceholder') }}</option>
               <option v-for="c in nomStore.containers" :key="c.id" :value="c.id">
-                {{ c.code }} ({{ t('admin.packages.status.' + c.status) }})
+                <!-- Statuts de CONTENEUR (en chargement / en transit / arrivé),
+                     et non de package : le mauvais espace de noms affichait la
+                     clé brute « admin.packages.status.loading ». -->
+                {{ c.code }} ({{ t('admin.containers.status.' + c.status) }})
               </option>
             </select>
             <div class="text-center">

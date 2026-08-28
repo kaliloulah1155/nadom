@@ -140,9 +140,30 @@ export const useFormatters = () => {
   }
 
   // Tronquer un texte
-  const truncate = (text: string, length: number = 100, suffix: string = '...'): string => {
-    if (text.length <= length) return text
-    return text.slice(0, length).trim() + suffix
+  // `text` est typé `string`, mais les valeurs viennent de l'API où le champ est
+  // nullable : une demande « Envoi de colis » n'a pas de titre produit. Sans ce
+  // garde-fou, `null.length` remontait jusqu'au rendu et laissait le tableau de
+  // bord et la liste des expéditions entièrement blancs.
+  const truncate = (text: string | null | undefined, length: number = 100, suffix: string = '...'): string => {
+    const s = text == null ? '' : String(text)
+    if (s.length <= length) return s
+    return s.slice(0, length).trim() + suffix
+  }
+
+  /**
+   * Libellé affichable d'une demande. Le `title` ne concerne que le Personal
+   * Shopping (nom du produit à acheter) ; pour un envoi de colis, on se rabat
+   * sur le numéro de suivi, puis sur un libellé générique — plutôt qu'une
+   * cellule vide qui ne dit rien à l'agent.
+   */
+  const requestTitle = (request: any): string => {
+    if (!request) return ''
+    if (request.title) return request.title
+    if (request.requestType === 'package_sending' || request.request_type === 'package_sending') {
+      const ref = request.trackingNumber || request.tracking_number
+      return ref ? `${t('admin.requests.typePackageSending')} — ${ref}` : t('admin.requests.typePackageSending')
+    }
+    return request.description || '—'
   }
 
   // Capitaliser première lettre
@@ -238,6 +259,7 @@ export const useFormatters = () => {
     formatWeight,
     formatPhone,
     truncate,
+    requestTitle,
     capitalize,
     slugify,
     formatRequestStatus,

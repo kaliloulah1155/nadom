@@ -206,7 +206,7 @@
                 </div>
                 <div class="col-12">
                   <label class="form-label">Téléphone</label>
-                  <input v-model="editForm.phone" type="tel" class="form-control" />
+                  <PhoneInput v-model="editForm.phone" country="ci" />
                 </div>
                 <div class="col-12">
                   <label class="form-label">Ville</label>
@@ -238,6 +238,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 const { t } = useI18n()
 
 import { computed, onMounted, ref, reactive } from 'vue'

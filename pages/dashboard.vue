@@ -154,7 +154,7 @@
                             style="object-fit: cover;"
                             alt=""
                           />
-                          <span class="fw-medium">{{ truncate(request.title, 30) }}</span>
+                          <span class="fw-medium">{{ truncate(requestTitle(request), 30) }}</span>
                         </div>
                       </td>
                       <td><small class="text-muted">{{ request.category }}</small></td>
@@ -297,7 +297,7 @@ const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
 const guidesStore = useGuidesStore()
 const visasStore = useVisasStore()
-const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl, formatCurrency } = useFormatters()
+const { formatRequestStatus, formatShipmentStatus, formatDateShort, truncate, requestThumbnailUrl, formatCurrency, requestTitle } = useFormatters()
 const { pay, publicPrice, processing: payProcessing } = usePayment()
 
 onMounted(async () => {

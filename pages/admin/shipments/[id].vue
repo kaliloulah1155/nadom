@@ -201,6 +201,55 @@
           </div>
         </div>
 
+        <!-- Documents joints (facture, annexes) -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-paperclip me-2"></i>{{ t('admin.shipments.documents') }}
+            </h5>
+            <label class="btn btn-sm btn-outline-primary mb-0">
+              <i class="bi bi-upload me-1"></i>{{ t('admin.shipments.addDocument') }}
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" multiple hidden @change="onDocumentsSelected" />
+            </label>
+          </div>
+          <div class="card-body">
+            <div v-if="uploadingDocuments" class="text-center py-3">
+              <span class="spinner-border spinner-border-sm text-primary me-2"></span>
+              <span class="small text-muted">{{ t('admin.shipments.uploading') }}</span>
+            </div>
+
+            <div v-else-if="shipmentDocuments.length === 0" class="text-muted small text-center py-3">
+              <i class="bi bi-file-earmark d-block mb-1" style="font-size: 1.5rem;"></i>
+              {{ t('admin.shipments.noDocument') }}
+            </div>
+
+            <ul v-else class="list-group list-group-flush">
+              <li
+                v-for="(doc, i) in shipmentDocuments"
+                :key="i"
+                class="list-group-item d-flex justify-content-between align-items-center px-0"
+              >
+                <div class="text-truncate me-2">
+                  <i class="bi me-2" :class="doc.filename?.toLowerCase().endsWith('.pdf') ? 'bi-file-earmark-pdf text-danger' : 'bi-file-earmark-text text-secondary'"></i>
+                  <a :href="resolveStorageAssetUrl(doc.path || doc.url)" target="_blank" rel="noopener" class="text-decoration-none">
+                    {{ doc.filename || t('admin.shipments.document') }}
+                  </a>
+                  <small v-if="doc.size" class="text-muted ms-2">{{ formatFileSize(doc.size) }}</small>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  :disabled="uploadingDocuments"
+                  :title="t('admin.common.delete')"
+                  @click="removeDocument(i)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <!-- Client & Request -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3">
@@ -370,6 +419,7 @@ import { useRoute } from 'vue-router'
 import { useShippingStore } from '~/stores/shipping'
 import type { ShipmentStatus } from '~/stores/shipping'
 import { useFormatters } from '~/composables/useFormatters'
+import { useApi } from '~/composables/useApi'
 import { useNotification } from '~/composables/useNotification'
 import { getToken } from '~/composables/useApi'
 
@@ -514,6 +564,76 @@ const confirmDeleteEvent = async (event: any) => {
 const shipment = computed(() =>
   shippingStore.shipments.find(s => s.tracking_number === id || String(s.id) === id)
 )
+
+// --- Documents joints à l'expédition -------------------------------------------
+// Facture PDF, document annexe… L'endpoint d'upload existant (`/upload/file`,
+// réservé au back-office, 5 Mo) est réutilisé ; la liste vit dans la colonne JSON
+// `documents` de l'expédition.
+const uploadingDocuments = ref(false)
+
+const shipmentDocuments = computed<any[]>(() => {
+  const d = (shipment.value as any)?.documents
+  return Array.isArray(d) ? d : []
+})
+
+const formatFileSize = (octets: number) => {
+  if (!octets) return ''
+  if (octets < 1024) return octets + ' o'
+  if (octets < 1024 * 1024) return Math.round(octets / 1024) + ' Ko'
+  return (octets / 1024 / 1024).toFixed(1) + ' Mo'
+}
+
+/** Enregistre la liste complète : l'API remplace la colonne JSON telle quelle. */
+const persistDocuments = async (docs: any[]) => {
+  await shippingStore.updateShipment(String(shipment.value?.id), { documents: docs } as any)
+  await fetchShipment(false)
+}
+
+const onDocumentsSelected = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const fichiers = Array.from(input.files || [])
+  if (fichiers.length === 0 || !shipment.value) return
+
+  uploadingDocuments.value = true
+  try {
+    const api = useApi()
+    const ajoutes: any[] = []
+    for (const f of fichiers) {
+      const fd = new FormData()
+      fd.append('file', f)
+      fd.append('folder', 'shipments/documents')
+      const res = await api.post<any>('/upload/file', fd)
+      if (!res.success || !res.data?.path) throw new Error('upload')
+      ajoutes.push({
+        path: res.data.path,
+        url: res.data.url,
+        filename: res.data.filename || f.name,
+        size: res.data.size ?? f.size,
+        uploaded_at: new Date().toISOString(),
+      })
+    }
+    await persistDocuments([...shipmentDocuments.value, ...ajoutes])
+    success(t('admin.shipments.documentAdded'))
+  } catch {
+    error(t('admin.shipments.documentUploadFailed'))
+  } finally {
+    uploadingDocuments.value = false
+    input.value = ''
+  }
+}
+
+const removeDocument = async (index: number) => {
+  const reste = shipmentDocuments.value.filter((_, i) => i !== index)
+  uploadingDocuments.value = true
+  try {
+    await persistDocuments(reste)
+    success(t('admin.shipments.documentRemoved'))
+  } catch {
+    error(t('common.error'))
+  } finally {
+    uploadingDocuments.value = false
+  }
+}
 
 const sortedTimeline = computed(() => {
   const list = shipment.value?.timeline || []

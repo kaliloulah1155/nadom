@@ -240,7 +240,12 @@
       "uploadFailed": "Image upload failed: the file is probably too large. Try a lighter image (auto-compressed)."
     },
     "procedurePdfNew": "New request procedure (PDF)",
-    "procedurePdfCart": "Cart order procedure (PDF)"
+    "procedurePdfCart": "Cart order procedure (PDF)",
+    "categoryMenu": {
+      "viewProducts": "View products",
+      "noSubcategories": "No subcategory for “{name}”. Click “View products”.",
+      "hoverHint": "Hover a category to see its subcategories."
+    }
   },
   "importExport": {
     "title": "Import-Export",
@@ -960,7 +965,10 @@
       "confirmUnassign": "Remove package {code} from this container?",
       "unassigned": "Package removed from container.",
       "unassignError": "Error while removing.",
-      "noShipmentsInPackage": "No shipments in this package."
+      "noShipmentsInPackage": "No shipments in this package.",
+      "etd": "Est. departure (ETD)",
+      "eta": "Est. arrival (ETA)",
+      "shipmentsInPackage": "{n} parcels"
     },
     "pages": {
       "dashboard": "Dashboard",
@@ -1353,7 +1361,15 @@
       "pdfError": "Could not generate PDF",
       "statusUpdatedSuccess": "Status updated successfully",
       "requestLink": "Request #{id}",
-      "clientFallback": "Client #{id}"
+      "clientFallback": "Client #{id}",
+      "documents": "Attached documents",
+      "addDocument": "Add",
+      "noDocument": "No document attached.",
+      "document": "Document",
+      "uploading": "Uploading…",
+      "documentAdded": "Document added.",
+      "documentRemoved": "Document removed.",
+      "documentUploadFailed": "Upload failed. Check the format and size (5 MB max)."
     },
     "support": {
       "title": "Customer support",
@@ -2099,5 +2115,11 @@
     "departureDate": "Departure date",
     "returnDate": "Return date",
     "notes": "Notes"
+  },
+  "phone": {
+    "tooLong": "Number too long for the selected country.",
+    "tooShort": "Number too short for the selected country.",
+    "invalid": "Invalid phone number.",
+    "required": "Phone number is required."
   }
 }

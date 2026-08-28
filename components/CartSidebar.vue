@@ -156,16 +156,7 @@
                 <div v-if="errors.name" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.name }}</div>
               </div>
               <div class="mb-2">
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text bg-white"><i class="bi bi-whatsapp text-success"></i></span>
-                  <input
-                    v-model="contactNumber"
-                    type="tel"
-                    class="form-control"
-                    :class="{ 'is-invalid': errors.phone }"
-                    placeholder="WhatsApp * (+225 07 XX XX)"
-                  />
-                </div>
+                <PhoneInput v-model="contactNumber" country="ci" size="sm" required />
                 <div v-if="errors.phone" class="text-danger mt-1" style="font-size:0.72rem;">{{ errors.phone }}</div>
               </div>
               <div class="mb-1">
@@ -215,6 +206,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCartStore } from '~/stores/cart'
 import { usePersonalShoppingStore, DEFAULT_CART_CURRENCIES } from '~/stores/personalShopping'

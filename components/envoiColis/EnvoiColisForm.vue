@@ -102,7 +102,7 @@
           </div>
           <div class="col-md-6 mb-4">
             <label class="form-label fw-medium">{{ t('envoiColis.form.senderPhone') }}</label>
-            <input ref="senderPhoneRef" type="tel" class="form-control form-control-lg" @input="onSenderPhoneInput" />
+            <PhoneInput v-model="form.senderNumber" country="cn" size="lg" />
           </div>
         </div>
         <div class="mb-4">
@@ -192,14 +192,7 @@
           </div>
           <div class="col-md-6 mb-4">
             <label class="form-label fw-medium"><i class="bi bi-whatsapp text-success me-1"></i>{{ t('personalShopping.formExtra.whatsappContact') }} *</label>
-            <input
-              ref="contactPhoneRef"
-              type="tel"
-              class="form-control form-control-lg"
-              :class="{ 'is-invalid': errors.contactNumber }"
-              required
-              @input="onContactPhoneInput"
-            />
+            <PhoneInput v-model="form.contactNumber" country="ci" size="lg" required />
             <div v-if="errors.contactNumber" class="invalid-feedback d-block">{{ errors.contactNumber }}</div>
           </div>
         </div>
@@ -588,9 +581,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import intlTelInput from 'intl-tel-input/intlTelInputWithUtils'
-import type { Iti } from 'intl-tel-input'
-import 'intl-tel-input/build/css/intlTelInput.css'
+import PhoneInput from '~/components/PhoneInput.vue'
 import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useShippingStore } from '~/stores/shipping'
@@ -836,73 +827,8 @@ const form = reactive({
   contactCompany: '',
 })
 
-// Téléphone avec indicatif pays (drapeau + code), sur le modèle from/to de
-// pickngo — expéditeur (Chine par défaut) et destinataire (Côte d'Ivoire par
-// défaut). Le widget se (re)crée à chaque fois que son <input> réapparaît
-// dans le DOM (changement d'onglet Origine/Destination).
-const senderPhoneRef = ref<HTMLInputElement | null>(null)
-const contactPhoneRef = ref<HTMLInputElement | null>(null)
-let itiSender: Iti | null = null
-let itiContact: Iti | null = null
-
-const itiOptions = (initialCountry: string): NonNullable<Parameters<typeof intlTelInput>[1]> => ({
-  initialCountry,
-  nationalMode: false,
-  formatOnDisplay: true,
-  separateDialCode: true,
-  allowDropdown: true,
-})
-
-function initSenderPhone() {
-  if (!senderPhoneRef.value || itiSender) return
-  itiSender = intlTelInput(senderPhoneRef.value, itiOptions('cn'))
-  if (form.senderNumber) itiSender.setNumber(form.senderNumber)
-}
-
-function initContactPhone() {
-  if (!contactPhoneRef.value || itiContact) return
-  itiContact = intlTelInput(contactPhoneRef.value, itiOptions('ci'))
-  if (form.contactNumber) itiContact.setNumber(form.contactNumber)
-}
-
-watch(senderPhoneRef, (el) => {
-  itiSender?.destroy()
-  itiSender = null
-  if (el) nextTick(initSenderPhone)
-}, { flush: 'post' })
-
-watch(contactPhoneRef, (el) => {
-  itiContact?.destroy()
-  itiContact = null
-  if (el) nextTick(initContactPhone)
-}, { flush: 'post' })
-
-// `getNumber()` d'intl-tel-input renvoie une chaîne vide tant que le numéro n'est
-// pas analysable (saisie en cours, indicatif pays qui ne correspond pas...). S'en
-// tenir à cette valeur viderait le champ à l'insu de l'utilisateur, qui verrait
-// alors sa saisie refusée sans comprendre pourquoi. On retombe donc sur la saisie
-// brute, et on ne garde le format E.164 que lorsqu'il est réellement disponible.
-const onSenderPhoneInput = () => {
-  form.senderNumber = itiSender?.getNumber() || senderPhoneRef.value?.value || ''
-}
-const onContactPhoneInput = () => {
-  form.contactNumber = itiContact?.getNumber() || contactPhoneRef.value?.value || ''
-}
-
-// Reflète dans le widget une valeur posée par ailleurs (préremplissage profil,
-// carnet d'adresses, reset panier) — le check `!== getNumber()` évite de
-// re-déclencher une boucle quand le changement vient du widget lui-même.
-watch(() => form.senderNumber, (val) => {
-  if (itiSender && val !== itiSender.getNumber()) itiSender.setNumber(val || '')
-})
-watch(() => form.contactNumber, (val) => {
-  if (itiContact && val !== itiContact.getNumber()) itiContact.setNumber(val || '')
-})
-
-onUnmounted(() => {
-  itiSender?.destroy()
-  itiContact?.destroy()
-})
+// Les champs téléphone reposent sur <PhoneInput>, qui gère indicatif, drapeau
+// et contrôle de la longueur propre au pays.
 
 // Plusieurs colis possibles par demande (dimensions/poids différents), sur le
 // modèle des "parcels" répétables de pickngo — ctn_count/declared_weight/cbm

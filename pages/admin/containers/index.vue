@@ -39,8 +39,8 @@
                 <th>{{ t('admin.containers.lot') }}</th>
                 <th>{{ t('admin.containers.packagesCount') }}</th>
                 <th>{{ t('admin.dashboard.status') }}</th>
-                <th>ETD</th>
-                <th>ETA</th>
+                <th>{{ t('admin.containers.etd') }}</th>
+                <th>{{ t('admin.containers.eta') }}</th>
                 <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
@@ -150,7 +150,7 @@
                     <code class="ms-1">{{ p.code }}</code>
                   </button>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark">{{ p.shipments_count ?? 0 }} colis</span>
+                    <span class="badge bg-light text-dark">{{ t('admin.containers.shipmentsInPackage', { n: p.shipments_count ?? p.shipments?.length ?? 0 }) }}</span>
                     <button class="btn btn-sm btn-outline-secondary py-0 px-1" :title="t('admin.containers.unassignPackage')" @click="unassignPackage(p)">
                       <i class="bi bi-x-lg"></i>
                     </button>

@@ -111,9 +111,7 @@
             <template v-if="activeCategory">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">{{ getCategoryName(activeCategory) }}</h5>
-                <button class="btn btn-sm btn-primary" @click="selectParent(activeCategory)">
-                  Voir les produits
-                </button>
+                <button class="btn btn-sm btn-primary" @click="selectParent(activeCategory)">{{ t('personalShopping.categoryMenu.viewProducts') }}</button>
               </div>
 
               <div v-if="activeSubCategories.length" class="row g-2">
@@ -129,11 +127,11 @@
                 </div>
               </div>
               <p v-else class="text-muted mb-0">
-                <i class="bi bi-info-circle me-1"></i>Aucune sous-catégorie pour « {{ getCategoryName(activeCategory) }} ». Cliquez sur « Voir les produits ».
+                <i class="bi bi-info-circle me-1"></i>{{ t('personalShopping.categoryMenu.noSubcategories', { name: getCategoryName(activeCategory) }) }}
               </p>
             </template>
             <p v-else class="text-muted mb-0 d-none d-md-block">
-              <i class="bi bi-arrow-left me-1"></i>Survolez une catégorie pour afficher ses sous-catégories.
+              <i class="bi bi-arrow-left me-1"></i>{{ t('personalShopping.categoryMenu.hoverHint') }}
             </p>
           </div>
         </div>

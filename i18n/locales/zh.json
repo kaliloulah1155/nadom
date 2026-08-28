@@ -240,7 +240,12 @@
       "uploadFailed": "图片上传失败：文件可能过大。请尝试更小的图片（已自动压缩）。"
     },
     "procedurePdfNew": "新申请流程 (PDF)",
-    "procedurePdfCart": "购物车下单流程 (PDF)"
+    "procedurePdfCart": "购物车下单流程 (PDF)",
+    "categoryMenu": {
+      "viewProducts": "查看商品",
+      "noSubcategories": "“{name}” 没有子分类。请点击“查看商品”。",
+      "hoverHint": "将鼠标悬停在分类上以显示子分类。"
+    }
   },
   "importExport": {
     "title": "进出口",
@@ -960,7 +965,10 @@
       "confirmUnassign": "将包裹批次 {code} 从此集装箱移除？",
       "unassigned": "包裹批次已从集装箱移除。",
       "unassignError": "移除时出错。",
-      "noShipmentsInPackage": "此包裹批次内没有货件。"
+      "noShipmentsInPackage": "此包裹批次内没有货件。",
+      "etd": "预计离港 (ETD)",
+      "eta": "预计到港 (ETA)",
+      "shipmentsInPackage": "{n} 件包裹"
     },
     "pages": {
       "dashboard": "仪表板",
@@ -1353,7 +1361,15 @@
       "pdfError": "无法生成 PDF",
       "statusUpdatedSuccess": "状态已更新",
       "requestLink": "请求 #{id}",
-      "clientFallback": "客户 #{id}"
+      "clientFallback": "客户 #{id}",
+      "documents": "附件文档",
+      "addDocument": "添加",
+      "noDocument": "暂无附件。",
+      "document": "文档",
+      "uploading": "上传中…",
+      "documentAdded": "文档已添加。",
+      "documentRemoved": "文档已移除。",
+      "documentUploadFailed": "上传失败。请检查格式与大小（最大 5 MB）。"
     },
     "support": {
       "title": "客户支持",
@@ -2099,5 +2115,11 @@
     "departureDate": "出发日期",
     "returnDate": "返回日期",
     "notes": "备注"
+  },
+  "phone": {
+    "tooLong": "号码长度超出所选国家/地区的位数。",
+    "tooShort": "号码位数少于所选国家/地区的要求。",
+    "invalid": "电话号码无效。",
+    "required": "请填写电话号码。"
   }
 }

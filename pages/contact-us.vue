@@ -98,13 +98,10 @@
                   <div class="col-xl-6 col-lg-6 col-md-6">
                     <div class="form-group form-border">
                       <label class="form-label">{{ labels.phone }}</label>
-                      <input
-                        type="tel"
-                        class="form-control bg-light"
-                        autocomplete="tel"
-                        :value="form.phone"
-                        :maxlength="LIMITS.phone"
-                        @input="onInput('phone', ($event.target as HTMLInputElement).value)"
+                      <PhoneInput
+                        :model-value="form.phone"
+                        country="ci"
+                        @update:model-value="(v: string) => onInput('phone', v)"
                       />
                     </div>
                   </div>
@@ -182,6 +179,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 import fallbackBg from '@/assets/img/title-banner.jpg'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useSiteStaticPagesStore } from '~/stores/siteStaticPages'

@@ -156,7 +156,7 @@
                     />
                     <div>
                       <div class="fw-medium">
-                        {{ truncate(request.title, 25) }}
+                        {{ truncate(requestTitle(request), 25) }}
                         <span v-if="request.items?.length" class="badge bg-info-subtle text-info ms-1" style="font-size: 0.6rem;">
                           {{ request.items.length }} art.
                         </span>
@@ -359,7 +359,7 @@ definePageMeta({
 
 const psStore = usePersonalShoppingStore()
 const shippingStore = useShippingStore()
-const { formatCurrency, formatDateShort, truncate, requestThumbnailUrl } = useFormatters()
+const { formatCurrency, formatDateShort, truncate, requestThumbnailUrl, requestTitle } = useFormatters()
 const { success, error } = useNotification()
 
 const { label: podCategoryLabel } = usePodCategoryLabel()

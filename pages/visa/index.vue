@@ -252,7 +252,7 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ t('clientForms.whatsapp') }} *</label>
-                  <input v-model="visaForm.phone" type="tel" class="form-control" placeholder="+225 07 XX XX XX XX" required />
+                  <PhoneInput v-model="visaForm.phone" country="ci" required />
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ t('clientForms.email') }}</label>
@@ -295,6 +295,7 @@
 </template>
 
 <script setup lang="ts">
+import PhoneInput from '~/components/PhoneInput.vue'
 import { onMounted, computed } from 'vue'
 import { useVisasStore } from '~/stores/visas'
 import { useFormatters } from '~/composables/useFormatters'

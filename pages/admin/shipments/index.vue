@@ -198,7 +198,7 @@
                   <select v-model="form.requestId" class="form-select input-md" required @change="onRequestChange">
                     <option value="">{{ t('admin.shipments.selectRequestPlaceholder') }}</option>
                     <option v-for="req in availableRequests" :key="req.id" :value="req.id">
-                      #{{ String(req.id ?? '').slice(-6) }} — {{ truncate(req.title, 40) }} · {{ t('admin.shipments.requestOptionQuote', { price: formatCurrency(req.quotedPrice ?? 0, (req as any).currency || 'XOF') }) }}
+                      #{{ String(req.id ?? '').slice(-6) }} — {{ truncate(requestTitle(req), 40) }} · {{ t('admin.shipments.requestOptionQuote', { price: formatCurrency(req.quotedPrice ?? 0, (req as any).currency || 'XOF') }) }}
                     </option>
                   </select>
                   <small v-if="availableRequests.length === 0" class="text-warning">
@@ -309,7 +309,7 @@ definePageMeta({
 const shippingStore = useShippingStore()
 const psStore = usePersonalShoppingStore()
 const countriesStore = useCountriesStore()
-const { formatDateShort, formatShipmentStatus, formatCurrency, truncate } = useFormatters()
+const { formatDateShort, formatShipmentStatus, formatCurrency, truncate, requestTitle } = useFormatters()
 const { success, error: notifyError } = useNotification()
 const { createPaymentLink, processing: payProcessing } = usePayment()
 const { can } = useAdminAbility()
@@ -435,7 +435,9 @@ onMounted(async () => {
     psStore.fetchRequests(),
     countriesStore.fetchAll()
   ])
-  if (typeof window !== 'undefined' && (window as any).bootstrap) {
+  // `modalRef` peut être vide si le rendu a échoué en amont : Bootstrap lève
+  // alors une erreur obscure sur `backdrop` qui masque la vraie cause.
+  if (typeof window !== 'undefined' && (window as any).bootstrap && modalRef.value) {
     modalInstance = new (window as any).bootstrap.Modal(modalRef.value)
   }
 })
