@@ -208,46 +208,48 @@
                     </div>
                   </div>
 
-                  <table v-else class="table table-sm mb-0 pkg-table align-middle">
-                    <thead>
-                      <tr>
-                        <th>{{ t('envoiColis.form.quantity') }}</th>
-                        <th>{{ t('envoiColis.form.declaredWeight') }}</th>
-                        <th>{{ t('envoiColis.form.dimLength') }}×{{ t('envoiColis.form.dimWidth') }}×{{ t('envoiColis.form.dimHeight') }}</th>
-                        <th>{{ t('envoiColis.form.itemDescription') }}</th>
-                        <th>{{ t('envoiColis.form.photos') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(pi, idx) in (request as any).packageItems" :key="idx">
-                        <td>{{ pi.quantity }}</td>
-                        <td>{{ pi.weight != null ? `${pi.weight} kg` : '—' }}</td>
-                        <td>{{ pi.length && pi.width && pi.height ? `${pi.length}×${pi.width}×${pi.height} cm` : '—' }}</td>
-                        <td>
-                          <span v-if="pi.categories?.length" class="d-flex flex-wrap gap-1">
-                            <span v-for="(c, ci) in pi.categories" :key="ci" class="badge bg-secondary-subtle text-secondary">{{ c }}</span>
-                          </span>
-                          <span v-else class="text-muted">—</span>
-                          <div v-if="pi.description" class="small text-muted mt-1">{{ pi.description }}</div>
-                        </td>
-                        <td>
-                          <div v-if="pi.images?.length" class="d-flex gap-1 flex-wrap">
-                            <img
-                              v-for="(img, i) in pi.images"
-                              :key="i"
-                              :src="resolveStorageAssetUrl(img)"
-                              class="rounded border pkg-thumb"
-                              width="56"
-                              height="56"
-                              :alt="`${t('envoiColis.form.photos')} ${i + 1}`"
-                              @click="openZoom(img)"
-                            />
-                          </div>
-                          <span v-else class="text-muted">—</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div v-else class="table-responsive">
+                    <table class="table table-sm mb-0 pkg-table align-middle">
+                      <thead>
+                        <tr>
+                          <th>{{ t('envoiColis.form.quantity') }}</th>
+                          <th>{{ t('envoiColis.form.declaredWeight') }}</th>
+                          <th>{{ t('envoiColis.form.dimLength') }}×{{ t('envoiColis.form.dimWidth') }}×{{ t('envoiColis.form.dimHeight') }}</th>
+                          <th>{{ t('envoiColis.form.itemDescription') }}</th>
+                          <th>{{ t('envoiColis.form.photos') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(pi, idx) in (request as any).packageItems" :key="idx">
+                          <td>{{ pi.quantity }}</td>
+                          <td>{{ pi.weight != null ? `${pi.weight} kg` : '—' }}</td>
+                          <td>{{ pi.length && pi.width && pi.height ? `${pi.length}×${pi.width}×${pi.height} cm` : '—' }}</td>
+                          <td>
+                            <span v-if="pi.categories?.length" class="d-flex flex-wrap gap-1">
+                              <span v-for="(c, ci) in pi.categories" :key="ci" class="badge bg-secondary-subtle text-secondary">{{ c }}</span>
+                            </span>
+                            <span v-else class="text-muted">—</span>
+                            <div v-if="pi.description" class="small text-muted mt-1">{{ pi.description }}</div>
+                          </td>
+                          <td>
+                            <div v-if="pi.images?.length" class="d-flex gap-1 flex-wrap">
+                              <img
+                                v-for="(img, i) in pi.images"
+                                :key="i"
+                                :src="resolveStorageAssetUrl(img)"
+                                class="rounded border pkg-thumb"
+                                width="56"
+                                height="56"
+                                :alt="`${t('envoiColis.form.photos')} ${i + 1}`"
+                                @click="openZoom(img)"
+                              />
+                            </div>
+                            <span v-else class="text-muted">—</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -412,54 +414,56 @@
             <div class="card-body">
               <!-- Existing Quotation -->
               <div v-if="request.quotedPrice && request.quotedDetails && !showQuotationForm">
-                <table class="table table-sm">
-                  <tbody>
-                    <template v-if="isPackageSending">
-                      <tr>
-                        <td>{{ t('admin.requests.detail.transport') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <tbody>
+                      <template v-if="isPackageSending">
+                        <tr>
+                          <td>{{ t('admin.requests.detail.transport') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.packaging') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.customs') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.customsFee, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.localDelivery') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.localDeliveryFee, requestCurrency) }}</td>
+                        </tr>
+                      </template>
+                      <template v-else>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.productCost') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.commission') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.inspection') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.packaging') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
+                        </tr>
+                        <tr>
+                          <td>{{ t('admin.requests.detail.shippingLine') }}</td>
+                          <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                        </tr>
+                      </template>
+                      <tr class="fw-bold border-top border-2">
+                        <td>{{ t('admin.requests.detail.total') }} <span class="badge bg-success-subtle text-success">net NADOM</span></td>
+                        <td class="text-end text-success fs-6">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
                       </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.packaging') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.customs') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.customsFee, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.localDelivery') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.localDeliveryFee, requestCurrency) }}</td>
-                      </tr>
-                    </template>
-                    <template v-else>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.productCost') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.commission') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.inspection') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.packaging') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
-                      </tr>
-                      <tr>
-                        <td>{{ t('admin.requests.detail.shippingLine') }}</td>
-                        <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
-                      </tr>
-                    </template>
-                    <tr class="fw-bold border-top border-2">
-                      <td>{{ t('admin.requests.detail.total') }} <span class="badge bg-success-subtle text-success">net NADOM</span></td>
-                      <td class="text-end text-success fs-6">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
 
                 <div class="border rounded p-3 bg-light mt-3">
                   <div class="text-uppercase small fw-bold text-muted mb-2">

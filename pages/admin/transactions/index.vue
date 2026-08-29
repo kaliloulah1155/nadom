@@ -239,41 +239,45 @@
               <span class="fw-semibold">En attente de reversement</span>
               <span class="fs-4 fw-bold">{{ money(bal.pending_reversement) }} {{ balanceCurrency }}</span>
             </div>
-            <table class="table table-sm align-middle mb-1">
-              <tbody>
-                <tr>
-                  <td class="text-muted">Déjà reversé</td>
-                  <td class="text-end fw-semibold text-success">{{ money(bal.total_reversed) }} {{ balanceCurrency }}</td>
-                </tr>
-                <tr class="border-top border-2">
-                  <td class="fw-semibold">Total net qui vous revient</td>
-                  <td class="text-end fw-bold text-success">{{ money(bal.total_net) }} {{ balanceCurrency }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-1">
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Déjà reversé</td>
+                    <td class="text-end fw-semibold text-success">{{ money(bal.total_reversed) }} {{ balanceCurrency }}</td>
+                  </tr>
+                  <tr class="border-top border-2">
+                    <td class="fw-semibold">Total net qui vous revient</td>
+                    <td class="text-end fw-bold text-success">{{ money(bal.total_net) }} {{ balanceCurrency }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <!-- Informations : ne vous appartiennent PAS -->
             <h6 class="text-muted text-uppercase small mb-2 mt-3"><i class="bi bi-info-circle me-1"></i>Pour information (ne vous revient pas)</h6>
-            <table class="table table-sm align-middle mb-0">
-              <tbody>
-                <tr>
-                  <td class="text-muted">Payé par les clients <small>(prix public, frais inclus)</small></td>
-                  <td class="text-end">{{ money(bal.total_public) }} {{ balanceCurrency }}</td>
-                </tr>
-                <tr>
-                  <td class="text-muted">Total prix de vente</td>
-                  <td class="text-end">{{ money(bal.total_sales) }} {{ balanceCurrency }}</td>
-                </tr>
-                <tr>
-                  <td class="text-muted">Commission de service (10 %)</td>
-                  <td class="text-end text-muted">− {{ money(bal.total_commission) }} {{ balanceCurrency }}</td>
-                </tr>
-                <tr>
-                  <td class="text-muted">Remboursé aux clients</td>
-                  <td class="text-end text-danger">{{ money(bal.total_refunded) }} {{ balanceCurrency }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Payé par les clients <small>(prix public, frais inclus)</small></td>
+                    <td class="text-end">{{ money(bal.total_public) }} {{ balanceCurrency }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Total prix de vente</td>
+                    <td class="text-end">{{ money(bal.total_sales) }} {{ balanceCurrency }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Commission de service (10 %)</td>
+                    <td class="text-end text-muted">− {{ money(bal.total_commission) }} {{ balanceCurrency }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Remboursé aux clients</td>
+                    <td class="text-end text-danger">{{ money(bal.total_refunded) }} {{ balanceCurrency }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <div class="alert alert-light border small mb-0 mt-3">
               <i class="bi bi-shield-check me-1 text-success"></i>

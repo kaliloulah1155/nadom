@@ -170,34 +170,36 @@
                 <h5 class="mb-0 text-success"><i class="bi bi-receipt me-2"></i>Devis</h5>
               </div>
               <div class="card-body">
-                <table class="table table-borderless mb-0">
-                  <tbody>
-                    <tr v-if="request.quotedDetails">
-                      <td>Cout produit</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
-                    </tr>
-                    <tr v-if="request.quotedDetails">
-                      <td>Frais de service (5%)</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr v-if="request.quotedDetails">
-                      <td>Inspection</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr v-if="request.quotedDetails">
-                      <td>Emballage</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
-                    </tr>
-                    <tr v-if="request.quotedDetails">
-                      <td>Expedition</td>
-                      <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
-                    </tr>
-                    <tr class="border-top fw-bold fs-5">
-                      <td>TOTAL</td>
-                      <td class="text-end text-success">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="table-responsive">
+                  <table class="table table-borderless mb-0">
+                    <tbody>
+                      <tr v-if="request.quotedDetails">
+                        <td>Cout produit</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.productCost, requestCurrency) }}</td>
+                      </tr>
+                      <tr v-if="request.quotedDetails">
+                        <td>Frais de service (5%)</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.serviceFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr v-if="request.quotedDetails">
+                        <td>Inspection</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.inspectionFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr v-if="request.quotedDetails">
+                        <td>Emballage</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.packagingFee, requestCurrency) }}</td>
+                      </tr>
+                      <tr v-if="request.quotedDetails">
+                        <td>Expedition</td>
+                        <td class="text-end">{{ formatCurrency(request.quotedDetails.shippingCost, requestCurrency) }}</td>
+                      </tr>
+                      <tr class="border-top fw-bold fs-5">
+                        <td>TOTAL</td>
+                        <td class="text-end text-success">{{ formatCurrency(request.quotedPrice, requestCurrency) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
                 <div v-if="request.status === 'negotiating'" class="d-grid gap-2 mt-4">
                   <button class="btn btn-success btn-lg" @click="acceptQuotation">

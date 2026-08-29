@@ -145,29 +145,31 @@
                   </div>
                 </div>
 
-                <table class="table table-borderless">
-                  <tbody>
-                    <tr v-if="result.duration">
-                      <td>{{ t('calculator.estimatedDelay') }}</td>
-                      <td class="text-end">{{ result.duration }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('calculator.ratePerUnit', { unit: currentUnit }) }}</td>
-                      <td class="text-end">{{ fmtMoney(result.cost_per_kg, result.currency_code) }}</td>
-                    </tr>
-                    <tr>
-                      <td>{{ t('calculator.shippingCost') }}</td>
-                      <td class="text-end">{{ fmtMoney(result.cost, result.currency_code) }}</td>
-                    </tr>
-                    <tr class="text-muted small">
-                      <td colspan="2">{{ t('calculator.rateDetailUnit', { rate: fmtMoney(result.cost_per_kg, result.currency_code), qty: result.weight, unit: currentUnit }) }}</td>
-                    </tr>
-                    <tr class="border-top fw-bold fs-5">
-                      <td>{{ t('calculator.totalEstimate') }}</td>
-                      <td class="text-end text-primary">{{ fmtMoney(result.cost, result.currency_code) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="table-responsive">
+                  <table class="table table-borderless">
+                    <tbody>
+                      <tr v-if="result.duration">
+                        <td>{{ t('calculator.estimatedDelay') }}</td>
+                        <td class="text-end">{{ result.duration }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('calculator.ratePerUnit', { unit: currentUnit }) }}</td>
+                        <td class="text-end">{{ fmtMoney(result.cost_per_kg, result.currency_code) }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ t('calculator.shippingCost') }}</td>
+                        <td class="text-end">{{ fmtMoney(result.cost, result.currency_code) }}</td>
+                      </tr>
+                      <tr class="text-muted small">
+                        <td colspan="2">{{ t('calculator.rateDetailUnit', { rate: fmtMoney(result.cost_per_kg, result.currency_code), qty: result.weight, unit: currentUnit }) }}</td>
+                      </tr>
+                      <tr class="border-top fw-bold fs-5">
+                        <td>{{ t('calculator.totalEstimate') }}</td>
+                        <td class="text-end text-primary">{{ fmtMoney(result.cost, result.currency_code) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
                 <div class="alert alert-info mb-0">
                   <i class="bi bi-info-circle me-2"></i>
