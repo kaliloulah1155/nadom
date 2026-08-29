@@ -214,10 +214,6 @@ const blur = reactive({
   message: false
 })
 
-function isFrLang(): boolean {
-  return String(locale.value || '').startsWith('fr')
-}
-
 function onInput(key: keyof typeof form, raw: string) {
   const limitsByKey = {
     name: LIMITS.name,
@@ -252,54 +248,41 @@ function resetForm(): void {
 const simpleEmailOk = (e: string) => /^[^\s@]{1,200}@[^\s@]{1,200}\.[^\s@]{2,}$/.test(e)
 
 const fieldErrors = computed(() => {
-  const fr = isFrLang()
   const err: { name?: string; email?: string; subject?: string; message?: string } = {}
 
   const nameOk = sanitizePlainText(form.name, LIMITS.name)
   if ((blur.name || attempted.value) && nameOk.length < 2) {
-    err.name = fr ? 'Indiquez au moins 2 caractères.' : 'At least 2 characters are required.'
+    err.name = t('contactForm.nameMin')
   }
 
   const em = sanitizePlainText(form.email, LIMITS.email).toLowerCase()
   if ((blur.email || attempted.value) && em.length === 0) {
-    err.email = fr ? 'Une adresse e-mail est requise.' : 'An email address is required.'
+    err.email = t('contactForm.emailRequired')
   } else if ((blur.email || attempted.value) && em.length > 0 && !simpleEmailOk(em)) {
-    err.email = fr ? 'Adresse e-mail invalide.' : 'Invalid email address.'
+    err.email = t('contactForm.emailInvalid')
   }
 
   const subj = sanitizePlainText(form.subject, LIMITS.subject)
   if ((blur.subject || attempted.value) && subj.length < 2) {
-    err.subject = fr ? 'Ajoutez un sujet court.' : 'Please enter a short subject.'
+    err.subject = t('contactForm.subjectMin')
   }
 
   const msg = sanitizePlainText(form.message, LIMITS.message)
   if ((blur.message || attempted.value) && msg.length < 10) {
-    err.message =
-      fr ? 'Merci de détailler votre demande (10 caractères minimum).' : 'Please add more detail (minimum 10 characters).'
+    err.message = t('contactForm.messageMin')
   }
 
   return err
 })
 
-const labels = computed(() =>
-  isFrLang()
-    ? {
-        name: 'Votre nom',
-        email: 'E-mail',
-        phone: 'Téléphone',
-        subject: 'Sujet',
-        message: 'Votre message',
-        submit: 'Envoyer'
-      }
-    : {
-        name: 'Your name',
-        email: 'Email',
-        phone: 'Phone',
-        subject: 'Subject',
-        message: 'Your message',
-        submit: 'Send message'
-      }
-)
+const labels = computed(() => ({
+  name: t('contactForm.name'),
+  email: t('contactForm.email'),
+  phone: t('contactForm.phone'),
+  subject: t('contactForm.subject'),
+  message: t('contactForm.message'),
+  submit: t('contactForm.submit'),
+}))
 
 const pages = useSiteStaticPagesStore()
 
@@ -309,13 +292,19 @@ onMounted(() => {
 
 const payload = computed(() => pages.contactPayload as Record<string, any>)
 
-function loc(obj?: { fr?: string | null; en?: string | null }): string {
+function loc(obj?: { fr?: string | null; en?: string | null; zh?: string | null }, zhFallback = ''): string {
   if (!obj) return ''
-  const useFr = String(locale.value || '').startsWith('fr')
-  return String(useFr ? (obj.fr ?? obj.en) : (obj.en ?? obj.fr) ?? '').trim()
+  const current = String(locale.value || '')
+  if (current.startsWith('zh')) {
+    return String(obj.zh ?? zhFallback ?? obj.en ?? obj.fr ?? '').trim()
+  }
+  if (current.startsWith('en')) {
+    return String(obj.en ?? obj.fr ?? obj.zh ?? '').trim()
+  }
+  return String(obj.fr ?? obj.en ?? obj.zh ?? '').trim()
 }
 
-const heroTitle = computed(() => loc(payload.value.hero?.title) || (locale.value.startsWith('fr') ? 'Contact' : 'Contact Us'))
+const heroTitle = computed(() => loc(payload.value.hero?.title, t('contactForm.heroFallback')) || t('contactForm.heroFallback'))
 const heroSubtitle = computed(() => loc(payload.value.hero?.subtitle))
 
 const heroStyle = computed(() => {
@@ -334,7 +323,7 @@ const displayCards = computed(() => {
   }))
 })
 
-const formTitle = computed(() => loc(payload.value.form_block?.title) || 'Drop Us a Line')
+const formTitle = computed(() => loc(payload.value.form_block?.title, t('contactForm.formTitleFallback')) || t('contactForm.formTitleFallback'))
 const formIntro = computed(() => loc(payload.value.form_block?.intro))
 
 const mapUrl = computed(() => String(payload.value.map_embed_url || '').trim())
@@ -348,7 +337,7 @@ async function submitForm() {
 
   const errs = fieldErrors.value
   if (errs.name || errs.email || errs.subject || errs.message) {
-    error(isFrLang() ? 'Veuillez corriger le formulaire.' : 'Please fix the form errors.')
+    error(t('contactForm.formErrors'))
     return
   }
 
@@ -365,15 +354,15 @@ async function submitForm() {
     const api = usePublicApi()
     const res = await api.post<{ message?: string }>('/contact/lead', body)
     if (!res.success) {
-      throw new Error(res.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))
+      throw new Error(res.message || t('contactForm.sendFailed'))
     }
-    const msg = String(res.message || (isFrLang() ? 'Votre message a bien été reçu. Nous vous répondrons rapidement.' : 'Your message has been received. We will reply shortly.'))
+    const msg = String(res.message || t('contactForm.sendSuccess'))
     success(msg)
     submittedMessage.value = msg
     submitted.value = true
     resetForm()
   } catch (e: any) {
-    error(e?.message || (isFrLang() ? 'Envoi impossible.' : 'Could not send.'))
+    error(e?.message || t('contactForm.sendFailed'))
   } finally {
     sending.value = false
   }
