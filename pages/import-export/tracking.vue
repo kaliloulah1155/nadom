@@ -53,13 +53,15 @@
           <!-- Result -->
           <div v-if="shipment" class="card border-0 shadow">
             <div class="card-header bg-transparent py-3">
-              <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                   <h5 class="mb-1">{{ shipment.tracking_number }}</h5>
                   <small class="text-muted">{{ shipment.destination_country }} - {{ shipment.destination_city }}</small>
                 </div>
+                <!-- `ms-auto` : le statut est cale a droite sans dependre de la
+                     repartition du conteneur, qui ne le poussait pas au bout. -->
                 <span
-                  class="badge fs-6"
+                  class="badge fs-6 ms-auto text-nowrap"
                   :style="{
                     backgroundColor: formatShipmentStatus(shipment.status).color,
                     color: '#fff'
@@ -96,6 +98,38 @@
                   <div class="p-3 bg-light rounded text-center">
                     <small class="text-muted d-block">{{ t('clientForms.estimatedDelivery') }}</small>
                     <strong>{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : '-' }}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conteneur (BL) : n'apparait que si le colis y est rattache.
+                   Le code du BL et ses dates sont des informations de transport,
+                   sans donnee personnelle — leur place est bien sur le suivi. -->
+              <div v-if="shipment.container" class="border rounded p-3 mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                  <div>
+                    <small class="text-muted d-block">{{ t('tracking.container') }}</small>
+                    <strong class="fs-6"><i class="bi bi-truck-flatbed me-1"></i>{{ shipment.container.code }}</strong>
+                  </div>
+                  <small class="text-muted">
+                    {{ t('tracking.containerLot', {
+                      n: shipment.container.container_number,
+                      lot: shipment.container.lot_number
+                    }) }}
+                  </small>
+                </div>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="p-2 bg-light rounded text-center">
+                      <small class="text-muted d-block">{{ t('tracking.etd') }}</small>
+                      <strong>{{ shipment.container.etd ? formatDateShort(shipment.container.etd) : '-' }}</strong>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="p-2 bg-light rounded text-center">
+                      <small class="text-muted d-block">{{ t('tracking.eta') }}</small>
+                      <strong>{{ shipment.container.eta ? formatDateShort(shipment.container.eta) : '-' }}</strong>
+                    </div>
                   </div>
                 </div>
               </div>

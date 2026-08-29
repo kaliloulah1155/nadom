@@ -454,7 +454,11 @@
       "timeline": "时间线"
     },
     "budget": "预算",
-    "description": "描述"
+    "description": "描述",
+    "container": "集装箱 / 提单",
+    "etd": "预计离港",
+    "eta": "预计到港",
+    "containerLot": "集装箱 {n} 号，批次 {lot} 号"
   },
   "cart": {
     "addedToCart": "产品已加入购物车",
@@ -933,7 +937,13 @@
       "confirmDelete": "删除包裹批次 {code}？",
       "deleted": "包裹批次已删除。",
       "deleteError": "删除时出错。",
-      "noShipments": "此包裹批次内没有货件。"
+      "noShipments": "此包裹批次内没有货件。",
+      "openContainer": "打开集装箱",
+      "openShipment": "打开包裹详情",
+      "shipment": "包裹",
+      "shipmentAssigned": "包裹已加入集装箱。",
+      "shipmentUnassigned": "包裹已从集装箱移除。",
+      "unassignShipment": "从集装箱中移除"
     },
     "containers": {
       "title": "集装箱 / 提单",
@@ -968,7 +978,11 @@
       "noShipmentsInPackage": "此包裹批次内没有货件。",
       "etd": "预计离港 (ETD)",
       "eta": "预计到港 (ETA)",
-      "shipmentsInPackage": "{n} 件包裹"
+      "shipmentsInPackage": "{n} 件包裹",
+      "openPackage": "打开包裹组",
+      "shipmentsInContainer": "此集装箱内的包裹",
+      "noShipments": "此集装箱尚无包裹。",
+      "shipmentsCount": "包裹数"
     },
     "pages": {
       "dashboard": "仪表板",
@@ -1082,7 +1096,8 @@
       "savingEllipsis": "保存中…",
       "savingDots": "保存中...",
       "allNeutral": "— 全部 —",
-      "searchEllipsis": "搜索…"
+      "searchEllipsis": "搜索…",
+      "error": "发生错误。"
     },
     "messages": {
       "genericError": "发生错误",
@@ -2121,5 +2136,12 @@
     "tooShort": "号码位数少于所选国家/地区的要求。",
     "invalid": "电话号码无效。",
     "required": "请填写电话号码。"
+  },
+  "client": {
+    "shipment": {
+      "downloadReceipt": "下载回单",
+      "downloadError": "无法下载回单。",
+      "downloadLabel": "下载面单"
+    }
   }
 }

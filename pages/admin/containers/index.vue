@@ -37,7 +37,7 @@
                 <th>{{ t('admin.containers.code') }}</th>
                 <th>{{ t('admin.containers.number') }}</th>
                 <th>{{ t('admin.containers.lot') }}</th>
-                <th>{{ t('admin.containers.packagesCount') }}</th>
+                <th>{{ t('admin.containers.shipmentsCount') }}</th>
                 <th>{{ t('admin.dashboard.status') }}</th>
                 <th>{{ t('admin.containers.etd') }}</th>
                 <th>{{ t('admin.containers.eta') }}</th>
@@ -70,7 +70,7 @@
                     @change="updateNumber(c, 'lot_number', ($event.target as HTMLInputElement).value)"
                   />
                 </td>
-                <td>{{ c.packages_count ?? 0 }}</td>
+                <td>{{ c.shipments_count ?? 0 }}</td>
                 <td>
                   <select
                     :value="c.status"
@@ -108,8 +108,8 @@
                     </button>
                     <button
                       class="btn btn-sm btn-outline-danger"
-                      :disabled="(c.packages_count ?? 0) > 0"
-                      :title="(c.packages_count ?? 0) > 0 ? t('admin.containers.cannotDeleteHasPackages') : ''"
+                      :disabled="(c.shipments_count ?? 0) > 0 || (c.packages_count ?? 0) > 0"
+                      :title="(c.shipments_count ?? 0) > 0 || (c.packages_count ?? 0) > 0 ? t('admin.containers.cannotDeleteHasPackages') : ''"
                       @click="confirmDeleteContainer(c)"
                     >
                       <i class="bi bi-trash"></i>
@@ -141,14 +141,46 @@
             <button type="button" class="btn-close" @click="detailContainer = null"></button>
           </div>
           <div class="modal-body">
+            <!-- Composition réelle du BL : les colis y sont rattachés un par un,
+                 toutes journées confondues. Le regroupement par package ci-dessous
+                 ne reflète que les affectations faites à l'ancienne méthode. -->
+            <h6 class="text-muted small text-uppercase mb-2">{{ t('admin.containers.shipmentsInContainer') }}</h6>
+            <table v-if="detailContainer.shipments?.length" class="table table-sm small align-middle mb-4">
+              <tbody>
+                <tr v-for="s in detailContainer.shipments" :key="s.id">
+                  <td>
+                    <NuxtLink :to="`/admin/shipments/${s.id}`"><code>{{ s.tracking_number }}</code></NuxtLink>
+                  </td>
+                  <td class="text-muted">{{ s.destination_city || s.destination_country || '—' }}</td>
+                  <td class="text-muted">{{ s.package?.code || '—' }}</td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-sm btn-outline-secondary py-0 px-1"
+                      :title="t('admin.packages.unassignShipment')"
+                      @click="retirerColis(s)"
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-else class="text-muted small mb-4">{{ t('admin.containers.noShipments') }}</p>
+
             <h6 class="text-muted small text-uppercase mb-2">{{ t('admin.containers.packagesInContainer') }}</h6>
             <div v-if="detailContainer.packages?.length" class="accordion" id="packagesAccordion">
               <div v-for="p in detailContainer.packages" :key="p.id" class="border rounded mb-2">
                 <div class="d-flex justify-content-between align-items-center p-2">
-                  <button class="btn btn-link btn-sm p-0 text-decoration-none" @click="toggleExpand(p.id)">
-                    <i class="bi" :class="expandedPackageId === p.id ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
-                    <code class="ms-1">{{ p.code }}</code>
-                  </button>
+                  <div class="d-flex align-items-center gap-1">
+                    <button class="btn btn-link btn-sm p-0 text-decoration-none" @click="toggleExpand(p.id)">
+                      <i class="bi" :class="expandedPackageId === p.id ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                    </button>
+                    <!-- Réciproque du lien conteneur : le code du package ouvre
+                         sa fiche dans l'écran Packages. -->
+                    <NuxtLink :to="`/admin/packages?package=${p.id}`" :title="t('admin.containers.openPackage')">
+                      <code>{{ p.code }}</code>
+                    </NuxtLink>
+                  </div>
                   <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-light text-dark">{{ t('admin.containers.shipmentsInPackage', { n: p.shipments_count ?? p.shipments?.length ?? 0 }) }}</span>
                     <button class="btn btn-sm btn-outline-secondary py-0 px-1" :title="t('admin.containers.unassignPackage')" @click="unassignPackage(p)">
@@ -299,5 +331,36 @@ const unassignPackage = async (p: Package) => {
   }
 }
 
-onMounted(() => fetchContainers(1))
+/** Retire un colis du BL. Le colis reste dans son package journalier. */
+const retirerColis = async (s: PackageShipment) => {
+  if (!detailContainer.value) return
+  try {
+    await store.setShipmentContainer(s.id, null, detailContainer.value.id)
+    success(t('admin.packages.shipmentUnassigned'))
+    detailContainer.value = await store.fetchContainerById(detailContainer.value.id)
+    await fetchContainers(store.containersMeta.currentPage)
+  } catch (err: any) {
+    notifyError(err?.message || t('admin.common.error'))
+  }
+}
+
+const route = useRoute()
+
+onMounted(async () => {
+  await fetchContainers(1)
+
+  // Arrivée depuis l'écran Packages (clic sur le code du conteneur) : on ouvre
+  // directement la fiche visée, sinon l'agent atterrit sur la liste et doit
+  // rechercher lui-même la ligne d'où il vient.
+  const cible = route.query.container as string | undefined
+  if (!cible) return
+  const trouve = store.containers.find((c: Container) => c.id === cible)
+  if (trouve) {
+    openDetail(trouve)
+  } else {
+    // La liste est paginée : le conteneur visé peut ne pas y figurer.
+    const full = await store.fetchContainerById(cible)
+    if (full) detailContainer.value = full
+  }
+})
 </script>

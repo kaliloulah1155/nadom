@@ -455,7 +455,11 @@
       "timeline": "Historique"
     },
     "budget": "Budget",
-    "description": "Description"
+    "description": "Description",
+    "container": "Conteneur / BL",
+    "etd": "Départ prévu",
+    "eta": "Arrivée prévue",
+    "containerLot": "Conteneur n°{n}, lot n°{lot}"
   },
   "pricing": {
     "title": "Nos Tarifs",
@@ -927,7 +931,13 @@
       "confirmDelete": "Supprimer le package {code} ?",
       "deleted": "Package supprimé.",
       "deleteError": "Erreur lors de la suppression.",
-      "noShipments": "Aucun envoi dans ce package."
+      "noShipments": "Aucun envoi dans ce package.",
+      "openContainer": "Ouvrir le conteneur",
+      "openShipment": "Ouvrir la fiche du colis",
+      "shipment": "Colis",
+      "shipmentAssigned": "Colis rattaché au conteneur.",
+      "shipmentUnassigned": "Colis retiré du conteneur.",
+      "unassignShipment": "Retirer du conteneur"
     },
     "containers": {
       "title": "Conteneurs / BL",
@@ -962,7 +972,11 @@
       "noShipmentsInPackage": "Aucun envoi dans ce package.",
       "etd": "Départ prévu (ETD)",
       "eta": "Arrivée prévue (ETA)",
-      "shipmentsInPackage": "{n} colis"
+      "shipmentsInPackage": "{n} colis",
+      "openPackage": "Ouvrir le package",
+      "shipmentsInContainer": "Colis dans ce conteneur",
+      "noShipments": "Aucun colis rattaché à ce conteneur.",
+      "shipmentsCount": "Nb. colis"
     },
     "pages": {
       "dashboard": "Tableau de bord",
@@ -1076,7 +1090,8 @@
       "savingEllipsis": "Enregistrement…",
       "savingDots": "Enregistrement...",
       "allNeutral": "— Tous —",
-      "searchEllipsis": "Rechercher…"
+      "searchEllipsis": "Rechercher…",
+      "error": "Une erreur est survenue."
     },
     "messages": {
       "genericError": "Une erreur est survenue",
@@ -2125,5 +2140,12 @@
     "tooShort": "Numéro trop court pour le pays sélectionné.",
     "invalid": "Numéro de téléphone invalide.",
     "required": "Le numéro de téléphone est requis."
+  },
+  "client": {
+    "shipment": {
+      "downloadReceipt": "Télécharger le récépissé",
+      "downloadError": "Le récépissé n'a pas pu être téléchargé.",
+      "downloadLabel": "Télécharger l'étiquette"
+    }
   }
 }

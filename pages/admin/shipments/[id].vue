@@ -279,22 +279,26 @@
         </div>
 
         <!-- Traçabilité (Phase 2 — Package / Conteneur) -->
-        <div v-if="(shipment as any).package" class="card border-0 shadow-sm mb-4">
+        <div v-if="(shipment as any).package || conteneurDuColis" class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-transparent py-3">
             <h5 class="card-title mb-0">{{ t('admin.shipments.traceability') }}</h5>
           </div>
           <div class="card-body">
-            <div class="mb-3">
+            <div v-if="(shipment as any).package" class="mb-3">
               <label class="text-muted small d-block">{{ t('admin.shipments.package') }}</label>
-              <code>{{ (shipment as any).package.code }}</code>
+              <NuxtLink :to="`/admin/packages?package=${(shipment as any).package.id}`">
+                <code>{{ (shipment as any).package.code }}</code>
+              </NuxtLink>
             </div>
-            <div v-if="(shipment as any).package.container">
+            <div v-if="conteneurDuColis">
               <label class="text-muted small d-block">{{ t('admin.shipments.container') }}</label>
-              <code class="fw-bold">{{ (shipment as any).package.container.code }}</code>
+              <NuxtLink :to="`/admin/containers?container=${conteneurDuColis.id}`">
+                <code class="fw-bold">{{ conteneurDuColis.code }}</code>
+              </NuxtLink>
               <div class="small text-muted mt-1">
                 {{ t('admin.shipments.containerLot', {
-                  n: (shipment as any).package.container.container_number,
-                  lot: (shipment as any).package.container.lot_number
+                  n: conteneurDuColis.container_number,
+                  lot: conteneurDuColis.lot_number
                 }) }}
               </div>
             </div>
@@ -642,6 +646,18 @@ const sortedTimeline = computed(() => {
     const dateB = new Date(b.sdate || b.date).getTime()
     return dateB - dateA
   })
+})
+
+/**
+ * Conteneur (BL) du colis. Le rattachement se fait colis par colis : on lit
+ * `shipment.container`. Le repli sur `package.container` ne couvre que les
+ * affectations historiques faites au niveau du panier journalier — sans lui,
+ * la fiche affichait le conteneur du package, donc un BL faux dès que le colis
+ * avait été rattaché ailleurs.
+ */
+const conteneurDuColis = computed<any | null>(() => {
+  const s: any = shipment.value
+  return s?.container ?? s?.package?.container ?? null
 })
 
 const notFound = computed(() => !loading.value && !shipment.value)

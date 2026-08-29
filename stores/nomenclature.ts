@@ -9,6 +9,10 @@ export interface PackageShipment {
   destination_city: string | null
   weight: number | string | null
   request_id: string | null
+  /** Conteneur (BL) du colis. Rattachement propre à chaque colis : un conteneur
+   *  peut embarquer des envois de journées — donc de packages — différentes. */
+  container_id?: string | null
+  container?: { id: string; code: string } | null
 }
 
 export interface Package {
@@ -32,6 +36,9 @@ export interface Container {
   eta: string | null
   packages_count?: number
   packages?: Package[]
+  /** Colis rattachés directement au BL — sa composition réelle. */
+  shipments_count?: number
+  shipments?: (PackageShipment & { package?: { id: string; code: string } | null })[]
 }
 
 interface Meta {
@@ -188,6 +195,27 @@ export const useNomenclatureStore = defineStore('nomenclature', {
       const pkgIdx = this.packages.findIndex(p => p.id === packageId)
       if (pkgIdx !== -1) {
         this.packages[pkgIdx] = { ...this.packages[pkgIdx], container_id: null, status: 'open' }
+      }
+    },
+
+    /**
+     * Rattache un colis à un conteneur, ou l'en détache si `containerId` est
+     * vide. L'affectation se décide colis par colis : deux envois de dates
+     * différentes peuvent partir dans le même BL.
+     */
+    async setShipmentContainer(
+      shipmentId: string,
+      containerId: string | null,
+      ancienContainerId?: string | null,
+    ): Promise<void> {
+      const api = useApi()
+      if (containerId) {
+        const res = await api.put(`/containers/${containerId}/assign-shipment`, { shipment_id: shipmentId })
+        if (!res.success) throw new Error(res.message)
+      } else {
+        if (!ancienContainerId) return
+        const res = await api.delete(`/containers/${ancienContainerId}/shipments/${shipmentId}`)
+        if (!res.success) throw new Error(res.message)
       }
     },
 

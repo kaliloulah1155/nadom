@@ -119,7 +119,8 @@ export const useShippingStore = defineStore('shipping', {
     getShipmentByTracking: (state) => (tracking: string) =>
       state.shipments.find(s => s.tracking_number === tracking),
     getShipmentById: (state) => (id: string | number) => state.shipments.find(s => String(s.id) === String(id)),
-    getShipmentsByUser: (state) => (userId: number) => state.shipments.filter(s => s.user_id === userId),
+    getShipmentsByUser: (state) => (userId: number | string) =>
+      state.shipments.filter((s: any) => String(s.user_id ?? s.userId ?? '') === String(userId)),
     getShipmentsByStatus: (state) => (status: ShipmentStatus) => state.shipments.filter(s => s.status === status),
     getInTransitShipments: (state) => state.shipments.filter(s =>
       ['picked_up', 'in_transit', 'in_customs', 'out_for_delivery'].includes(s.status)

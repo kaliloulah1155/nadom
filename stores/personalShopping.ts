@@ -280,7 +280,8 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
 
   getters: {
     getRequestById: (state) => (id: string) => state.requests.find(r => r.id === id),
-    getRequestsByUser: (state) => (userId: string) => state.requests.filter(r => r.userId === userId),
+    getRequestsByUser: (state) => (userId: string | number) =>
+      state.requests.filter((r: any) => String(r.userId ?? r.user_id ?? '') === String(userId)),
     getRequestsByStatus: (state) => (status: RequestStatus) => state.requests.filter(r => r.status === status),
     getPendingRequests: (state) => state.requests.filter(r => r.status === 'pending'),
     getActiveRequests: (state) => {

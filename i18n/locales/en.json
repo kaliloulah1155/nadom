@@ -454,7 +454,11 @@
       "timeline": "Timeline"
     },
     "budget": "Budget",
-    "description": "Description"
+    "description": "Description",
+    "container": "Container / BL",
+    "etd": "Est. departure",
+    "eta": "Est. arrival",
+    "containerLot": "Container no.{n}, lot no.{lot}"
   },
   "cart": {
     "addedToCart": "Product added to cart",
@@ -933,7 +937,13 @@
       "confirmDelete": "Delete package {code}?",
       "deleted": "Package deleted.",
       "deleteError": "Error while deleting.",
-      "noShipments": "No shipments in this package."
+      "noShipments": "No shipments in this package.",
+      "openContainer": "Open container",
+      "openShipment": "Open parcel details",
+      "shipment": "Parcel",
+      "shipmentAssigned": "Parcel added to the container.",
+      "shipmentUnassigned": "Parcel removed from the container.",
+      "unassignShipment": "Remove from container"
     },
     "containers": {
       "title": "Containers / BL",
@@ -968,7 +978,11 @@
       "noShipmentsInPackage": "No shipments in this package.",
       "etd": "Est. departure (ETD)",
       "eta": "Est. arrival (ETA)",
-      "shipmentsInPackage": "{n} parcels"
+      "shipmentsInPackage": "{n} parcels",
+      "openPackage": "Open package",
+      "shipmentsInContainer": "Parcels in this container",
+      "noShipments": "No parcel attached to this container.",
+      "shipmentsCount": "Parcels"
     },
     "pages": {
       "dashboard": "Dashboard",
@@ -1082,7 +1096,8 @@
       "savingEllipsis": "Saving…",
       "savingDots": "Saving...",
       "allNeutral": "— All —",
-      "searchEllipsis": "Search…"
+      "searchEllipsis": "Search…",
+      "error": "Something went wrong."
     },
     "messages": {
       "genericError": "An error occurred",
@@ -2121,5 +2136,12 @@
     "tooShort": "Number too short for the selected country.",
     "invalid": "Invalid phone number.",
     "required": "Phone number is required."
+  },
+  "client": {
+    "shipment": {
+      "downloadReceipt": "Download receipt",
+      "downloadError": "The receipt could not be downloaded.",
+      "downloadLabel": "Download label"
+    }
   }
 }

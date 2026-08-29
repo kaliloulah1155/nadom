@@ -64,7 +64,10 @@ export const useAuthStore = defineStore('auth', {
       const last = state.currentUser.lastname || state.currentUser.lastName || ''
       return `${first} ${last}`.trim()
     },
-    userId: (state) => state.currentUser?.uuid || state.currentUser?.id || ''
+    // Identifiant utilise par les cles etrangeres (`shipments.user_id`,
+    // `personal_shopping_requests.user_id`) : c'est l'ID, pas l'uuid. L'inverse
+    // faisait remonter zero partout sur le tableau de bord client.
+    userId: (state) => state.currentUser?.id ?? state.currentUser?.uuid ?? ''
   },
 
   actions: {

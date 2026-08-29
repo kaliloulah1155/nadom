@@ -262,7 +262,9 @@ const id = route.params.id as string
 const user = computed(() => FAKE_USERS.find(u => u.id === id))
 
 const userRequests = computed(() => psStore.requests.filter(r => r.userId === id))
-const userShipments = computed(() => shippingStore.shipments.filter(s => s.userId === id))
+const userShipments = computed(() =>
+  shippingStore.shipments.filter((s: any) => String(s.user_id ?? s.userId ?? '') === String(id)),
+)
 
 const modalRef = ref<HTMLElement | null>(null)
 let modalInstance: any = null

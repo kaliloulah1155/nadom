@@ -234,9 +234,23 @@
                   <strong>Numero de suivi :</strong>
                   <code>{{ request.trackingNumber }}</code>
                 </p>
-                <NuxtLink :to="`/import-export/tracking?tracking=${request.trackingNumber}`" class="btn btn-outline-primary">
-                  Suivre mon colis
-                </NuxtLink>
+                <div class="d-flex flex-wrap gap-2">
+                  <NuxtLink :to="`/import-export/tracking?tracking=${request.trackingNumber}`" class="btn btn-outline-primary">
+                    Suivre mon colis
+                  </NuxtLink>
+                  <!-- Recepisse de SON envoi : la route verifie l'appartenance,
+                       le client ne peut pas telecharger celui d'un autre. -->
+                  <button class="btn btn-outline-secondary" :disabled="!!telechargement" @click="telecharger('pdf')">
+                    <span v-if="telechargement === 'pdf'" class="spinner-border spinner-border-sm me-1"></span>
+                    <i v-else class="bi bi-file-earmark-pdf me-1"></i>
+                    {{ t('client.shipment.downloadReceipt') }}
+                  </button>
+                  <button class="btn btn-outline-secondary" :disabled="!!telechargement" @click="telecharger('label')">
+                    <span v-if="telechargement === 'label'" class="spinner-border spinner-border-sm me-1"></span>
+                    <i v-else class="bi bi-upc-scan me-1"></i>
+                    {{ t('client.shipment.downloadLabel') }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -332,7 +346,42 @@ const cartStore = useCartStore()
 const { formatCurrency, formatDateShort, formatRequestStatus } = useFormatters()
 const { contactForRequest } = useWhatsApp()
 const { success } = useNotification()
+import { getToken } from '~/composables/useApi'
+
 const { t, locale } = useI18n()
+
+/** Document en cours de telechargement ('pdf' | 'label'), sinon null. */
+const telechargement = ref<'pdf' | 'label' | null>(null)
+
+/**
+ * Telecharge un document de l'expedition liee a cette demande.
+ *
+ * Le numero affiche ici est celui de la DEMANDE (« NDM-XXXX »), pas celui de
+ * l'expedition : l'API accepte les deux et fait la correspondance.
+ */
+const telecharger = async (type: 'pdf' | 'label') => {
+  const suivi = (request.value as any)?.trackingNumber
+  if (!suivi) return
+  telechargement.value = type
+  try {
+    const config = useRuntimeConfig()
+    const url = `${config.public.apiBase}/shipments/mine/${encodeURIComponent(suivi)}/${type}?lang=${locale.value}`
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${getToken()}`, Accept: 'application/pdf' },
+    })
+    if (!res.ok) throw new Error(type)
+    const blob = await res.blob()
+    const lien = document.createElement('a')
+    lien.href = URL.createObjectURL(blob)
+    lien.download = `${type === 'label' ? 'etiquette' : 'expedition'}-${suivi}.pdf`
+    lien.click()
+    URL.revokeObjectURL(lien.href)
+  } catch {
+    alert(t('client.shipment.downloadError'))
+  } finally {
+    telechargement.value = null
+  }
+}
 const { pay, publicPrice, processing: payProcessing } = usePayment()
 
 const loading = ref(true)

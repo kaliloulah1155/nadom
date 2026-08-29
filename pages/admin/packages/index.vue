@@ -50,13 +50,12 @@
                 <th>{{ t('admin.packages.date') }}</th>
                 <th>{{ t('admin.packages.shipmentsCount') }}</th>
                 <th>{{ t('admin.dashboard.status') }}</th>
-                <th>{{ t('admin.packages.container') }}</th>
                 <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="store.packages.length === 0">
-                <td colspan="6" class="text-center py-4 text-muted">{{ t('admin.packages.none') }}</td>
+                <td colspan="5" class="text-center py-4 text-muted">{{ t('admin.packages.none') }}</td>
               </tr>
               <template v-for="pkg in store.packages" :key="pkg.id">
                 <tr>
@@ -72,20 +71,7 @@
                     <span class="badge bg-light text-dark">{{ t(`admin.packages.status.${pkg.status}`) }}</span>
                   </td>
                   <td>
-                    <span v-if="pkg.container" class="badge bg-info-subtle text-info">
-                      <i class="bi bi-truck-flatbed me-1"></i>{{ pkg.container.code }}
-                    </span>
-                    <span v-else class="text-muted small fst-italic">{{ t('admin.packages.noContainer') }}</span>
-                  </td>
-                  <td>
                     <div class="d-flex gap-1">
-                      <button
-                        v-if="!pkg.container_id"
-                        class="btn btn-sm btn-outline-primary"
-                        @click="openAssignModal(pkg)"
-                      >
-                        <i class="bi bi-truck-flatbed me-1"></i>{{ t('admin.packages.assign') }}
-                      </button>
                       <button
                         class="btn btn-sm btn-outline-danger"
                         :disabled="(pkg.shipments_count ?? 0) > 0"
@@ -98,17 +84,75 @@
                   </td>
                 </tr>
                 <tr v-if="expandedPackageId === pkg.id">
-                  <td colspan="6" class="bg-light">
+                  <td colspan="5" class="bg-light">
                     <div v-if="loadingExpand" class="text-center py-2">
                       <div class="spinner-border spinner-border-sm text-primary"></div>
                     </div>
-                    <ul v-else-if="expandedShipments.length" class="list-unstyled mb-0 small">
-                      <li v-for="s in expandedShipments" :key="s.id" class="d-flex justify-content-between py-1 border-bottom">
-                        <code>{{ s.tracking_number }}</code>
-                        <span class="text-muted">{{ s.destination_city || s.destination_country || '—' }}</span>
-                        <span class="badge bg-light text-dark">{{ s.status }}</span>
-                      </li>
-                    </ul>
+                    <!-- Le conteneur se choisit colis par colis : un même BL
+                         embarque des envois de journées différentes. -->
+                    <table v-else-if="expandedShipments.length" class="table table-sm mb-0 small align-middle">
+                      <thead>
+                        <tr class="text-muted">
+                          <th class="fw-normal">{{ t('admin.packages.shipment') }}</th>
+                          <th class="fw-normal">{{ t('admin.shipments.destination') }}</th>
+                          <th class="fw-normal" style="width: 12rem;">{{ t('admin.packages.container') }}</th>
+                          <th class="fw-normal">{{ t('admin.dashboard.status') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="s in expandedShipments" :key="s.id">
+                          <td>
+                            <NuxtLink :to="`/admin/shipments/${s.id}`" :title="t('admin.packages.openShipment')">
+                              <code>{{ s.tracking_number }}</code>
+                            </NuxtLink>
+                          </td>
+                          <td class="text-muted">{{ s.destination_city || s.destination_country || '—' }}</td>
+                          <td>
+                            <div class="d-flex align-items-center gap-1">
+                              <select
+                                class="form-select form-select-sm"
+                                :value="s.container_id || ''"
+                                :disabled="savingShipmentId === s.id"
+                                @change="changerConteneur(s, ($event.target as HTMLSelectElement).value)"
+                              >
+                                <option value="">{{ t('admin.packages.noContainer') }}</option>
+                                <option
+                                  v-for="c in nomStore.containers"
+                                  :key="c.id"
+                                  :value="c.id"
+                                  :disabled="c.status !== 'loading' && c.id !== s.container_id"
+                                >
+                                  {{ c.code }} ({{ t('admin.containers.status.' + c.status) }})
+                                </option>
+                              </select>
+                              <!-- Le lien vers la fiche du BL vit desormais ici :
+                                   le conteneur se decide colis par colis, plus au
+                                   niveau du panier journalier. -->
+                              <NuxtLink
+                                v-if="s.container_id"
+                                :to="`/admin/containers?container=${s.container_id}`"
+                                class="btn btn-sm btn-outline-info py-0 px-1"
+                                :title="t('admin.packages.openContainer')"
+                              >
+                                <i class="bi bi-box-arrow-up-right"></i>
+                              </NuxtLink>
+                              <!-- Retrait explicite : l'option vide du select est un
+                                   moyen de detachement peu lisible pour l'agent. -->
+                              <button
+                                v-if="s.container_id"
+                                class="btn btn-sm btn-outline-danger py-0 px-1"
+                                :disabled="savingShipmentId === s.id"
+                                :title="t('admin.packages.unassignShipment')"
+                                @click="changerConteneur(s, '')"
+                              >
+                                <i class="bi bi-x-lg"></i>
+                              </button>
+                            </div>
+                          </td>
+                          <td><span class="badge bg-light text-dark">{{ s.status }}</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
                     <p v-else class="text-muted small mb-0">{{ t('admin.packages.noShipments') }}</p>
                   </td>
                 </tr>
@@ -125,44 +169,6 @@
           @update:current-page="(p: number) => fetchPackages(p)"
           @update:limit="(l: number) => fetchPackages(1, l)"
         />
-      </div>
-    </div>
-
-    <!-- Assign Modal -->
-    <div v-if="assigningPackage" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ t('admin.packages.assignModalTitle', { code: assigningPackage.code }) }}</h5>
-            <button type="button" class="btn-close" @click="assigningPackage = null"></button>
-          </div>
-          <div class="modal-body">
-            <label class="form-label">{{ t('admin.packages.selectContainer') }}</label>
-            <select v-model="selectedContainerId" class="form-select mb-3">
-              <option value="">{{ t('admin.packages.selectContainerPlaceholder') }}</option>
-              <option v-for="c in nomStore.containers" :key="c.id" :value="c.id">
-                <!-- Statuts de CONTENEUR (en chargement / en transit / arrivé),
-                     et non de package : le mauvais espace de noms affichait la
-                     clé brute « admin.packages.status.loading ». -->
-                {{ c.code }} ({{ t('admin.containers.status.' + c.status) }})
-              </option>
-            </select>
-            <div class="text-center">
-              <span class="text-muted small">{{ t('admin.common.or') }}</span>
-            </div>
-            <button class="btn btn-outline-secondary w-100 mt-2" :disabled="creatingContainer" @click="createNewContainer">
-              <span v-if="creatingContainer" class="spinner-border spinner-border-sm me-1"></span>
-              <i v-else class="bi bi-plus-lg me-1"></i>{{ t('admin.packages.createNewContainer') }}
-            </button>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-light" @click="assigningPackage = null">{{ t('admin.common.cancel') }}</button>
-            <button class="btn btn-primary" :disabled="!selectedContainerId || assigning" @click="confirmAssign">
-              <span v-if="assigning" class="spinner-border spinner-border-sm me-1"></span>
-              {{ t('admin.packages.confirmAssign') }}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -198,48 +204,32 @@ const fetchPackages = async (page?: number, limit?: number) => {
   })
 }
 
-const assigningPackage = ref<Package | null>(null)
-const selectedContainerId = ref('')
-const assigning = ref(false)
-const creatingContainer = ref(false)
+/** Colis en cours d'enregistrement, pour neutraliser son select le temps de l'appel. */
+const savingShipmentId = ref<string | null>(null)
 
-const openAssignModal = async (pkg: Package) => {
-  assigningPackage.value = pkg
-  selectedContainerId.value = ''
-  if (nomStore.containers.length === 0) {
-    await nomStore.fetchContainers({ status: 'loading', limit: 50 })
-  }
-}
+/**
+ * Change le conteneur d'un colis. L'affectation est propre au colis : deux
+ * envois de journées différentes peuvent rejoindre le même BL.
+ */
+const changerConteneur = async (s: PackageShipment, containerId: string) => {
+  const ancien = s.container_id ?? null
+  const nouveau = containerId || null
+  if (nouveau === ancien) return
 
-const createNewContainer = async () => {
-  creatingContainer.value = true
+  savingShipmentId.value = s.id
   try {
-    const created = await nomStore.createContainer()
-    if (created) {
-      success(t('admin.packages.containerCreated', { code: created.code }))
-      selectedContainerId.value = created.id
-    }
-  } catch (err: any) {
-    notifyError(err.message || t('admin.packages.containerCreateError'))
+    await store.setShipmentContainer(s.id, nouveau, ancien)
+    // Mise à jour locale : évite de recharger toute la liste pour un select.
+    s.container_id = nouveau
+    s.container = nouveau ? nomStore.containers.find(c => c.id === nouveau) ?? null : null
+    success(nouveau ? t('admin.packages.shipmentAssigned') : t('admin.packages.shipmentUnassigned'))
+  } catch (e: any) {
+    notifyError(e?.message || t('admin.common.error'))
   } finally {
-    creatingContainer.value = false
+    savingShipmentId.value = null
   }
 }
 
-const confirmAssign = async () => {
-  if (!assigningPackage.value || !selectedContainerId.value) return
-  assigning.value = true
-  try {
-    await nomStore.assignPackage(selectedContainerId.value, assigningPackage.value.id)
-    success(t('admin.packages.assigned'))
-    assigningPackage.value = null
-    await fetchPackages(store.packagesMeta.currentPage)
-  } catch (err: any) {
-    notifyError(err.message || t('admin.packages.assignError'))
-  } finally {
-    assigning.value = false
-  }
-}
 
 const expandedPackageId = ref<string | null>(null)
 const expandedShipments = ref<PackageShipment[]>([])
@@ -270,5 +260,22 @@ const confirmDeletePackage = async (pkg: Package) => {
   }
 }
 
-onMounted(() => fetchPackages(1))
+const route = useRoute()
+
+onMounted(async () => {
+  await fetchPackages(1)
+
+  // Les conteneurs alimentent le select présent sur chaque ligne de colis :
+  // ils doivent être chargés dès l'ouverture, pas seulement à l'ouverture du modal.
+  if (nomStore.containers.length === 0) {
+    await nomStore.fetchContainers({ limit: 100 })
+  }
+
+  // Arrivée depuis le détail d'un conteneur (clic sur le code du package) :
+  // on déplie directement la ligne concernée.
+  const cible = route.query.package as string | undefined
+  if (cible && store.packages.some((p: Package) => p.id === cible)) {
+    await toggleExpand(cible)
+  }
+})
 </script>
