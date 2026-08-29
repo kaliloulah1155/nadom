@@ -90,7 +90,8 @@
                     </div>
                     <!-- Le conteneur se choisit colis par colis : un même BL
                          embarque des envois de journées différentes. -->
-                    <table v-else-if="expandedShipments.length" class="table table-sm mb-0 small align-middle">
+                    <div v-else-if="expandedShipments.length" class="table-responsive">
+                      <table class="table table-sm mb-0 small align-middle">
                       <thead>
                         <tr class="text-muted">
                           <th class="fw-normal">{{ t('admin.packages.shipment') }}</th>
@@ -153,6 +154,7 @@
                         </tr>
                       </tbody>
                     </table>
+                    </div>
                     <p v-else class="text-muted small mb-0">{{ t('admin.packages.noShipments') }}</p>
                   </td>
                 </tr>

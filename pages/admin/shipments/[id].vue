@@ -23,8 +23,8 @@
     </nav>
 
     <!-- Header Actions -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div class="d-flex align-items-center">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <div class="d-flex align-items-center flex-wrap gap-2">
         <h4 class="mb-0 me-3">{{ t('admin.shipments.detailHeading') }} #{{ shipment.tracking_number }}</h4>
         <span
           class="badge"
@@ -33,7 +33,7 @@
           {{ formatShipmentStatus(shipment.status).label }}
         </span>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 flex-wrap">
         <button
           class="btn btn-outline-dark btn-md"
           :disabled="downloadingLabel"
@@ -154,22 +154,22 @@
         <!-- Estimates -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-body">
-            <div class="d-flex align-items-start justify-content-between mb-3">
-              <div class="d-flex align-items-center">
-                <div class="bg-primary-subtle p-3 rounded-circle me-3">
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+              <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
+                <div class="bg-primary-subtle p-3 rounded-circle me-3 flex-shrink-0">
                   <i class="bi bi-calendar-event text-primary fs-4"></i>
                 </div>
-                <div>
+                <div class="flex-grow-1" style="min-width: 0;">
                   <small class="text-muted d-block">{{ t('admin.shipments.estimatedDelivery') }}</small>
                   <div v-if="!editingDelivery">
                     <h5 class="mb-0">{{ shipment.estimated_delivery ? formatDateShort(shipment.estimated_delivery) : t('admin.shipments.na') }}</h5>
                   </div>
-                  <div v-else class="d-flex align-items-center gap-2 mt-1">
+                  <div v-else class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                     <input
                       v-model="deliveryDateInput"
                       type="date"
                       class="form-control form-control-sm"
-                      style="width: 160px;"
+                      style="flex: 1 1 130px; min-width: 0;"
                     />
                     <button
                       class="btn btn-sm btn-primary"

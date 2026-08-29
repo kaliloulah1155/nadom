@@ -145,7 +145,8 @@
                  toutes journées confondues. Le regroupement par package ci-dessous
                  ne reflète que les affectations faites à l'ancienne méthode. -->
             <h6 class="text-muted small text-uppercase mb-2">{{ t('admin.containers.shipmentsInContainer') }}</h6>
-            <table v-if="detailContainer.shipments?.length" class="table table-sm small align-middle mb-4">
+            <div v-if="detailContainer.shipments?.length" class="table-responsive">
+              <table class="table table-sm small align-middle mb-4">
               <tbody>
                 <tr v-for="s in detailContainer.shipments" :key="s.id">
                   <td>
@@ -165,6 +166,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
             <p v-else class="text-muted small mb-4">{{ t('admin.containers.noShipments') }}</p>
 
             <h6 class="text-muted small text-uppercase mb-2">{{ t('admin.containers.packagesInContainer') }}</h6>
