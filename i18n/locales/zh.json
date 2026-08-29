@@ -1549,8 +1549,11 @@
       "unreadOnly": "未读",
       "results": "条结果",
       "none": "暂无通知",
-      "upToDate": "您已查看全部通知！",
-      "viewDetail": "查看详情"
+      "upToDate": "已全部查看！",
+      "viewDetail": "查看详情",
+      "refresh": "刷新",
+      "all": "全部",
+      "searchPlaceholder": "按标题搜索..."
     },
     "products": {
       "title": "产品管理",
@@ -1777,7 +1780,16 @@
       "noServices": "未配置服务",
       "createService": "创建服务",
       "serviceName": "服务名称",
-      "serviceActive": "服务启用"
+      "serviceActive": "服务启用",
+      "retry": "重试",
+      "name": "服务名称 *",
+      "codeHint": "标识符（例：PERSONAL_SHOPPING）",
+      "price": "价格 *",
+      "currency": "币种 *",
+      "slug": "Slug *",
+      "slugHint": "唯一网址（例：personal-shopping）",
+      "description": "描述",
+      "active": "服务启用"
     },
     "countries": {
       "title": "国家（参考）",

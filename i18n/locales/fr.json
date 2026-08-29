@@ -1539,7 +1539,7 @@
     },
     "notifications": {
       "title": "Notifications",
-      "unread": "non lues",
+      "unread": "Non lues",
       "markAllRead": "Tout marquer lu",
       "searchTitle": "Rechercher par titre...",
       "read": "Lues",
@@ -1547,7 +1547,10 @@
       "results": "résultat(s)",
       "none": "Aucune notification",
       "upToDate": "Vous êtes à jour !",
-      "viewDetail": "Voir le détail"
+      "viewDetail": "Voir le détail",
+      "refresh": "Actualiser",
+      "all": "Toutes",
+      "searchPlaceholder": "Rechercher par titre..."
     },
     "products": {
       "title": "Gestion des produits",
@@ -1774,7 +1777,16 @@
       "noServices": "Aucun service configuré",
       "createService": "Créer un service",
       "serviceName": "Nom du service",
-      "serviceActive": "Service actif"
+      "serviceActive": "Service actif",
+      "retry": "Réessayer",
+      "name": "Nom du service *",
+      "codeHint": "Identifiant (ex: PERSONAL_SHOPPING)",
+      "price": "Prix *",
+      "currency": "Devise *",
+      "slug": "Slug *",
+      "slugHint": "URL unique (ex: personal-shopping)",
+      "description": "Description",
+      "active": "Service actif"
     },
     "countries": {
       "title": "Pays (référentiel)",

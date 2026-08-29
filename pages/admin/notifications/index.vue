@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
       <div>
-        <h4 class="mb-1">Notifications</h4>
+        <h4 class="mb-1">{{ t('admin.notifications.title') }}</h4>
         <p class="text-muted mb-0">
           {{ notifStore.total }} notifications
           <span v-if="notifStore.unread > 0" class="badge bg-primary ms-2">{{ notifStore.unread }} non lues</span>
@@ -11,10 +11,10 @@
       </div>
       <div class="d-flex gap-2">
         <button class="btn btn-outline-secondary btn-md" :disabled="notifStore.loading" @click="refresh">
-          <i class="bi bi-arrow-clockwise me-2"></i>Actualiser
+          <i class="bi bi-arrow-clockwise me-2"></i>{{ t('admin.notifications.refresh') }}
         </button>
         <button v-if="notifStore.unread > 0" class="btn btn-primary btn-md" @click="markAllRead">
-          <i class="bi bi-check2-all me-2"></i>Tout marquer lu
+          <i class="bi bi-check2-all me-2"></i>{{ t('admin.notifications.markAllRead') }}
         </button>
       </div>
     </div>
@@ -32,15 +32,15 @@
                 v-model="search"
                 type="text"
                 class="form-control border-start-0"
-                placeholder="Rechercher par titre..."
+                :placeholder="t('admin.notifications.searchPlaceholder')"
               />
             </div>
           </div>
           <div class="col-md-3">
             <select v-model="readFilter" class="form-select">
-              <option value="">Toutes</option>
-              <option value="unread">Non lues</option>
-              <option value="read">Lues</option>
+              <option value="">{{ t('admin.notifications.all') }}</option>
+              <option value="unread">{{ t('admin.notifications.unread') }}</option>
+              <option value="read">{{ t('admin.notifications.read') }}</option>
             </select>
           </div>
           <div class="col-md-4 text-muted small text-md-end">
@@ -60,7 +60,7 @@
       <div class="card-body text-center py-5 text-muted">
         <i class="bi bi-bell-slash fs-1 d-block mb-3 opacity-50"></i>
         <h6>{{ t('admin.notifications.none') }}</h6>
-        <p class="small mb-0">Vous êtes à jour !</p>
+        <p class="small mb-0">{{ t('admin.notifications.upToDate') }}</p>
       </div>
     </div>
 
@@ -110,7 +110,7 @@
                 {{ typeLabel(n.type) }}
               </span>
               <small v-if="n.link" class="text-primary">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Voir le détail
+                <i class="bi bi-box-arrow-up-right me-1"></i>{{ t('admin.notifications.viewDetail') }}
               </small>
             </div>
           </div>

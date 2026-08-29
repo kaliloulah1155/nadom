@@ -1542,15 +1542,18 @@
     },
     "notifications": {
       "title": "Notifications",
-      "unread": "unread",
-      "markAllRead": "Mark all as read",
+      "unread": "Unread",
+      "markAllRead": "Mark all read",
       "searchTitle": "Search by title...",
       "read": "Read",
       "unreadOnly": "Unread",
       "results": "result(s)",
       "none": "No notifications",
-      "upToDate": "You are up to date!",
-      "viewDetail": "View detail"
+      "upToDate": "You are all caught up!",
+      "viewDetail": "View details",
+      "refresh": "Refresh",
+      "all": "All",
+      "searchPlaceholder": "Search by title..."
     },
     "products": {
       "title": "Product management",
@@ -1771,13 +1774,22 @@
       "visaActive": "Visa active"
     },
     "pricing": {
-      "title": "Services & pricing management",
+      "title": "Services & pricing",
       "newService": "New service",
       "loadingServices": "Loading services...",
       "noServices": "No services configured",
       "createService": "Create service",
       "serviceName": "Service name",
-      "serviceActive": "Service active"
+      "serviceActive": "Service active",
+      "retry": "Retry",
+      "name": "Service name *",
+      "codeHint": "Identifier (e.g. PERSONAL_SHOPPING)",
+      "price": "Price *",
+      "currency": "Currency *",
+      "slug": "Slug *",
+      "slugHint": "Unique URL (e.g. personal-shopping)",
+      "description": "Description",
+      "active": "Service active"
     },
     "countries": {
       "title": "Countries (reference)",

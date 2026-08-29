@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
       <div>
-        <h4 class="mb-1">Gestion des services & tarifs</h4>
+        <h4 class="mb-1">{{ t('admin.pricing.title') }}</h4>
         <p class="text-muted mb-0">{{ pricingStore.servicesMeta.total }} services configurés</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau service
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.pricing.newService') }}
       </button>
     </div>
 
@@ -15,7 +15,7 @@
     <div v-if="pricingStore.error" class="alert alert-danger d-flex align-items-center" role="alert">
       <i class="bi bi-exclamation-triangle me-2"></i>
       <div class="flex-grow-1">{{ pricingStore.error }}</div>
-      <button class="btn btn-sm btn-outline-danger" @click="fetchServices(1)">Réessayer</button>
+      <button class="btn btn-sm btn-outline-danger" @click="fetchServices(1)">{{ t('admin.pricing.retry') }}</button>
     </div>
 
     <!-- Loading -->
@@ -99,18 +99,18 @@
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label">Nom du service *</label>
+                  <label class="form-label">{{ t('admin.pricing.name') }}</label>
                   <input v-model="form.key" type="text" class="form-control" required :disabled="!!editingService" />
-                  <small class="text-muted">Identifiant (ex: PERSONAL_SHOPPING)</small>
+                  <small class="text-muted">{{ t('admin.pricing.codeHint') }}</small>
                 </div>
 
                 <!-- Prix + Devise -->
                 <div class="col-8">
-                  <label class="form-label">Prix *</label>
+                  <label class="form-label">{{ t('admin.pricing.price') }}</label>
                   <input v-model.number="form.value" type="number" class="form-control" required min="0" step="any" />
                 </div>
                 <div class="col-4">
-                  <label class="form-label">Devise *</label>
+                  <label class="form-label">{{ t('admin.pricing.currency') }}</label>
                   <select v-model="form.currency" class="form-select" required>
                     <option v-for="cur in currencies" :key="cur.uuid || cur.code" :value="cur.code">
                       {{ cur.label || cur.code }}
@@ -119,18 +119,18 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Slug *</label>
+                  <label class="form-label">{{ t('admin.pricing.slug') }}</label>
                   <input v-model="form.slug" type="text" class="form-control" required />
-                  <small class="text-muted">URL unique (ex: personal-shopping)</small>
+                  <small class="text-muted">{{ t('admin.pricing.slugHint') }}</small>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Description</label>
+                  <label class="form-label">{{ t('admin.pricing.description') }}</label>
                   <WysiwygEditor v-model="form.description" height="120px" />
                 </div>
                 <div class="col-12">
                   <div class="form-check">
                     <input v-model="form.status" type="checkbox" class="form-check-input" id="serviceStatus" />
-                    <label class="form-check-label" for="serviceStatus">Service actif</label>
+                    <label class="form-check-label" for="serviceStatus">{{ t('admin.pricing.active') }}</label>
                   </div>
                 </div>
               </div>
