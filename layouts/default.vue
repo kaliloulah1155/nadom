@@ -22,8 +22,11 @@
                 {{ cartStore.totalItems }}
               </span>
             </a>
-            <NuxtLink v-if="!isAuthenticated" to="/login" class="mobile-action-btn">
+            <NuxtLink v-if="!isAuthenticated" to="/login" class="mobile-action-btn" :title="t('nav.login')">
               <i class="bi bi-person-circle"></i>
+            </NuxtLink>
+            <NuxtLink v-if="!isAuthenticated" to="/register" class="mobile-action-btn text-danger" :title="t('nav.register')">
+              <i class="bi bi-person-plus"></i>
             </NuxtLink>
             <NuxtLink v-else to="/dashboard" class="mobile-action-btn">
               <i class="bi bi-person-circle"></i>
@@ -195,12 +198,19 @@
                 </ul>
               </li>
 
-              <!-- Auth: Se connecter / Mon compte -->
-              <li v-if="!isAuthenticated" class="lh-nav-item">
-                <NuxtLink to="/login" class="lh-link lh-link-signin">
-                  <i class="bi bi-person me-1"></i>{{ t('nav.login') }}
-                </NuxtLink>
-              </li>
+              <!-- Auth: Se connecter + S'inscrire (toujours visibles si déconnecté) -->
+              <template v-if="!isAuthenticated">
+                <li class="lh-nav-item lh-nav-auth">
+                  <NuxtLink to="/login" class="lh-link lh-link-signin">
+                    <i class="bi bi-person me-1"></i>{{ t('nav.login') }}
+                  </NuxtLink>
+                </li>
+                <li class="lh-nav-item lh-nav-auth">
+                  <NuxtLink to="/register" class="lh-link lh-link-register">
+                    {{ t('nav.register') }}
+                  </NuxtLink>
+                </li>
+              </template>
               <li v-else class="lh-nav-item lh-user-pill">
                 <NuxtLink to="/dashboard" class="lh-link lh-link-user" :title="t('nav.myAccount')">
                   <span class="lh-avatar-circle"><i class="bi bi-person-fill"></i></span>
@@ -842,6 +852,30 @@ main {
 
 .lh-link-signin:hover {
   color: #dc3545 !important;
+}
+
+/* Liens auth compacts pour tenir dans le header saturé */
+.lh-nav-auth {
+  flex-shrink: 0;
+}
+.lh-nav-auth .lh-link {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+}
+
+.lh-link-register {
+  color: #fff !important;
+  background: #dc3545;
+  font-weight: 600;
+  border-radius: 6px;
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
+  margin-left: 0.15rem;
+}
+
+.lh-link-register:hover {
+  color: #fff !important;
+  background: #b02a37;
 }
 
 /* Cart Badge */

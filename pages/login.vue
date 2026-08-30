@@ -108,13 +108,18 @@
 
                   <div class="text-center mt-4">
                     <p class="text-muted small mb-2">{{ t('auth.noAccountYet') }}</p>
-                    <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm">
-                      <i class="bi bi-plus-circle me-1"></i>{{ t('personalShopping.newRequest') }}
+                    <NuxtLink to="/register" class="btn btn-primary btn-sm mb-2">
+                      <i class="bi bi-person-plus me-1"></i>{{ t('nav.register') }}
                     </NuxtLink>
-                    <span class="mx-2 text-muted">·</span>
-                    <NuxtLink to="/import-export/tracking" class="btn btn-outline-secondary btn-sm">
-                      <i class="bi bi-upc-scan me-1"></i>{{ t('auth.trackWithoutAccount') }}
-                    </NuxtLink>
+                    <div class="mt-2">
+                      <NuxtLink to="/personal-shopping/new" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>{{ t('personalShopping.newRequest') }}
+                      </NuxtLink>
+                      <span class="mx-2 text-muted">·</span>
+                      <NuxtLink to="/import-export/tracking" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-upc-scan me-1"></i>{{ t('auth.trackWithoutAccount') }}
+                      </NuxtLink>
+                    </div>
                   </div>
 
                   <!-- Back to Home -->

@@ -1,182 +1,416 @@
 <template>
-    <div class="bg-cover" :style="{backgroundImage:`url(${bg})`, backgroundColor:'#ffe8ede', backgroundRepeat:'no-repeat'}">
-        <div id="main-wrapper">
-            <section>
-                <div class="container">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-xl-5 col-lg-7 col-md-9">
-                            <div class="authWrap">
-                                <div class="authhead">
-                                    <div class="text-center mb-4">
-                                        <NuxtLink to="/">
-                                            <img class="img-fluid" :src="logo" width="55" alt="logo"/>
-                                        </NuxtLink>
-                                    </div>
-                                </div>
-
-                                <div class="authbody d-black mb-4">
-                                    <div class="card rounded-4 p-sm-5 p-4">
-                                        <div class="card-body p-0">
-                                            <div class="text-center">
-                                                <h1 class="mb-2 fs-2">Create An Account!</h1>
-                                            </div>
-                                            
-                                            <div v-if="error" class="alert alert-danger">{{ error }}</div>
-                                            
-                                            <form class="mt-5 text-start" @submit.prevent="onSubmit">
-                                                <div class="form mb-5">
-                                                    <div class="row">
-                                                        <div class="col-md-6 mb-3">
-                                                            <div class="form-group form-border">
-                                                                <label class="form-label">Firstname *</label>
-                                                                <input v-model="form.firstname" type="text" class="form-control" placeholder="John" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <div class="form-group form-border">
-                                                                <label class="form-label">Lastname *</label>
-                                                                <input v-model="form.lastname" type="text" class="form-control" placeholder="Doe" required />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-group form-border mb-3">
-                                                        <label class="form-label">Email *</label>
-                                                        <input v-model="form.email" type="email" class="form-control" placeholder="name@example.com" required />
-                                                    </div>
-                                                    
-                                                    <div class="form-group form-border mb-3">
-                                                        <label class="form-label">Phone</label>
-                                                        <PhoneInput v-model="form.phone" country="ci" />
-                                                    </div>
-
-                                                    <div class="row">
-                                                        <div class="col-md-6 mb-3">
-                                                            <div class="form-group form-border">
-                                                                <label class="form-label">Country</label>
-                                                                <input v-model="form.country" type="text" class="form-control" placeholder="Côte d'Ivoire" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <div class="form-group form-border">
-                                                                <label class="form-label">City</label>
-                                                                <input v-model="form.city" type="text" class="form-control" placeholder="Abidjan" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-group form-border mb-3">
-                                                        <label class="form-label">Password *</label>
-                                                        <div class="position-relative">
-                                                            <input v-model="form.password" type="password" class="form-control" id="password-field" placeholder="Min. 8 characters" required minlength="8" />
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-group form-border mb-3">
-                                                        <label class="form-label">Confirm Password *</label>
-                                                        <input v-model="form.password_confirmation" type="password" class="form-control" placeholder="*********" required minlength="8" />
-                                                    </div>
-
-                                                    <p v-if="form.password !== form.password_confirmation && form.password_confirmation" class="text-danger small">
-                                                        Passwords do not match
-                                                    </p>
-
-                                                    <div class="form-group mb-4">
-                                                        <button type="submit" class="btn btn-primary full-width fw-medium" :disabled="loading || form.password !== form.password_confirmation">
-                                                            <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                                                            {{ loading ? 'Creating...' : 'Create Account' }}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="authfooter">
-                                    <div class="text-center">
-                                        <p class="text-dark mb-0">
-                                            Already have an account?
-                                            <NuxtLink to="/login" class="fw-medium text-primary"> Login Here</NuxtLink>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  <div>
+    <section
+      class="bg-cover position-relative"
+      :style="{ backgroundImage: `url(${heroBg})`, backgroundRepeat: 'no-repeat' }"
+      data-overlay="6"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-xl-7 col-lg-9 col-md-12">
+            <div class="position-relative text-center mb-5 pt-lg-0 pt-5">
+              <h1 class="text-light xl-heading">{{ t('auth.registerTitle') }}</h1>
+              <p class="text-light opacity-90 mb-3">{{ t('auth.registerSubtitle') }}</p>
+              <nav id="breadcrumbs" class="breadcrumbs light">
+                <ul>
+                  <li><NuxtLink to="/">{{ t('nav.home') }}</NuxtLink></li>
+                  <li><span>{{ t('auth.registerTitle') }}</span></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
+    </section>
+
+    <section class="py-5">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-xl-7 col-lg-8 col-md-10">
+            <div class="contactForm">
+              <div class="touch-block d-flex flex-column mb-4">
+                <h2>{{ t('auth.registerTitle') }}</h2>
+                <p class="mb-0">{{ t('auth.registerIntro') }}</p>
+              </div>
+
+              <div v-if="error" class="alert alert-danger rounded-4 mb-4" role="alert">
+                {{ error }}
+              </div>
+
+              <ul class="nav nav-tabs register-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    type="button"
+                    class="nav-link"
+                    :class="{ active: activeTab === 'infos' }"
+                    role="tab"
+                    @click="activeTab = 'infos'"
+                  >
+                    {{ t('auth.tabInfos') }}
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    type="button"
+                    class="nav-link"
+                    :class="{ active: activeTab === 'password' }"
+                    role="tab"
+                    @click="goToPasswordTab"
+                  >
+                    {{ t('auth.tabPassword') }}
+                  </button>
+                </li>
+              </ul>
+
+              <form @submit.prevent="onSubmit">
+                <!-- Tab Infos -->
+                <div v-show="activeTab === 'infos'" class="tab-pane">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('clientArea.firstname') }} *</label>
+                        <input
+                          v-model="form.firstname"
+                          type="text"
+                          class="form-control bg-light"
+                          :placeholder="t('auth.firstnamePlaceholder')"
+                          required
+                          autocomplete="given-name"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('clientArea.lastname') }} *</label>
+                        <input
+                          v-model="form.lastname"
+                          type="text"
+                          class="form-control bg-light"
+                          :placeholder="t('auth.lastnamePlaceholder')"
+                          required
+                          autocomplete="family-name"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('auth.email') }} *</label>
+                        <input
+                          v-model="form.email"
+                          type="email"
+                          class="form-control bg-light"
+                          placeholder="name@example.com"
+                          required
+                          autocomplete="email"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('clientArea.phone') }}</label>
+                        <PhoneInput v-model="form.phone" country="ci" />
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('clientArea.country') }}</label>
+                        <select
+                          v-model="selectedCountryUuid"
+                          class="form-select bg-light"
+                          :disabled="countriesStore.loading"
+                          @change="onCountryChange"
+                        >
+                          <option value="">
+                            {{
+                              countriesStore.loading
+                                ? t('auth.loadingCountries')
+                                : t('clientArea.selectCountry')
+                            }}
+                          </option>
+                          <option
+                            v-for="c in countriesList"
+                            :key="c.uuid"
+                            :value="c.uuid"
+                          >
+                            {{ c.label }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('clientArea.city') }}</label>
+                        <input
+                          v-model="form.city"
+                          type="text"
+                          class="form-control bg-light"
+                          :placeholder="t('auth.cityPlaceholder')"
+                          autocomplete="address-level2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <p class="text-muted mb-0">
+                      {{ t('auth.alreadyHaveAccount') }}
+                      <NuxtLink to="/login" class="fw-medium text-primary">
+                        {{ t('auth.loginHere') }}
+                      </NuxtLink>
+                    </p>
+                    <button type="button" class="btn btn-primary fw-medium px-4" @click="goToPasswordTab">
+                      {{ t('auth.nextTab') }}
+                      <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Tab Mot de passe -->
+                <div v-show="activeTab === 'password'" class="tab-pane">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('auth.password') }} *</label>
+                        <div class="input-group">
+                          <input
+                            v-model="form.password"
+                            :type="showPassword ? 'text' : 'password'"
+                            class="form-control bg-light"
+                            :placeholder="t('auth.passwordMinPlaceholder')"
+                            required
+                            minlength="8"
+                            autocomplete="new-password"
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                            :title="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
+                            @click="showPassword = !showPassword"
+                          >
+                            <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="form-group form-border">
+                        <label class="form-label">{{ t('auth.confirmPassword') }} *</label>
+                        <div class="input-group">
+                          <input
+                            v-model="form.password_confirmation"
+                            :type="showPasswordConfirm ? 'text' : 'password'"
+                            class="form-control bg-light"
+                            placeholder="*********"
+                            required
+                            minlength="8"
+                            autocomplete="new-password"
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            :aria-label="showPasswordConfirm ? t('auth.hidePassword') : t('auth.showPassword')"
+                            :title="showPasswordConfirm ? t('auth.hidePassword') : t('auth.showPassword')"
+                            @click="showPasswordConfirm = !showPasswordConfirm"
+                          >
+                            <i :class="showPasswordConfirm ? 'bi bi-eye' : 'bi bi-eye-slash'" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p
+                    v-if="form.password !== form.password_confirmation && form.password_confirmation"
+                    class="text-danger small mt-2 mb-0"
+                  >
+                    {{ t('auth.passwordsMismatch') }}
+                  </p>
+
+                  <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary fw-medium px-4" @click="activeTab = 'infos'">
+                      <i class="bi bi-arrow-left me-1"></i>
+                      {{ t('auth.prevTab') }}
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary fw-medium px-5"
+                      :disabled="loading || form.password !== form.password_confirmation"
+                    >
+                      <span v-if="loading" class="spinner-border spinner-border-sm me-2" />
+                      {{ loading ? t('auth.creatingAccount') : t('auth.createAccount') }}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
 import PhoneInput from '~/components/PhoneInput.vue'
-import { ref, reactive } from 'vue'
+import heroBg from '@/assets/img/title-banner.jpg'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import { useCountriesStore } from '~/stores/countries'
 import { useRouter } from 'vue-router'
 
-const bg = '/assets/img/auth-bg.png'
-const logo = '/assets/img/icon.png'
+definePageMeta({
+  layout: 'default',
+  middleware: ['guest'],
+})
 
+const { t } = useI18n()
 const authStore = useAuthStore()
+const countriesStore = useCountriesStore()
 const router = useRouter()
 
+const activeTab = ref<'infos' | 'password'>('infos')
+const showPassword = ref(false)
+const showPasswordConfirm = ref(false)
 const loading = ref(false)
 const error = ref('')
+const selectedCountryUuid = ref('')
+
+const countriesList = computed(() => countriesStore.activeCountries)
 
 const form = reactive({
-    firstname: '',
-    lastname: '',
-    email: '',
-    phone: '',
-    country: '',
-    city: '',
-    password: '',
-    password_confirmation: ''
+  firstname: '',
+  lastname: '',
+  email: '',
+  phone: '',
+  country: '',
+  city: '',
+  password: '',
+  password_confirmation: '',
+})
+
+const infosValides = () => {
+  if (!form.firstname.trim() || !form.lastname.trim() || !form.email.trim()) {
+    error.value = t('auth.infosRequired')
+    return false
+  }
+  error.value = ''
+  return true
+}
+
+const goToPasswordTab = () => {
+  if (!infosValides()) {
+    activeTab.value = 'infos'
+    return
+  }
+  activeTab.value = 'password'
+}
+
+const onCountryChange = () => {
+  const country = countriesStore.getByUuid(selectedCountryUuid.value)
+  form.country = country?.label || ''
+}
+
+onMounted(async () => {
+  await countriesStore.fetchAll()
+  // Côte d'Ivoire par défaut (comme l'indicatif téléphone CI)
+  const civ =
+    countriesStore.getByCode('ci') ||
+    countriesList.value.find((c) =>
+      /c[oô]te\s*d['’]?\s*ivoire/i.test(c.label || '') ||
+      /ivory\s*coast/i.test(c.label || '')
+    )
+  if (civ) {
+    selectedCountryUuid.value = civ.uuid
+    form.country = civ.label || ''
+  }
 })
 
 const onSubmit = async () => {
-    error.value = ''
-    
-    if (form.password !== form.password_confirmation) {
-        error.value = 'Passwords do not match'
-        return
-    }
-    
-    if (form.password.length < 8) {
-        error.value = 'Password must be at least 8 characters'
-        return
-    }
-    
-    loading.value = true
-    
-    try {
-        await authStore.register({
-            firstname: form.firstname,
-            lastname: form.lastname,
-            email: form.email,
-            password: form.password,
-            phone: form.phone || undefined,
-            country: form.country || undefined,
-            city: form.city || undefined
-        })
-        
-        // Redirect to login or show success
-        router.push('/login?registered=true')
-    } catch (err: any) {
-        error.value = err.message || 'Failed to create account'
-    } finally {
-        loading.value = false
-    }
+  error.value = ''
+
+  if (!infosValides()) {
+    activeTab.value = 'infos'
+    return
+  }
+
+  if (form.password !== form.password_confirmation) {
+    error.value = t('auth.passwordsMismatch')
+    activeTab.value = 'password'
+    return
+  }
+
+  if (form.password.length < 8) {
+    error.value = t('auth.passwordShort')
+    activeTab.value = 'password'
+    return
+  }
+
+  loading.value = true
+
+  try {
+    await authStore.register({
+      firstname: form.firstname,
+      lastname: form.lastname,
+      email: form.email,
+      password: form.password,
+      phone: form.phone || undefined,
+      country: form.country || undefined,
+      city: form.city || undefined,
+    })
+
+    router.push('/profile?registered=true')
+  } catch (err: any) {
+    error.value = err.message || t('auth.registerError')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
-<style lang="scss" scoped>
-.form-border {
-    .form-label {
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
+<style scoped>
+.form-select.bg-light {
+  height: 56px;
+  font-size: 14px;
+}
+
+.form-group .input-group .form-control {
+  height: 56px;
+}
+
+.form-group .input-group .btn {
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: var(--bs-border-color, #dee2e6);
+}
+
+.register-tabs {
+  border-bottom: 2px solid #eee;
+}
+
+.register-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: #6c757d;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+}
+
+.register-tabs .nav-link:hover {
+  color: #dc3545;
+  border-color: transparent;
+}
+
+.register-tabs .nav-link.active {
+  color: #dc3545;
+  border-bottom-color: #dc3545;
+  background: transparent;
 }
 </style>

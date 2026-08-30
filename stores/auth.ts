@@ -109,16 +109,24 @@ export const useAuthStore = defineStore('auth', {
       phone?: string
       country?: string
       city?: string
+      /** Connexion auto + profil chargé après création (rôle client). */
+      autoLogin?: boolean
     }) {
       this.loading = true
       this.error = null
 
       try {
         const api = useApi()
-        const res = await api.post('/user', userData)
+        const { autoLogin = true, ...payload } = userData
+        const res = await api.post('/user', payload)
 
         if (!res.success) {
           throw new Error(res.message || 'Erreur lors de la création du compte')
+        }
+
+        // Compte client créé avec le profil (phone, pays, ville) → session + /auth/user
+        if (autoLogin) {
+          await this.login({ email: payload.email, password: payload.password })
         }
 
         return res.data

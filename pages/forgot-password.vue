@@ -48,4 +48,9 @@
 <script setup>
     import bg from '@/assets/img/auth-bg.png'
     import logo from '@/assets/img/icon.png'
+
+    definePageMeta({
+      layout: 'auth',
+      middleware: ['guest'],
+    })
 </script>
