@@ -207,7 +207,7 @@
                 </li>
                 <li class="lh-nav-item lh-nav-auth">
                   <NuxtLink to="/register" class="lh-link lh-link-register">
-                    {{ t('nav.register') }}
+                    <i class="bi bi-person-plus me-1"></i>{{ t('nav.register') }}
                   </NuxtLink>
                 </li>
               </template>
@@ -864,18 +864,12 @@ main {
 }
 
 .lh-link-register {
-  color: #fff !important;
-  background: #dc3545;
+  color: #333 !important;
   font-weight: 600;
-  border-radius: 6px;
-  padding-top: 0.45rem !important;
-  padding-bottom: 0.45rem !important;
-  margin-left: 0.15rem;
 }
 
 .lh-link-register:hover {
-  color: #fff !important;
-  background: #b02a37;
+  color: #dc3545 !important;
 }
 
 /* Cart Badge */
