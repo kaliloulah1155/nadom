@@ -111,6 +111,12 @@ export default defineNuxtConfig({
         { name: 'keywords', content: 'import export, chine, personal shopping, expedition, visa chine, guide chine, sourcing' },
       ],
       link: [
+        // Favicon declare explicitement : le fallback implicite /favicon.ico ne
+        // resiste pas au reverse proxy en prod (et le fichier .ico contient en
+        // realite un PNG, type MIME incoherent selon le serveur).
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'shortcut icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'apple-touch-icon', href: '/favicon.png' },
         {
           rel: 'stylesheet',
           href: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css',
