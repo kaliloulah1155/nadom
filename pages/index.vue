@@ -189,25 +189,25 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-5 bg-primary position-relative overflow-hidden">
+    <section class="py-5 stats-section position-relative overflow-hidden">
       <div class="stats-pattern"></div>
       <div class="container position-relative">
         <div class="row text-center">
           <div class="col-6 col-md-3 mb-4 mb-md-0">
-            <div class="display-4 fw-bold text-white">500+</div>
-            <p class="mb-0 text-white opacity-75">{{ t('home.statsClients') }}</p>
+            <div class="display-4 fw-bold stats-value">500+</div>
+            <p class="mb-0 stats-label">{{ t('home.statsClients') }}</p>
           </div>
           <div class="col-6 col-md-3 mb-4 mb-md-0">
-            <div class="display-4 fw-bold text-white">1200+</div>
-            <p class="mb-0 text-white opacity-75">{{ t('home.statsPackages') }}</p>
+            <div class="display-4 fw-bold stats-value">1200+</div>
+            <p class="mb-0 stats-label">{{ t('home.statsPackages') }}</p>
           </div>
           <div class="col-6 col-md-3">
-            <div class="display-4 fw-bold text-white">15+</div>
-            <p class="mb-0 text-white opacity-75">{{ t('home.statsCountries') }}</p>
+            <div class="display-4 fw-bold stats-value">15+</div>
+            <p class="mb-0 stats-label">{{ t('home.statsCountries') }}</p>
           </div>
           <div class="col-6 col-md-3">
-            <div class="display-4 fw-bold text-white">5+</div>
-            <p class="mb-0 text-white opacity-75">{{ t('home.statsYears') }}</p>
+            <div class="display-4 fw-bold stats-value">5+</div>
+            <p class="mb-0 stats-label">{{ t('home.statsYears') }}</p>
           </div>
         </div>
       </div>
@@ -540,13 +540,32 @@ const recentPosts = computed(() => blogStore.getRecentPosts(4))
   pointer-events: none;
 }
 
+/* Bandeau statistiques : rose clair de la charte (meme teinte que le rouge du
+   logo, version claire deja definie dans _custom.scss). */
+.stats-section {
+  background: var(--bs-primary-bg-subtle);
+  border-top: 1px solid var(--bs-primary-border-subtle);
+  border-bottom: 1px solid var(--bs-primary-border-subtle);
+}
+
+.stats-value {
+  color: var(--bs-primary);
+}
+
+.stats-label {
+  color: #2b2b2b;
+  opacity: 0.7;
+}
+
 .stats-pattern {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  /* Motif repris dans le rouge de la marque : le blanc d'origine disparaissait
+     sur un fond clair. */
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c71f37' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   pointer-events: none;
 }
 
