@@ -23,7 +23,7 @@
             </div>
             <h5>{{ authStore.userFullName }}</h5>
             <p class="text-muted small mb-3">{{ authStore.currentUser?.email }}</p>
-            <span class="badge bg-primary-subtle text-primary">Administrateur</span>
+            <span class="badge bg-primary-subtle text-primary">{{ authStore.currentUser?.role?.label || t('admin.users.defaultRole') }}</span>
           </div>
         </div>
       </div>
