@@ -283,6 +283,13 @@ definePageMeta({
 })
 
 const { t, tm, rt, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.home.title'),
+  description: () => t('seo.home.description'),
+  ogTitle: () => t('seo.home.title'),
+  ogDescription: () => t('seo.home.description'),
+})
 const { field } = useLocaleField()
 const { categoryLabel } = useCategoryLabel()
 

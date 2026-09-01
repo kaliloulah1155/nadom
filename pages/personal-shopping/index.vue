@@ -303,6 +303,13 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.personalShopping.title'),
+  description: () => t('seo.personalShopping.description'),
+  ogTitle: () => t('seo.personalShopping.title'),
+  ogDescription: () => t('seo.personalShopping.description'),
+})
 const { label: podCategoryLabel } = usePodCategoryLabel()
 const { resolveList } = useI18nResolved()
 

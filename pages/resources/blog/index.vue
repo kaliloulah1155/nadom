@@ -64,6 +64,13 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.blog.title'),
+  description: () => t('seo.blog.description'),
+  ogTitle: () => t('seo.blog.title'),
+  ogDescription: () => t('seo.blog.description'),
+})
 const { formatDate, truncate } = useFormatters()
 const blogStore = useBlogStore()
 const config = useRuntimeConfig()

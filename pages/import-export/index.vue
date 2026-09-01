@@ -186,6 +186,13 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.importExport.title'),
+  description: () => t('seo.importExport.description'),
+  ogTitle: () => t('seo.importExport.title'),
+  ogDescription: () => t('seo.importExport.description'),
+})
 const { countryName, globalSettingSlug, field } = useLocaleField()
 const { categoryLabel } = useCategoryLabel()
 const shippingStore = useShippingStore()

@@ -308,6 +308,13 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.pricing.title'),
+  description: () => t('seo.pricing.description'),
+  ogTitle: () => t('seo.pricing.title'),
+  ogDescription: () => t('seo.pricing.description'),
+})
 const { formatCurrency } = useFormatters()
 const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()

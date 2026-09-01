@@ -195,6 +195,13 @@ import { useSiteStaticPagesStore } from '~/stores/siteStaticPages'
 import { resolveStorageAssetUrl } from '~/composables/useStorageAssetUrl'
 
 const { locale, t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.aboutUs.title'),
+  description: () => t('seo.aboutUs.description'),
+  ogTitle: () => t('seo.aboutUs.title'),
+  ogDescription: () => t('seo.aboutUs.description'),
+})
 const store = useSiteStaticPagesStore()
 
 onMounted(() => {

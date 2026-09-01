@@ -157,6 +157,18 @@ const resolveImage = (img: string | null) => {
   return resolveStorageAssetUrl(img) || 'https://placehold.co/1200x600?text=NADOM'
 }
 
+// Titre/description par article : reprend le contenu reel du post plutot que
+// le fallback generique du blog, seul moyen de differencier chaque article
+// aux yeux d'un moteur de recherche.
+useSeoMeta({
+  title: () => post.value?.[`title_${locale.value}`] || post.value?.title_fr || t('seo.blog.title'),
+  description: () => post.value?.[`excerpt_${locale.value}`] || post.value?.excerpt_fr || t('seo.blogPost.description'),
+  ogTitle: () => post.value?.[`title_${locale.value}`] || post.value?.title_fr || t('seo.blog.title'),
+  ogDescription: () => post.value?.[`excerpt_${locale.value}`] || post.value?.excerpt_fr || t('seo.blogPost.description'),
+  ogType: 'article',
+  ogImage: () => resolveImage(post.value?.image || null),
+})
+
 const resolveAvatar = (avatar: string | null, name: string | null) => {
   if (avatar) return resolveStorageAssetUrl(avatar)
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Author')}&background=random&color=fff`

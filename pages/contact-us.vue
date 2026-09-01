@@ -191,6 +191,13 @@ import { CONTACT_FORM_LIMITS, sanitizePlainText } from '~/composables/usePublicC
 const LIMITS = CONTACT_FORM_LIMITS
 
 const { locale, t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.contactUs.title'),
+  description: () => t('seo.contactUs.description'),
+  ogTitle: () => t('seo.contactUs.title'),
+  ogDescription: () => t('seo.contactUs.description'),
+})
 const { success, error } = useNotification()
 
 const sending = ref(false)

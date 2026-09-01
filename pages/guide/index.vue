@@ -405,6 +405,13 @@ definePageMeta({
 })
 
 const { t, te, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.guide.title'),
+  description: () => t('seo.guide.description'),
+  ogTitle: () => t('seo.guide.title'),
+  ogDescription: () => t('seo.guide.description'),
+})
 const { field } = useLocaleField()
 const { categoryLabel } = useCategoryLabel()
 const { resolveList } = useI18nResolved()

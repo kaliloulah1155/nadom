@@ -51,6 +51,15 @@
 <script setup>
 import { ref } from 'vue';
 
+const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.privacyPolicy.title'),
+  description: () => t('seo.privacyPolicy.description'),
+  ogTitle: () => t('seo.privacyPolicy.title'),
+  ogDescription: () => t('seo.privacyPolicy.description'),
+})
+
 const policyData = ref([
     {
         title:'Google Analytics',

@@ -209,6 +209,13 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.calculator.title'),
+  description: () => t('seo.calculator.description'),
+  ogTitle: () => t('seo.calculator.title'),
+  ogDescription: () => t('seo.calculator.description'),
+})
 const runtimeConfig = useRuntimeConfig()
 const shippingStore = useShippingStore()
 const countriesStore = useCountriesStore()

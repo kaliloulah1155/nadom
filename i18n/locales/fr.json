@@ -29,6 +29,59 @@
     "logout": "Déconnexion",
     "greeting": "Bonjour, {name}"
   },
+  "seo": {
+    "home": {
+      "title": "Import-Export Chine, Personal Shopping & Visa",
+      "description": "NADOM accompagne vos achats, vos expeditions (fret aerien et maritime) et vos demarches visa entre la Chine et l'Afrique. Devis en ligne, suivi en temps reel."
+    },
+    "aboutUs": {
+      "title": "Qui sommes-nous",
+      "description": "Decouvrez NADOM, votre partenaire pour l'import-export, le personal shopping et les services visa entre la Chine et l'Afrique."
+    },
+    "contactUs": {
+      "title": "Contact",
+      "description": "Une question sur une expedition, un achat ou un visa ? Contactez l'equipe NADOM, nous vous repondons rapidement."
+    },
+    "faq": {
+      "title": "Questions frequentes",
+      "description": "Retrouvez les reponses aux questions les plus posees sur nos services d'import-export, personal shopping et visa Chine."
+    },
+    "guide": {
+      "title": "Guides & Accompagnement en Chine",
+      "description": "Nos guides francophones vous accompagnent lors de vos voyages d'affaires en Chine. Visites de marches, usines et negociations."
+    },
+    "importExport": {
+      "title": "Fret Chine-Afrique : Aerien & Maritime",
+      "description": "Expedition de vos marchandises depuis la Chine vers l'Afrique. Fret aerien et maritime, consolidation de colis, dedouanement."
+    },
+    "calculator": {
+      "title": "Calculateur de tarifs d'expedition",
+      "description": "Estimez en ligne le cout d'expedition de vos marchandises depuis la Chine avec le calculateur NADOM."
+    },
+    "personalShopping": {
+      "title": "Personal Shopping en Chine",
+      "description": "Trouvez n'importe quel produit en Chine sans vous deplacer. Nos agents sur place recherchent, negocient et expedient pour vous."
+    },
+    "privacyPolicy": {
+      "title": "Politique de confidentialite",
+      "description": "Consultez la politique de confidentialite de NADOM : collecte, usage et protection de vos donnees personnelles."
+    },
+    "blog": {
+      "title": "Blog & Actualites",
+      "description": "Conseils, guides et actualites sur l'import-export avec la Chine."
+    },
+    "blogPost": {
+      "description": "Article NADOM sur l'import-export, le personal shopping ou les services visa avec la Chine."
+    },
+    "pricing": {
+      "title": "Nos Tarifs",
+      "description": "Tarifs transparents pour tous nos services d'import-export, personal shopping et visa Chine."
+    },
+    "visa": {
+      "title": "Visa Chine : Affaires, Tourisme, Etudes",
+      "description": "Assistance complete pour l'obtention de votre visa chinois. Visa affaires, tourisme, etudes ou travail."
+    }
+  },
   "home": {
     "heroTitle": "Votre partenaire Import-Export avec la Chine",
     "heroSubtitle": "Personal shopping, expedition de marchandises, visa et accompagnement professionnel",

@@ -90,6 +90,13 @@ import { ref, computed } from 'vue'
 import { useBlogStore } from '~/stores/blog'
 
 const { t, locale } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.faq.title'),
+  description: () => t('seo.faq.description'),
+  ogTitle: () => t('seo.faq.title'),
+  ogDescription: () => t('seo.faq.description'),
+})
 const blogStore = useBlogStore()
 
 const loading = ref(true)

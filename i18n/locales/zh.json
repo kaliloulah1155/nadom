@@ -29,6 +29,59 @@
     "logout": "退出登录",
     "greeting": "您好，{name}"
   },
+  "seo": {
+    "home": {
+      "title": "中国进出口、代购与签证服务",
+      "description": "NADOM 为您处理在中国与非洲之间的采购、货运（空运与海运）及签证手续。在线报价，实时跟踪。"
+    },
+    "aboutUs": {
+      "title": "关于我们",
+      "description": "了解 NADOM，您在中国与非洲之间进出口、代购和签证服务的合作伙伴。"
+    },
+    "contactUs": {
+      "title": "联系我们",
+      "description": "有关于货运、采购或签证的问题？联系 NADOM 团队，我们会尽快回复您。"
+    },
+    "faq": {
+      "title": "常见问题",
+      "description": "查找关于我们的进出口、代购和中国签证服务的常见问题解答。"
+    },
+    "guide": {
+      "title": "中国向导与陪同服务",
+      "description": "我们的法语向导在您的中国商务旅行中为您提供陪同：市场、工厂参观及谈判协助。"
+    },
+    "importExport": {
+      "title": "中非货运：空运与海运",
+      "description": "将您的货物从中国运往非洲。空运和海运、拼箱集运、清关服务。"
+    },
+    "calculator": {
+      "title": "运费计算器",
+      "description": "使用 NADOM 计算器在线估算您从中国发货的运费。"
+    },
+    "personalShopping": {
+      "title": "中国代购服务",
+      "description": "无需亲自前往中国即可购买任何产品。我们的当地代理为您寻找、议价并发货。"
+    },
+    "privacyPolicy": {
+      "title": "隐私政策",
+      "description": "查看 NADOM 的隐私政策：个人数据的收集、使用和保护方式。"
+    },
+    "blog": {
+      "title": "博客与资讯",
+      "description": "关于中国进出口的建议、指南和最新资讯。"
+    },
+    "blogPost": {
+      "description": "NADOM 关于中国进出口、代购或签证服务的文章。"
+    },
+    "pricing": {
+      "title": "服务价格",
+      "description": "我们所有进出口、代购和中国签证服务的透明价格。"
+    },
+    "visa": {
+      "title": "中国签证：商务、旅游、留学",
+      "description": "为您获得中国签证提供全方位协助。商务、旅游、留学或工作签证。"
+    }
+  },
   "home": {
     "heroTitle": "您与中国进出口的合作伙伴",
     "heroSubtitle": "代购、货运、签证和专业陪同服务",

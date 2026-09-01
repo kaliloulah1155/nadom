@@ -306,6 +306,13 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.visa.title'),
+  description: () => t('seo.visa.description'),
+  ogTitle: () => t('seo.visa.title'),
+  ogDescription: () => t('seo.visa.description'),
+})
 const { resolveList } = useI18nResolved()
 
 const VISA_PROCESS_ICONS = [
