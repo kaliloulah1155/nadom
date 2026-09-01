@@ -49,7 +49,19 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
+  modules: ['@pinia/nuxt', '@nuxtjs/i18n', 'nuxt-site-config', '@nuxtjs/sitemap'],
+
+  // Base SEO : URL de reference pour le sitemap et les liens canoniques generes
+  // par les modules. nadom.co reste la seule adresse indexable (voir
+  // server/middleware/seo-noindex-guard.ts pour rc.nadom.co et /admin).
+  site: {
+    url: 'https://nadom.co',
+    name: 'NADOM',
+  },
+
+  sitemap: {
+    exclude: ['/admin/**', '/login', '/register', '/dashboard/**', '/profile', '/paiement/**', '/error'],
+  },
 
   i18n: {
     locales: [
