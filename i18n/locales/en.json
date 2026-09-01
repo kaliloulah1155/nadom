@@ -1929,7 +1929,19 @@
       "noSettings": "No settings configured",
       "keyField": "Key (kkey)",
       "valueHint": "Enter value (emojis OK: 🎉 ✨ 🚀)",
-      "purpose": "What is this setting for?"
+      "purpose": "What is this setting for?",
+      "settingsConfigured": "{n} settings configured",
+      "slug": "Slug",
+      "valueField": "Value (vvalue)",
+      "descriptionField": "Description",
+      "statusField": "Status",
+      "keyLocked": "Key not editable",
+      "slugLocked": "Slug not editable (referenced by the marquee on the homepage)",
+      "editSetting": "Edit setting",
+      "defaultMarqueeDescription": "Scrolling text shown on the homepage",
+      "created": "Setting created",
+      "updated": "Setting updated",
+      "deleted": "Setting deleted"
     },
     "activityLogs": {
       "title": "Activity log",

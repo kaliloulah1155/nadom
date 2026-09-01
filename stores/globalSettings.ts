@@ -30,7 +30,8 @@ export const useGlobalSettingsStore = defineStore('globalSettings', {
   getters: {
     getValue: (state) => (slug: string, fallback = '') => {
       const s = state.bySlug[slug] || state.items.find(i => i.slug === slug)
-      return s?.vvalue ?? s?.value ?? fallback
+      if (!s || Number(s.status) === 0) return fallback
+      return s.vvalue ?? s.value ?? fallback
     },
     getDescription: (state) => (slug: string, fallback = '') => {
       const s = state.bySlug[slug] || state.items.find(i => i.slug === slug)

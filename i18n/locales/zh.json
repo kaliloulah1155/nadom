@@ -1929,7 +1929,19 @@
       "noSettings": "未配置参数",
       "keyField": "键 (kkey)",
       "valueHint": "输入值（支持表情：🎉 ✨ 🚀）",
-      "purpose": "此参数的用途？"
+      "purpose": "此参数的用途？",
+      "settingsConfigured": "已配置 {n} 个参数",
+      "slug": "Slug",
+      "valueField": "值 (vvalue)",
+      "descriptionField": "描述",
+      "statusField": "状态",
+      "keyLocked": "键不可修改",
+      "slugLocked": "Slug 不可修改（首页滚动条引用此项）",
+      "editSetting": "编辑参数",
+      "defaultMarqueeDescription": "首页展示的滚动文字",
+      "created": "参数已创建",
+      "updated": "参数已更新",
+      "deleted": "参数已删除"
     },
     "activityLogs": {
       "title": "活动日志",

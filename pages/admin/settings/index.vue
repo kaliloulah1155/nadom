@@ -4,14 +4,14 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
       <div>
         <h4 class="mb-1">{{ t('admin.settings.title') }}</h4>
-        <p class="text-muted mb-0">{{ items.length }} paramètres configurés</p>
+        <p class="text-muted mb-0">{{ t('admin.settings.settingsConfigured', { n: items.length }) }}</p>
       </div>
       <div class="d-flex gap-2">
         <button v-can="['update', 'global-settings']" class="btn btn-outline-primary" @click="openMarqueeEditor">
           <i class="bi bi-megaphone me-2"></i>{{ t('admin.settings.editMarquee') }}
         </button>
         <button v-can="['create', 'global-settings']" class="btn btn-primary" @click="openModal()">
-          <i class="bi bi-plus-lg me-2"></i>Nouveau paramètre
+          <i class="bi bi-plus-lg me-2"></i>{{ t('admin.settings.newSetting') }}
         </button>
       </div>
     </div>
@@ -21,7 +21,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
           <div class="card-body">
-            <small class="text-muted d-block">Total paramètres</small>
+            <small class="text-muted d-block">{{ t('admin.settings.totalSettings') }}</small>
             <h3 class="fw-bold mb-0">{{ items.length }}</h3>
           </div>
         </div>
@@ -29,7 +29,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
           <div class="card-body">
-            <small class="text-muted d-block">Actifs</small>
+            <small class="text-muted d-block">{{ t('admin.common.active') }}</small>
             <h3 class="fw-bold mb-0 text-success">{{ activeCount }}</h3>
           </div>
         </div>
@@ -37,7 +37,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 border-start border-warning border-4">
           <div class="card-body">
-            <small class="text-muted d-block">Marquee</small>
+            <small class="text-muted d-block">{{ t('admin.settings.marquee') }}</small>
             <h6 class="fw-bold mb-0 text-truncate" :title="marqueeText">{{ marqueeText || '—' }}</h6>
           </div>
         </div>
@@ -45,7 +45,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100 border-start border-info border-4">
           <div class="card-body">
-            <small class="text-muted d-block">Inactifs</small>
+            <small class="text-muted d-block">{{ t('admin.common.inactive') }}</small>
             <h3 class="fw-bold mb-0 text-muted">{{ items.length - activeCount }}</h3>
           </div>
         </div>
@@ -63,19 +63,19 @@
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th>Clé</th>
-                <th>Slug</th>
-                <th>Valeur</th>
-                <th>Description</th>
-                <th>Statut</th>
-                <th class="text-end">Actions</th>
+                <th>{{ t('admin.settings.key') }}</th>
+                <th>{{ t('admin.settings.slug') }}</th>
+                <th>{{ t('admin.settings.value') }}</th>
+                <th>{{ t('admin.settings.descriptionField') }}</th>
+                <th>{{ t('admin.settings.statusField') }}</th>
+                <th class="text-end">{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="items.length === 0">
                 <td colspan="6" class="text-center py-5 text-muted">
                   <i class="bi bi-gear fs-1 d-block mb-2"></i>
-                  Aucun paramètre configuré
+                  {{ t('admin.settings.noSettings') }}
                 </td>
               </tr>
               <tr v-for="s in items" :key="s.uuid">
@@ -85,7 +85,7 @@
                 <td class="text-muted small text-truncate" style="max-width: 200px;" :title="s.description || ''">{{ s.description || '—' }}</td>
                 <td>
                   <span :class="['badge', Number(s.status) === 1 ? 'bg-success' : 'bg-secondary']">
-                    {{ Number(s.status) === 1 ? 'Actif' : 'Inactif' }}
+                    {{ Number(s.status) === 1 ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
                 </td>
                 <td class="text-end">
@@ -110,14 +110,14 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier' : 'Nouveau' }} paramètre</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.settings.editSetting') : t('admin.settings.newSetting') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Clé (kkey) *</label>
+                  <label class="form-label">{{ t('admin.settings.keyField') }} *</label>
                   <input
                     v-model="form.kkey"
                     type="text"
@@ -126,10 +126,10 @@
                     required
                     :disabled="!!editing"
                   />
-                  <small v-if="editing" class="text-muted">Clé non modifiable</small>
+                  <small v-if="editing" class="text-muted">{{ t('admin.settings.keyLocked') }}</small>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Slug *</label>
+                  <label class="form-label">{{ t('admin.settings.slug') }} *</label>
                   <input
                     v-model="form.slug"
                     type="text"
@@ -138,29 +138,29 @@
                     required
                     :disabled="marqueeSlugLocked"
                   />
-                  <small v-if="marqueeSlugLocked" class="text-muted">Slug non modifiable (référence du marquee sur l'accueil)</small>
+                  <small v-if="marqueeSlugLocked" class="text-muted">{{ t('admin.settings.slugLocked') }}</small>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Valeur (vvalue) *</label>
+                  <label class="form-label">{{ t('admin.settings.valueField') }} *</label>
                   <WysiwygEditor
                     v-model="form.vvalue"
                     height="160px"
-                    placeholder="Saisissez la valeur (emojis OK : 🎉 ✨ 🚀)"
+                    :placeholder="t('admin.settings.valueHint')"
                   />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Description</label>
+                  <label class="form-label">{{ t('admin.settings.descriptionField') }}</label>
                   <WysiwygEditor
                     v-model="form.description"
                     height="120px"
-                    placeholder="À quoi sert ce paramètre ?"
+                    :placeholder="t('admin.settings.purpose')"
                   />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.settings.statusField') }}</label>
                   <select v-model.number="form.status" class="form-select">
-                    <option :value="1">Actif</option>
-                    <option :value="0">Inactif</option>
+                    <option :value="1">{{ t('admin.common.active') }}</option>
+                    <option :value="0">{{ t('admin.common.inactive') }}</option>
                   </select>
                 </div>
               </div>
@@ -169,7 +169,7 @@
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                Enregistrer
+                {{ t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -250,7 +250,7 @@ const openMarqueeEditor = () => {
     resetForm()
     form.kkey = 'HOME_MARQUEE'
     form.slug = 'home_marquee'
-    form.description = "Texte défilant affiché sur la page d'accueil"
+    form.description = t('admin.settings.defaultMarqueeDescription')
     modalInstance?.show()
   }
 }
@@ -265,7 +265,7 @@ const save = async () => {
         description: form.description,
         status: form.status,
       } as any)
-      success('Paramètre mis à jour')
+      success(t('admin.settings.updated'))
     } else {
       await settingsStore.create({
         kkey: form.kkey,
@@ -274,24 +274,24 @@ const save = async () => {
         description: form.description,
         status: form.status,
       } as any)
-      success('Paramètre créé')
+      success(t('admin.settings.created'))
     }
     modalInstance?.hide()
     await settingsStore.fetchAll()
   } catch (err: any) {
-    notifyError(err.message || 'Erreur lors de la sauvegarde')
+    notifyError(err.message || t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
 }
 
 const confirmDelete = async (s: any) => {
-  if (!await useSwal().confirmDelete(`Supprimer le paramètre "${s.kkey}" ?`)) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteSetting', { key: s.kkey }))) return
   try {
     await settingsStore.remove(s.uuid)
-    success('Paramètre supprimé')
+    success(t('admin.settings.deleted'))
   } catch (err: any) {
-    notifyError(err.message || 'Erreur lors de la suppression')
+    notifyError(err.message || t('admin.messages.deleteError'))
   }
 }
 

@@ -1926,7 +1926,19 @@
       "noSettings": "Aucun paramètre configuré",
       "keyField": "Clé (kkey)",
       "valueHint": "Saisissez la valeur (emojis OK : 🎉 ✨ 🚀)",
-      "purpose": "À quoi sert ce paramètre ?"
+      "purpose": "À quoi sert ce paramètre ?",
+      "settingsConfigured": "{n} paramètres configurés",
+      "slug": "Slug",
+      "valueField": "Valeur (vvalue)",
+      "descriptionField": "Description",
+      "statusField": "Statut",
+      "keyLocked": "Clé non modifiable",
+      "slugLocked": "Slug non modifiable (référence du marquee sur l'accueil)",
+      "editSetting": "Modifier le paramètre",
+      "defaultMarqueeDescription": "Texte défilant affiché sur la page d'accueil",
+      "created": "Paramètre créé",
+      "updated": "Paramètre mis à jour",
+      "deleted": "Paramètre supprimé"
     },
     "activityLogs": {
       "title": "Journal d'activité",
