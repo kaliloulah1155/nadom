@@ -142,7 +142,7 @@
                   <small class="text-muted">{{ formatDate((step as any).sdate ?? step.date) }}</small>
                 </div>
                 <div class="small fw-medium text-primary mb-1">{{ step.location }}</div>
-                <div class="small text-muted mb-0 description-container" v-html="step.description"></div>
+                <div class="small text-muted mb-0 description-container" v-html="sanitizeHtml(step.description)"></div>
               </div>
             </div>
           </div>

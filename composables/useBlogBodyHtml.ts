@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify'
+
 /**
  * Extrait l'identifiant vidéo YouTube d'une URL (watch, youtu.be, shorts, embed).
  */
@@ -75,6 +77,18 @@ export function enrichBlogBodyHtml(html: string): string {
       return id ? embedIframe(id) : full
     }
   )
+
+  // Le retrait de <script> ci-dessus ne bloque pas les vecteurs XSS reels d'un
+  // v-html (attributs onerror/onload, javascript: dans href/src) : DOMPurify
+  // neutralise tout ca. Execute cote client uniquement (DOMPurify a besoin du
+  // DOM) ; en SSR/mode build, l'appel est un no-op transparent (voir doc
+  // DOMPurify) donc sans risque ici en mode SPA (ssr:false).
+  if (typeof window !== 'undefined') {
+    h = DOMPurify.sanitize(h, {
+      ADD_TAGS: ['iframe'],
+      ADD_ATTR: ['allow', 'allowfullscreen', 'referrerpolicy', 'frameborder', 'target'],
+    })
+  }
 
   return h
 }

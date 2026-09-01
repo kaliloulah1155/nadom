@@ -265,7 +265,7 @@
                   :class="{ show: idx === 0 }"
                   data-bs-parent="#pricingFaq"
                 >
-                  <div class="accordion-body" v-html="faq[`answer_${locale}`] || faq.answer_fr"></div>
+                  <div class="accordion-body" v-html="sanitizeHtml(faq[`answer_${locale}`] || faq.answer_fr)"></div>
                 </div>
               </div>
             </div>

@@ -50,7 +50,7 @@
                 <small class="text-muted">{{ service.slug }}</small>
               </div>
             </div>
-            <p v-if="service.description" class="text-muted small mb-3" v-html="service.description"></p>
+            <p v-if="service.description" class="text-muted small mb-3" v-html="sanitizeHtml(service.description)"></p>
             <h4 class="text-primary mb-0">
               {{ formatCurrency(parseServiceValue(service.value).amount, parseServiceValue(service.value).currency) }}
             </h4>

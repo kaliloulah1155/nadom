@@ -318,7 +318,7 @@
                 <div class="col-md-8">
                   <h5>{{ request.title }}</h5>
                   <span class="badge bg-secondary mb-3">{{ request.category }}</span>
-                  <div class="text-muted request-description" v-html="request.description"></div>
+                  <div class="text-muted request-description">{{ request.description }}</div>
                   <div class="row g-2">
                     <div class="col-6">
                       <small class="text-muted d-block">{{ t('admin.requests.detail.quantity') }}</small>
@@ -1369,5 +1369,7 @@ const deleteRequest = async () => {
 
 .request-description {
   line-height: 1.6;
+  /* Champ texte libre (pas de HTML) : preserve les retours a la ligne saisis. */
+  white-space: pre-line;
 }
 </style>

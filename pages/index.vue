@@ -126,11 +126,11 @@
                   <i :class="service.icon" class="fs-1 text-primary"></i>
                 </div>
                 <h5 class="card-title">{{ service.name }}</h5>
-                <div class="card-text text-muted service-desc mb-3" v-html="service.descriptionHtml"></div>
+                <div class="card-text text-muted service-desc mb-3" v-html="sanitizeHtml(service.descriptionHtml)"></div>
                 <ul class="list-unstyled mb-0">
                   <li v-for="(featureHtml, idx) in service.featureBlocks" :key="idx" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    <small class="service-feature-line d-inline-block" v-html="featureHtml"></small>
+                    <small class="service-feature-line d-inline-block" v-html="sanitizeHtml(featureHtml)"></small>
                   </li>
                 </ul>
               </div>

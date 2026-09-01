@@ -133,7 +133,7 @@
                 </div>
 
                 <h6 class="fw-medium">{{ t('clientRequest.description') }}</h6>
-                <div class="text-muted request-description" v-html="request.description"></div>
+                <div class="text-muted request-description">{{ request.description }}</div>
 
                 <div class="row g-3 mt-3 stat-row">
                   <div class="col-6 col-md-3">
@@ -550,5 +550,6 @@ const addRequestToCart = () => {
 
 .request-description {
   line-height: 1.7;
+  white-space: pre-line;
 }
 </style>

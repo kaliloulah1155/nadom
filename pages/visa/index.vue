@@ -78,7 +78,7 @@
               </div>
 
               <h5 class="card-title fw-bold mb-2">{{ visa[`name_${locale}`] || visa.name_fr || visa.type }}</h5>
-              <div class="text-muted small mb-3 visa-desc" v-html="visa[`description_${locale}`] || visa.description_fr || ''"></div>
+              <div class="text-muted small mb-3 visa-desc" v-html="sanitizeHtml(visa[`description_${locale}`] || visa.description_fr || '')"></div>
 
               <!-- Info Grid -->
               <div class="row g-2 mb-3">

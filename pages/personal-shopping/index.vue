@@ -160,7 +160,7 @@
                 <div class="card-body">
                   <h6 class="fw-bold mb-1">{{ prod[`name_${locale}`] || prod.name_fr }}</h6>
                   <p class="text-primary fw-bold mb-2">{{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</p>
-                  <p class="text-muted small mb-0" v-html="prod[`description_${locale}`] || prod.description_fr || ''"></p>
+                  <p class="text-muted small mb-0" v-html="sanitizeHtml(prod[`description_${locale}`] || prod.description_fr || '')"></p>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0">
                   <button class="btn btn-outline-primary w-100" @click="addToCart(prod)">

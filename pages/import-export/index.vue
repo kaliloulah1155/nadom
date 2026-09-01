@@ -64,7 +64,7 @@
                 <div
                   v-if="field(mode, 'description')"
                   class="shipping-mode-desc text-muted text-start"
-                  v-html="field(mode, 'description')"
+                  v-html="sanitizeHtml(field(mode, 'description'))"
                 ></div>
               </div>
             </div>

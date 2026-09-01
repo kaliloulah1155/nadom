@@ -83,7 +83,7 @@
                 <div class="text-muted" style="font-size:.72rem;">client paie {{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</div>
               </td>
               <td>
-                <div class="text-muted small text-truncate" style="max-width: 250px;" v-html="prod.description_fr || prod.description_en || ''"></div>
+                <div class="text-muted small text-truncate" style="max-width: 250px;" v-html="sanitizeHtml(prod.description_fr || prod.description_en || '')"></div>
               </td>
               <td class="text-end px-4">
                 <div class="d-flex justify-content-end gap-2">

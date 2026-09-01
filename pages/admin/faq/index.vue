@@ -37,7 +37,7 @@
                 </td>
                 <td>
                   <div class="fw-medium mb-1">{{ faq.question_fr }}</div>
-                  <small class="text-muted d-block text-truncate" style="max-width: 500px;" v-html="truncate(faq.answer_fr || '', 100)">
+                  <small class="text-muted d-block text-truncate" style="max-width: 500px;" v-html="sanitizeHtml(truncate(faq.answer_fr || '', 100))">
                   </small>
                 </td>
                 <td>

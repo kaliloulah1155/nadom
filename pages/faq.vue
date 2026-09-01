@@ -67,7 +67,7 @@
                         class="accordion-collapse collapse"
                         :data-bs-parent="`#faqGroup${gIdx}`"
                       >
-                        <div class="accordion-body" v-html="item[`answer_${locale}`] || item.answer_fr"></div>
+                        <div class="accordion-body" v-html="sanitizeHtml(item[`answer_${locale}`] || item.answer_fr)"></div>
                       </div>
                     </div>
                   </div>

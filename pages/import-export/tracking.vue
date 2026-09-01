@@ -173,7 +173,7 @@
                     </div>
                     <div v-if="linkedRequest.description" class="col-12">
                       <small class="text-muted d-block">{{ t('tracking.description') }}</small>
-                      <div class="mb-0 request-description" v-html="linkedRequest.description"></div>
+                      <div class="mb-0 request-description" style="white-space: pre-line">{{ linkedRequest.description }}</div>
                     </div>
                     <div v-if="linkedRequest.images && linkedRequest.images.length > 0" class="col-12">
                       <small class="text-muted d-block mb-2">{{ t('tracking.projectImages') }}</small>
@@ -213,7 +213,7 @@
                           <i :class="formatShipmentStatus(event.status).icon" class="me-2"></i>
                           {{ formatShipmentStatus(event.status).label }}
                         </h6>
-                        <div class="request-description" v-html="event.description"></div>
+                        <div class="request-description" v-html="sanitizeHtml(event.description)"></div>
                         <p class="text-muted small mb-0">{{ event.location }}</p>
                       </div>
                       <small class="text-muted">{{ formatDateShort(event.sdate || event.date) }}</small>
