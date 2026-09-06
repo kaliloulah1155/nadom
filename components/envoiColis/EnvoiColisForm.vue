@@ -64,11 +64,6 @@
             <input v-model="form.originCity" type="text" class="form-control form-control-lg" />
           </div>
         </div>
-        <div class="mb-4">
-          <label class="form-label fw-medium">{{ t('envoiColis.form.originAddress') }}</label>
-          <input v-model="form.originAddress" type="text" class="form-control form-control-lg" :placeholder="t('envoiColis.form.originAddressPlaceholder')" />
-        </div>
-
         <!-- Expéditeur -->
         <h6 class="text-uppercase text-muted small fw-bold mb-3 mt-4">
           <i class="bi bi-person-badge me-1"></i>{{ t('envoiColis.form.senderSection') }}
@@ -121,11 +116,6 @@
           </select>
           <div v-if="errors.destinationId" class="invalid-feedback">{{ errors.destinationId }}</div>
         </div>
-        <div class="mb-4">
-          <label class="form-label fw-medium">{{ t('envoiColis.form.destinationAddress') }}</label>
-          <input v-model="form.destinationAddress" type="text" class="form-control form-control-lg" :placeholder="t('envoiColis.form.destinationAddressPlaceholder')" />
-        </div>
-
         <!-- Destinataire -->
         <h6 class="text-uppercase text-muted small fw-bold mb-3 mt-4">
           <i class="bi bi-person-check me-1"></i>{{ t('envoiColis.form.recipientSection') }}
@@ -406,8 +396,6 @@
             <div class="col-6 text-end fw-medium">{{ form.originCity || form.originCountry ? `${form.originCity || ''}${form.originCity && form.originCountry ? ', ' : ''}${form.originCountry || ''}` : '—' }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.destination') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ recapDestinationLabel }}</div>
-            <div v-if="form.destinationAddress" class="col-6"><span class="text-muted">{{ t('envoiColis.form.destinationAddress') }}</span></div>
-            <div v-if="form.destinationAddress" class="col-6 text-end fw-medium">{{ form.destinationAddress }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.shippingMode') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ recapShippingModeLabel }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.ctnCount') }}</span></div>
