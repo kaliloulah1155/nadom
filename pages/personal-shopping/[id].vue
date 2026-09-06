@@ -335,7 +335,6 @@ import { useNotification } from '~/composables/useNotification'
 definePageMeta({
   layout: 'client',
   // Les utilisateurs back-office sont renvoyés vers leur équivalent admin.
-  middleware: 'client-only',
 })
 
 const route = useRoute()

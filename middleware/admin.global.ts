@@ -25,7 +25,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!authStore.hasBackofficeAccess) {
     // Un client qui tente une URL /admin est renvoyé vers SON espace, et non vers
     // l'accueil : il y retrouve son contexte, et la séparation des deux interfaces
-    // reste lisible (le pendant de ce garde-fou est le middleware `client-only`,
+    // reste lisible (le pendant de ce garde-fou est le middleware global `clientOnly.global.ts`,
     // qui écarte les utilisateurs back-office de l'espace client).
     if (authStore.isAuthenticated) {
       return navigateTo('/dashboard')

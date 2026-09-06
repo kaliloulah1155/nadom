@@ -103,7 +103,7 @@ import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
   layout: 'client',
-  middleware: ['auth', 'client-only']
+  middleware: ['auth']
 })
 
 const { t } = useI18n()

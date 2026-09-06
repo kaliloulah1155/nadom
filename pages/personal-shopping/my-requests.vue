@@ -84,7 +84,7 @@ import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'client',
-  middleware: ['auth', 'client-only'],
+  middleware: ['auth'],
 })
 
 const { t } = useI18n()

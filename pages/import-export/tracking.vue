@@ -369,7 +369,7 @@ import { useFormatters } from '~/composables/useFormatters'
 
 definePageMeta({
   layout: 'client',
-  middleware: 'client-only'
+  // Les utilisateurs back-office sont renvoyes vers leur equivalent admin.
 })
 
 const { t, locale } = useI18n()

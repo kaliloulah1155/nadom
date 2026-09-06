@@ -6,7 +6,7 @@
        La barre n'apparaît que pour un client connecté : ces pages restent
        ouvertes aux visiteurs, à qui une barre contenant « Déconnexion » n'aurait
        aucun sens. Les utilisateurs back-office, eux, n'ont pas à se trouver ici
-       (middleware `client-only`). -->
+       (middleware global `clientOnly.global.ts`). -->
   <NuxtLayout name="default">
     <div v-if="showSidebar" class="client-area py-4 py-lg-5">
       <div class="container">

@@ -32,7 +32,6 @@ import EnvoiColisForm from '~/components/envoiColis/EnvoiColisForm.vue'
 definePageMeta({
   layout: 'client',
   // Les utilisateurs back-office sont renvoyés vers leur équivalent admin.
-  middleware: 'client-only',
 })
 
 const { t } = useI18n()

@@ -401,7 +401,7 @@ import { useNotification } from '~/composables/useNotification'
 
 definePageMeta({
   layout: 'client',
-  middleware: 'client-only'
+  // Les utilisateurs back-office sont renvoyes vers leur equivalent admin.
 })
 
 const { t, te, locale } = useI18n()

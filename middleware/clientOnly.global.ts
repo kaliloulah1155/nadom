@@ -2,20 +2,29 @@ import { useAuthStore } from '~/stores/auth'
 import { getToken } from '~/composables/useApi'
 
 /**
- * Écarte les utilisateurs back-office (admin, agent, super-admin) des pages
- * destinées aux clients.
+ * Écarte les utilisateurs back-office (admin, agent, super-admin) de TOUTE
+ * page cliente, pas seulement celles ayant un équivalent back-office direct.
  *
- * Ces pages disposent toutes d'un équivalent côté back-office — les demandes se
- * créent désormais dans une modale depuis « Demandes », et se consultent sur la
- * fiche admin. Un membre de l'équipe n'a donc aucune raison de passer par
- * l'interface client : il y perdrait le contexte de son travail, et la demande
- * qu'il y créerait lui serait rattachée comme s'il en était le client.
+ * Auparavant applique uniquement aux pages listees dans `equivalences` via
+ * `definePageMeta({ middleware: ['client-only'] })` : une fois connecte, un
+ * membre de l'equipe pouvait encore se promener librement sur l'accueil, le
+ * blog, le calculateur, etc. — rien ne l'en empechait tant que la page ne
+ * figurait pas dans cette liste explicite. Middleware global desormais : tant
+ * qu'il ne s'est pas deconnecte, un compte back-office est toujours renvoye
+ * vers son espace, sur n'importe quelle route hors /admin.
  *
- * Les visiteurs et les clients ne sont jamais concernés : sans jeton, ou sans
- * rôle back-office, la page s'affiche normalement.
+ * Les visiteurs et les clients ne sont jamais concernes : sans jeton, ou sans
+ * role back-office, la page s'affiche normalement.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
   if (typeof window === 'undefined') return
+
+  // L'espace back-office et les pages d'authentification restent hors champ :
+  // une regle globale qui les redirigerait aussi produirait une boucle.
+  const horsChamp = ['/admin', '/login', '/register', '/forgot-password']
+  if (horsChamp.some((p) => to.path === p || to.path.startsWith(p + '/'))) {
+    return
+  }
 
   // Pas de session : c'est un visiteur, il a toute sa place ici.
   if (!getToken()) return
@@ -27,7 +36,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!authStore.hasBackofficeAccess) return
 
-  // Chaque page client renvoie vers son pendant back-office.
+  // Chaque page client renvoie vers son pendant back-office quand il existe.
   const equivalences: { prefixe: string; vers: string }[] = [
     { prefixe: '/personal-shopping/new', vers: '/admin/requests' },
     { prefixe: '/personal-shopping', vers: '/admin/requests' },

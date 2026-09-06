@@ -32,7 +32,6 @@ import PersonalShoppingForm from '~/components/personalShopping/PersonalShopping
 definePageMeta({
   layout: 'client',
   // Les utilisateurs back-office sont renvoyés vers leur équivalent admin.
-  middleware: 'client-only',
 })
 
 const { t } = useI18n()
