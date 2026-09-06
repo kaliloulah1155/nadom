@@ -73,10 +73,6 @@ export interface PersonalShoppingRequest {
   senderFullname?: string | null
   senderNumber?: string | null
   senderEmail?: string | null
-  senderType?: 'individual' | 'company' | null
-  senderCompany?: string | null
-  contactType?: 'individual' | 'company' | null
-  contactCompany?: string | null
   packageItems?: Array<{ quantity: number; weight: number | null; length: number | null; width: number | null; height: number | null; description?: string | null; images?: string[] }> | null
   createdAt: string
   updatedAt: string
@@ -225,10 +221,6 @@ function normalizeRequest(r: any) {
     senderFullname: r.senderFullname ?? r.sender_fullname ?? null,
     senderNumber: r.senderNumber ?? r.sender_number ?? null,
     senderEmail: r.senderEmail ?? r.sender_email ?? null,
-    senderType: r.senderType ?? r.sender_type ?? null,
-    senderCompany: r.senderCompany ?? r.sender_company ?? null,
-    contactType: r.contactType ?? r.contact_type ?? null,
-    contactCompany: r.contactCompany ?? r.contact_company ?? null,
     packageItems: r.packageItems ?? r.package_items ?? null,
     budgetEstimated: toNum(r.budget_estimated ?? r.budgetEstimated),
     quotedPrice: r.quoted_price != null || r.quotedPrice != null
@@ -597,10 +589,6 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
           senderFullname: 'sender_fullname',
           senderNumber: 'sender_number',
           senderEmail: 'sender_email',
-          senderType: 'sender_type',
-          senderCompany: 'sender_company',
-          contactType: 'contact_type',
-          contactCompany: 'contact_company',
           packageItems: 'package_items',
         }
         const payload: Record<string, any> = {}
@@ -643,10 +631,6 @@ export const usePersonalShoppingStore = defineStore('personalShopping', {
         senderFullname: 'sender_fullname',
         senderNumber: 'sender_number',
         senderEmail: 'sender_email',
-        senderType: 'sender_type',
-        senderCompany: 'sender_company',
-        contactType: 'contact_type',
-        contactCompany: 'contact_company',
         // Champs « Envoi de colis » : absents de cette table, ils partaient en
         // camelCase et étaient silencieusement ignorés par l'API (le DTO attend du
         // snake_case). Une correction des colis par l'agent semblait alors

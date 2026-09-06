@@ -85,25 +85,15 @@
                   <small class="text-muted d-block">{{ t('envoiColis.form.destinationAddress') }}</small>
                   <strong>{{ (request as any).destinationAddress }}</strong>
                 </div>
-                <div v-if="(request as any).senderFullname || (request as any).senderCompany" class="col-md-6">
+                <div v-if="(request as any).senderFullname" class="col-md-6">
                   <small class="text-muted d-block">{{ t('envoiColis.form.senderSection') }}</small>
                   <strong>{{ (request as any).senderFullname }}<template v-if="(request as any).senderNumber"> — {{ (request as any).senderNumber }}</template></strong>
                   <div v-if="(request as any).senderEmail" class="small text-muted">{{ (request as any).senderEmail }}</div>
-                  <div v-if="(request as any).senderType === 'company' && (request as any).senderCompany" class="small">
-                    <span class="badge bg-secondary-subtle text-secondary">
-                      <i class="bi bi-building me-1"></i>{{ (request as any).senderCompany }}
-                    </span>
-                  </div>
                 </div>
-                <div v-if="(request as any).contactFullname || (request as any).contactCompany" class="col-md-6">
+                <div v-if="(request as any).contactFullname" class="col-md-6">
                   <small class="text-muted d-block">{{ t('envoiColis.form.recipientSection') }}</small>
                   <strong>{{ (request as any).contactFullname }}<template v-if="(request as any).contactNumber"> — {{ (request as any).contactNumber }}</template></strong>
                   <div v-if="(request as any).contactEmail" class="small text-muted">{{ (request as any).contactEmail }}</div>
-                  <div v-if="(request as any).contactType === 'company' && (request as any).contactCompany" class="small">
-                    <span class="badge bg-secondary-subtle text-secondary">
-                      <i class="bi bi-building me-1"></i>{{ (request as any).contactCompany }}
-                    </span>
-                  </div>
                 </div>
                 <div v-if="request.description" class="col-12">
                   <small class="text-muted d-block">{{ t('envoiColis.form.description') }}</small>

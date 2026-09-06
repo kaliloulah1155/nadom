@@ -420,7 +420,10 @@
       "declaredWeight": "Indiquez le poids déclaré",
       "destination": "Sélectionnez une destination",
       "itemDescription": "Décrivez le contenu de ce colis",
-      "fixErrors": "Merci de corriger les champs en rouge avant de soumettre."
+      "fixErrors": "Merci de corriger les champs en rouge avant de soumettre.",
+      "dimensions": "Indiquez les dimensions (L x l x H) de ce colis",
+      "quantityTooHigh": "Nombre de cartons trop eleve pour une seule ligne (max 999) : verifiez la saisie ou ajoutez plusieurs colis",
+      "weightTooHigh": "Poids par carton trop eleve (max 1000 kg) : verifiez la saisie"
     },
     "submitSuccess": "Votre demande d'envoi de colis a été enregistrée.",
     "submitError": "Une erreur est survenue lors de l'enregistrement de votre demande."

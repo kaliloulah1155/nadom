@@ -420,7 +420,10 @@
       "declaredWeight": "请填写申报重量",
       "destination": "请选择目的地",
       "itemDescription": "请描述该包裹的内容物",
-      "fixErrors": "请先更正标红的字段再提交。"
+      "fixErrors": "请先更正标红的字段再提交。",
+      "dimensions": "请填写此包裹的尺寸（长 x 宽 x 高）",
+      "quantityTooHigh": "单行纸箱数量过高（最大 999）：请检查或新增一个包裹",
+      "weightTooHigh": "每个纸箱重量过高（最大 1000 kg）：请检查"
     },
     "submitSuccess": "您的寄送包裹申请已成功提交。",
     "submitError": "提交申请时发生错误。"

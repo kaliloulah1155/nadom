@@ -420,7 +420,10 @@
       "declaredWeight": "Enter the declared weight",
       "destination": "Select a destination",
       "itemDescription": "Describe the contents of this package",
-      "fixErrors": "Please fix the highlighted fields before submitting."
+      "fixErrors": "Please fix the highlighted fields before submitting.",
+      "dimensions": "Enter this package's dimensions (L x W x H)",
+      "quantityTooHigh": "Carton count too high for a single line (max 999): check the value or add another package",
+      "weightTooHigh": "Weight per carton too high (max 1000 kg): check the value"
     },
     "submitSuccess": "Your package shipment request has been recorded.",
     "submitError": "An error occurred while recording your request."

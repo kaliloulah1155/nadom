@@ -73,28 +73,6 @@
         <h6 class="text-uppercase text-muted small fw-bold mb-3 mt-4">
           <i class="bi bi-person-badge me-1"></i>{{ t('envoiColis.form.senderSection') }}
         </h6>
-        <div class="d-flex gap-2 mt-2 mb-4">
-          <button
-            type="button"
-            class="btn btn-sm rounded-pill px-3"
-            :class="form.senderType === 'individual' ? 'btn-primary' : 'btn-outline-secondary'"
-            @click="form.senderType = 'individual'"
-          >
-            <i class="bi bi-person me-1"></i>{{ t('envoiColis.form.individual') }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm rounded-pill px-3"
-            :class="form.senderType === 'company' ? 'btn-primary' : 'btn-outline-secondary'"
-            @click="form.senderType = 'company'"
-          >
-            <i class="bi bi-building me-1"></i>{{ t('envoiColis.form.company') }}
-          </button>
-        </div>
-        <div v-if="form.senderType === 'company'" class="mb-4">
-          <label class="form-label fw-medium">{{ t('envoiColis.form.companyName') }}</label>
-          <input v-model="form.senderCompany" type="text" class="form-control form-control-lg" />
-        </div>
         <div class="row">
           <div class="col-md-6 mb-4">
             <label class="form-label fw-medium">{{ t('personalShopping.formExtra.fullName') }}</label>
@@ -152,28 +130,6 @@
         <h6 class="text-uppercase text-muted small fw-bold mb-3 mt-4">
           <i class="bi bi-person-check me-1"></i>{{ t('envoiColis.form.recipientSection') }}
         </h6>
-        <div class="d-flex gap-2 mt-2 mb-4">
-          <button
-            type="button"
-            class="btn btn-sm rounded-pill px-3"
-            :class="form.contactType === 'individual' ? 'btn-primary' : 'btn-outline-secondary'"
-            @click="form.contactType = 'individual'"
-          >
-            <i class="bi bi-person me-1"></i>{{ t('envoiColis.form.individual') }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm rounded-pill px-3"
-            :class="form.contactType === 'company' ? 'btn-primary' : 'btn-outline-secondary'"
-            @click="form.contactType = 'company'"
-          >
-            <i class="bi bi-building me-1"></i>{{ t('envoiColis.form.company') }}
-          </button>
-        </div>
-        <div v-if="form.contactType === 'company'" class="mb-4">
-          <label class="form-label fw-medium">{{ t('envoiColis.form.companyName') }}</label>
-          <input v-model="form.contactCompany" type="text" class="form-control form-control-lg" />
-        </div>
         <div class="row">
           <div class="col-md-6 mb-4">
             <label class="form-label fw-medium">{{ t('personalShopping.formExtra.fullName') }} *</label>
@@ -234,7 +190,7 @@
         <div class="row g-3">
           <div class="col-6 col-lg-3">
             <label class="form-label fw-medium small pkg-field-label" :title="t('envoiColis.form.quantityHint')">{{ t('envoiColis.form.quantity') }}</label>
-            <input v-model.number="item.quantity" type="number" min="1" class="form-control form-control-lg" />
+            <input v-model.number="item.quantity" type="number" min="1" max="999" class="form-control form-control-lg" :class="{ 'is-invalid': errors.quantity }" />
           </div>
           <div class="col-6 col-lg-3">
             <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.declaredWeight') }} *</label>
@@ -242,14 +198,15 @@
               v-model.number="item.weight"
               type="number"
               min="0"
+              max="1000"
               step="any"
               class="form-control form-control-lg"
-              :class="{ 'is-invalid': idx === 0 && errors.declaredWeight }"
+              :class="{ 'is-invalid': (idx === 0 && errors.declaredWeight) || errors.weight }"
             />
           </div>
           <div class="col-12 col-lg-6">
-            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.dimensions') }}</label>
-            <div class="d-flex align-items-center gap-2 pkg-dims">
+            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.dimensions') }} *</label>
+            <div class="d-flex align-items-center gap-2 pkg-dims" :class="{ 'pkg-dims-invalid': invalidDimensionItemIds.has(item.id) }">
               <input
                 v-model.number="item.length"
                 type="number"
@@ -356,7 +313,10 @@
           </div>
         </div>
       </div>
-      <div v-if="errors.declaredWeight" class="text-danger small mb-3">{{ errors.declaredWeight }}</div>
+      <div v-if="invalidDimensionItemIds.size > 0" class="text-danger small mb-2">{{ t('envoiColis.validation.dimensions') }}</div>
+      <div v-if="errors.declaredWeight" class="text-danger small mb-2">{{ errors.declaredWeight }}</div>
+      <div v-if="errors.quantity" class="text-danger small mb-2">{{ errors.quantity }}</div>
+      <div v-if="errors.weight" class="text-danger small mb-3">{{ errors.weight }}</div>
 
       <button type="button" class="btn btn-outline-primary mb-4" @click="addPackageItem">
         <i class="bi bi-plus-lg me-1"></i>{{ t('envoiColis.form.addPackage') }}
@@ -404,22 +364,6 @@
         <span class="small text-muted">{{ t('envoiColis.form.quoteByAgent') }}</span>
       </div>
 
-      <!-- Declared value -->
-      <div class="mb-4">
-        <label class="form-label fw-medium">{{ t('envoiColis.form.declaredValue') }}</label>
-        <div class="input-group">
-          <input
-            v-model.number="form.declaredValue"
-            type="number"
-            min="0"
-            step="any"
-            class="form-control form-control-lg"
-          />
-          <select v-model="form.currency" class="form-select form-select-lg" style="max-width: 130px;">
-            <option v-for="cur in currencies" :key="cur.id" :value="cur.code">{{ cur.label }}</option>
-          </select>
-        </div>
-      </div>
       </div>
       <!-- /Step 2 -->
 
@@ -468,22 +412,14 @@
             <div class="col-6 text-end fw-medium">{{ recapShippingModeLabel }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.ctnCount') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ form.ctnCount ?? '—' }}</div>
-            <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.declaredWeight') }}</span></div>
-            <div class="col-6 text-end fw-medium">{{ form.declaredWeight != null ? `${form.declaredWeight} kg` : '—' }}</div>
-            <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.cbm') }}</span></div>
-            <div class="col-6 text-end fw-medium">{{ form.cbm != null ? `${form.cbm} m³` : '—' }}</div>
-            <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.declaredValue') }}</span></div>
-            <div class="col-6 text-end fw-medium">{{ form.declaredValue != null ? `${form.declaredValue} ${form.currency}` : '—' }}</div>
+            <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.declaredWeight') }}</span> / <span class="text-muted">{{ t('envoiColis.form.cbm') }}</span></div>
+            <div class="col-6 text-end fw-medium">{{ form.declaredWeight != null ? `${form.declaredWeight} kg` : '—' }} / {{ form.cbm != null ? `${form.cbm} m³` : '—' }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.photos') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ totalPhotosCount }}</div>
             <div v-if="form.senderFullname" class="col-6"><span class="text-muted">{{ t('envoiColis.form.senderSection') }}</span></div>
             <div v-if="form.senderFullname" class="col-6 text-end fw-medium">{{ form.senderFullname }}{{ form.senderNumber ? ` (${form.senderNumber})` : '' }}</div>
-            <div v-if="form.senderType === 'company' && form.senderCompany" class="col-6"><span class="text-muted">{{ t('envoiColis.form.companyName') }}</span></div>
-            <div v-if="form.senderType === 'company' && form.senderCompany" class="col-6 text-end fw-medium">{{ form.senderCompany }}</div>
             <div class="col-6"><span class="text-muted">{{ t('envoiColis.form.recipientSection') }} — {{ t('personalShopping.formExtra.fullName') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ form.contactFullname || '—' }}</div>
-            <div v-if="form.contactType === 'company' && form.contactCompany" class="col-6"><span class="text-muted">{{ t('envoiColis.form.companyName') }}</span></div>
-            <div v-if="form.contactType === 'company' && form.contactCompany" class="col-6 text-end fw-medium">{{ form.contactCompany }}</div>
             <div class="col-6"><span class="text-muted">{{ t('personalShopping.formExtra.whatsappContact') }}</span></div>
             <div class="col-6 text-end fw-medium">{{ form.contactNumber || '—' }}</div>
           </div>
@@ -627,8 +563,6 @@ const applyOriginAddress = (a: SavedAddress) => {
   if (a.fullname) form.senderFullname = a.fullname
   if (a.phone) form.senderNumber = a.phone
   if (a.email) form.senderEmail = a.email
-  if (a.person_type) form.senderType = a.person_type
-  form.senderCompany = a.company || ''
 }
 
 const applyDestinationAddress = (a: SavedAddress) => {
@@ -636,8 +570,6 @@ const applyDestinationAddress = (a: SavedAddress) => {
   if (a.phone) form.contactNumber = a.phone
   if (a.email) form.contactEmail = a.email
   if (a.address) form.destinationAddress = a.address
-  if (a.person_type) form.contactType = a.person_type
-  form.contactCompany = a.company || ''
 }
 
 const destinations = computed(() => shippingStore.destinations)
@@ -818,13 +750,9 @@ const form = reactive({
   senderFullname: '',
   senderNumber: '',
   senderEmail: '',
-  senderType: 'individual' as 'individual' | 'company',
-  senderCompany: '',
   contactNumber: '',
   contactFullname: '',
   contactEmail: '',
-  contactType: 'individual' as 'individual' | 'company',
-  contactCompany: '',
 })
 
 // Les champs téléphone reposent sur <PhoneInput>, qui gère indicatif, drapeau
@@ -881,6 +809,7 @@ const makePackageItem = (): PackageItem => ({
 
 const packageItems = ref<PackageItem[]>([makePackageItem()])
 const invalidItemIds = ref<Set<number>>(new Set())
+const invalidDimensionItemIds = ref<Set<number>>(new Set())
 
 /** Chaque colis doit avoir une description de contenu (obligatoire côté pickngo). */
 const validatePackageDescriptions = (): boolean => {
@@ -889,6 +818,35 @@ const validatePackageDescriptions = (): boolean => {
   const missing = packageItems.value.filter((i) => !i.categories || i.categories.length === 0)
   invalidItemIds.value = new Set(missing.map((i) => i.id))
   return missing.length === 0
+}
+
+/**
+ * Les dimensions n'étaient jamais vérifiées : un colis pouvait être soumis
+ * sans longueur/largeur/hauteur, et le volume (CBM) — pourtant nécessaire à
+ * l'agent pour établir le devis fret — restait silencieusement à 0/absent.
+ */
+const validatePackageDimensions = (): boolean => {
+  const missing = packageItems.value.filter((i) => !i.length || !i.width || !i.height)
+  invalidDimensionItemIds.value = new Set(missing.map((i) => i.id))
+  return missing.length === 0
+}
+
+/**
+ * Bornes de plausibilité (pas des limites métier strictes) : elles existent
+ * uniquement pour intercepter une saisie clairement fautive — un chiffre en
+ * trop tape par erreur — avant qu'elle ne parte dans une demande impossible
+ * à traiter par l'agent (ex. observe en prod : 2773 cartons de 14 tonnes
+ * chacun, faute de frappe sur quantite/poids jamais detectee).
+ */
+const MAX_QUANTITY_PER_ITEM = 999
+const MAX_WEIGHT_PER_CARTON_KG = 1000
+
+const validatePackageSanity = (): boolean => {
+  const tooManyCartons = packageItems.value.some((i) => Number(i.quantity) > MAX_QUANTITY_PER_ITEM)
+  const tooHeavy = packageItems.value.some((i) => Number(i.weight) > MAX_WEIGHT_PER_CARTON_KG)
+  errors.quantity = tooManyCartons ? t('envoiColis.validation.quantityTooHigh') : ''
+  errors.weight = tooHeavy ? t('envoiColis.validation.weightTooHigh') : ''
+  return !tooManyCartons && !tooHeavy
 }
 
 const addPackageItem = () => {
@@ -937,6 +895,8 @@ const errors = reactive({
   declaredWeight: '',
   contactNumber: '',
   contactFullname: '',
+  quantity: '',
+  weight: '',
 })
 
 const validateForm = () => {
@@ -953,7 +913,9 @@ const validateForm = () => {
     errors.contactFullname = t('personalShopping.formExtra.validationName')
 
   const descriptionsOk = validatePackageDescriptions()
-  return !Object.values(errors).some((e) => e) && descriptionsOk
+  const dimensionsOk = validatePackageDimensions()
+  const sanityOk = validatePackageSanity()
+  return !Object.values(errors).some((e) => e) && descriptionsOk && dimensionsOk && sanityOk
 }
 
 const currentStep = ref(1)
@@ -984,7 +946,9 @@ const validateStep = (step: number) => {
   }
 
   const descriptionsOk = step === 2 ? validatePackageDescriptions() : true
-  return !Object.values(errors).some((e) => e) && descriptionsOk
+  const dimensionsOk = step === 2 ? validatePackageDimensions() : true
+  const sanityOk = step === 2 ? validatePackageSanity() : true
+  return !Object.values(errors).some((e) => e) && descriptionsOk && dimensionsOk && sanityOk
 }
 
 const nextStep = () => {
@@ -1027,8 +991,6 @@ const buildPayload = (itemImages: Record<number, string[]>) => ({
   senderFullname: form.senderFullname || null,
   senderNumber: form.senderNumber || null,
   senderEmail: form.senderEmail || null,
-  senderType: form.senderType,
-  senderCompany: form.senderType === 'company' ? form.senderCompany || null : null,
   packageItems: packageItems.value.map((i) => ({
     quantity: i.quantity,
     weight: i.weight,
@@ -1042,8 +1004,6 @@ const buildPayload = (itemImages: Record<number, string[]>) => ({
   contactNumber: form.contactNumber,
   contactFullname: form.contactFullname,
   contactEmail: form.contactEmail || null,
-  contactType: form.contactType,
-  contactCompany: form.contactType === 'company' ? form.contactCompany || null : null,
 })
 
 // Panier multi-envois : le client peut déclarer plusieurs envois (destinations
@@ -1071,8 +1031,6 @@ const resetFormForNextShipment = () => {
   form.contactNumber = ''
   form.contactFullname = ''
   form.contactEmail = ''
-  form.contactType = 'individual'
-  form.contactCompany = ''
   packageItems.value = [makePackageItem()]
   const u: any = authStore.currentUser
   if (u && !isAdminFlow.value) {
@@ -1113,7 +1071,14 @@ const goToFirstError = () => {
     originDestTab.value = 'destination'
     return
   }
-  if (errors.ctnCount || errors.declaredWeight || invalidItemIds.value.size > 0) {
+  if (
+    errors.ctnCount ||
+    errors.declaredWeight ||
+    errors.quantity ||
+    errors.weight ||
+    invalidItemIds.value.size > 0 ||
+    invalidDimensionItemIds.value.size > 0
+  ) {
     currentStep.value = 2
   }
 }
@@ -1237,6 +1202,18 @@ const handleSubmit = async () => {
     padding-left: 0.6rem;
     padding-right: 0.6rem;
   }
+}
+
+/* Surlignage d'erreur : dimensions manquantes (nouveau) et categorie de
+   contenu manquante (pkg-cat-invalid existait deja dans le template mais
+   n'avait jamais recu de style). */
+.pkg-dims-invalid .form-control,
+.pkg-cat-invalid {
+  border: 1px solid var(--bs-danger, #dc3545);
+  border-radius: 0.375rem;
+}
+.pkg-dims-invalid .form-control {
+  border-radius: 0.375rem !important;
 }
 
 /* intl-tel-input : aligner sur la taille des .form-control-lg de Bootstrap. */

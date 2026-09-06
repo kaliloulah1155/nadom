@@ -11,8 +11,6 @@ export interface SavedAddress {
   country: string | null
   city: string | null
   address: string | null
-  person_type: 'individual' | 'company' | null
-  company: string | null
 }
 
 export const useAddressBookStore = defineStore('addressBook', {
