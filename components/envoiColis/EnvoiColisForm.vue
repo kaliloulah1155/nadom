@@ -445,7 +445,7 @@
       <!-- /Step 4 -->
 
       <!-- Navigation -->
-      <div class="d-flex gap-2 mt-4">
+      <div class="d-flex align-items-center gap-2 mt-4">
         <button
           v-if="currentStep > 1"
           type="button"
@@ -457,7 +457,7 @@
         <button
           v-if="currentStep < 4"
           type="button"
-          class="btn btn-primary btn-lg flex-fill"
+          class="btn btn-primary btn-lg px-4 ms-auto"
           @click="nextStep"
         >
           {{ t('envoiColis.form.next') }}<i class="bi bi-arrow-right ms-1"></i>
@@ -465,19 +465,19 @@
         <button
           v-else
           type="submit"
-          class="btn btn-primary btn-lg flex-fill"
+          class="btn btn-primary btn-lg px-4 ms-auto"
           :disabled="loading"
         >
           <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
           {{ loading ? t("common.loading") : (cart.length > 0 ? t('envoiColis.form.submitAll', { n: cart.length + 1 }) : t("envoiColis.form.submit")) }}
         </button>
       </div>
-      <div v-if="currentStep === 4" class="d-grid mt-2">
+      <div v-if="currentStep === 4" class="text-center mt-2">
         <button type="button" class="btn btn-outline-primary" :disabled="loading" @click="addAnotherShipment">
           <i class="bi bi-plus-lg me-1"></i>{{ t('envoiColis.form.addAnotherShipment') }}
         </button>
       </div>
-      <div class="d-grid mt-2">
+      <div class="text-center mt-2">
         <button v-if="embedded" type="button" class="btn btn-link text-muted" @click="emit('close')">
           {{ t("common.cancel") }}
         </button>
