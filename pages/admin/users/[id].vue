@@ -150,7 +150,7 @@
                         </td>
                         <td>{{ formatDateShort(req.createdAt) }}</td>
                         <td class="text-end pe-4">
-                          <NuxtLink :to="`/admin/requests/${req.id}`" class="btn btn-sm btn-outline-primary">{{ t('admin.requests.detail') }}</NuxtLink>
+                          <NuxtLink :to="`/admin/requests/${req.id}`" class="btn btn-sm btn-outline-primary">{{ t('admin.common.detail') }}</NuxtLink>
                         </td>
                       </tr>
                     </tbody>
@@ -221,7 +221,7 @@
                         </td>
                         <td>{{ formatDateShort(app.created_at) }}</td>
                         <td class="text-end pe-4">
-                          <NuxtLink to="/admin/visas" class="btn btn-sm btn-outline-primary">{{ t('admin.requests.detail') }}</NuxtLink>
+                          <NuxtLink to="/admin/visas" class="btn btn-sm btn-outline-primary">{{ t('admin.common.detail') }}</NuxtLink>
                         </td>
                       </tr>
                     </tbody>
