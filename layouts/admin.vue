@@ -41,6 +41,12 @@
                   <span v-if="pendingRequestsCount > 0" class="badge bg-danger ms-auto">{{ pendingRequestsCount }}</span>
                 </NuxtLink>
               </li>
+              <li v-can="['list', 'address-book']" class="nav-item">
+                <NuxtLink to="/admin/address-book" class="nav-link py-1" :class="{ 'active': isActive('/admin/address-book') }">
+                  <i class="bi bi-journal-bookmark"></i>
+                  <span>{{ t('admin.nav.addressBook') }}</span>
+                </NuxtLink>
+              </li>
               <li v-can="['list', 'shipments']" class="nav-item">
                 <NuxtLink to="/admin/shipments" class="nav-link py-1" :class="{ 'active': isActive('/admin/shipments') }">
                   <i class="bi bi-truck"></i>
@@ -554,6 +560,7 @@ const isCatalogSectionActive = computed(
 const isFretSectionActive = computed(
   () =>
     isActive('/admin/requests') ||
+    isActive('/admin/address-book') ||
     isActive('/admin/shipments') ||
     isActive('/admin/packages') ||
     isActive('/admin/containers') ||
@@ -627,6 +634,7 @@ const pageTitle = computed(() => {
   const titles: Record<string, string> = {
     '/admin/dashboard': t('admin.pages.dashboard'),
     '/admin/requests': t('admin.pages.requests'),
+    '/admin/address-book': t('admin.pages.addressBook'),
     '/admin/shipments': t('admin.pages.shipments'),
     '/admin/packages': t('admin.pages.packages'),
     '/admin/containers': t('admin.pages.containers'),
@@ -711,7 +719,7 @@ watch(
     // Ferme tout puis ouvre uniquement la section courante
     Object.values(menuState).forEach(m => { m.value = false })
 
-    if (path.startsWith('/admin/requests') || path.startsWith('/admin/shipments') || path.startsWith('/admin/packages') || path.startsWith('/admin/containers') || path.startsWith('/admin/destinations') || path.startsWith('/admin/shipping')) {
+    if (path.startsWith('/admin/requests') || path.startsWith('/admin/address-book') || path.startsWith('/admin/shipments') || path.startsWith('/admin/packages') || path.startsWith('/admin/containers') || path.startsWith('/admin/destinations') || path.startsWith('/admin/shipping')) {
       fretMenuOpen.value = true
     } else if (path.startsWith('/admin/categories') || path.startsWith('/admin/products') || path.startsWith('/admin/personal-shopping')) {
       psMenuOpen.value = true

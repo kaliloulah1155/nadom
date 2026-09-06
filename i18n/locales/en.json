@@ -950,6 +950,7 @@
       "supportSystem": "Support & system",
       "teamAccess": "Team & access",
       "requests": "Requests",
+      "addressBook": "Address book",
       "shipments": "Shipments",
       "packages": "Packages",
       "containers": "Containers / BL",
@@ -1066,6 +1067,7 @@
     "pages": {
       "dashboard": "Dashboard",
       "requests": "Request management",
+      "addressBook": "Address book",
       "shipments": "Shipment management",
       "packages": "Packages (daily batches)",
       "containers": "Containers / BL",
@@ -1216,6 +1218,7 @@
     },
     "requests": {
       "title": "Request management",
+      "request": "Request",
       "newRequest": "New request",
       "backToList": "Back to requests",
       "searchPlaceholder": "Search...",
@@ -1595,6 +1598,9 @@
       "recipient": "Recipient",
       "track": "Track",
       "noUserShipments": "No shipments",
+      "noUserVisas": "No visa applications",
+      "notFound": "User not found",
+      "country": "Country",
       "city": "City",
       "selectCountry": "Select a country",
       "totalCount": "{n} users in total",
@@ -1832,6 +1838,8 @@
     },
     "visas": {
       "title": "Visa management",
+      "type": "Visa type",
+      "type": "Visa type",
       "newVisa": "New visa",
       "duration": "Duration",
       "requiredDocs": "Required documents",
@@ -2018,6 +2026,20 @@
       "activityDetail": "Activity detail",
       "entity": "Entity",
       "associatedData": "Associated data"
+    },
+    "addressBook": {
+      "title": "Address book",
+      "subtitle": "Directory of all clients and their saved addresses.",
+      "search": "Search",
+      "searchHint": "Name, phone, email, city, address...",
+      "client": "Client",
+      "phone": "Phone",
+      "email": "Email",
+      "location": "City / Country",
+      "addressesCount": "Address(es)",
+      "noClients": "No clients found",
+      "viewProfile": "View profile",
+      "loading": "Loading..."
     },
     "contactLeads": {
       "title": "Contact requests (site)",

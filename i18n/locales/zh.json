@@ -950,6 +950,7 @@
       "supportSystem": "支持与系统",
       "teamAccess": "团队与权限",
       "requests": "请求",
+      "addressBook": "地址簿",
       "shipments": "运输",
       "packages": "包裹批次",
       "containers": "集装箱 / 提单",
@@ -1066,6 +1067,7 @@
     "pages": {
       "dashboard": "仪表板",
       "requests": "请求管理",
+      "addressBook": "地址簿",
       "shipments": "运输管理",
       "packages": "包裹批次（每日）",
       "containers": "集装箱 / 提单",
@@ -1216,6 +1218,7 @@
     },
     "requests": {
       "title": "请求管理",
+      "request": "请求",
       "newRequest": "新建请求",
       "backToList": "返回请求列表",
       "searchPlaceholder": "搜索...",
@@ -1595,6 +1598,9 @@
       "recipient": "收件人",
       "track": "跟踪",
       "noUserShipments": "暂无运输",
+      "noUserVisas": "暂无签证申请",
+      "notFound": "未找到用户",
+      "country": "国家",
       "city": "城市",
       "selectCountry": "选择国家",
       "totalCount": "共 {n} 位用户",
@@ -1832,6 +1838,7 @@
     },
     "visas": {
       "title": "签证管理",
+      "type": "签证类型",
       "newVisa": "新建签证",
       "duration": "期限",
       "requiredDocs": "所需材料",
@@ -2018,6 +2025,20 @@
       "activityDetail": "活动详情",
       "entity": "实体",
       "associatedData": "关联数据"
+    },
+    "addressBook": {
+      "title": "地址簿",
+      "subtitle": "所有客户及其已保存地址的目录。",
+      "search": "搜索",
+      "searchHint": "姓名、电话、邮箱、城市、地址...",
+      "client": "客户",
+      "phone": "电话",
+      "email": "邮箱",
+      "location": "城市 / 国家",
+      "addressesCount": "地址数",
+      "noClients": "未找到客户",
+      "viewProfile": "查看资料",
+      "loading": "加载中..."
     },
     "contactLeads": {
       "title": "联系请求（网站）",
