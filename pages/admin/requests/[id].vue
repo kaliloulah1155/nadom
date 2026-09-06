@@ -55,15 +55,15 @@
               <div class="row g-3">
                 <div class="col-md-3">
                   <small class="text-muted d-block">{{ t('admin.requests.ctnCountLabel') }}</small>
-                  <strong>{{ request.ctnCount ?? t('admin.shipments.na') }}</strong>
+                  <strong>{{ editPackages ? draftCtnCount : (request.ctnCount ?? t('admin.shipments.na')) }}</strong>
                 </div>
                 <div class="col-md-3">
                   <small class="text-muted d-block">{{ t('admin.requests.declaredWeightLabel') }}</small>
-                  <strong>{{ request.declaredWeight != null ? `${request.declaredWeight} kg` : t('admin.shipments.na') }}</strong>
+                  <strong>{{ editPackages ? `${draftWeight} kg` : (request.declaredWeight != null ? `${request.declaredWeight} kg` : t('admin.shipments.na')) }}</strong>
                 </div>
                 <div class="col-md-3">
                   <small class="text-muted d-block">{{ t('admin.requests.cbmLabel') }}</small>
-                  <strong>{{ request.cbm != null ? `${request.cbm} m³` : t('admin.shipments.na') }}</strong>
+                  <strong>{{ editPackages ? `${draftCbm} m³` : (request.cbm != null ? `${request.cbm} m³` : t('admin.shipments.na')) }}</strong>
                 </div>
                 <div class="col-md-3">
                   <small class="text-muted d-block">{{ t('admin.requests.declaredValueLabel') }}</small>
@@ -193,8 +193,13 @@
                         </div>
                       </div>
                     </div>
-                    <div class="alert alert-info py-2 small mb-0">
-                      {{ t('admin.requests.detail.packagesRecomputed') }}
+                    <div class="alert alert-info py-2 px-3 small mb-0 d-flex flex-wrap gap-3 align-items-center">
+                      <span>{{ t('admin.requests.detail.packagesRecomputed') }}</span>
+                      <span class="ms-md-auto fw-medium text-nowrap">
+                        {{ draftCtnCount }} {{ t('admin.requests.ctnCountLabel') }} ·
+                        {{ draftWeight }} kg ·
+                        {{ draftCbm }} m³
+                      </span>
                     </div>
                   </div>
 
@@ -748,6 +753,34 @@ const editPackages = ref(false)
 const savingPackages = ref(false)
 const uploadingPhotos = ref(false)
 const packageDraft = ref<any[]>([])
+
+/**
+ * Le bandeau "Nombre de cartons / Poids / Volume" restait fige sur les
+ * valeurs enregistrees pendant toute l'edition des colis — l'agent ne
+ * voyait l'effet de sa saisie qu'apres avoir sauvegarde (aller-retour
+ * serveur). Meme formule que totalCtnCount/totalWeight/totalCbm dans
+ * EnvoiColisForm.vue, appliquee ici a packageDraft pour un recalcul en
+ * direct pendant la frappe.
+ */
+const draftCtnCount = computed(() =>
+  packageDraft.value.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0),
+)
+
+const draftWeight = computed(() => {
+  const total = packageDraft.value.reduce((sum, i) => sum + (Number(i.weight) || 0) * (Number(i.quantity) || 0), 0)
+  return Math.round(total * 100) / 100
+})
+
+const draftCbm = computed(() => {
+  const total = packageDraft.value.reduce((sum, i) => {
+    const l = Number(i.length)
+    const w = Number(i.width)
+    const h = Number(i.height)
+    if (!l || !w || !h) return sum
+    return sum + (l * w * h * (Number(i.quantity) || 1)) / 1_000_000
+  }, 0)
+  return Math.round(total * 1_000_000) / 1_000_000
+})
 
 const packageCategories = computed(() =>
   (psStore.categories || []).filter((c: any) => {
