@@ -70,5 +70,14 @@
   z-index: 20000 !important;
 }
 
+// Modales de creation/edition a plusieurs colonnes (Envoi de colis, Personal
+// Shopping, Expedition) : modal-xl plafonne a 1140px meme sur un grand ecran,
+// trop etroit pour ces formulaires. Demande explicite : les elargir.
+.modal-2xl {
+  @media (min-width: 992px) {
+    max-width: min(96vw, 1400px);
+  }
+}
+
 // Import Font Family
 @import url('https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700;800&display=swap');

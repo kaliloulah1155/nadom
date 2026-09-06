@@ -170,7 +170,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="shipmentModal" tabindex="-1" ref="modalRef">
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-xl modal-2xl">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ editingShipment ? t('admin.shipments.modalEditTitle') : t('admin.shipments.modalNewTitle') }}</h5>

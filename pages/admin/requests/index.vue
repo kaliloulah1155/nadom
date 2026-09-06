@@ -293,7 +293,7 @@
     <!-- Nouvelle demande "Envoi de colis" — même formulaire que la page publique
          (composant partagé), ouvert en modale pour ne pas quitter la liste. -->
     <div id="packageRequestModal" ref="packageModalRef" class="modal fade" tabindex="-1">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-dialog modal-xl modal-2xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
           <div class="modal-header">
             <h5 class="modal-title">
@@ -319,7 +319,7 @@
     <!-- Nouvelle demande "Personal Shopping" — même formulaire que la page
          publique (composant partagé), ouvert en modale. -->
     <div id="shoppingRequestModal" ref="shoppingModalRef" class="modal fade" tabindex="-1">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-dialog modal-xl modal-2xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
           <div class="modal-header">
             <h5 class="modal-title">
