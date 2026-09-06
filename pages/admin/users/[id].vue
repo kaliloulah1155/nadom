@@ -129,7 +129,7 @@
                     <thead class="table-light">
                       <tr>
                         <th class="ps-4">{{ t('admin.requests.request') }}</th>
-                        <th>{{ t('admin.requests.status') }}</th>
+                        <th>{{ t('admin.dashboard.status') }}</th>
                         <th>Date</th>
                         <th class="text-end pe-4">Action</th>
                       </tr>
@@ -166,7 +166,7 @@
                       <tr>
                         <th class="ps-4">Tracking #</th>
                         <th>{{ t('admin.shipments.destination') }}</th>
-                        <th>{{ t('admin.requests.status') }}</th>
+                        <th>{{ t('admin.dashboard.status') }}</th>
                         <th class="text-end pe-4">Action</th>
                       </tr>
                     </thead>
@@ -200,7 +200,7 @@
                     <thead class="table-light">
                       <tr>
                         <th class="ps-4">{{ t('admin.visas.type') }}</th>
-                        <th>{{ t('admin.requests.status') }}</th>
+                        <th>{{ t('admin.dashboard.status') }}</th>
                         <th>Date</th>
                         <th class="text-end pe-4">Action</th>
                       </tr>
