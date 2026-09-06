@@ -29,4 +29,28 @@ export default defineNuxtPlugin(() => {
       document.body.style.removeProperty('padding-right')
     })
   })
+
+  // Bug connu (jackocnr/intl-tel-input#1704) : le piege a focus d'une modale
+  // Bootstrap 5 renvoie de force le focus vers son propre contenu des qu'il
+  // en sort — or le menu deroulant de PhoneInput (dropdownContainer:
+  // document.body, cf. PhoneInput.vue) vit volontairement HORS du DOM de la
+  // modale, pour echapper a son overflow. Consequence : impossible de
+  // cliquer dans la recherche pays quand le champ telephone est dans une
+  // modale (Envoi de colis, Personal Shopping...) — chaque focusin y est
+  // immediatement recapture par la modale.
+  //
+  // Les listeners focusin (bulle, meme noeud document) s'executent dans
+  // leur ordre d'ajout : celui-ci est enregistre au demarrage de l'app,
+  // donc avant qu'aucune modale n'existe — il s'execute donc TOUJOURS avant
+  // celui que Bootstrap ajoute plus tard (a l'ouverture d'une modale), et
+  // stopImmediatePropagation() empeche ce dernier de rediriger le focus.
+  // Le focus lui-meme est deja pose par le navigateur avant meme que cet
+  // evenement ne se declenche : on bloque seulement la reaction de
+  // Bootstrap, pas la prise de focus.
+  document.addEventListener('focusin', (event) => {
+    const target = event.target
+    if (target instanceof Element && target.closest('.iti--container')) {
+      event.stopImmediatePropagation()
+    }
+  })
 })
