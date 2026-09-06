@@ -59,5 +59,16 @@
   z-index: 20000 !important;
 }
 
+// Meme cause que le correctif SweetAlert2 ci-dessus, meme symptome : la liste des
+// indicatifs pays d'intl-tel-input (PhoneInput.vue) est rattachee au <body> pour
+// echapper au overflow des modales, mais son z-index par defaut (1060) reste sous
+// les 9999 des modales de ce theme. Le dropdown existe dans le DOM (drapeaux,
+// recherche de pays) mais s'affiche DERRIERE la modale — au clic, c'est la modale
+// qui recoit l'evenement, pas l'option du menu : impossible de changer l'indicatif
+// depuis un formulaire ouvert en modale (« Nouvelle demande » du back-office).
+.iti--container {
+  z-index: 20000 !important;
+}
+
 // Import Font Family
 @import url('https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700;800&display=swap');
