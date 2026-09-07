@@ -2,11 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Carousel d'accueil</h4>
-        <p class="text-muted mb-0">{{ rows.length }} slide(s) — image + textes multilingues FR / EN / 中文</p>
+        <h4 class="mb-1">{{ t('admin.homeSlides.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.homeSlides.subtitle', { n: rows.length }) }}</p>
       </div>
       <button v-can="['create', 'home-slides']" type="button" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau slide
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.homeSlides.newSlide') }}
       </button>
     </div>
 
@@ -16,16 +16,16 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th>Image</th>
-                <th>Titre (FR)</th>
-                <th class="text-center">Ordre</th>
-                <th class="text-center">Actif</th>
-                <th>Actions</th>
+                <th>{{ t('admin.homeSlides.colImage') }}</th>
+                <th>{{ t('admin.homeSlides.colTitleFr') }}</th>
+                <th class="text-center">{{ t('admin.homeSlides.colOrder') }}</th>
+                <th class="text-center">{{ t('admin.homeSlides.colActive') }}</th>
+                <th>{{ t('admin.homeSlides.colActions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="rows.length === 0">
-                <td colspan="5" class="text-center py-4 text-muted">Aucun slide. Cliquez sur « Nouveau slide ».</td>
+                <td colspan="5" class="text-center py-4 text-muted">{{ t('admin.homeSlides.noSlides') }}</td>
               </tr>
               <tr v-for="row in rows" :key="row.id">
                 <td>
@@ -42,7 +42,7 @@
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
                   <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">
-                    {{ row.is_active ? 'Oui' : 'Non' }}
+                    {{ row.is_active ? t('admin.common.yes') : t('admin.common.no') }}
                   </span>
                 </td>
                 <td>
@@ -71,14 +71,14 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier le slide' : 'Nouveau slide' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.homeSlides.modalEdit') : t('admin.homeSlides.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
               <!-- Image -->
               <div class="mb-3">
-                <label class="form-label fw-semibold">Image du slide *</label>
+                <label class="form-label fw-semibold">{{ t('admin.homeSlides.imageLabel') }}</label>
                 <div class="d-flex align-items-center gap-3">
                   <img
                     v-if="form.image_path"
@@ -91,7 +91,7 @@
                   />
                   <div class="flex-grow-1">
                     <input type="file" accept="image/*" class="form-control" :disabled="uploading" @change="onImageSelected" />
-                    <small v-if="uploading" class="text-muted">Téléversement…</small>
+                    <small v-if="uploading" class="text-muted">{{ t('admin.homeSlides.uploading') }}</small>
                     <small v-else-if="form.image_path" class="text-muted text-truncate d-block">{{ form.image_path }}</small>
                   </div>
                   <button v-if="form.image_path" type="button" class="btn btn-outline-danger btn-sm" @click="form.image_path = ''">
@@ -102,50 +102,50 @@
 
               <div class="row g-3 mb-3">
                 <div class="col-md-8">
-                  <label class="form-label">Lien du bouton (CTA URL)</label>
-                  <input v-model="form.cta_url" type="text" class="form-control" placeholder="/personal-shopping/new" />
+                  <label class="form-label">{{ t('admin.homeSlides.ctaUrl') }}</label>
+                  <input v-model="form.cta_url" type="text" class="form-control" :placeholder="t('admin.homeSlides.ctaUrlPlaceholder')" />
                 </div>
                 <div class="col-md-2">
-                  <label class="form-label">Ordre</label>
+                  <label class="form-label">{{ t('admin.homeSlides.order') }}</label>
                   <input v-model.number="form.display_order" type="number" min="0" class="form-control" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                   <div class="form-check">
                     <input id="slide-active" v-model="form.is_active" class="form-check-input" type="checkbox" />
-                    <label class="form-check-label" for="slide-active">Actif</label>
+                    <label class="form-check-label" for="slide-active">{{ t('admin.homeSlides.active') }}</label>
                   </div>
                 </div>
               </div>
 
               <ul class="nav nav-tabs mb-3">
-                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'fr' }" @click="activeLang = 'fr'">Français</button></li>
-                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'en' }" @click="activeLang = 'en'">English</button></li>
-                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'zh' }" @click="activeLang = 'zh'">中文</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'fr' }" @click="activeLang = 'fr'">{{ t('admin.common.french') }}</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'en' }" @click="activeLang = 'en'">{{ t('admin.common.english') }}</button></li>
+                <li class="nav-item"><button type="button" class="nav-link" :class="{ active: activeLang === 'zh' }" @click="activeLang = 'zh'">{{ t('admin.common.chinese') }}</button></li>
               </ul>
 
               <div class="tab-content">
                 <div v-show="activeLang === 'fr'">
-                  <div class="mb-3"><label class="form-label">Titre (FR)</label><input v-model="form.title_fr" type="text" class="form-control" /></div>
-                  <div class="mb-3"><label class="form-label">Sous-titre (FR)</label><textarea v-model="form.subtitle_fr" rows="2" class="form-control"></textarea></div>
-                  <div class="mb-2"><label class="form-label">Libellé du bouton (FR)</label><input v-model="form.cta_label_fr" type="text" class="form-control" placeholder="Cliquez ici" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.titleFr') }}</label><input v-model="form.title_fr" type="text" class="form-control" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.subtitleFr') }}</label><textarea v-model="form.subtitle_fr" rows="2" class="form-control"></textarea></div>
+                  <div class="mb-2"><label class="form-label">{{ t('admin.homeSlides.ctaLabelFr') }}</label><input v-model="form.cta_label_fr" type="text" class="form-control" :placeholder="t('admin.homeSlides.ctaLabelFrPlaceholder')" /></div>
                 </div>
                 <div v-show="activeLang === 'en'">
-                  <div class="mb-3"><label class="form-label">Title (EN)</label><input v-model="form.title_en" type="text" class="form-control" /></div>
-                  <div class="mb-3"><label class="form-label">Subtitle (EN)</label><textarea v-model="form.subtitle_en" rows="2" class="form-control"></textarea></div>
-                  <div class="mb-2"><label class="form-label">Button label (EN)</label><input v-model="form.cta_label_en" type="text" class="form-control" placeholder="Click here" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.titleEn') }}</label><input v-model="form.title_en" type="text" class="form-control" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.subtitleEn') }}</label><textarea v-model="form.subtitle_en" rows="2" class="form-control"></textarea></div>
+                  <div class="mb-2"><label class="form-label">{{ t('admin.homeSlides.ctaLabelEn') }}</label><input v-model="form.cta_label_en" type="text" class="form-control" :placeholder="t('admin.homeSlides.ctaLabelEnPlaceholder')" /></div>
                 </div>
                 <div v-show="activeLang === 'zh'">
-                  <div class="mb-3"><label class="form-label">标题 (中文)</label><input v-model="form.title_zh" type="text" class="form-control" /></div>
-                  <div class="mb-3"><label class="form-label">副标题 (中文)</label><textarea v-model="form.subtitle_zh" rows="2" class="form-control"></textarea></div>
-                  <div class="mb-2"><label class="form-label">按钮文字 (中文)</label><input v-model="form.cta_label_zh" type="text" class="form-control" placeholder="点击这里" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.titleZh') }}</label><input v-model="form.title_zh" type="text" class="form-control" /></div>
+                  <div class="mb-3"><label class="form-label">{{ t('admin.homeSlides.subtitleZh') }}</label><textarea v-model="form.subtitle_zh" rows="2" class="form-control"></textarea></div>
+                  <div class="mb-2"><label class="form-label">{{ t('admin.homeSlides.ctaLabelZh') }}</label><input v-model="form.cta_label_zh" type="text" class="form-control" :placeholder="t('admin.homeSlides.ctaLabelZhPlaceholder')" /></div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">Annuler</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="saving">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving || uploading">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+                {{ saving ? t('admin.common.savingEllipsis') : t('admin.common.save') }}
               </button>
             </div>
           </form>
@@ -164,6 +164,7 @@ import { getToken } from '~/composables/useApi'
 
 definePageMeta({ layout: 'admin' })
 
+const { t } = useI18n()
 const store = useHomeSlidesStore()
 const { success, error } = useNotification()
 const config = useRuntimeConfig()
@@ -216,12 +217,12 @@ const onImageSelected = async (e: Event) => {
     const json = await res.json()
     if ((json?.success || json?.status === 'success') && (json.data?.path || json.data?.url)) {
       form.image_path = json.data.path || json.data.url
-      success('Image téléversée')
+      success(t('admin.homeSlides.imageUploaded'))
     } else {
-      throw new Error(json?.message || 'Échec du téléversement')
+      throw new Error(json?.message || t('admin.messages.uploadError'))
     }
   } catch (err: any) {
-    error(err?.message || 'Erreur de téléversement')
+    error(err?.message || t('admin.messages.uploadError'))
   } finally {
     uploading.value = false
     ;(e.target as HTMLInputElement).value = ''
@@ -252,7 +253,7 @@ const openModal = (row?: HomeSlideRow) => {
 const save = async () => {
   if (saving.value) return
   if (!form.image_path) {
-    error('Veuillez ajouter une image au slide.')
+    error(t('admin.homeSlides.imageRequired'))
     return
   }
   saving.value = true
@@ -260,15 +261,15 @@ const save = async () => {
   try {
     if (editing.value) {
       await store.update(editing.value.id, payload)
-      success('Slide mis à jour')
+      success(t('admin.homeSlides.slideUpdated'))
     } else {
       await store.create(payload)
-      success('Slide créé')
+      success(t('admin.homeSlides.slideCreated'))
     }
     modalInstance?.hide()
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || 'Erreur d\'enregistrement')
+    error(e?.message || t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -276,14 +277,14 @@ const save = async () => {
 
 const remove = async (row: HomeSlideRow) => {
   if (deletingId.value) return
-  if (!await useSwal().confirmDelete('Supprimer ce slide ?')) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteSlide'))) return
   deletingId.value = row.id
   try {
     await store.remove(row.id)
-    success('Slide supprimé')
+    success(t('admin.homeSlides.slideDeleted'))
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || 'Erreur de suppression')
+    error(e?.message || t('admin.messages.deleteError'))
   } finally {
     deletingId.value = null
   }
