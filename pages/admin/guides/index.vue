@@ -4,10 +4,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-1">{{ t('admin.guides.title') }}</h4>
-        <p class="text-muted mb-0">{{ guidesStore.guidesMeta.total }} guides disponibles</p>
+        <p class="text-muted mb-0">{{ t('admin.guides.guidesAvailableCount', { n: guidesStore.guidesMeta.total }) }}</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau guide
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.guides.newGuide') }}
       </button>
     </div>
 
@@ -20,21 +20,21 @@
               <span class="input-group-text bg-transparent border-end-0">
                 <i class="bi bi-search text-muted"></i>
               </span>
-              <input v-model="filters.search" type="text" class="form-control border-start-0" placeholder="Rechercher un guide..." @input="debouncedFetch" />
+              <input v-model="filters.search" type="text" class="form-control border-start-0" :placeholder="t('admin.guides.searchPlaceholder')" @input="debouncedFetch" />
             </div>
           </div>
           <div class="col-md-3">
             <select v-model="filterKind" class="form-select" @change="fetchGuides(1)">
               <option value="">{{ t('admin.guides.allTypes') }}</option>
-              <option value="tour">Accompagnateurs</option>
-              <option value="documentation">Documentation</option>
+              <option value="tour">{{ t('admin.guides.interpreters') }}</option>
+              <option value="documentation">{{ t('admin.guides.documentation') }}</option>
             </select>
           </div>
           <div class="col-md-3">
             <select v-model="filters.available" class="form-select" @change="fetchGuides(1)">
               <option :value="undefined">{{ t('admin.common.all') }}</option>
-              <option :value="true">Disponibles</option>
-              <option :value="false">Indisponibles</option>
+              <option :value="true">{{ t('admin.guides.available') }}</option>
+              <option :value="false">{{ t('admin.guides.unavailable') }}</option>
             </select>
           </div>
         </div>
@@ -48,26 +48,26 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Type</th>
-                <th>Guide</th>
-                <th>Langues</th>
-                <th>villes</th>
-                <th>Expérience</th>
-                <th>Tarif/Jour</th>
-                <th>Disponibilité</th>
-                <th>Actions</th>
+                <th>{{ t('admin.guides.type') }}</th>
+                <th>{{ t('admin.guides.guideColumn') }}</th>
+                <th>{{ t('admin.guides.languages') }}</th>
+                <th>{{ t('admin.guides.cities') }}</th>
+                <th>{{ t('admin.guides.experience') }}</th>
+                <th>{{ t('admin.guides.ratePerDay') }}</th>
+                <th>{{ t('admin.guides.availability') }}</th>
+                <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="guides.length === 0">
                 <td colspan="8" class="text-center py-4 text-muted">
-                  Aucun guide configuré
+                  {{ t('admin.guides.noGuides') }}
                 </td>
               </tr>
               <tr v-for="guide in guides" :key="guide.id">
                 <td>
                   <span class="badge" :class="guide.kind === 'documentation' ? 'bg-info text-dark' : 'bg-secondary'">
-                    {{ guide.kind === 'documentation' ? 'Documentation' : 'Accompagnateur' }}
+                    {{ guide.kind === 'documentation' ? t('admin.guides.documentation') : t('admin.guides.interpreterSingular') }}
                   </span>
                 </td>
                 <td>
@@ -85,11 +85,11 @@
                 <td>
                   <span v-for="city in guide.cities" :key="city" class="badge bg-secondary me-1">{{ city }}</span>
                 </td>
-                <td>{{ guide.experience }} ans</td>
-                <td class="fw-bold text-primary">{{ guide.price_per_day?.toLocaleString() }} {{ guide.currency || 'XOF' }}/j</td>
+                <td>{{ guide.experience }} {{ t('admin.guides.yearsSuffix') }}</td>
+                <td class="fw-bold text-primary">{{ guide.price_per_day?.toLocaleString() }} {{ guide.currency || 'XOF' }}{{ t('admin.guides.perDayShort') }}</td>
                 <td>
                   <span :class="['badge', guide.available ? 'bg-success' : 'bg-secondary']">
-                    {{ guide.available ? 'Disponible' : 'Indisponible' }}
+                    {{ guide.available ? t('admin.guides.availableSingular') : t('admin.guides.unavailableSingular') }}
                   </span>
                 </td>
                 <td>
@@ -126,71 +126,71 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingGuide ? 'Modifier' : 'Nouveau' }} guide</h5>
+            <h5 class="modal-title">{{ editingGuide ? t('admin.guides.editGuideModalTitle') : t('admin.guides.newGuide') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveGuide">
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label">Nom du guide *</label>
+                  <label class="form-label">{{ t('admin.guides.guideName') }} *</label>
                   <input v-model="form.name" type="text" class="form-control" required />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label">Type</label>
+                  <label class="form-label">{{ t('admin.guides.type') }}</label>
                   <select v-model="form.kind" class="form-select">
-                    <option value="tour">Accompagnateur (visites)</option>
-                    <option value="documentation">Documentation / fichiers</option>
+                    <option value="tour">{{ t('admin.guides.interpreterVisits') }}</option>
+                    <option value="documentation">{{ t('admin.guides.docFiles') }}</option>
                   </select>
                 </div>
                 <div v-if="form.kind === 'documentation'" class="col-md-6">
-                  <label class="form-label">Catégorie GDC *</label>
+                  <label class="form-label">{{ t('admin.guides.gdcCategory') }} *</label>
                   <select v-model.number="form.category_id" class="form-select">
-                    <option :value="0">— Choisir —</option>
+                    <option :value="0">{{ t('admin.guides.chooseOption') }}</option>
                     <option v-for="c in gdcCategories" :key="c.id" :value="c.id">{{ categoryLabel(c) }}</option>
                   </select>
                 </div>
                 <div v-if="form.kind === 'documentation'" class="col-12">
-                  <label class="form-label">URL du document (PDF ou lien)</label>
+                  <label class="form-label">{{ t('admin.guides.documentUrlHint') }}</label>
                   <input v-model="form.document_url" type="url" class="form-control" placeholder="https://..." />
                 </div>
                 <div v-if="form.kind === 'documentation'" class="col-md-6">
-                  <label class="form-label">Langues (affichage carte)</label>
+                  <label class="form-label">{{ t('admin.guides.languagesCardDisplay') }}</label>
                   <input v-model="form.languagesInput" type="text" class="form-control" placeholder="FR, EN" />
                 </div>
 
                 <template v-if="form.kind === 'tour'">
                   <div class="col-md-6">
-                    <label class="form-label">Langues</label>
-                    <input v-model="form.languagesInput" type="text" class="form-control" placeholder="Francais, English, Chinois (séparés par virgules)" />
-                    <small class="text-muted">Entrez les langues séparées par des virgules</small>
+                    <label class="form-label">{{ t('admin.guides.languages') }}</label>
+                    <input v-model="form.languagesInput" type="text" class="form-control" :placeholder="t('admin.guides.languagesPlaceholder')" />
+                    <small class="text-muted">{{ t('admin.guides.languagesHint') }}</small>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Villes</label>
+                    <label class="form-label">{{ t('admin.guides.citiesFormLabel') }}</label>
                     <input v-model="form.citiesInput" type="text" class="form-control" placeholder="Abidjan,广州, Shenzhen" />
-                    <small class="text-muted">Entrez les villes séparées par des virgules</small>
+                    <small class="text-muted">{{ t('admin.guides.citiesHint') }}</small>
                   </div>
 
                   <div class="col-md-6">
-                    <label class="form-label">Spécialisations (FR)</label>
+                    <label class="form-label">{{ t('admin.guides.specializationsFr') }}</label>
                     <input v-model="form.specializations_frInput" type="text" class="form-control" placeholder="Achats, Sourcing, Contrôle qualité" />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Spécialisations (EN)</label>
+                    <label class="form-label">{{ t('admin.guides.specializationsEn') }}</label>
                     <input v-model="form.specializations_enInput" type="text" class="form-control" placeholder="Sourcing, Quality control, Procurement" />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Spécialisations (中文)</label>
+                    <label class="form-label">{{ t('admin.guides.specializationsZh') }}</label>
                     <input v-model="form.specializations_zhInput" type="text" class="form-control" placeholder="采购, 质检" />
                   </div>
 
                   <div class="col-md-4">
-                    <label class="form-label">Années d'expérience</label>
+                    <label class="form-label">{{ t('admin.guides.yearsExperience') }}</label>
                     <input v-model.number="form.experience" type="number" class="form-control" min="0" />
                   </div>
                   <div class="col-md-4">
-                    <label class="form-label">Devise</label>
+                    <label class="form-label">{{ t('admin.guides.currency') }}</label>
                     <select v-model="form.currency" class="form-select">
                       <option value="XOF">FCFA (XOF)</option>
                       <option value="USD">Dollar (USD)</option>
@@ -199,17 +199,17 @@
                     </select>
                   </div>
                   <div class="col-md-4">
-                    <label class="form-label">Prix par jour ({{ form.currency }})</label>
+                    <label class="form-label">{{ t('admin.guides.pricePerDay') }} ({{ form.currency }})</label>
                     <input v-model.number="form.price_per_day" type="number" class="form-control" min="0" />
                   </div>
                   <div class="col-md-4">
-                    <label class="form-label">Prix par heure ({{ form.currency }})</label>
+                    <label class="form-label">{{ t('admin.guides.pricePerHour') }} ({{ form.currency }})</label>
                     <input v-model.number="form.price_per_hour" type="number" class="form-control" min="0" />
                   </div>
                 </template>
 
                 <div class="col-12">
-                  <label class="form-label">Avatar URL</label>
+                  <label class="form-label">{{ t('admin.guides.avatarUrl') }}</label>
                   <div class="input-group">
                     <input v-model="form.avatar" type="text" class="form-control" placeholder="https://..." />
                     <button type="button" class="btn btn-outline-secondary" @click="form.avatar = `https://robohash.org/${form.name}?set=set5`">
@@ -232,15 +232,15 @@
                   </ul>
                   <div class="tab-content">
                     <div class="tab-pane fade show active" id="guide-desc-fr">
-                      <label class="form-label">Description (FR)</label>
+                      <label class="form-label">{{ t('admin.guides.descriptionFr') }}</label>
                       <WysiwygEditor v-model="form.description_fr" height="160px" />
                     </div>
                     <div class="tab-pane fade" id="guide-desc-en">
-                      <label class="form-label">Description (EN)</label>
+                      <label class="form-label">{{ t('admin.guides.descriptionEn') }}</label>
                       <WysiwygEditor v-model="form.description_en" height="160px" />
                     </div>
                     <div class="tab-pane fade" id="guide-desc-zh">
-                      <label class="form-label">描述 (中文)</label>
+                      <label class="form-label">{{ t('admin.guides.descriptionZh') }}</label>
                       <WysiwygEditor v-model="form.description_zh" height="160px" />
                     </div>
                   </div>
@@ -250,7 +250,7 @@
                   <div class="form-check">
                     <input v-model="form.available" type="checkbox" class="form-check-input" id="guideAvailable" />
                     <label class="form-check-label" for="guideAvailable">
-                      Disponible pour les réservations
+                      {{ t('admin.guides.availableForBooking') }}
                     </label>
                   </div>
                 </div>
@@ -408,7 +408,7 @@ const parseArrayInput = (input: string): string[] => {
 const saveGuide = async () => {
   if (saving.value) return
   if (form.kind === 'documentation' && (!form.category_id || form.category_id === 0)) {
-    error('Choisissez une catégorie GDC pour une fiche documentation.')
+    error(t('admin.guides.gdcCategoryRequired'))
     return
   }
   saving.value = true
@@ -437,15 +437,15 @@ const saveGuide = async () => {
   try {
     if (editingGuide.value) {
       await guidesStore.updateGuide(editingGuide.value.id, data as any)
-      success('Guide modifié')
+      success(t('admin.guides.guideUpdated'))
     } else {
       await guidesStore.createGuide(data as any)
-      success('Guide créé')
+      success(t('admin.guides.guideCreated'))
     }
     modalInstance?.hide()
     await fetchGuides(guidesStore.guidesMeta.currentPage)
   } catch (err: any) {
-    error(err.message || 'Erreur lors de l\'enregistrement')
+    error(err.message || t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -457,7 +457,7 @@ const deleteGuide = async (id: string) => {
   deletingId.value = id
   try {
     await guidesStore.deleteGuide(id)
-    success('Guide supprimé')
+    success(t('admin.guides.guideDeleted'))
     await fetchGuides(guidesStore.guidesMeta.currentPage)
   } catch (err: any) {
     error(err.message || t('admin.messages.deleteError'))

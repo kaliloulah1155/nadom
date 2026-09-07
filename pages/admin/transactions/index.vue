@@ -281,7 +281,7 @@
 
             <div class="alert alert-light border small mb-0 mt-3">
               <i class="bi bi-shield-check me-1 text-success"></i>
-              <span v-html="t('admin.transactions.balanceExplanation')"></span>
+              <span v-html="sanitizeHtml(t('admin.transactions.balanceExplanation'))"></span>
             </div>
           </div>
           <div class="modal-footer">
@@ -449,7 +449,7 @@ const doConfirm = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
     title: t('admin.transactions.confirmManualTitle'),
-    html: t('admin.transactions.confirmManualHtml', { reference: trx.reference }),
+    html: sanitizeHtml(t('admin.transactions.confirmManualHtml', { reference: trx.reference })),
     confirmButtonText: t('admin.transactions.confirmPaymentButton'),
   })
   if (!ok) return
@@ -464,7 +464,7 @@ const doReverser = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
     title: t('admin.transactions.reverseTitle'),
-    html: t('admin.transactions.reverseHtml', { reference: trx.reference }),
+    html: sanitizeHtml(t('admin.transactions.reverseHtml', { reference: trx.reference })),
     confirmButtonText: t('admin.transactions.reverseButton'),
   })
   if (!ok) return
