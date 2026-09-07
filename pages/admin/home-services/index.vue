@@ -2,11 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Services (page d'accueil)</h4>
-        <p class="text-muted mb-0">{{ rows.length }} carte(s) — contenu multilingue FR / EN (éditeur riche)</p>
+        <h4 class="mb-1">{{ t('admin.homeServices.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.homeServices.subtitle', { n: rows.length }) }}</p>
       </div>
       <button v-can="['create', 'home-services']" type="button" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouvelle carte
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.homeServices.newCard') }}
       </button>
     </div>
 
@@ -16,11 +16,11 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Slug</th>
-                <th>Titre (FR)</th>
-                <th class="text-center">Ordre</th>
-                <th class="text-center">Actif</th>
-                <th>Actions</th>
+                <th>{{ t('admin.homeServices.colSlug') }}</th>
+                <th>{{ t('admin.homeServices.colTitleFr') }}</th>
+                <th class="text-center">{{ t('admin.homeServices.colOrder') }}</th>
+                <th class="text-center">{{ t('admin.homeServices.colActive') }}</th>
+                <th>{{ t('admin.homeServices.colActions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
                   <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">
-                    {{ row.is_active ? 'Oui' : 'Non' }}
+                    {{ row.is_active ? t('admin.common.yes') : t('admin.common.no') }}
                   </span>
                 </td>
                 <td>
@@ -78,29 +78,29 @@
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <label class="form-label">Slug * <small class="text-muted">(unique, non modifiable après création)</small></label>
+                  <label class="form-label">{{ t('admin.homeServices.colSlug') }} * <small class="text-muted">{{ t('admin.homeServices.slugHint') }}</small></label>
                   <input
                     v-model="form.slug"
                     type="text"
                     class="form-control"
-                    placeholder="personal-shopping"
+                    :placeholder="t('admin.homeServices.slugPlaceholder')"
                     required
                     pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
                     :disabled="!!editing"
                   />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Icône Bootstrap</label>
-                  <input v-model="form.icon" type="text" class="form-control" placeholder="bi-bag-check" />
+                  <label class="form-label">{{ t('admin.homeServices.iconBootstrap') }}</label>
+                  <input v-model="form.icon" type="text" class="form-control" :placeholder="t('admin.homeServices.iconPlaceholder')" />
                 </div>
                 <div class="col-md-2">
-                  <label class="form-label">Ordre</label>
+                  <label class="form-label">{{ t('admin.homeServices.order') }}</label>
                   <input v-model.number="form.display_order" type="number" min="0" class="form-control" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                   <div class="form-check">
                     <input id="hs-active" v-model="form.is_active" class="form-check-input" type="checkbox" />
-                    <label class="form-check-label" for="hs-active">Actif</label>
+                    <label class="form-check-label" for="hs-active">{{ t('admin.homeServices.active') }}</label>
                   </div>
                 </div>
               </div>
@@ -120,11 +120,11 @@
               <div class="tab-content mb-3">
                 <div id="hs-fr" class="tab-pane fade show active">
                   <div class="mb-3">
-                    <label class="form-label">Titre (FR)</label>
+                    <label class="form-label">{{ t('admin.homeServices.titleFr') }}</label>
                     <input v-model="form.title_fr" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (FR)</label>
+                    <label class="form-label">{{ t('admin.homeServices.descriptionFr') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_fr" height="140px" />
                     </ClientOnly>
@@ -132,11 +132,11 @@
                 </div>
                 <div id="hs-en" class="tab-pane fade">
                   <div class="mb-3">
-                    <label class="form-label">Title (EN)</label>
+                    <label class="form-label">{{ t('admin.homeServices.titleEn') }}</label>
                     <input v-model="form.title_en" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (EN)</label>
+                    <label class="form-label">{{ t('admin.homeServices.descriptionEn') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_en" height="140px" />
                     </ClientOnly>
@@ -144,11 +144,11 @@
                 </div>
                 <div id="hs-zh" class="tab-pane fade">
                   <div class="mb-3">
-                    <label class="form-label">标题 (中文)</label>
+                    <label class="form-label">{{ t('admin.homeServices.titleZh') }}</label>
                     <input v-model="form.title_zh" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">描述 (中文)</label>
+                    <label class="form-label">{{ t('admin.homeServices.descriptionZh') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_zh" height="140px" />
                     </ClientOnly>
@@ -158,12 +158,12 @@
 
               <div class="border rounded p-3 bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="form-label fw-semibold mb-0">Points clés (liste à puces sur le site)</label>
+                  <label class="form-label fw-semibold mb-0">{{ t('admin.homeServices.featuresLabel') }}</label>
                   <button type="button" class="btn btn-sm btn-outline-primary" @click="addFeatureRow">
-                    <i class="bi bi-plus-lg"></i> Ligne
+                    <i class="bi bi-plus-lg"></i> {{ t('admin.homeServices.line') }}
                   </button>
                 </div>
-                <p class="small text-muted mb-3">Une ligne = FR / EN / 中文 (éditeur riche).</p>
+                <p class="small text-muted mb-3">{{ t('admin.homeServices.featuresHint') }}</p>
                 <div v-for="(_, idx) in form.features_fr" :key="'feat-' + idx" class="row g-2 mb-3 align-items-start border-bottom pb-3">
                   <div class="col-md-4">
                     <span class="small text-muted">FR {{ idx + 1 }}</span>

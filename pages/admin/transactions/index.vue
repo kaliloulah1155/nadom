@@ -5,17 +5,17 @@
       <div>
         <h4 class="mb-1">{{ t('admin.nav.transactions') }}</h4>
         <p class="text-muted mb-0">
-          Encaissements, remboursements clients et reversements au marchand (NADOM).
+          {{ t('admin.transactions.subtitle') }}
         </p>
       </div>
       <div class="d-flex gap-2">
         <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="balanceLoading" @click="openBalance">
           <span v-if="balanceLoading" class="spinner-border spinner-border-sm me-1"></span>
-          <i v-else class="bi bi-wallet2 me-1"></i>Soldes
+          <i v-else class="bi bi-wallet2 me-1"></i>{{ t('admin.transactions.balance') }}
         </button>
         <button type="button" class="btn btn-outline-success btn-sm" :disabled="exporting" @click="doExport">
           <span v-if="exporting" class="spinner-border spinner-border-sm me-1"></span>
-          <i v-else class="bi bi-file-earmark-excel me-1"></i>Exporter Excel
+          <i v-else class="bi bi-file-earmark-excel me-1"></i>{{ t('admin.common.exportExcel') }}
         </button>
         <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="store.loading" @click="reload(1)">
           <i class="bi bi-arrow-clockwise me-1"></i>{{ t('admin.common.refresh') }}
@@ -28,52 +28,52 @@
       <div class="card-body py-3">
         <div class="row g-2 align-items-end">
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Type</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.transactions.type') }}</label>
             <select v-model="filters.type" class="form-select form-select-sm" @change="reload(1)">
-              <option value="">Tous</option>
-              <option value="payment">Encaissement</option>
-              <option value="refund">Remboursement</option>
-              <option value="reversement">Reversement</option>
+              <option value="">{{ t('admin.common.all') }}</option>
+              <option value="payment">{{ t('admin.transactions.typePayment') }}</option>
+              <option value="refund">{{ t('admin.transactions.typeRefund') }}</option>
+              <option value="reversement">{{ t('admin.transactions.typeReversement') }}</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Objet</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.transactions.object') }}</label>
             <select v-model="filters.kind" class="form-select form-select-sm" @change="reload(1)">
-              <option value="">Tous</option>
-              <option value="cart">Panier</option>
-              <option value="visa">Visa</option>
-              <option value="guide_booking">Réservation guide</option>
-              <option value="shipment">Expédition</option>
-              <option value="personal_shopping">Demande PS</option>
+              <option value="">{{ t('admin.common.all') }}</option>
+              <option value="cart">{{ t('admin.transactions.kindCart') }}</option>
+              <option value="visa">{{ t('admin.transactions.kindVisa') }}</option>
+              <option value="guide_booking">{{ t('admin.transactions.kindGuideBooking') }}</option>
+              <option value="shipment">{{ t('admin.transactions.kindShipment') }}</option>
+              <option value="personal_shopping">{{ t('admin.transactions.kindPersonalShopping') }}</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Statut</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.dashboard.status') }}</label>
             <select v-model="filters.status" class="form-select form-select-sm" @change="reload(1)">
-              <option :value="null">Tous</option>
-              <option :value="0">En attente</option>
-              <option :value="1">Réussi</option>
-              <option :value="3">Échoué</option>
-              <option :value="4">Remboursé</option>
-              <option :value="7">Cashout complété</option>
+              <option :value="null">{{ t('admin.common.all') }}</option>
+              <option :value="0">{{ t('admin.transactions.statusPending') }}</option>
+              <option :value="1">{{ t('admin.transactions.statusSuccess') }}</option>
+              <option :value="3">{{ t('admin.transactions.statusFailed') }}</option>
+              <option :value="4">{{ t('admin.transactions.statusRefunded') }}</option>
+              <option :value="7">{{ t('admin.transactions.statusCashoutCompleted') }}</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Du</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.transactions.dateFrom') }}</label>
             <input v-model="filters.dateFrom" type="date" class="form-control form-control-sm" @change="reload(1)" />
           </div>
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Au</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.transactions.dateTo') }}</label>
             <input v-model="filters.dateTo" type="date" class="form-control form-control-sm" @change="reload(1)" />
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Recherche (référence)</label>
+            <label class="form-label small text-muted mb-1">{{ t('admin.transactions.searchByReference') }}</label>
             <input v-model="filters.search" type="text" class="form-control form-control-sm"
-              placeholder="Référence / ID" @input="debouncedReload" />
+              :placeholder="t('admin.transactions.referenceIdPlaceholder')" @input="debouncedReload" />
           </div>
           <div class="col-md-2">
             <button class="btn btn-outline-secondary btn-sm w-100" @click="resetFilters">
-              <i class="bi bi-x-circle me-1"></i>Réinitialiser
+              <i class="bi bi-x-circle me-1"></i>{{ t('admin.common.reset') }}
             </button>
           </div>
         </div>
@@ -84,23 +84,23 @@
     <div class="card border-0 shadow-sm">
       <div v-if="store.loading" class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted mb-0">Chargement…</p>
+        <p class="mt-2 text-muted mb-0">{{ t('admin.common.loading') }}</p>
       </div>
       <div v-else-if="!store.items.length" class="card-body text-center py-5 text-muted">
-        <i class="bi bi-inbox fs-2 d-block mb-2"></i>Aucune transaction.
+        <i class="bi bi-inbox fs-2 d-block mb-2"></i>{{ t('admin.transactions.noTransactions') }}
       </div>
       <div v-else class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light">
               <tr>
-                <th>Référence</th>
-                <th>Objet</th>
-                <th>Client</th>
-                <th>Type</th>
-                <th class="text-end">Montant</th>
-                <th>Statut</th>
-                <th class="text-end">Actions</th>
+                <th>{{ t('admin.transactions.reference') }}</th>
+                <th>{{ t('admin.transactions.object') }}</th>
+                <th>{{ t('admin.transactions.client') }}</th>
+                <th>{{ t('admin.transactions.type') }}</th>
+                <th class="text-end">{{ t('admin.transactions.amount') }}</th>
+                <th>{{ t('admin.dashboard.status') }}</th>
+                <th class="text-end">{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -126,29 +126,29 @@
                 </td>
                 <td>
                   <span :class="statusBadge(trx.status)">{{ statusLabel(trx.status) }}</span>
-                  <div v-if="trx.reversed" class="text-success mt-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill"></i> reversé</div>
+                  <div v-if="trx.reversed" class="text-success mt-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill"></i> {{ t('admin.transactions.reversedLabel') }}</div>
                 </td>
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end flex-wrap">
                     <button v-if="canManage && trx.type === 'payment' && trx.status === 0"
-                      class="btn btn-sm btn-outline-warning" title="Confirmer manuellement le paiement"
+                      class="btn btn-sm btn-outline-warning" :title="t('admin.transactions.confirmManuallyTitle')"
                       :disabled="busy === trx.reference" @click="doConfirm(trx)">
                       <i class="bi bi-check2-circle"></i>
                     </button>
                     <button v-if="canManage && trx.type === 'payment' && trx.status === 1"
-                      class="btn btn-sm btn-outline-success" title="Reverser le net à NADOM"
+                      class="btn btn-sm btn-outline-success" :title="t('admin.transactions.reverseNetTitle')"
                       :disabled="busy === trx.reference" @click="doReverser(trx)">
                       <i class="bi bi-send"></i>
                     </button>
                     <button v-if="canManage && trx.type === 'payment' && trx.status === 1"
-                      class="btn btn-sm btn-outline-danger" title="Rembourser le client"
+                      class="btn btn-sm btn-outline-danger" :title="t('admin.transactions.refundClientTitle')"
                       :disabled="busy === trx.reference" @click="doRefund(trx)">
                       <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
-                    <button v-if="trx.reference && trx.status === 1" class="btn btn-sm btn-outline-secondary" title="Reçu de paiement" @click="downloadReceipt(trx.reference)">
+                    <button v-if="trx.reference && trx.status === 1" class="btn btn-sm btn-outline-secondary" :title="t('admin.transactions.receiptTitle')" @click="downloadReceipt(trx.reference)">
                       <i class="bi bi-receipt"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-primary" title="Détails" @click="openDetails(trx)">
+                    <button class="btn btn-sm btn-outline-primary" :title="t('admin.transactions.detailsTitle')" @click="openDetails(trx)">
                       <i class="bi bi-eye"></i>
                     </button>
                   </div>
@@ -175,48 +175,48 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Transaction {{ selected.reference }}</h5>
+            <h5 class="modal-title">{{ t('admin.transactions.transactionRef', { reference: selected.reference }) }}</h5>
             <button type="button" class="btn-close" @click="selected = null"></button>
           </div>
           <div class="modal-body">
-            <h6 class="text-muted text-uppercase small mb-2">Opération</h6>
+            <h6 class="text-muted text-uppercase small mb-2">{{ t('admin.transactions.operation') }}</h6>
             <dl class="row mb-3">
-              <dt class="col-sm-4">Référence</dt><dd class="col-sm-8"><code>{{ selected.reference || '—' }}</code></dd>
-              <dt class="col-sm-4">ID transaction</dt><dd class="col-sm-8"><code class="small">{{ selected.id }}</code></dd>
-              <dt class="col-sm-4">Plateforme</dt><dd class="col-sm-8 text-uppercase">{{ selected.platform || 'nadom' }}</dd>
-              <dt class="col-sm-4">Objet</dt><dd class="col-sm-8">{{ kindLabel(selected.payable_kind) }} <span v-if="selected.payable_id" class="text-muted">/ {{ selected.payable_id }}</span></dd>
-              <dt class="col-sm-4">Type</dt><dd class="col-sm-8">{{ typeLabel(selected.type) }}</dd>
-              <dt class="col-sm-4">Statut</dt><dd class="col-sm-8"><span :class="statusBadge(selected.status)">{{ statusLabel(selected.status) }}</span></dd>
-              <dt class="col-sm-4">Moyen de paiement</dt><dd class="col-sm-8">{{ selected.payment_method || '—' }}</dd>
-              <dt class="col-sm-4">Date</dt><dd class="col-sm-8">{{ formatDateTime(selected.created_at || '') }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.reference') }}</dt><dd class="col-sm-8"><code>{{ selected.reference || '—' }}</code></dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.transactionId') }}</dt><dd class="col-sm-8"><code class="small">{{ selected.id }}</code></dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.platform') }}</dt><dd class="col-sm-8 text-uppercase">{{ selected.platform || 'nadom' }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.object') }}</dt><dd class="col-sm-8">{{ kindLabel(selected.payable_kind) }} <span v-if="selected.payable_id" class="text-muted">/ {{ selected.payable_id }}</span></dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.type') }}</dt><dd class="col-sm-8">{{ typeLabel(selected.type) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.dashboard.status') }}</dt><dd class="col-sm-8"><span :class="statusBadge(selected.status)">{{ statusLabel(selected.status) }}</span></dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.paymentMethod') }}</dt><dd class="col-sm-8">{{ selected.payment_method || '—' }}</dd>
+              <dt class="col-sm-4">{{ t('admin.dashboard.date') }}</dt><dd class="col-sm-8">{{ formatDateTime(selected.created_at || '') }}</dd>
               <template v-if="selected.type === 'payment'">
-                <dt class="col-sm-4">Reversé à NADOM</dt>
+                <dt class="col-sm-4">{{ t('admin.transactions.reversedToNadom') }}</dt>
                 <dd class="col-sm-8">
-                  <span v-if="selected.reversed" class="text-success"><i class="bi bi-check-circle-fill"></i> Oui<span v-if="selected.reversed_at" class="text-muted"> — {{ formatDateTime(selected.reversed_at) }}</span></span>
-                  <span v-else class="text-muted">Non</span>
+                  <span v-if="selected.reversed" class="text-success"><i class="bi bi-check-circle-fill"></i> {{ t('admin.common.yes') }}<span v-if="selected.reversed_at" class="text-muted"> — {{ formatDateTime(selected.reversed_at) }}</span></span>
+                  <span v-else class="text-muted">{{ t('admin.common.no') }}</span>
                 </dd>
               </template>
             </dl>
 
-            <h6 class="text-muted text-uppercase small mb-2">Client</h6>
+            <h6 class="text-muted text-uppercase small mb-2">{{ t('admin.transactions.client') }}</h6>
             <dl class="row mb-3">
-              <dt class="col-sm-4">Nom</dt><dd class="col-sm-8">{{ clientName(selected) }}</dd>
-              <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ clientEmail(selected) || '—' }}</dd>
-              <dt class="col-sm-4">Téléphone</dt><dd class="col-sm-8">{{ selected.phone || '—' }}</dd>
-              <dt class="col-sm-4">Type de compte</dt><dd class="col-sm-8">{{ selected.user_id ? 'Compte client' : 'Invité (sans compte)' }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.name') }}</dt><dd class="col-sm-8">{{ clientName(selected) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.email') }}</dt><dd class="col-sm-8">{{ clientEmail(selected) || '—' }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.phone') }}</dt><dd class="col-sm-8">{{ selected.phone || '—' }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.accountType') }}</dt><dd class="col-sm-8">{{ selected.user_id ? t('admin.transactions.clientAccount') : t('admin.transactions.guestNoAccount') }}</dd>
             </dl>
 
-            <h6 class="text-muted text-uppercase small mb-2">Montants</h6>
+            <h6 class="text-muted text-uppercase small mb-2">{{ t('admin.transactions.amounts') }}</h6>
             <dl class="row mb-0">
-              <dt class="col-sm-4">Prix de vente (net)</dt><dd class="col-sm-8">{{ money(selected.amount_net) }}</dd>
-              <dt class="col-sm-4">Prix public payé</dt><dd class="col-sm-8 fw-semibold">{{ money(selected.amount_public) }}</dd>
-              <dt class="col-sm-4">Commission (10 %)</dt><dd class="col-sm-8">{{ money(selected.commission) }}</dd>
-              <dt class="col-sm-4">Net marchand</dt><dd class="col-sm-8 text-success fw-semibold">{{ money(netMarchand(selected)) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.salePriceNet') }}</dt><dd class="col-sm-8">{{ money(selected.amount_net) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.publicPricePaid') }}</dt><dd class="col-sm-8 fw-semibold">{{ money(selected.amount_public) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.commission') }}</dt><dd class="col-sm-8">{{ money(selected.commission) }}</dd>
+              <dt class="col-sm-4">{{ t('admin.transactions.netMerchant') }}</dt><dd class="col-sm-8 text-success fw-semibold">{{ money(netMarchand(selected)) }}</dd>
             </dl>
           </div>
           <div class="modal-footer">
             <button v-if="selected.reference" class="btn btn-outline-success" @click="downloadReceipt(selected.reference)">
-              <i class="bi bi-download me-1"></i>Télécharger le reçu
+              <i class="bi bi-download me-1"></i>{{ t('admin.transactions.downloadReceipt') }}
             </button>
             <button class="btn btn-secondary" @click="selected = null">{{ t('admin.common.close') }}</button>
           </div>
@@ -229,25 +229,25 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-wallet2 me-2"></i>Mon solde</h5>
+            <h5 class="modal-title"><i class="bi bi-wallet2 me-2"></i>{{ t('admin.transactions.myBalance') }}</h5>
             <button type="button" class="btn-close" @click="showBalance = false"></button>
           </div>
           <div class="modal-body">
             <!-- Ce qui revient réellement à NADOM (net) -->
-            <h6 class="text-success text-uppercase small fw-bold mb-2"><i class="bi bi-check-circle me-1"></i>Ce qui vous revient (net)</h6>
+            <h6 class="text-success text-uppercase small fw-bold mb-2"><i class="bi bi-check-circle me-1"></i>{{ t('admin.transactions.whatYouGetNet') }}</h6>
             <div class="alert alert-warning d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-semibold">En attente de reversement</span>
+              <span class="fw-semibold">{{ t('admin.transactions.pendingReversement') }}</span>
               <span class="fs-4 fw-bold">{{ money(bal.pending_reversement) }} {{ balanceCurrency }}</span>
             </div>
             <div class="table-responsive">
               <table class="table table-sm align-middle mb-1">
                 <tbody>
                   <tr>
-                    <td class="text-muted">Déjà reversé</td>
+                    <td class="text-muted">{{ t('admin.transactions.alreadyReversed') }}</td>
                     <td class="text-end fw-semibold text-success">{{ money(bal.total_reversed) }} {{ balanceCurrency }}</td>
                   </tr>
                   <tr class="border-top border-2">
-                    <td class="fw-semibold">Total net qui vous revient</td>
+                    <td class="fw-semibold">{{ t('admin.transactions.totalNetYours') }}</td>
                     <td class="text-end fw-bold text-success">{{ money(bal.total_net) }} {{ balanceCurrency }}</td>
                   </tr>
                 </tbody>
@@ -255,24 +255,24 @@
             </div>
 
             <!-- Informations : ne vous appartiennent PAS -->
-            <h6 class="text-muted text-uppercase small mb-2 mt-3"><i class="bi bi-info-circle me-1"></i>Pour information (ne vous revient pas)</h6>
+            <h6 class="text-muted text-uppercase small mb-2 mt-3"><i class="bi bi-info-circle me-1"></i>{{ t('admin.transactions.forInfoNotYours') }}</h6>
             <div class="table-responsive">
               <table class="table table-sm align-middle mb-0">
                 <tbody>
                   <tr>
-                    <td class="text-muted">Payé par les clients <small>(prix public, frais inclus)</small></td>
+                    <td class="text-muted">{{ t('admin.transactions.paidByClients') }} <small>{{ t('admin.transactions.publicPriceFeesIncluded') }}</small></td>
                     <td class="text-end">{{ money(bal.total_public) }} {{ balanceCurrency }}</td>
                   </tr>
                   <tr>
-                    <td class="text-muted">Total prix de vente</td>
+                    <td class="text-muted">{{ t('admin.transactions.totalSalePrice') }}</td>
                     <td class="text-end">{{ money(bal.total_sales) }} {{ balanceCurrency }}</td>
                   </tr>
                   <tr>
-                    <td class="text-muted">Commission de service (10 %)</td>
+                    <td class="text-muted">{{ t('admin.transactions.serviceCommission') }}</td>
                     <td class="text-end text-muted">− {{ money(bal.total_commission) }} {{ balanceCurrency }}</td>
                   </tr>
                   <tr>
-                    <td class="text-muted">Remboursé aux clients</td>
+                    <td class="text-muted">{{ t('admin.transactions.refundedToClients') }}</td>
                     <td class="text-end text-danger">{{ money(bal.total_refunded) }} {{ balanceCurrency }}</td>
                   </tr>
                 </tbody>
@@ -281,13 +281,12 @@
 
             <div class="alert alert-light border small mb-0 mt-3">
               <i class="bi bi-shield-check me-1 text-success"></i>
-              Le montant payé par le client (<strong>prix public</strong>) inclut les <strong>frais de traitement</strong> et la <strong>commission de service de 10 %</strong>.
-              Conformément au contrat (Art. 4-5), <strong>seul le net</strong> (prix de vente − 10 %) vous est reversé. Le reste ne vous appartient pas.
+              <span v-html="t('admin.transactions.balanceExplanation')"></span>
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-outline-secondary" :disabled="balanceLoading" @click="openBalance">
-              <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+              <i class="bi bi-arrow-clockwise me-1"></i>{{ t('admin.common.refresh') }}
             </button>
             <button class="btn btn-secondary" @click="showBalance = false">{{ t('admin.common.close') }}</button>
           </div>
@@ -374,17 +373,17 @@ const clientName = (trx: TransactionRow) => {
 const clientEmail = (trx: TransactionRow) =>
   trx.user?.email || trx.metadata?.customer?.email || null
 
-const typeLabel = (tp: string) => ({ payment: 'Encaissement', refund: 'Remboursement', reversement: 'Reversement' }[tp] || tp)
+const typeLabel = (tp: string) => ({ payment: t('admin.transactions.typePayment'), refund: t('admin.transactions.typeRefund'), reversement: t('admin.transactions.typeReversement') }[tp] || tp)
 const kindLabel = (k: string | null) => ({
-  cart: 'Panier', visa: 'Visa', guide_booking: 'Réservation guide',
-  shipment: 'Expédition', personal_shopping: 'Demande PS',
+  cart: t('admin.transactions.kindCart'), visa: t('admin.transactions.kindVisa'), guide_booking: t('admin.transactions.kindGuideBooking'),
+  shipment: t('admin.transactions.kindShipment'), personal_shopping: t('admin.transactions.kindPersonalShopping'),
 }[k || 'cart'] || (k || '—'))
 const typeBadge = (tp: string) => 'badge ' + ({ payment: 'bg-primary-subtle text-primary', refund: 'bg-danger-subtle text-danger', reversement: 'bg-success-subtle text-success' }[tp] || 'bg-secondary')
 
 const statusLabel = (s: number) => ({
-  0: 'En attente', 1: 'Réussi', 2: 'Inconnu', 3: 'Échoué', 4: 'Remboursé',
-  5: 'Cashout demandé', 6: 'Cashout approuvé', 7: 'Cashout complété', 8: 'Cashout échoué',
-}[s] || 'Inconnu')
+  0: t('admin.transactions.statusPending'), 1: t('admin.transactions.statusSuccess'), 2: t('admin.transactions.statusUnknown'), 3: t('admin.transactions.statusFailed'), 4: t('admin.transactions.statusRefunded'),
+  5: t('admin.transactions.statusCashoutRequested'), 6: t('admin.transactions.statusCashoutApproved'), 7: t('admin.transactions.statusCashoutCompleted'), 8: t('admin.transactions.statusCashoutFailed'),
+}[s] || t('admin.transactions.statusUnknown'))
 const statusBadge = (s: number) => 'badge ' + ({
   1: 'bg-success', 7: 'bg-success', 0: 'bg-warning text-dark', 5: 'bg-info text-dark', 6: 'bg-info text-dark',
   3: 'bg-danger', 8: 'bg-danger', 4: 'bg-secondary',
@@ -421,7 +420,7 @@ const doExport = async () => {
     a.remove()
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    swal.error('Export impossible', e?.message)
+    swal.error(t('admin.transactions.exportImpossibleTitle'), e?.message)
   } finally {
     exporting.value = false
   }
@@ -449,9 +448,9 @@ const openBalance = async () => {
 const doConfirm = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
-    title: 'Confirmer manuellement ?',
-    html: `Confirmer le paiement <strong>${trx.reference}</strong> ?<br><small class="text-muted">À n'utiliser que si la notification automatique n'arrive pas.</small>`,
-    confirmButtonText: 'Confirmer le paiement',
+    title: t('admin.transactions.confirmManualTitle'),
+    html: t('admin.transactions.confirmManualHtml', { reference: trx.reference }),
+    confirmButtonText: t('admin.transactions.confirmPaymentButton'),
   })
   if (!ok) return
   busy.value = trx.reference
@@ -464,9 +463,9 @@ const doConfirm = async (trx: TransactionRow) => {
 const doReverser = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
-    title: 'Reverser à NADOM ?',
-    html: `Reverser le net de <strong>${trx.reference}</strong> à NADOM ?`,
-    confirmButtonText: 'Reverser',
+    title: t('admin.transactions.reverseTitle'),
+    html: t('admin.transactions.reverseHtml', { reference: trx.reference }),
+    confirmButtonText: t('admin.transactions.reverseButton'),
   })
   if (!ok) return
   busy.value = trx.reference
@@ -479,11 +478,11 @@ const doReverser = async (trx: TransactionRow) => {
 const doRefund = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const reason = await swal.prompt({
-    title: 'Rembourser le client',
-    text: `Remboursement de ${trx.reference}`,
-    inputLabel: 'Motif (optionnel)',
-    inputPlaceholder: 'Ex : annulation de commande',
-    confirmButtonText: 'Rembourser',
+    title: t('admin.transactions.refundClientTitle'),
+    text: t('admin.transactions.refundOf', { reference: trx.reference }),
+    inputLabel: t('admin.transactions.refundReasonLabel'),
+    inputPlaceholder: t('admin.transactions.refundReasonPlaceholder'),
+    confirmButtonText: t('admin.transactions.refundButton'),
   })
   if (reason === null) return
   busy.value = trx.reference
