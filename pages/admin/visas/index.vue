@@ -4,10 +4,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-1">{{ t('admin.visas.title') }}</h4>
-        <p class="text-muted mb-0">{{ visasStore.visaTypesMeta.total }} types de visa configurés</p>
+        <p class="text-muted mb-0">{{ t('admin.visas.visaTypesConfiguredCount', { n: visasStore.visaTypesMeta.total }) }}</p>
       </div>
       <button class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouveau visa
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.visas.newVisa') }}
       </button>
     </div>
 
@@ -21,7 +21,7 @@
                 <i class="bi bi-passport fs-4"></i>
               </div>
               <span :class="['badge', visa.is_active ? 'bg-success' : 'bg-secondary']">
-                {{ visa.is_active ? 'Actif' : 'Inactif' }}
+                {{ visa.is_active ? t('admin.common.active') : t('admin.common.inactive') }}
               </span>
             </div>
             <h5 class="card-title">{{ visa.name_fr }}</h5>
@@ -29,17 +29,17 @@
 
             <div class="row g-2 mb-3">
               <div class="col-6">
-                <small class="text-muted d-block">Durée</small>
+                <small class="text-muted d-block">{{ t('admin.visas.duration') }}</small>
                 <strong>{{ visa.duration_fr }}</strong>
               </div>
               <div class="col-6">
-                <small class="text-muted d-block">Prix</small>
+                <small class="text-muted d-block">{{ t('admin.visas.price') }}</small>
                 <strong class="text-primary">{{ formatPrice(visa.cost, visa.currency) }}</strong>
               </div>
             </div>
 
             <div class="mb-3">
-              <small class="text-muted d-block mb-1">Documents requis</small>
+              <small class="text-muted d-block mb-1">{{ t('admin.visas.requiredDocs') }}</small>
               <div class="d-flex flex-wrap gap-1">
                 <span v-for="doc in (visa.requirements_fr || []).slice(0, 3)" :key="doc" class="badge bg-light text-dark small">
                   {{ doc }}
@@ -52,7 +52,7 @@
 
             <div v-if="visa.pdf_url" class="mb-3">
               <a :href="visa.pdf_url" target="_blank" class="btn btn-sm btn-outline-primary w-100">
-                <i class="bi bi-file-earmark-pdf me-2"></i>Voir le formulaire PDF
+                <i class="bi bi-file-earmark-pdf me-2"></i>{{ t('admin.visas.viewPdf') }}
               </a>
             </div>
           </div>
@@ -76,9 +76,9 @@
           <div class="card-body text-center py-5">
             <i class="bi bi-passport display-4 text-muted"></i>
             <h5 class="mt-3">{{ t('admin.visas.noVisas') }}</h5>
-            <p class="text-muted">Configurez les types de visas disponibles.</p>
+            <p class="text-muted">{{ t('admin.visas.configureVisasHint') }}</p>
             <button class="btn btn-primary" @click="openModal()">
-              <i class="bi bi-plus-lg me-2"></i>Ajouter un visa
+              <i class="bi bi-plus-lg me-2"></i>{{ t('admin.visas.addVisa') }}
             </button>
           </div>
         </div>
@@ -103,7 +103,7 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingVisa ? 'Modifier' : 'Nouveau' }} type de visa</h5>
+            <h5 class="modal-title">{{ editingVisa ? t('admin.visas.editVisaTypeModalTitle') : t('admin.visas.newVisaTypeModalTitle') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="saveVisa">
@@ -125,7 +125,7 @@
                 <div class="tab-pane fade show active" id="visa-fr">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Nom du visa (FR) *</label>
+                      <label class="form-label">{{ t('admin.visas.visaNameFr') }} *</label>
                       <input v-model="form.name_fr" type="text" class="form-control" required />
                     </div>
                     <div class="col-md-6">
@@ -141,7 +141,7 @@
                       <input v-model="form.processing_time_fr" type="text" class="form-control" placeholder="5-7 jours ouvrés" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Description (FR)</label>
+                      <label class="form-label">{{ t('admin.visas.descriptionFr') }}</label>
                       <WysiwygEditor v-model="form.description_fr" height="160px" />
                     </div>
                   </div>
@@ -149,7 +149,7 @@
                 <div class="tab-pane fade" id="visa-en">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Visa Name (EN) *</label>
+                      <label class="form-label">{{ t('admin.visas.visaNameEn') }} *</label>
                       <input v-model="form.name_en" type="text" class="form-control" />
                     </div>
                     <div class="col-md-6">
@@ -165,7 +165,7 @@
                       <input v-model="form.processing_time_en" type="text" class="form-control" placeholder="5-7 working days" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Description (EN)</label>
+                      <label class="form-label">{{ t('admin.visas.descriptionEn') }}</label>
                       <WysiwygEditor v-model="form.description_en" height="160px" />
                     </div>
                   </div>
@@ -173,7 +173,7 @@
                 <div class="tab-pane fade" id="visa-zh">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">签证名称 (中文)</label>
+                      <label class="form-label">{{ t('admin.visas.visaNameZh') }}</label>
                       <input v-model="form.name_zh" type="text" class="form-control" />
                     </div>
                     <div class="col-md-6">
@@ -189,7 +189,7 @@
                       <input v-model="form.processing_time_zh" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">描述 (中文)</label>
+                      <label class="form-label">{{ t('admin.visas.descriptionZh') }}</label>
                       <WysiwygEditor v-model="form.description_zh" height="160px" />
                     </div>
                   </div>
@@ -198,19 +198,19 @@
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Type de visa *</label>
+                  <label class="form-label">{{ t('admin.visas.type') }} *</label>
                   <select v-model="form.type" class="form-select" required>
-                    <option value="">Sélectionner</option>
-                    <option value="touriste">Touriste</option>
-                    <option value="affaires">Affaires</option>
+                    <option value="">{{ t('admin.common.select') }}</option>
+                    <option value="touriste">{{ t('admin.visas.tourist') }}</option>
+                    <option value="affaires">{{ t('admin.visas.business') }}</option>
                     <option value="transit">{{ t('admin.dashboard.transit') }}</option>
-                    <option value="travail">Travail</option>
-                    <option value="etudes">Études</option>
-                    <option value="familial">Regroupement familial</option>
+                    <option value="travail">{{ t('admin.visas.work') }}</option>
+                    <option value="etudes">{{ t('admin.visas.study') }}</option>
+                    <option value="familial">{{ t('admin.visas.family') }}</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Prix</label>
+                  <label class="form-label">{{ t('admin.visas.price') }}</label>
                   <div class="input-group">
                     <input v-model.number="form.cost" type="number" class="form-control" min="0" placeholder="0" />
                     <select v-model="form.currency" class="form-select" style="max-width: 120px;">
@@ -220,12 +220,12 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Documents requis (séparés par virgule)</label>
+                  <label class="form-label">{{ t('admin.visas.requirementsLabel') }}</label>
                   <input v-model="form.requirementsInput" type="text" class="form-control" placeholder="Passeport, Photo, Formulaire, etc." />
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Formulaire PDF</label>
+                  <label class="form-label">{{ t('admin.visas.pdfForm') }}</label>
                   <div class="d-flex align-items-center gap-2">
                     <input
                       type="file"
@@ -239,12 +239,12 @@
                       :href="resolveAsset(form.pdf_url)"
                       target="_blank"
                       class="btn btn-outline-primary"
-                      title="Voir"
+                      :title="t('admin.common.view')"
                     >
                       <i class="bi bi-eye"></i>
                     </a>
                   </div>
-                  <small v-if="uploadingPdf" class="text-muted">Téléversement…</small>
+                  <small v-if="uploadingPdf" class="text-muted">{{ t('admin.visas.uploadingEllipsis') }}</small>
                   <small v-else-if="form.pdf_url" class="text-muted text-truncate d-block">{{ form.pdf_url }}</small>
                 </div>
 
@@ -252,7 +252,7 @@
                   <div class="form-check">
                     <input v-model="form.is_active" type="checkbox" class="form-check-input" id="visaActive" />
                     <label class="form-check-label" for="visaActive">
-                      Visa actif
+                      {{ t('admin.visas.visaActive') }}
                     </label>
                   </div>
                 </div>
@@ -313,12 +313,12 @@ const onVisaPdfSelected = async (e: Event) => {
     const json = await res.json()
     if (json?.status === 'success' && (json.data?.url || json.data?.path)) {
       form.pdf_url = json.data.url || json.data.path
-      success('Fichier téléversé')
+      success(t('admin.visas.fileUploaded'))
     } else {
-      throw new Error(json?.message || 'Échec du téléversement')
+      throw new Error(json?.message || t('admin.visas.uploadFailed'))
     }
   } catch (err: any) {
-    error(err.message || 'Erreur de téléversement')
+    error(err.message || t('admin.messages.uploadError'))
   } finally {
     uploadingPdf.value = false
     input.value = ''
@@ -483,15 +483,15 @@ const saveVisa = async () => {
   try {
     if (editingVisa.value) {
       await visasStore.updateVisaType(editingVisa.value.id, data as any)
-      success('Visa modifié')
+      success(t('admin.visas.visaUpdated'))
     } else {
       await visasStore.createVisaType(data as any)
-      success('Visa créé')
+      success(t('admin.visas.visaCreated'))
     }
     modalInstance?.hide()
     await fetchVisaTypes(visasStore.visaTypesMeta.currentPage)
   } catch (err: any) {
-    error(err.message || 'Erreur lors de l\'enregistrement')
+    error(err.message || t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -499,11 +499,11 @@ const saveVisa = async () => {
 
 const deleteVisa = async (id: number) => {
   if (deletingId.value) return
-  if (!await useSwal().confirmDelete(t('admin.confirm.deleteGuide'))) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteVisa'))) return
   deletingId.value = id
   try {
     await visasStore.deleteVisaType(id)
-    success('Visa supprimé')
+    success(t('admin.visas.visaDeleted'))
     await fetchVisaTypes(visasStore.visaTypesMeta.currentPage)
   } catch (err: any) {
     error(err.message || t('admin.messages.deleteError'))
