@@ -20,8 +20,8 @@
               <tr>
                 <th style="width: 250px;">{{ t('admin.faq.category') }}</th>
                 <th>{{ t('admin.faq.question') }}</th>
-                <th style="width: 130px;">Statut</th>
-                <th style="width: 90px;">Position</th>
+                <th style="width: 130px;">{{ t('admin.faq.status') }}</th>
+                <th style="width: 90px;">{{ t('admin.faq.position') }}</th>
                 <th>{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
@@ -41,9 +41,9 @@
                   </small>
                 </td>
                 <td>
-                  <span v-if="faq.statut === 2" class="badge bg-primary">Page tarifs</span>
-                  <span v-else-if="faq.statut === 3" class="badge bg-info text-dark">Page visa</span>
-                  <span v-else class="badge bg-light text-dark">Générale</span>
+                  <span v-if="faq.statut === 2" class="badge bg-primary">{{ t('admin.faq.statusPricing') }}</span>
+                  <span v-else-if="faq.statut === 3" class="badge bg-info text-dark">{{ t('admin.faq.statusVisa') }}</span>
+                  <span v-else class="badge bg-light text-dark">{{ t('admin.faq.general') }}</span>
                 </td>
                 <td>{{ faq.position ?? 0 }}</td>
                 <td>
@@ -100,11 +100,11 @@
                 <div class="tab-pane fade show active" id="faq-fr">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Question (FR) *</label>
+                      <label class="form-label">{{ t('admin.faq.questionFr') }} *</label>
                       <input v-model="form.question_fr" type="text" class="form-control" required />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Réponse (FR) *</label>
+                      <label class="form-label">{{ t('admin.faq.answerFr') }} *</label>
                       <WysiwygEditor v-model="form.answer_fr" height="200px" />
                     </div>
                   </div>
@@ -112,11 +112,11 @@
                 <div class="tab-pane fade" id="faq-en">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Question (EN) *</label>
+                      <label class="form-label">{{ t('admin.faq.questionEn') }} *</label>
                       <input v-model="form.question_en" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Answer (EN) *</label>
+                      <label class="form-label">{{ t('admin.faq.answerEn') }} *</label>
                       <WysiwygEditor v-model="form.answer_en" height="200px" />
                     </div>
                   </div>
@@ -124,11 +124,11 @@
                 <div class="tab-pane fade" id="faq-zh">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">问题 (中文)</label>
+                      <label class="form-label">{{ t('admin.faq.questionZh') }}</label>
                       <input v-model="form.question_zh" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">回答 (中文)</label>
+                      <label class="form-label">{{ t('admin.faq.answerZh') }}</label>
                       <WysiwygEditor v-model="form.answer_zh" height="200px" />
                     </div>
                   </div>
@@ -137,22 +137,22 @@
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Catégorie</label>
-                  <input v-model="form.category" type="text" class="form-control" placeholder="Général, Shipping, Visa, etc." />
+                  <label class="form-label">{{ t('admin.faq.category') }}</label>
+                  <input v-model="form.category" type="text" class="form-control" :placeholder="t('admin.faq.categoryPlaceholder')" />
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Position</label>
+                  <label class="form-label">{{ t('admin.faq.position') }}</label>
                   <input v-model.number="form.position" type="number" min="0" class="form-control" />
-                  <small class="text-muted">Ordre d'affichage (croissant).</small>
+                  <small class="text-muted">{{ t('admin.faq.positionHint') }}</small>
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.faq.status') }}</label>
                   <select v-model.number="form.statut" class="form-select">
-                    <option :value="1">Générale (/faq)</option>
-                    <option :value="2">Page tarifs</option>
-                    <option :value="3">Page visa</option>
+                    <option :value="1">{{ t('admin.faq.statusGeneral') }}</option>
+                    <option :value="2">{{ t('admin.faq.statusPricing') }}</option>
+                    <option :value="3">{{ t('admin.faq.statusVisa') }}</option>
                   </select>
-                  <small class="text-muted">« Page tarifs » et « Page visa » s'affichent aussi sur /faq.</small>
+                  <small class="text-muted">{{ t('admin.faq.statusHint') }}</small>
                 </div>
               </div>
             </div>
