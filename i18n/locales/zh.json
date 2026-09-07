@@ -1627,6 +1627,11 @@
     },
     "notifications": {
       "title": "通知",
+      "types": {
+        "requestCreated": "来自{name}的新请求",
+        "ticketCreated": "新客服工单",
+        "guideBookingCreated": "新导游预订 — {name}"
+      },
       "unread": "未读",
       "markAllRead": "全部标为已读",
       "searchTitle": "按标题搜索...",

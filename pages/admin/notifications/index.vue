@@ -87,7 +87,7 @@
           <div class="flex-grow-1 min-w-0">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <div class="fw-semibold" :class="{ 'text-primary': !n.is_read }">
-                {{ n.title }}
+                {{ notificationTitle(n) }}
               </div>
               <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <small class="text-muted">{{ formatRelativeTime(n.created_at) }}</small>
@@ -138,6 +138,7 @@ const { t } = useI18n()
 
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationsStore, type AppNotification } from '~/stores/notifications'
+import { useNotificationLabel } from '~/composables/useNotificationLabel'
 
 definePageMeta({
   layout: 'admin',
@@ -146,6 +147,7 @@ definePageMeta({
 
 const router = useRouter()
 const notifStore = useNotificationsStore()
+const { notificationTitle } = useNotificationLabel()
 
 const search = ref('')
 const readFilter = ref<'' | 'read' | 'unread'>('')

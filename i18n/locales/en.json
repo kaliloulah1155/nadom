@@ -1627,6 +1627,11 @@
     },
     "notifications": {
       "title": "Notifications",
+      "types": {
+        "requestCreated": "New request from {name}",
+        "ticketCreated": "New support ticket",
+        "guideBookingCreated": "New guide booking — {name}"
+      },
       "unread": "Unread",
       "markAllRead": "Mark all read",
       "searchTitle": "Search by title...",

@@ -402,7 +402,7 @@
                       style="width:8px; height:8px; padding:0;"
                     ></span>
                     <div class="flex-grow-1">
-                      <div class="small">{{ n.title }}</div>
+                      <div class="small">{{ notificationTitle(n) }}</div>
                       <div class="text-muted" style="font-size: 0.75rem;">
                         {{ formatRelativeTime(n.created_at) }}
                       </div>
@@ -492,6 +492,7 @@ import { useAuthStore } from '~/stores/auth'
 import { usePersonalShoppingStore } from '~/stores/personalShopping'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useNotification } from '~/composables/useNotification'
+import { useNotificationLabel } from '~/composables/useNotificationLabel'
 
 const { t, locale, setLocale } = useI18n()
 const route = useRoute()
@@ -516,6 +517,7 @@ const authStore = useAuthStore()
 const psStore = usePersonalShoppingStore()
 const notifStore = useNotificationsStore()
 const { notifications, removeNotification } = useNotification()
+const { notificationTitle } = useNotificationLabel()
 const config = useRuntimeConfig()
 
 const formatRelativeTime = (iso: string) => {
