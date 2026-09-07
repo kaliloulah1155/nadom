@@ -1538,7 +1538,13 @@
       "monthlyEvolution": "Évolution mensuelle",
       "topDestinations": "Top Destinations",
       "exportError": "Erreur export {format}",
-      "applying": "Appliquer"
+      "applying": "Appliquer",
+      "filteredOn": "Filtré sur",
+      "monthsShort": "mois",
+      "expressedIn": "exprimé en",
+      "allDestinationsShort": "Toutes destinations",
+      "lastMonths": "derniers mois",
+      "aggregatedFcfa": "agrégé en FCFA"
     },
     "transactions": {
       "subtitle": "Encaissements, remboursements clients et reversements au marchand (NADOM).",
@@ -1904,7 +1910,8 @@
       "descriptionFr": "Description (FR)",
       "descriptionEn": "Description (EN)",
       "descriptionZh": "描述 (中文)",
-      "guidesAvailableCount": "{n} guides disponibles"
+      "guidesAvailableCount": "{n} guides disponibles",
+      "currency": "Devise"
     },
     "guideBookings": {
       "title": "Réservations guides",

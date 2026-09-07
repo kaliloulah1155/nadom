@@ -91,12 +91,12 @@
         <div class="mt-2">
           <small v-if="countryFilter" class="text-primary">
             <i class="bi bi-info-circle me-1"></i>
-            Filtré sur <strong>{{ countryFilter }}</strong> · {{ months }} mois · {{ yearFilter }}
-            — exprimé en {{ revenueCurrency }}.
+            {{ t('admin.reports.filteredOn') }} <strong>{{ countryFilter }}</strong> · {{ months }} {{ t('admin.reports.monthsShort') }} · {{ yearFilter }}
+            — {{ t('admin.reports.expressedIn') }} {{ revenueCurrency }}.
           </small>
           <small v-else class="text-muted">
             <i class="bi bi-info-circle me-1"></i>
-            Toutes destinations · {{ months }} derniers mois · {{ yearFilter }} — agrégé en FCFA.
+            {{ t('admin.reports.allDestinationsShort') }} · {{ months }} {{ t('admin.reports.lastMonths') }} · {{ yearFilter }} — {{ t('admin.reports.aggregatedFcfa') }}.
           </small>
         </div>
       </div>
@@ -107,11 +107,11 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h6 class="text-muted small">Volume d'affaires</h6>
+            <h6 class="text-muted small">{{ t('admin.reports.turnover') }}</h6>
             <h4 class="mb-0">{{ formatRevenue(reportsStore.overview?.revenue.current) }}</h4>
             <small :class="trendClass(reportsStore.overview?.revenue.trend)">
               <i :class="trendIcon(reportsStore.overview?.revenue.trend)"></i>
-              {{ formatPercent(reportsStore.overview?.revenue.percent_change) }} vs mois dernier
+              {{ formatPercent(reportsStore.overview?.revenue.percent_change) }} {{ t('admin.common.vsLastMonth') }}
             </small>
           </div>
         </div>
@@ -119,11 +119,11 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h6 class="text-muted small">Demandes traitées</h6>
+            <h6 class="text-muted small">{{ t('admin.reports.handledRequests') }}</h6>
             <h4 class="mb-0">{{ reportsStore.overview?.requests_handled.current ?? 0 }}</h4>
             <small :class="trendClass(reportsStore.overview?.requests_handled.trend)">
               <i :class="trendIcon(reportsStore.overview?.requests_handled.trend)"></i>
-              {{ formatPercent(reportsStore.overview?.requests_handled.percent_change) }} vs mois dernier
+              {{ formatPercent(reportsStore.overview?.requests_handled.percent_change) }} {{ t('admin.common.vsLastMonth') }}
             </small>
           </div>
         </div>
@@ -135,7 +135,7 @@
             <h4 class="mb-0">{{ reportsStore.overview?.new_clients.current ?? 0 }}</h4>
             <small :class="trendClass(reportsStore.overview?.new_clients.trend)">
               <i :class="trendIcon(reportsStore.overview?.new_clients.trend)"></i>
-              {{ formatPercent(reportsStore.overview?.new_clients.percent_change) }} vs mois dernier
+              {{ formatPercent(reportsStore.overview?.new_clients.percent_change) }} {{ t('admin.common.vsLastMonth') }}
             </small>
           </div>
         </div>
@@ -143,9 +143,9 @@
       <div class="col-sm-6 col-lg-3">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h6 class="text-muted small">Taux de satisfaction</h6>
+            <h6 class="text-muted small">{{ t('admin.reports.satisfactionRate') }}</h6>
             <h4 class="mb-0">{{ reportsStore.overview?.satisfaction.rate ?? 0 }}/{{ reportsStore.overview?.satisfaction.scale ?? 5 }}</h4>
-            <small class="text-success"><i class="bi bi-check-circle me-1"></i>{{ reportsStore.overview?.satisfaction.label || 'Stable' }}</small>
+            <small class="text-success"><i class="bi bi-check-circle me-1"></i>{{ reportsStore.overview?.satisfaction.label || t('admin.common.stable') }}</small>
           </div>
         </div>
       </div>
@@ -156,11 +156,11 @@
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Évolution mensuelle</h5>
+            <h5 class="mb-0">{{ t('admin.reports.monthlyEvolution') }}</h5>
             <select v-model.number="months" class="form-select form-select-sm" style="width: 150px;" @change="applyFilters">
-              <option :value="12">Derniers 12 mois</option>
-              <option :value="6">Derniers 6 mois</option>
-              <option :value="3">Derniers 3 mois</option>
+              <option :value="12">{{ t('admin.reports.last12Months') }}</option>
+              <option :value="6">{{ t('admin.reports.last6Months') }}</option>
+              <option :value="3">{{ t('admin.reports.last3Months') }}</option>
             </select>
           </div>
           <div class="card-body">
@@ -175,7 +175,7 @@
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-transparent">
-            <h5 class="mb-0">Top Destinations</h5>
+            <h5 class="mb-0">{{ t('admin.reports.topDestinations') }}</h5>
           </div>
           <div class="card-body">
             <div v-if="reportsStore.statsLoading && reportsStore.destinations.length === 0" class="text-center py-4">
@@ -269,7 +269,7 @@ const renderChart = async () => {
 
   const labels     = reportsStore.monthly?.labels || []
   const data       = reportsStore.monthly?.data   || []
-  const seriesName = `Volume d'affaires (${revenueCurrency.value})`
+  const seriesName = `${t('admin.reports.turnover')} (${revenueCurrency.value})`
 
   if (chartInstance) {
     chartInstance.updateOptions({
