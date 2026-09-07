@@ -2472,7 +2472,21 @@
       "blockDeleted": "Block deleted",
       "editSocial": "Edit link",
       "editContactBlock": "Edit contact block",
-      "newContactBlock": "New contact block"
+      "newContactBlock": "New contact block",
+      "icon": "Icon",
+      "network": "Network",
+      "order": "Order",
+      "contentAllLangs": "Content (FR / EN / 中文)",
+      "platform": "Platform",
+      "type": "Type",
+      "addressOption": "Address(es)",
+      "phoneOption": "Phone number(s)",
+      "emailOption": "Email(s)",
+      "frenchText": "French text",
+      "englishText": "English text",
+      "kindAddress": "Address",
+      "kindPhone": "Phone",
+      "kindEmail": "Email"
     }
   },
   "faq": {

@@ -2468,7 +2468,21 @@
       "blockDeleted": "Bloc supprimé",
       "editSocial": "Modifier le lien",
       "editContactBlock": "Modifier le bloc contact",
-      "newContactBlock": "Nouveau bloc contact"
+      "newContactBlock": "Nouveau bloc contact",
+      "icon": "Icône",
+      "network": "Réseau",
+      "order": "Ordre",
+      "contentAllLangs": "Contenu (FR / EN / 中文)",
+      "platform": "Plateforme",
+      "type": "Type",
+      "addressOption": "Adresse(s)",
+      "phoneOption": "Téléphone(s)",
+      "emailOption": "E-mail(s)",
+      "frenchText": "Texte français",
+      "englishText": "Texte anglais",
+      "kindAddress": "Adresse",
+      "kindPhone": "Téléphone",
+      "kindEmail": "E-mail"
     }
   },
   "faq": {

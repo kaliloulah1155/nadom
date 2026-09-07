@@ -76,7 +76,7 @@
             :class="aboutLang === 'fr' ? 'btn-primary' : 'btn-outline-secondary'"
             @click="aboutLang = 'fr'"
           >
-            Français
+            {{ t('admin.common.french') }}
           </button>
           <button
             type="button"
@@ -86,7 +86,7 @@
             :class="aboutLang === 'en' ? 'btn-primary' : 'btn-outline-secondary'"
             @click="aboutLang = 'en'"
           >
-            English
+            {{ t('admin.common.english') }}
           </button>
           <button
             type="button"
@@ -125,7 +125,7 @@
       <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
         <strong>{{ t('admin.footerAdmin.socialNetworks') }}</strong>
         <button v-can="['create', 'site-footer']" type="button" class="btn btn-sm btn-outline-primary" @click="openSocial()">
-          <i class="bi bi-plus-lg me-1"></i>Ajouter
+          <i class="bi bi-plus-lg me-1"></i>{{ t('admin.footerAdmin.add') }}
         </button>
       </div>
       <div class="card-body p-0">
@@ -133,11 +133,11 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Icône</th>
-                <th>Réseau</th>
-                <th>URL</th>
-                <th class="text-center">Ordre</th>
-                <th class="text-center">Actif</th>
+                <th>{{ t('admin.footerAdmin.icon') }}</th>
+                <th>{{ t('admin.footerAdmin.network') }}</th>
+                <th>{{ t('admin.footerAdmin.url') }}</th>
+                <th class="text-center">{{ t('admin.footerAdmin.order') }}</th>
+                <th class="text-center">{{ t('admin.common.active') }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -151,7 +151,7 @@
                 <td style="max-width: 260px;"><code class="small text-break">{{ row.url }}</code></td>
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
-                  <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">{{ row.is_active ? 'Oui' : 'Non' }}</span>
+                  <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">{{ row.is_active ? t('admin.common.yes') : t('admin.common.no') }}</span>
                 </td>
                 <td class="text-nowrap">
                   <button
@@ -193,7 +193,7 @@
       <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
         <strong>{{ t('admin.footerAdmin.contactBlocks') }}</strong>
         <button v-can="['create', 'site-footer']" type="button" class="btn btn-sm btn-outline-primary" @click="openContact()">
-          <i class="bi bi-plus-lg me-1"></i>Ajouter
+          <i class="bi bi-plus-lg me-1"></i>{{ t('admin.footerAdmin.add') }}
         </button>
       </div>
       <div class="card-body p-0">
@@ -201,10 +201,10 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Type</th>
-                <th>Contenu (FR / EN / 中文)</th>
-                <th class="text-center">Ordre</th>
-                <th class="text-center">Actif</th>
+                <th>{{ t('admin.footerAdmin.type') }}</th>
+                <th>{{ t('admin.footerAdmin.contentAllLangs') }}</th>
+                <th class="text-center">{{ t('admin.footerAdmin.order') }}</th>
+                <th class="text-center">{{ t('admin.common.active') }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -224,7 +224,7 @@
                 </td>
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
-                  <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">{{ row.is_active ? 'Oui' : 'Non' }}</span>
+                  <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">{{ row.is_active ? t('admin.common.yes') : t('admin.common.no') }}</span>
                 </td>
                 <td class="text-nowrap">
                   <button
@@ -272,7 +272,7 @@
           <form @submit.prevent="saveSocial">
             <div class="modal-body">
               <div class="mb-3" v-if="!socEditing">
-                <label class="form-label">Plateforme *</label>
+                <label class="form-label">{{ t('admin.footerAdmin.platform') }} *</label>
                 <select v-model="socForm.platform_code" class="form-select" required>
                   <option v-for="(meta, code) in platformOptions" :key="code" :value="code">
                     {{ meta.label }}
@@ -280,29 +280,29 @@
                 </select>
               </div>
               <div class="mb-3" v-else>
-                <label class="form-label">Plateforme</label>
+                <label class="form-label">{{ t('admin.footerAdmin.platform') }}</label>
                 <input type="text" class="form-control" :value="platformOptions[socForm.platform_code]?.label || socForm.platform_code" disabled />
               </div>
               <div class="mb-3">
-                <label class="form-label">URL *</label>
+                <label class="form-label">{{ t('admin.footerAdmin.url') }} *</label>
                 <input v-model="socForm.url" type="url" class="form-control" placeholder="https://..." required />
               </div>
               <div class="row">
                 <div class="col-6 mb-3">
-                  <label class="form-label">Ordre</label>
+                  <label class="form-label">{{ t('admin.footerAdmin.order') }}</label>
                   <input v-model.number="socForm.display_order" type="number" min="0" class="form-control" />
                 </div>
                 <div class="col-6 mb-3 d-flex align-items-end">
                   <div class="form-check">
                     <input id="socAct" v-model="socForm.is_active" type="checkbox" class="form-check-input" />
-                    <label class="form-check-label" for="socAct">Actif</label>
+                    <label class="form-check-label" for="socAct">{{ t('admin.common.active') }}</label>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="savingSocialSubmit">
-                Annuler
+                {{ t('admin.common.cancel') }}
               </button>
               <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" :disabled="savingSocialSubmit">
                 <span v-if="savingSocialSubmit" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
@@ -325,41 +325,41 @@
           <form @submit.prevent="saveContact">
             <div class="modal-body">
               <div class="mb-3">
-                <label class="form-label">Type *</label>
+                <label class="form-label">{{ t('admin.footerAdmin.type') }} *</label>
                 <select v-model="cntForm.kind" class="form-select" :disabled="!!cntEditing">
-                  <option value="address">Adresse(s)</option>
-                  <option value="phone">Téléphone(s)</option>
-                  <option value="email">E-mail(s)</option>
+                  <option value="address">{{ t('admin.footerAdmin.addressOption') }}</option>
+                  <option value="phone">{{ t('admin.footerAdmin.phoneOption') }}</option>
+                  <option value="email">{{ t('admin.footerAdmin.emailOption') }}</option>
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Texte français</label>
-                <textarea v-model="cntForm.body_fr" class="form-control" rows="4" placeholder="Une ligne ou plusieurs lignes"></textarea>
+                <label class="form-label">{{ t('admin.footerAdmin.frenchText') }}</label>
+                <textarea v-model="cntForm.body_fr" class="form-control" rows="4" :placeholder="t('admin.footerAdmin.oneOrMoreLines')"></textarea>
               </div>
               <div class="mb-3">
-                <label class="form-label">Texte anglais</label>
+                <label class="form-label">{{ t('admin.footerAdmin.englishText') }}</label>
                 <textarea v-model="cntForm.body_en" class="form-control" rows="4"></textarea>
               </div>
               <div class="mb-3">
-                <label class="form-label">中文</label>
+                <label class="form-label">{{ t('admin.common.chinese') }}</label>
                 <textarea v-model="cntForm.body_zh" class="form-control" rows="4"></textarea>
               </div>
               <div class="row">
                 <div class="col-6 mb-3">
-                  <label class="form-label">Ordre</label>
+                  <label class="form-label">{{ t('admin.footerAdmin.order') }}</label>
                   <input v-model.number="cntForm.display_order" type="number" min="0" class="form-control" />
                 </div>
                 <div class="col-6 mb-3 d-flex align-items-end">
                   <div class="form-check">
                     <input id="cntAct" v-model="cntForm.is_active" type="checkbox" class="form-check-input" />
-                    <label class="form-check-label" for="cntAct">Actif</label>
+                    <label class="form-check-label" for="cntAct">{{ t('admin.common.active') }}</label>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="savingContactSubmit">
-                Annuler
+                {{ t('admin.common.cancel') }}
               </button>
               <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" :disabled="savingContactSubmit">
                 <span v-if="savingContactSubmit" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
@@ -541,9 +541,9 @@ const cntForm = reactive({
 })
 
 function kindLabel(k: string) {
-  if (k === 'address') return 'Adresse'
-  if (k === 'phone') return 'Téléphone'
-  if (k === 'email') return 'E-mail'
+  if (k === 'address') return t('admin.footerAdmin.kindAddress')
+  if (k === 'phone') return t('admin.footerAdmin.kindPhone')
+  if (k === 'email') return t('admin.footerAdmin.kindEmail')
   return k
 }
 

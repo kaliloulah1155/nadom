@@ -2471,7 +2471,21 @@
       "blockDeleted": "区块已删除",
       "editSocial": "编辑链接",
       "editContactBlock": "编辑联系区块",
-      "newContactBlock": "新建联系区块"
+      "newContactBlock": "新建联系区块",
+      "icon": "图标",
+      "network": "平台",
+      "order": "顺序",
+      "contentAllLangs": "内容 (FR / EN / 中文)",
+      "platform": "平台",
+      "type": "类型",
+      "addressOption": "地址",
+      "phoneOption": "电话",
+      "emailOption": "邮箱",
+      "frenchText": "法语文本",
+      "englishText": "英语文本",
+      "kindAddress": "地址",
+      "kindPhone": "电话",
+      "kindEmail": "邮箱"
     }
   },
   "faq": {
