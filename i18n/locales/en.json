@@ -1522,7 +1522,14 @@
       "ticketCreated": "Ticket created",
       "ticketDeleted": "Ticket deleted",
       "chooseClientOrShipment": "Choose a client or a shipment.",
-      "clientFallback": "Client #{id}"
+      "clientFallback": "Client #{id}",
+      "shipmentConcerned": "Related shipment",
+      "selectShipmentFirstHint": "Select a shipment first to automatically link the client.",
+      "openingEditor": "Opening the editor…",
+      "resolvedSingular": "Resolved",
+      "closedSingular": "Closed",
+      "shipStatusCustoms": "Customs",
+      "shipStatusDelivery": "Out for delivery"
     },
     "reports": {
       "title": "Reports & Statistics",

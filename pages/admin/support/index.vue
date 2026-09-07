@@ -235,7 +235,7 @@
                     <span>
                       {{ editingTicket.user
                           ? ([editingTicket.user.firstname, editingTicket.user.lastname].filter(Boolean).join(' ') || editingTicket.user.email)
-                          : `Client #${editingTicket.user_id}` }}
+                          : t('admin.support.clientFallback', { id: editingTicket.user_id }) }}
                     </span>
                   </div>
                   <!-- Création sans expédition : sélection manuelle -->
@@ -259,7 +259,7 @@
                 <!-- Expédition -->
                 <div class="col-12">
                   <label class="form-label d-flex align-items-center gap-2">
-                    Expédition concernée
+                    {{ t('admin.support.shipmentConcerned') }}
                     <span v-if="shipmentsLoading || shipmentsPickerLoading" class="spinner-border spinner-border-sm text-primary" style="width:.75rem;height:.75rem;"></span>
                   </label>
                   <!-- Édition : expéditions du client du ticket -->
@@ -288,7 +288,7 @@
                     </option>
                   </select>
                   <small v-if="!editingTicket" class="text-muted d-block">
-                    Sélectionnez d'abord une expédition pour rattacher automatiquement le client.
+                    {{ t('admin.support.selectShipmentFirstHint') }}
                   </small>
                 </div>
 
@@ -318,7 +318,7 @@
                 <div class="col-12">
                   <label class="form-label">{{ t('admin.support.description') }}</label>
                   <div v-if="!wysiwygInModal" class="rounded border bg-light text-muted small p-3" style="min-height: 180px">
-                    Ouverture de l'éditeur…
+                    {{ t('admin.support.openingEditor') }}
                   </div>
                   <WysiwygEditor v-else v-model="form.description" height="180px" />
                 </div>
@@ -333,22 +333,22 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Priorité</label>
+                  <label class="form-label">{{ t('admin.support.priority') }}</label>
                   <select v-model="form.priority" class="form-select">
-                    <option value="low">Basse</option>
-                    <option value="medium">Normale</option>
-                    <option value="high">Haute</option>
-                    <option value="urgent">Urgente</option>
+                    <option value="low">{{ t('admin.support.low') }}</option>
+                    <option value="medium">{{ t('admin.support.normal') }}</option>
+                    <option value="high">{{ t('admin.support.high') }}</option>
+                    <option value="urgent">{{ t('admin.support.urgent') }}</option>
                   </select>
                 </div>
                 <div v-if="editingTicket" class="col-12">
-                  <label class="form-label">Statut</label>
+                  <label class="form-label">{{ t('admin.dashboard.status') }}</label>
                   <select v-model="form.status" class="form-select">
-                    <option value="open">Ouvert</option>
-                    <option value="in_progress">En cours</option>
+                    <option value="open">{{ t('admin.support.open') }}</option>
+                    <option value="in_progress">{{ t('admin.support.inProgress') }}</option>
                     <option value="pending">{{ t('admin.requests.status.pending') }}</option>
-                    <option value="resolved">Résolu</option>
-                    <option value="closed">Fermé</option>
+                    <option value="resolved">{{ t('admin.support.resolvedSingular') }}</option>
+                    <option value="closed">{{ t('admin.support.closedSingular') }}</option>
                   </select>
                 </div>
               </div>
@@ -386,11 +386,11 @@ const { formatDateShort } = useFormatters()
 const config = useRuntimeConfig()
 
 const statusOrder = [
-  { code: 'open', label: 'Ouvert' },
-  { code: 'in_progress', label: 'En cours' },
-  { code: 'pending', label: 'Attente' },
-  { code: 'resolved', label: 'Résolu' },
-  { code: 'closed', label: 'Fermé' },
+  { code: 'open', label: t('admin.support.open') },
+  { code: 'in_progress', label: t('admin.support.inProgress') },
+  { code: 'pending', label: t('admin.support.waiting') },
+  { code: 'resolved', label: t('admin.support.resolvedSingular') },
+  { code: 'closed', label: t('admin.support.closedSingular') },
 ]
 
 const resolveAvatar = (user: any) => {
@@ -489,10 +489,10 @@ const getPriorityBadgeClass = (priority: string) => {
 
 const getPriorityLabel = (priority: string) => {
   const labels: Record<string, string> = {
-    low: 'Basse',
-    medium: 'Normale',
-    high: 'Haute',
-    urgent: 'Urgente'
+    low: t('admin.support.low'),
+    medium: t('admin.support.normal'),
+    high: t('admin.support.high'),
+    urgent: t('admin.support.urgent')
   }
   return labels[priority] || priority
 }
@@ -510,23 +510,23 @@ const getStatusBadgeClass = (status: string) => {
 
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
-    open: 'Ouvert',
-    in_progress: 'En cours',
-    pending: 'En attente',
-    resolved: 'Résolu',
-    closed: 'Fermé'
+    open: t('admin.support.open'),
+    in_progress: t('admin.support.inProgress'),
+    pending: t('admin.support.waiting'),
+    resolved: t('admin.support.resolvedSingular'),
+    closed: t('admin.support.closedSingular')
   }
   return labels[status] || status
 }
 
 const shipmentStatusLabel = (s: string | undefined) => {
   const m: Record<string, string> = {
-    pending: 'En attente',
-    picked_up: 'Collecté',
-    in_transit: 'Transit',
-    in_customs: 'Douane',
-    out_for_delivery: 'Livraison',
-    delivered: 'Livré'
+    pending: t('admin.support.waiting'),
+    picked_up: t('admin.shipments.collected'),
+    in_transit: t('admin.dashboard.transit'),
+    in_customs: t('admin.support.shipStatusCustoms'),
+    out_for_delivery: t('admin.support.shipStatusDelivery'),
+    delivered: t('admin.shipments.delivered')
   }
   return m[s || ''] || s || ''
 }
@@ -583,7 +583,7 @@ async function loadShipmentPicker() {
 function formatShipmentPickerLabel(s: (typeof shipmentPickerList.value)[0]) {
   const u = s.user
   const name = u ? `${u.firstname ?? ''} ${u.lastname ?? ''}`.trim() : ''
-  const client = name || (s.user_id ? `Client #${s.user_id}` : '—')
+  const client = name || (s.user_id ? t('admin.support.clientFallback', { id: s.user_id }) : '—')
   return `${s.tracking_number || s.id} · ${client} · ${s.destination_city || '?'} · ${shipmentStatusLabel(s.status)}`
 }
 

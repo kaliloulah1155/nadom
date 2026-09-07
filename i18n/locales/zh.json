@@ -1522,7 +1522,14 @@
       "ticketCreated": "工单已创建",
       "ticketDeleted": "工单已删除",
       "chooseClientOrShipment": "请选择客户或运输。",
-      "clientFallback": "客户 #{id}"
+      "clientFallback": "客户 #{id}",
+      "shipmentConcerned": "关联货运",
+      "selectShipmentFirstHint": "请先选择一个货运，以便自动关联客户。",
+      "openingEditor": "正在打开编辑器…",
+      "resolvedSingular": "已解决",
+      "closedSingular": "已关闭",
+      "shipStatusCustoms": "清关中",
+      "shipStatusDelivery": "派送中"
     },
     "reports": {
       "title": "报告与统计",

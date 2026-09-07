@@ -1517,6 +1517,13 @@
       "ticketDeleted": "Ticket supprimé",
       "chooseClientOrShipment": "Choisissez un client ou une expédition.",
       "clientFallback": "Client #{id}",
+      "shipmentConcerned": "Expédition concernée",
+      "selectShipmentFirstHint": "Sélectionnez d'abord une expédition pour rattacher automatiquement le client.",
+      "openingEditor": "Ouverture de l'éditeur…",
+      "resolvedSingular": "Résolu",
+      "closedSingular": "Fermé",
+      "shipStatusCustoms": "Douane",
+      "shipStatusDelivery": "Livraison",
       "statusMap": {
         "picked_up": "Collecté"
       }
