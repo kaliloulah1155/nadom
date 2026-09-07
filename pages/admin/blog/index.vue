@@ -48,7 +48,7 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="badge bg-primary">{{ post.category }}</span>
               <span :class="['badge', post.is_published ? 'bg-success' : 'bg-warning']">
-                {{ post.is_published ? 'Publié' : 'Brouillon' }}
+                {{ post.is_published ? t('admin.blog.published') : t('admin.blog.drafts') }}
               </span>
             </div>
             <h6 class="card-title">{{ truncate(post.title_fr || post.title_en || '', 50) }}</h6>
@@ -127,17 +127,17 @@
                 <div class="tab-pane fade show active" id="post-fr">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Titre (FR) *</label>
+                      <label class="form-label">{{ t('admin.blog.titleFr') }} *</label>
                       <input v-model="form.title_fr" type="text" class="form-control" required />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Extrait (FR)</label>
+                      <label class="form-label">{{ t('admin.blog.excerptFr') }}</label>
                       <WysiwygEditor v-model="form.excerpt_fr" height="120px" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Contenu (FR)</label>
+                      <label class="form-label">{{ t('admin.blog.contentFr') }}</label>
                       <p class="small text-muted mb-2">
-                        Collez une URL YouTube (page vidéo ou partager) ou utilisez le bouton « vidéo » de l'éditeur : la lecture s'affiche sur le site.
+                        {{ t('admin.blog.contentFrHint') }}
                       </p>
                       <WysiwygEditor v-model="form.content_fr" height="200px" />
                     </div>
@@ -146,17 +146,17 @@
                 <div class="tab-pane fade" id="post-en">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">Title (EN) *</label>
+                      <label class="form-label">{{ t('admin.blog.titleEn') }} *</label>
                       <input v-model="form.title_en" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Excerpt (EN)</label>
+                      <label class="form-label">{{ t('admin.blog.excerptEn') }}</label>
                       <WysiwygEditor v-model="form.excerpt_en" height="120px" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Content (EN)</label>
+                      <label class="form-label">{{ t('admin.blog.contentEn') }}</label>
                       <p class="small text-muted mb-2">
-                        Paste a YouTube URL or use the editor video button; playback is embedded on the public article.
+                        {{ t('admin.blog.contentEnHint') }}
                       </p>
                       <WysiwygEditor v-model="form.content_en" height="200px" />
                     </div>
@@ -165,15 +165,15 @@
                 <div class="tab-pane fade" id="post-zh">
                   <div class="row g-3">
                     <div class="col-12">
-                      <label class="form-label">标题 (中文)</label>
+                      <label class="form-label">{{ t('admin.blog.titleZh') }}</label>
                       <input v-model="form.title_zh" type="text" class="form-control" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">摘要 (中文)</label>
+                      <label class="form-label">{{ t('admin.blog.excerptZh') }}</label>
                       <WysiwygEditor v-model="form.excerpt_zh" height="120px" />
                     </div>
                     <div class="col-12">
-                      <label class="form-label">正文 (中文)</label>
+                      <label class="form-label">{{ t('admin.blog.contentZh') }}</label>
                       <WysiwygEditor v-model="form.content_zh" height="200px" />
                     </div>
                   </div>
@@ -182,25 +182,25 @@
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Slug *</label>
+                  <label class="form-label">{{ t('admin.blog.slug') }} *</label>
                   <input v-model="form.slug" type="text" class="form-control" required />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Catégorie</label>
-                  <input v-model="form.category" type="text" class="form-control" placeholder="Actualités" />
+                  <label class="form-label">{{ t('admin.blog.category') }}</label>
+                  <input v-model="form.category" type="text" class="form-control" :placeholder="t('admin.blog.categoryPlaceholder')" />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label">Temps de lecture (min)</label>
+                  <label class="form-label">{{ t('admin.blog.readTime') }}</label>
                   <input v-model.number="form.read_time" type="number" class="form-control" min="1" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Auteur</label>
+                  <label class="form-label">{{ t('admin.blog.author') }}</label>
                   <input v-model="form.author" type="text" class="form-control" />
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Image</label>
+                  <label class="form-label">{{ t('admin.blog.image') }}</label>
                   <div class="d-flex align-items-center gap-3">
                     <img
                       v-if="form.image"
@@ -216,7 +216,7 @@
                         :disabled="uploading"
                         @change="onImageSelected"
                       />
-                      <small v-if="uploading" class="text-muted">Téléversement…</small>
+                      <small v-if="uploading" class="text-muted">{{ t('admin.blog.upload') }}</small>
                       <small v-else-if="form.image" class="text-muted text-truncate d-block">{{ form.image }}</small>
                     </div>
                     <button
@@ -231,15 +231,15 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Tags (séparés par virgule)</label>
-                  <input v-model="form.tagsInput" type="text" class="form-control" placeholder="news, actualité, chine" />
+                  <label class="form-label">{{ t('admin.blog.tags') }}</label>
+                  <input v-model="form.tagsInput" type="text" class="form-control" :placeholder="t('admin.blog.tagsPlaceholder')" />
                 </div>
 
                 <div class="col-12">
                   <div class="form-check">
                     <input v-model="form.is_published" type="checkbox" class="form-check-input" id="postPublished" />
                     <label class="form-check-label" for="postPublished">
-                      Publié
+                      {{ t('admin.blog.publishedStatus') }}
                     </label>
                   </div>
                 </div>
