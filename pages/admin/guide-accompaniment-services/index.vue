@@ -2,11 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1">Services d'accompagnement (page Guides)</h4>
-        <p class="text-muted mb-0">{{ rows.length }} carte(s) — contenu multilingue FR / EN (éditeur riche)</p>
+        <h4 class="mb-1">{{ t('admin.guideServices.title') }}</h4>
+        <p class="text-muted mb-0">{{ t('admin.guideServices.subtitle', { n: rows.length }) }}</p>
       </div>
       <button v-can="['create', 'guide-accompaniment-services']" type="button" class="btn btn-primary" @click="openModal()">
-        <i class="bi bi-plus-lg me-2"></i>Nouvelle carte
+        <i class="bi bi-plus-lg me-2"></i>{{ t('admin.guideServices.newCard') }}
       </button>
     </div>
 
@@ -16,17 +16,17 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Slug</th>
-                <th>Titre (FR)</th>
-                <th class="text-center">Ordre</th>
-                <th class="text-center">Actif</th>
-                <th>Actions</th>
+                <th>{{ t('admin.guideServices.colSlug') }}</th>
+                <th>{{ t('admin.guideServices.colTitleFr') }}</th>
+                <th class="text-center">{{ t('admin.guideServices.colOrder') }}</th>
+                <th class="text-center">{{ t('admin.guideServices.colActive') }}</th>
+                <th>{{ t('admin.guideServices.colActions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="rows.length === 0">
                 <td colspan="5" class="text-center py-4 text-muted">
-                  Aucun service — importez les données ou créez une carte.
+                  {{ t('admin.guideServices.noServices') }}
                 </td>
               </tr>
               <tr v-for="row in rows" :key="row.id">
@@ -35,7 +35,7 @@
                 <td class="text-center">{{ row.display_order }}</td>
                 <td class="text-center">
                   <span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">
-                    {{ row.is_active ? 'Oui' : 'Non' }}
+                    {{ row.is_active ? t('admin.common.yes') : t('admin.common.no') }}
                   </span>
                 </td>
                 <td>
@@ -71,36 +71,36 @@
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Modifier la carte' : 'Nouvelle carte' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.guideServices.editCard') : t('admin.guideServices.modalNew') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form @submit.prevent="save">
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <label class="form-label">Slug * <small class="text-muted">(unique, non modifiable après création)</small></label>
+                  <label class="form-label">{{ t('admin.guideServices.colSlug') }} * <small class="text-muted">{{ t('admin.guideServices.slugHint') }}</small></label>
                   <input
                     v-model="form.slug"
                     type="text"
                     class="form-control"
-                    placeholder="visit-marches"
+                    :placeholder="t('admin.guideServices.slugPlaceholder')"
                     required
                     pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
                     :disabled="!!editing"
                   />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Icône Bootstrap</label>
-                  <input v-model="form.icon" type="text" class="form-control" placeholder="bi bi-shop" />
+                  <label class="form-label">{{ t('admin.guideServices.iconBootstrap') }}</label>
+                  <input v-model="form.icon" type="text" class="form-control" :placeholder="t('admin.guideServices.iconPlaceholder')" />
                 </div>
                 <div class="col-md-2">
-                  <label class="form-label">Ordre</label>
+                  <label class="form-label">{{ t('admin.guideServices.order') }}</label>
                   <input v-model.number="form.display_order" type="number" min="0" class="form-control" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                   <div class="form-check">
                     <input id="gas-active" v-model="form.is_active" class="form-check-input" type="checkbox" />
-                    <label class="form-check-label" for="gas-active">Actif</label>
+                    <label class="form-check-label" for="gas-active">{{ t('admin.guideServices.active') }}</label>
                   </div>
                 </div>
               </div>
@@ -120,11 +120,11 @@
               <div class="tab-content mb-3">
                 <div id="gas-fr" class="tab-pane fade show active">
                   <div class="mb-3">
-                    <label class="form-label">Titre (FR)</label>
+                    <label class="form-label">{{ t('admin.guideServices.titleFr') }}</label>
                     <input v-model="form.title_fr" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (FR)</label>
+                    <label class="form-label">{{ t('admin.guideServices.descriptionFr') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_fr" height="140px" />
                     </ClientOnly>
@@ -132,11 +132,11 @@
                 </div>
                 <div id="gas-en" class="tab-pane fade">
                   <div class="mb-3">
-                    <label class="form-label">Title (EN)</label>
+                    <label class="form-label">{{ t('admin.guideServices.titleEn') }}</label>
                     <input v-model="form.title_en" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (EN)</label>
+                    <label class="form-label">{{ t('admin.guideServices.descriptionEn') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_en" height="140px" />
                     </ClientOnly>
@@ -144,11 +144,11 @@
                 </div>
                 <div id="gas-zh" class="tab-pane fade">
                   <div class="mb-3">
-                    <label class="form-label">标题 (中文)</label>
+                    <label class="form-label">{{ t('admin.guideServices.titleZh') }}</label>
                     <input v-model="form.title_zh" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">描述 (中文)</label>
+                    <label class="form-label">{{ t('admin.guideServices.descriptionZh') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_zh" height="140px" />
                     </ClientOnly>
@@ -158,12 +158,12 @@
 
               <div class="border rounded p-3 bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="form-label fw-semibold mb-0">Points clés (liste à puces sur le site)</label>
+                  <label class="form-label fw-semibold mb-0">{{ t('admin.guideServices.featuresLabel') }}</label>
                   <button type="button" class="btn btn-sm btn-outline-primary" @click="addFeatureRow">
-                    <i class="bi bi-plus-lg"></i> Ligne
+                    <i class="bi bi-plus-lg"></i> {{ t('admin.guideServices.line') }}
                   </button>
                 </div>
-                <p class="small text-muted mb-3">Une ligne = FR / EN / 中文 (éditeur riche).</p>
+                <p class="small text-muted mb-3">{{ t('admin.guideServices.featuresHint') }}</p>
                 <div v-for="(_, idx) in form.features_fr" :key="'feat-' + idx" class="row g-2 mb-3 align-items-start border-bottom pb-3">
                   <div class="col-md-4">
                     <span class="small text-muted">FR {{ idx + 1 }}</span>
@@ -184,7 +184,7 @@
                     </ClientOnly>
                   </div>
                   <div class="col-md-1 d-flex justify-content-end pt-4">
-                    <button type="button" class="btn btn-outline-danger btn-sm" title="Supprimer la ligne" @click="removeFeatureRow(idx)">
+                    <button type="button" class="btn btn-outline-danger btn-sm" :title="t('admin.guideServices.deleteLineTitle')" @click="removeFeatureRow(idx)">
                       <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
@@ -361,7 +361,7 @@ const save = async () => {
         display_order: form.display_order,
         is_active: form.is_active
       })
-      success(t('admin.homeServices.updated'))
+      success(t('admin.guideServices.updated'))
     } else {
       await store.create({
         slug: form.slug.trim(),
@@ -378,12 +378,12 @@ const save = async () => {
         display_order: form.display_order,
         is_active: form.is_active
       })
-      success(t('admin.homeServices.created'))
+      success(t('admin.guideServices.created'))
     }
     getBsModal()?.hide()
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || "Erreur lors de l'enregistrement")
+    error(e?.message || t('admin.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -391,14 +391,14 @@ const save = async () => {
 
 const remove = async (row: GuideAccompanimentServiceRow) => {
   if (deletingId.value) return
-  if (!await useSwal().confirmDelete(`Supprimer la carte « ${row.slug} » ?`)) return
+  if (!await useSwal().confirmDelete(t('admin.confirm.deleteGuideServiceCard', { slug: row.slug }))) return
   deletingId.value = row.id
   try {
     await store.remove(row.id)
-    success(t('admin.homeServices.deleted'))
+    success(t('admin.guideServices.deleted'))
     await store.fetchAdmin()
   } catch (e: any) {
-    error(e?.message || 'Erreur suppression')
+    error(e?.message || t('admin.messages.deleteError'))
   } finally {
     deletingId.value = null
   }
