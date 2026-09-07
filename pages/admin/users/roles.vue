@@ -147,22 +147,22 @@
           <form @submit.prevent="handleSaveRole">
             <div class="modal-body p-4">
               <div class="mb-3">
-                <label class="form-label small text-uppercase fw-bold">Nom du rôle *</label>
-                <input v-model="roleForm.libelle" type="text" class="form-control" required placeholder="Ex: Manager Logistique" />
+                <label class="form-label small text-uppercase fw-bold">{{ t('admin.users.roleName') }} *</label>
+                <input v-model="roleForm.libelle" type="text" class="form-control" required />
               </div>
               <div class="mb-3">
-                <label class="form-label small text-uppercase fw-bold">Code unique *</label>
-                <input v-model="roleForm.code" type="text" class="form-control" required placeholder="Ex: manager_log" :disabled="!!editingRole" />
+                <label class="form-label small text-uppercase fw-bold">{{ t('admin.users.uniqueCode') }} *</label>
+                <input v-model="roleForm.code" type="text" class="form-control" required :disabled="!!editingRole" />
               </div>
               <div class="mb-0">
-                <label class="form-label small text-uppercase fw-bold">Description</label>
-                <WysiwygEditor v-model="roleForm.description" height="140px" placeholder="Description courte des responsabilités..." />
+                <label class="form-label small text-uppercase fw-bold">{{ t('admin.users.description') }}</label>
+                <WysiwygEditor v-model="roleForm.description" height="140px" :placeholder="t('admin.users.roleDescription')" />
               </div>
             </div>
             <div class="modal-footer border-0 pb-4 px-4">
               <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ t('admin.common.cancel') }}</button>
               <button type="submit" class="btn btn-primary px-4" :disabled="submitting">
-                {{ editingRole ? 'Mettre à jour' : 'Créer le rôle' }}
+                {{ editingRole ? t('admin.users.updateRole') : t('admin.users.createRole') }}
               </button>
             </div>
           </form>

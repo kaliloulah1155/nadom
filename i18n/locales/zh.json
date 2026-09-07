@@ -1902,7 +1902,14 @@
       "updateFailed": "更新失败",
       "createFailed": "创建失败",
       "modalEdit": "编辑国家",
-      "modalNew": "新建国家"
+      "modalNew": "新建国家",
+      "currencyNotSet": "— 未设置 —",
+      "statusActive": "启用",
+      "statusInactive": "停用",
+      "statusArchived": "已归档",
+      "nameFr": "显示名称 (FR)",
+      "nameEn": "显示名称 (EN)",
+      "nameZh": "显示名称 (中文)"
     },
     "destinations": {
       "title": "运输目的地",

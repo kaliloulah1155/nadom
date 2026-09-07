@@ -1899,7 +1899,14 @@
       "updateFailed": "Échec de la mise à jour",
       "createFailed": "Échec de la création",
       "modalEdit": "Modifier le pays",
-      "modalNew": "Nouveau pays"
+      "modalNew": "Nouveau pays",
+      "currencyNotSet": "— Non renseignée —",
+      "statusActive": "Actif",
+      "statusInactive": "Inactif",
+      "statusArchived": "Archivé",
+      "nameFr": "Nom affiché (FR)",
+      "nameEn": "Nom affiché (EN)",
+      "nameZh": "Nom affiché (中文)"
     },
     "destinations": {
       "title": "Destinations d'expédition",

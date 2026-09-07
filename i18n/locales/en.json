@@ -1903,7 +1903,14 @@
       "updateFailed": "Update failed",
       "createFailed": "Creation failed",
       "modalEdit": "Edit country",
-      "modalNew": "New country"
+      "modalNew": "New country",
+      "currencyNotSet": "— Not set —",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "statusArchived": "Archived",
+      "nameFr": "Display name (FR)",
+      "nameEn": "Display name (EN)",
+      "nameZh": "Display name (中文)"
     },
     "destinations": {
       "title": "Shipping destinations",

@@ -129,7 +129,7 @@
                   <input v-model="form.label" type="text" class="form-control" required maxlength="255" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Code pays * <span class="text-muted small">(ISO, ex. ci, fr)</span></label>
+                  <label class="form-label">{{ t('admin.countries.countryCode') }} * <span class="text-muted small">(ISO, ex. ci, fr)</span></label>
                   <input
                     v-model="form.code"
                     type="text"
@@ -143,28 +143,28 @@
                   />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Indicatif téléphonique</label>
+                  <label class="form-label">{{ t('admin.countries.phoneDial') }}</label>
                   <input v-model="form.phone_code" type="text" class="form-control" maxlength="10" placeholder="+225" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Devise (réf. catégories DVS)</label>
+                  <label class="form-label">{{ t('admin.countries.currencyRef') }}</label>
                   <select v-model="form.currency_uuid" class="form-select">
-                    <option value="">— Non renseignée —</option>
+                    <option value="">{{ t('admin.countries.currencyNotSet') }}</option>
                     <option v-for="c in currencyOptions" :key="c.uuid" :value="c.uuid">
                       {{ categoryLabel(c) }} ({{ c.code }})
                     </option>
                   </select>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Ordre d'affichage *</label>
+                  <label class="form-label">{{ t('admin.countries.displayOrder') }} *</label>
                   <input v-model.number="form.sort_order" type="number" min="0" class="form-control" required />
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ t('admin.dashboard.status') }}</label>
                   <select v-model.number="form.status" class="form-select">
-                    <option :value="1">Actif</option>
-                    <option :value="2">Inactif</option>
-                    <option :value="0">Archivé</option>
+                    <option :value="1">{{ t('admin.countries.statusActive') }}</option>
+                    <option :value="2">{{ t('admin.countries.statusInactive') }}</option>
+                    <option :value="0">{{ t('admin.countries.statusArchived') }}</option>
                   </select>
                 </div>
               </div>
@@ -182,15 +182,15 @@
               </ul>
               <div class="tab-content">
                 <div id="country-name-fr" class="tab-pane fade show active">
-                  <label class="form-label">Nom affiché (FR)</label>
+                  <label class="form-label">{{ t('admin.countries.nameFr') }}</label>
                   <input v-model="form.name_fr" type="text" class="form-control" maxlength="150" />
                 </div>
                 <div id="country-name-en" class="tab-pane fade">
-                  <label class="form-label">Display name (EN)</label>
+                  <label class="form-label">{{ t('admin.countries.nameEn') }}</label>
                   <input v-model="form.name_en" type="text" class="form-control" maxlength="150" />
                 </div>
                 <div id="country-name-zh" class="tab-pane fade">
-                  <label class="form-label">显示名称 (中文)</label>
+                  <label class="form-label">{{ t('admin.countries.nameZh') }}</label>
                   <input v-model="form.name_zh" type="text" class="form-control" maxlength="150" />
                 </div>
               </div>
