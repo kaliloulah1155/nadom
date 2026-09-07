@@ -178,7 +178,7 @@
                   <input v-model="form.lastname" type="text" class="form-control" required placeholder="Ex: Dupont" />
                 </div>
                 <div class="col-md-12">
-                  <label class="form-label fw-medium small text-uppercase">Email *</label>
+                  <label class="form-label fw-medium small text-uppercase">{{ t('admin.users.email') }} *</label>
                   <input v-model="form.email" type="email" class="form-control" required placeholder="email@exemple.com" />
                 </div>
                 

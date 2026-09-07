@@ -56,7 +56,7 @@
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label class="text-muted small d-block mb-1">Email</label>
+              <label class="text-muted small d-block mb-1">{{ t('admin.users.email') }}</label>
               <a :href="`mailto:${user.email}`" class="fw-medium">{{ user.email }}</a>
             </div>
             <div class="mb-3">
@@ -91,7 +91,7 @@
           <div class="col-4">
             <div class="card border-0 shadow-sm text-center p-3">
               <div class="h4 mb-0">{{ userVisaApplications.length }}</div>
-              <small class="text-muted">Visa</small>
+              <small class="text-muted">{{ t('admin.nav.visas') }}</small>
             </div>
           </div>
         </div>
@@ -130,8 +130,8 @@
                       <tr>
                         <th class="ps-4">{{ t('admin.requests.request') }}</th>
                         <th>{{ t('admin.dashboard.status') }}</th>
-                        <th>Date</th>
-                        <th class="text-end pe-4">Action</th>
+                        <th>{{ t('admin.shipments.date') }}</th>
+                        <th class="text-end pe-4">{{ t('admin.common.actions') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -164,10 +164,10 @@
                   <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="ps-4">Tracking #</th>
+                        <th class="ps-4">{{ t('admin.shipments.trackingNumber') }}</th>
                         <th>{{ t('admin.shipments.destination') }}</th>
                         <th>{{ t('admin.dashboard.status') }}</th>
-                        <th class="text-end pe-4">Action</th>
+                        <th class="text-end pe-4">{{ t('admin.common.actions') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -201,8 +201,8 @@
                       <tr>
                         <th class="ps-4">{{ t('admin.visas.type') }}</th>
                         <th>{{ t('admin.dashboard.status') }}</th>
-                        <th>Date</th>
-                        <th class="text-end pe-4">Action</th>
+                        <th>{{ t('admin.shipments.date') }}</th>
+                        <th class="text-end pe-4">{{ t('admin.common.actions') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -254,7 +254,7 @@
                   <input v-model="editForm.lastname" type="text" class="form-control" required />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ t('admin.users.email') }}</label>
                   <input v-model="editForm.email" type="email" class="form-control" required />
                 </div>
                 <div class="col-12">
