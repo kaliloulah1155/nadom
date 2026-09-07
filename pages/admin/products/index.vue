@@ -80,7 +80,7 @@
               </td>
               <td>
                 <div class="fw-bold text-primary">{{ formatCurrency(prod.price, prod.currency || 'XOF') }}</div>
-                <div class="text-muted" style="font-size:.72rem;">client paie {{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</div>
+                <div class="text-muted" style="font-size:.72rem;">{{ t('admin.products.clientPaysLabel') }} {{ formatCurrency(publicPrice(Number(prod.price) || 0), prod.currency || 'XOF') }}</div>
               </td>
               <td>
                 <div class="text-muted small text-truncate" style="max-width: 250px;" v-html="sanitizeHtml(prod.description_fr || prod.description_en || '')"></div>
@@ -141,35 +141,35 @@
               <div class="tab-content mb-3">
                 <div class="tab-pane fade show active" id="prod-fr">
                   <div class="mb-3">
-                    <label class="form-label">Nom du produit (FR) *</label>
+                    <label class="form-label">{{ t('admin.products.nameFr') }} *</label>
                     <input v-model="form.name_fr" type="text" class="form-control" required />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (FR)</label>
+                    <label class="form-label">{{ t('admin.products.descriptionFr') }}</label>
                     <ClientOnly>
-                      <WysiwygEditor v-model="form.description_fr" height="180px" placeholder="Décrivez le produit..." />
+                      <WysiwygEditor v-model="form.description_fr" height="180px" :placeholder="t('admin.products.describeFr')" />
                     </ClientOnly>
                   </div>
                 </div>
                 <div class="tab-pane fade" id="prod-en">
                   <div class="mb-3">
-                    <label class="form-label">Product Name (EN) *</label>
+                    <label class="form-label">{{ t('admin.products.nameEn') }} *</label>
                     <input v-model="form.name_en" type="text" class="form-control" required />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Description (EN)</label>
+                    <label class="form-label">{{ t('admin.products.descriptionEn') }}</label>
                     <ClientOnly>
-                      <WysiwygEditor v-model="form.description_en" height="180px" placeholder="Describe the product..." />
+                      <WysiwygEditor v-model="form.description_en" height="180px" :placeholder="t('admin.products.describeEn')" />
                     </ClientOnly>
                   </div>
                 </div>
                 <div class="tab-pane fade" id="prod-zh">
                   <div class="mb-3">
-                    <label class="form-label">产品名称 (中文)</label>
+                    <label class="form-label">{{ t('admin.products.nameZh') }}</label>
                     <input v-model="form.name_zh" type="text" class="form-control" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">描述 (中文)</label>
+                    <label class="form-label">{{ t('admin.products.descriptionZh') }}</label>
                     <ClientOnly>
                       <WysiwygEditor v-model="form.description_zh" height="180px" />
                     </ClientOnly>
@@ -179,7 +179,7 @@
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Catégorie *</label>
+                  <label class="form-label">{{ t('admin.products.category') }} *</label>
                   <select v-model="form.category_id" class="form-select" required>
                     <option value="">
                       {{ loadingCategories ? t('admin.common.loading') : t('admin.products.selectCategory') }}
@@ -190,15 +190,15 @@
                   </select>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Prix de vente (ce que vous percevez) *</label>
+                  <label class="form-label">{{ t('admin.products.salePrice') }} *</label>
                   <input v-model.number="form.price" type="number" class="form-control" required min="0" step="any" />
                   <small v-if="form.price > 0" class="text-muted d-block mt-1">
-                    Le client paiera <strong class="text-primary">{{ formatCurrency(publicPrice(Number(form.price) || 0), form.currency || 'XOF') }}</strong>
-                    (commission + frais inclus). Vous percevez {{ formatCurrency(Number(form.price) || 0, form.currency || 'XOF') }}.
+                    {{ t('admin.products.clientWillPay') }} <strong class="text-primary">{{ formatCurrency(publicPrice(Number(form.price) || 0), form.currency || 'XOF') }}</strong>
+                    {{ t('admin.products.feesIncludedNote') }} {{ t('admin.products.youReceive') }} {{ formatCurrency(Number(form.price) || 0, form.currency || 'XOF') }}.
                   </small>
                 </div>
                 <div class="col-md-2">
-                  <label class="form-label">Devise *</label>
+                  <label class="form-label">{{ t('admin.products.currency') }} *</label>
                   <select v-model="form.currency" class="form-select" required>
                     <option v-for="cur in currencies" :key="cur.uuid || cur.code" :value="cur.code">
                       {{ cur.label }}
@@ -207,7 +207,7 @@
                 </div>
                 
                 <div class="col-12">
-                  <label class="form-label">Image du produit</label>
+                  <label class="form-label">{{ t('admin.products.productImage') }}</label>
                   <div class="d-flex gap-3 align-items-start">
                     <div class="image-upload-wrapper border rounded-3 overflow-hidden bg-light" style="width: 120px; height: 120px; flex-shrink: 0;">
                       <img v-if="form.image" :src="resolveStorageAssetUrl(form.image)" class="w-100 h-100 object-fit-cover" />
@@ -218,13 +218,13 @@
                     <div class="flex-grow-1">
                       <div class="mb-3">
                         <input type="file" class="form-control" @change="handleImageUpload" accept="image/*" />
-                        <div class="form-text">Formats acceptés: JPG, PNG, WebP. Max 2Mo.</div>
+                        <div class="form-text">{{ t('admin.products.imageFormats') }}</div>
                       </div>
                       <div class="input-group">
-                        <span class="input-group-text small">OU URL</span>
+                        <span class="input-group-text small">{{ t('admin.products.orUrl') }}</span>
                         <input v-model="form.image" type="text" class="form-control" placeholder="https://..." />
                         <button type="button" class="btn btn-outline-secondary" @click="generateDemoImage">
-                          <i class="bi bi-magic me-1"></i>Démo
+                          <i class="bi bi-magic me-1"></i>{{ t('admin.products.demo') }}
                         </button>
                       </div>
                     </div>
