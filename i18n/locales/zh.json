@@ -2008,6 +2008,7 @@
     },
     "activityLogs": {
       "title": "活动日志",
+      "subtitle": "后台所有操作的历史记录：谁做了什么、来自哪个 IP 地址、使用了哪个浏览器。可用于安全与审计。",
       "action": "操作",
       "creation": "创建",
       "modification": "修改",

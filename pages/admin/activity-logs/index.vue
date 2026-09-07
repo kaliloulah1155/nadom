@@ -4,7 +4,7 @@
       <div class="flex-grow-1" style="min-width: 0;">
         <h4 class="mb-1">{{ t('admin.activityLogs.title') }}</h4>
         <p class="text-muted mb-0">
-          Historique de toutes les actions menées dans le back-office : qui a fait quoi, depuis quelle adresse IP et avec quel navigateur. Utile pour la sécurité et l'audit.
+          {{ t('admin.activityLogs.subtitle') }}
         </p>
       </div>
       <div class="d-flex gap-2 ms-md-auto flex-shrink-0">
@@ -128,21 +128,21 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ t('admin.activityLogs.activityDetail') }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" :aria-label="t('admin.common.close')"></button>
           </div>
           <div v-if="selected" class="modal-body">
             <dl class="row mb-3">
               <dt class="col-sm-3">{{ t('admin.shipments.date') }}</dt>
               <dd class="col-sm-9">{{ formatWhen(selected.created_at) }}</dd>
               <dt class="col-sm-3">{{ t('admin.users.user') }}</dt>
-              <dd class="col-sm-9">{{ fullName(selected.user) || selected.user?.email || 'Anonyme' }}</dd>
-              <dt class="col-sm-3">Action</dt>
+              <dd class="col-sm-9">{{ fullName(selected.user) || selected.user?.email || t('admin.common.anonymous') }}</dd>
+              <dt class="col-sm-3">{{ t('admin.activityLogs.action') }}</dt>
               <dd class="col-sm-9"><span :class="actionBadgeClass(selected.action)">{{ actionLabel(selected.action) }}</span></dd>
               <dt class="col-sm-3">{{ t('admin.activityLogs.entity') }}</dt>
               <dd class="col-sm-9">{{ selected.entity_type || '—' }} <span v-if="selected.entity_id" class="text-muted">/ {{ selected.entity_id }}</span></dd>
               <dt class="col-sm-3">IP</dt>
               <dd class="col-sm-9"><code>{{ selected.ip_address || '—' }}</code></dd>
-              <dt class="col-sm-3">Navigateur</dt>
+              <dt class="col-sm-3">{{ t('admin.activityLogs.browser') }}</dt>
               <dd class="col-sm-9 small text-muted">{{ selected.user_agent || '—' }}</dd>
             </dl>
             <div v-if="selected.details">

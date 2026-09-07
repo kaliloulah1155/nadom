@@ -2009,6 +2009,7 @@
     },
     "activityLogs": {
       "title": "Activity log",
+      "subtitle": "History of every action taken in the back-office: who did what, from which IP address and with which browser. Useful for security and auditing.",
       "action": "Action",
       "creation": "Creation",
       "modification": "Modification",

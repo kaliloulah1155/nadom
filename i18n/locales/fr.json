@@ -2005,6 +2005,7 @@
     },
     "activityLogs": {
       "title": "Journal d'activité",
+      "subtitle": "Historique de toutes les actions menées dans le back-office : qui a fait quoi, depuis quelle adresse IP et avec quel navigateur. Utile pour la sécurité et l'audit.",
       "action": "Action",
       "creation": "Création",
       "modification": "Modification",
