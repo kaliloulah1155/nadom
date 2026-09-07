@@ -1707,7 +1707,8 @@
       "personalInfo": "Informations personnelles",
       "changePassword": "Changer le mot de passe",
       "newPassword": "Nouveau mot de passe",
-      "saveChanges": "Enregistrer les modifications"
+      "saveChanges": "Enregistrer les modifications",
+      "profileUpdated": "Profil mis à jour avec succès"
     },
     "notifications": {
       "title": "Notifications",

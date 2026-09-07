@@ -1710,7 +1710,8 @@
       "personalInfo": "Personal information",
       "changePassword": "Change password",
       "newPassword": "New password",
-      "saveChanges": "Save changes"
+      "saveChanges": "Save changes",
+      "profileUpdated": "Profile updated successfully"
     },
     "notifications": {
       "title": "Notifications",

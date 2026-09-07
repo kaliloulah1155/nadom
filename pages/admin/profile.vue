@@ -2,7 +2,7 @@
   <div>
     <div class="mb-4">
       <h4 class="mb-1">{{ t('admin.profile.title') }}</h4>
-      <p class="text-muted">Gérez vos informations personnelles et votre mot de passe</p>
+      <p class="text-muted">{{ t('admin.profile.subtitle') }}</p>
     </div>
 
     <div class="row g-4">
@@ -31,34 +31,34 @@
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-4">
-            <h5 class="card-title mb-4">Informations personnelles</h5>
+            <h5 class="card-title mb-4">{{ t('admin.profile.personalInfo') }}</h5>
             <form @submit.prevent="updateProfile">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Prénom</label>
+                  <label class="form-label">{{ t('admin.users.firstName') }}</label>
                   <input v-model="form.firstName" type="text" class="form-control input-md" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Nom</label>
+                  <label class="form-label">{{ t('admin.users.lastName') }}</label>
                   <input v-model="form.lastName" type="text" class="form-control input-md" />
                 </div>
                 <div class="col-md-12">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ t('admin.users.email') }}</label>
                   <input v-model="form.email" type="email" class="form-control input-md" />
                 </div>
                 <hr class="my-4">
-                <h5 class="card-title mb-3">Changer le mot de passe</h5>
+                <h5 class="card-title mb-3">{{ t('admin.profile.changePassword') }}</h5>
                 <div class="col-md-6">
-                  <label class="form-label">Nouveau mot de passe</label>
+                  <label class="form-label">{{ t('admin.profile.newPassword') }}</label>
                   <input v-model="form.password" type="password" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Confirmer le mot de passe</label>
+                  <label class="form-label">{{ t('admin.users.confirmPassword') }}</label>
                   <input v-model="form.confirmPassword" type="password" class="form-control" />
                 </div>
                 <div class="col-12 mt-4 text-end">
                   <button type="submit" class="btn btn-primary btn-md px-4">
-                    <i class="bi bi-check-lg me-2"></i>Enregistrer les modifications
+                    <i class="bi bi-check-lg me-2"></i>{{ t('admin.profile.saveChanges') }}
                   </button>
                 </div>
               </div>
@@ -106,6 +106,6 @@ const updateProfile = () => {
   if (form.password && form.password !== form.confirmPassword) {
     return
   }
-  success('Profil mis à jour avec succès')
+  success(t('admin.profile.profileUpdated'))
 }
 </script>
