@@ -281,7 +281,7 @@
 
             <div class="alert alert-light border small mb-0 mt-3">
               <i class="bi bi-shield-check me-1 text-success"></i>
-              <span v-html="sanitizeHtml(t('admin.transactions.balanceExplanation'))"></span>
+              <span>{{ t('admin.transactions.balanceExplanation') }}</span>
             </div>
           </div>
           <div class="modal-footer">
@@ -445,11 +445,19 @@ const openBalance = async () => {
   }
 }
 
+const escapeHtml = (v: string) =>
+  v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+// Le message i18n est du texte brut (le compilateur vue-i18n refuse le HTML en build de
+// production) ; la référence est mise en gras ici, après échappement.
+const boldRef = (text: string, ref: string) =>
+  escapeHtml(text).replace(escapeHtml(ref), `<strong>${escapeHtml(ref)}</strong>`)
+
 const doConfirm = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
     title: t('admin.transactions.confirmManualTitle'),
-    html: sanitizeHtml(t('admin.transactions.confirmManualHtml', { reference: trx.reference })),
+    html: boldRef(t('admin.transactions.confirmManualHtml', { reference: trx.reference }), trx.reference),
     confirmButtonText: t('admin.transactions.confirmPaymentButton'),
   })
   if (!ok) return
@@ -464,7 +472,7 @@ const doReverser = async (trx: TransactionRow) => {
   if (!trx.reference) return
   const ok = await swal.confirm({
     title: t('admin.transactions.reverseTitle'),
-    html: sanitizeHtml(t('admin.transactions.reverseHtml', { reference: trx.reference })),
+    html: boldRef(t('admin.transactions.reverseHtml', { reference: trx.reference }), trx.reference),
     confirmButtonText: t('admin.transactions.reverseButton'),
   })
   if (!ok) return
