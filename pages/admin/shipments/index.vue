@@ -195,15 +195,18 @@
                 </div>
                 <div class="col-12">
                   <label class="form-label">{{ t('admin.shipments.linkedRequestLabel') }}</label>
-                  <select v-model="form.requestId" class="form-select input-md" required @change="onRequestChange">
+                  <select v-model="form.requestId" class="form-select input-md" @change="onRequestChange">
                     <option value="">{{ t('admin.shipments.selectRequestPlaceholder') }}</option>
                     <option v-for="req in availableRequests" :key="req.id" :value="req.id">
                       #{{ String(req.id ?? '').slice(-6) }} — {{ truncate(requestTitle(req), 40) }} · {{ t('admin.shipments.requestOptionQuote', { price: formatCurrency(req.quotedPrice ?? 0, (req as any).currency || 'XOF') }) }}
                     </option>
                   </select>
-                  <small v-if="availableRequests.length === 0" class="text-warning">
+                  <small v-if="availableRequests.length === 0" class="text-warning d-block">
                     {{ t('admin.shipments.noRequestsWithQuote') }}
                   </small>
+                  <NuxtLink to="/admin/requests" class="small" @click="modalInstance?.hide()">
+                    <i class="bi bi-plus-circle me-1"></i>{{ t('admin.shipments.createRequestLink') }}
+                  </NuxtLink>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ t('admin.shipments.destinationCountryLabel') }}</label>
