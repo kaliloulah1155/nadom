@@ -819,22 +819,11 @@ const validatePackageDimensions = (): boolean => {
   return missing.length === 0
 }
 
-/**
- * Bornes de plausibilité (pas des limites métier strictes) : elles existent
- * uniquement pour intercepter une saisie clairement fautive — un chiffre en
- * trop tape par erreur — avant qu'elle ne parte dans une demande impossible
- * à traiter par l'agent (ex. observe en prod : 2773 cartons de 14 tonnes
- * chacun, faute de frappe sur quantite/poids jamais detectee).
- */
-const MAX_QUANTITY_PER_ITEM = 999
-const MAX_WEIGHT_PER_CARTON_KG = 1000
-
+// Plus de plafond sur la quantité ni le poids par carton (levé à la demande du client).
 const validatePackageSanity = (): boolean => {
-  const tooManyCartons = packageItems.value.some((i) => Number(i.quantity) > MAX_QUANTITY_PER_ITEM)
-  const tooHeavy = packageItems.value.some((i) => Number(i.weight) > MAX_WEIGHT_PER_CARTON_KG)
-  errors.quantity = tooManyCartons ? t('envoiColis.validation.quantityTooHigh') : ''
-  errors.weight = tooHeavy ? t('envoiColis.validation.weightTooHigh') : ''
-  return !tooManyCartons && !tooHeavy
+  errors.quantity = ''
+  errors.weight = ''
+  return true
 }
 
 const addPackageItem = () => {
