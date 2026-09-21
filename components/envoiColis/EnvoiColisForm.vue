@@ -179,7 +179,7 @@
              amputées chacune d'un suffixe d'unité. -->
         <div class="row g-3">
           <div class="col-6 col-lg-3">
-            <label class="form-label fw-medium small pkg-field-label" :title="t('envoiColis.form.quantityHint')">{{ t('envoiColis.form.quantity') }}</label>
+            <label class="form-label fw-medium small pkg-field-label" :title="t('envoiColis.form.quantityHint')">{{ t('envoiColis.form.quantity') }} *</label>
             <input v-model.number="item.quantity" type="number" min="1" max="999" class="form-control form-control-lg" :class="{ 'is-invalid': errors.quantity }" />
           </div>
           <div class="col-6 col-lg-3">
