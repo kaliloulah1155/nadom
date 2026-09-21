@@ -180,7 +180,7 @@
             <div class="modal-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.shipments.trackingNumberLabel') }}</label>
+                  <label class="form-label">{{ t('admin.shipments.trackingNumberLabel') }} <span class="text-danger">*</span></label>
                   <input v-model="form.trackingNumber" type="text" class="form-control input-md" required :disabled="!!editingShipment" />
                 </div>
                 <div class="col-md-6">
@@ -209,7 +209,7 @@
                   </NuxtLink>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.shipments.destinationCountryLabel') }}</label>
+                  <label class="form-label">{{ t('admin.shipments.destinationCountryLabel') }} <span class="text-danger">*</span></label>
                   <select
                     v-model="form.destinationCountry"
                     class="form-select input-md"
@@ -223,7 +223,7 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.shipments.destinationCityLabel') }}</label>
+                  <label class="form-label">{{ t('admin.shipments.destinationCityLabel') }} <span class="text-danger">*</span></label>
                   <select
                     v-if="availableCities.length > 0"
                     v-model="form.destinationCity"
@@ -245,7 +245,7 @@
                   />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.shipments.shippingModeLabel') }}</label>
+                  <label class="form-label">{{ t('admin.shipments.shippingModeLabel') }} <span class="text-danger">*</span></label>
                   <select v-model="form.shippingMode" class="form-select input-md" required>
                     <option value="air_normal">{{ t('admin.shipments.airNormal') }}</option>
                     <option value="air_express">{{ t('admin.shipments.airExpress') }}</option>
@@ -253,7 +253,7 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.shipments.statusLabel') }}</label>
+                  <label class="form-label">{{ t('admin.shipments.statusLabel') }} <span class="text-danger">*</span></label>
                   <select v-model="form.status" class="form-select input-md" required>
                     <option value="pending">{{ t('admin.shipments.status.pending') }}</option>
                     <option value="picked_up">{{ t('admin.shipments.status.picked_up') }}</option>
