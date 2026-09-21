@@ -100,7 +100,7 @@
           </div>
         </div>
         <div class="mb-4">
-          <label class="form-label fw-medium">{{ t('envoiColis.form.destination') }} *</label>
+          <label class="form-label fw-medium">{{ t('envoiColis.form.destination') }} <span class="text-danger">*</span></label>
           <select
             v-model="form.destinationId"
             class="form-select form-select-lg"
@@ -122,7 +122,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-4">
-            <label class="form-label fw-medium">{{ t('personalShopping.formExtra.fullName') }} *</label>
+            <label class="form-label fw-medium">{{ t('personalShopping.formExtra.fullName') }} <span class="text-danger">*</span></label>
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-person"></i></span>
               <input
@@ -137,7 +137,7 @@
             <div v-if="errors.contactFullname" class="invalid-feedback d-block">{{ errors.contactFullname }}</div>
           </div>
           <div class="col-md-6 mb-4">
-            <label class="form-label fw-medium"><i class="bi bi-whatsapp text-success me-1"></i>{{ t('personalShopping.formExtra.whatsappContact') }} *</label>
+            <label class="form-label fw-medium"><i class="bi bi-whatsapp text-success me-1"></i>{{ t('personalShopping.formExtra.whatsappContact') }} <span class="text-danger">*</span></label>
             <PhoneInput v-model="form.contactNumber" country="ci" size="lg" required />
             <div v-if="errors.contactNumber" class="invalid-feedback d-block">{{ errors.contactNumber }}</div>
           </div>
@@ -179,11 +179,11 @@
              amputées chacune d'un suffixe d'unité. -->
         <div class="row g-3">
           <div class="col-6 col-lg-3">
-            <label class="form-label fw-medium small pkg-field-label" :title="t('envoiColis.form.quantityHint')">{{ t('envoiColis.form.quantity') }} *</label>
+            <label class="form-label fw-medium small pkg-field-label" :title="t('envoiColis.form.quantityHint')">{{ t('envoiColis.form.quantity') }} <span class="text-danger">*</span></label>
             <input v-model.number="item.quantity" type="number" min="1" max="999" class="form-control form-control-lg" :class="{ 'is-invalid': errors.quantity }" />
           </div>
           <div class="col-6 col-lg-3">
-            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.declaredWeight') }} *</label>
+            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.declaredWeight') }} <span class="text-danger">*</span></label>
             <input
               v-model.number="item.weight"
               type="number"
@@ -195,7 +195,7 @@
             />
           </div>
           <div class="col-12 col-lg-6">
-            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.dimensions') }} *</label>
+            <label class="form-label fw-medium small pkg-field-label">{{ t('envoiColis.form.dimensions') }} <span class="text-danger">*</span></label>
             <div class="d-flex align-items-center gap-2 pkg-dims" :class="{ 'pkg-dims-invalid': invalidDimensionItemIds.has(item.id) }">
               <input
                 v-model.number="item.length"
@@ -231,7 +231,7 @@
         </div>
         <div class="row g-3">
           <div class="col-12">
-            <label class="form-label fw-medium small">{{ t('envoiColis.form.itemDescription') }} *</label>
+            <label class="form-label fw-medium small">{{ t('envoiColis.form.itemDescription') }} <span class="text-danger">*</span></label>
             <!-- Contenu rattaché à des catégories plutôt qu'à du texte libre :
                  l'agent classe ainsi la marchandise de façon homogène. -->
             <div class="d-flex flex-wrap gap-2" :class="{ 'pkg-cat-invalid': invalidItemIds.has(item.id) }">
